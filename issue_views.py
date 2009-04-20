@@ -149,8 +149,8 @@ class Issue_Edit(STLForm):
         # Set Style & JS
         context.styles.append('/ui/tchacker/tracker.css')
         context.scripts.append('/ui/tchacker/tracker.js')
-        context.styles.append('/ui/thickbox/thickbox.css')
-        context.scripts.append('/ui/thickbox/thickbox.js')
+        context.styles.append('/ui/tchacker/thickbox/thickbox.css')
+        context.scripts.append('/ui/tchacker/thickbox/thickbox.js')
 
         # Local variables
         users = resource.get_resource('/users')

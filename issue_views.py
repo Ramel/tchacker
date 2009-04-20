@@ -147,8 +147,8 @@ class Issue_Edit(STLForm):
 
     def get_namespace(self, resource, context):
         # Set Style & JS
-        context.styles.append('/ui/tracker/tracker.css')
-        context.scripts.append('/ui/tracker/tracker.js')
+        context.styles.append('/ui/pchack/tracker.css')
+        context.scripts.append('/ui/pchack/tracker.js')
         context.styles.append('/ui/thickbox/thickbox.css')
         context.scripts.append('/ui/thickbox/thickbox.js')
 

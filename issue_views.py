@@ -132,7 +132,7 @@ class Issue_Edit(STLForm):
     access = 'is_allowed_to_edit'
     title = MSG(u'Edit Issue')
     icon = 'edit.png'
-    template = '/ui/tracker/edit_issue.xml'
+    template = '/ui/pchack/edit_issue.xml'
 
 
     def get_schema(self, resource, context):
@@ -250,12 +250,12 @@ class Issue_History(STLView):
     access = 'is_allowed_to_view'
     title = MSG(u'History')
     icon = 'history.png'
-    template = '/ui/tracker/issue_history.xml'
+    template = '/ui/pchack/issue_history.xml'
 
 
     def get_namespace(self, resource, context):
         # Set Style
-        context.styles.append('/ui/tracker/tracker.css')
+        context.styles.append('/ui/pchack/tracker.css')
 
         # Local variables
         users = resource.get_resource('/users')
@@ -414,7 +414,7 @@ class Issue_ViewResources(Table_View):
 class Issue_AddEditResource(STLForm):
 
     access = 'is_allowed_to_edit'
-    template = '/ui/tracker/edit_resource.xml'
+    template = '/ui/pchack/edit_resource.xml'
 
     query_schema = {
         'id': Integer}

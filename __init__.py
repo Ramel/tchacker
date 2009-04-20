@@ -22,6 +22,7 @@ from itools.utils import get_version
 # Import from ikaaro
 from ikaaro.folder import Folder
 from ikaaro.skins import register_skin
+
 from issue import Issue
 from resources import Resources
 from tracker import Tracker

@@ -132,7 +132,7 @@ class Issue_Edit(STLForm):
     access = 'is_allowed_to_edit'
     title = MSG(u'Edit Issue')
     icon = 'edit.png'
-    template = '/ui/pchack/edit_issue.xml'
+    template = '/ui/tchacker/edit_issue.xml'
 
 
     def get_schema(self, resource, context):
@@ -147,8 +147,8 @@ class Issue_Edit(STLForm):
 
     def get_namespace(self, resource, context):
         # Set Style & JS
-        context.styles.append('/ui/pchack/tracker.css')
-        context.scripts.append('/ui/pchack/tracker.js')
+        context.styles.append('/ui/tchacker/tracker.css')
+        context.scripts.append('/ui/tchacker/tracker.js')
         context.styles.append('/ui/thickbox/thickbox.css')
         context.scripts.append('/ui/thickbox/thickbox.js')
 
@@ -250,12 +250,12 @@ class Issue_History(STLView):
     access = 'is_allowed_to_view'
     title = MSG(u'History')
     icon = 'history.png'
-    template = '/ui/pchack/issue_history.xml'
+    template = '/ui/tchacker/issue_history.xml'
 
 
     def get_namespace(self, resource, context):
         # Set Style
-        context.styles.append('/ui/pchack/tracker.css')
+        context.styles.append('/ui/tchacker/tracker.css')
 
         # Local variables
         users = resource.get_resource('/users')
@@ -414,7 +414,7 @@ class Issue_ViewResources(Table_View):
 class Issue_AddEditResource(STLForm):
 
     access = 'is_allowed_to_edit'
-    template = '/ui/pchack/edit_resource.xml'
+    template = '/ui/tchacker/edit_resource.xml'
 
     query_schema = {
         'id': Integer}

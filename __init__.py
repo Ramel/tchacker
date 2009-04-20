@@ -32,7 +32,7 @@ __version__ = get_version()
 
 # Register skin
 path = get_abspath('ui')
-register_skin('pchack', path)
+register_skin('tchacker', path)
 
 # Register document type
 Folder.register_document_type(Tracker)

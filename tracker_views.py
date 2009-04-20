@@ -67,7 +67,7 @@ columns = [
 class GoToIssueMenu(ContextMenu):
 
     title = MSG(u'Go To Issue')
-    template = '/ui/pchack/menu_goto.xml'
+    template = '/ui/tchacker/menu_goto.xml'
 
     def get_namespace(self, resource, context):
         path_to_tracker = '..' if isinstance(resource, Issue) else '.'
@@ -82,7 +82,7 @@ class StoreSearchMenu(ContextMenu):
     """
 
     title = MSG(u'Remember this search')
-    template = '/ui/pchack/menu_remember.xml'
+    template = '/ui/tchacker/menu_remember.xml'
     query_schema = merge_dicts(StoredSearchFile.schema,
                                search_name=String,
                                search_title=Unicode)
@@ -222,7 +222,7 @@ class Tracker_AddIssue(STLForm):
     access = 'is_allowed_to_edit'
     title = MSG(u'Add')
     icon = 'new.png'
-    template = '/ui/pchack/add_issue.xml'
+    template = '/ui/tchacker/add_issue.xml'
 
 
     def get_schema(self, resource, context):
@@ -230,8 +230,8 @@ class Tracker_AddIssue(STLForm):
 
 
     def get_namespace(self, resource, context):
-        context.styles.append('/ui/pchack/tracker.css')
-        context.scripts.append('/ui/pchack/tracker.js')
+        context.styles.append('/ui/tchacker/tracker.css')
+        context.scripts.append('/ui/tchacker/tracker.js')
 
         namespace =  self.build_namespace(resource, context)
         namespace['list_products'] = resource.get_list_products_namespace()
@@ -307,7 +307,7 @@ class Tracker_View(BrowseForm):
 
     def get_namespace(self, resource, context):
         # Set Style
-        context.styles.append('/ui/pchack/tracker.css')
+        context.styles.append('/ui/tchacker/tracker.css')
 
         # Default table namespace
         namespace = BrowseForm.get_namespace(self, resource, context)
@@ -399,7 +399,7 @@ class Tracker_Search(BaseSearchForm, Tracker_View):
     icon = 'search.png'
 
     # Search Form
-    search_template = '/ui/pchack/search.xml'
+    search_template = '/ui/tchacker/search.xml'
     search_schema = {
         'search_name': Unicode(),
         'search_title': Unicode(),
@@ -418,8 +418,8 @@ class Tracker_Search(BaseSearchForm, Tracker_View):
 
     def get_search_namespace(self, resource, context):
         # Set Style & JS
-        context.styles.append('/ui/pchack/tracker.css')
-        context.scripts.append('/ui/pchack/tracker.js')
+        context.styles.append('/ui/tchacker/tracker.css')
+        context.scripts.append('/ui/tchacker/tracker.js')
 
         # Search Form
         get_resource = resource.get_resource
@@ -579,7 +579,7 @@ class Tracker_GoToIssue(BaseView):
 
 class Tracker_ExportToCSVForm(Tracker_View):
 
-    template = '/ui/pchack/export_to_csv.xml'
+    template = '/ui/tchacker/export_to_csv.xml'
     external_form = True
 
     def get_query_schema(self):
@@ -672,7 +672,7 @@ class Tracker_ExportToCSV(BaseView):
 
 class Tracker_ExportToText(Tracker_ExportToCSVForm):
 
-    template = '/ui/pchack/export_to_text.xml'
+    template = '/ui/tchacker/export_to_text.xml'
 
     def get_query_schema(self):
         schema = Tracker_ExportToCSVForm.get_query_schema(self)
@@ -726,7 +726,7 @@ class Tracker_ChangeSeveralBugs(Tracker_View):
 
     access = 'is_allowed_to_view'
     title = MSG(u'Change Several Issues')
-    template = '/ui/pchack/change_bugs.xml'
+    template = '/ui/tchacker/change_bugs.xml'
     schema = {
         'comment': Unicode,
         'ids': String(multiple=True),
@@ -746,7 +746,7 @@ class Tracker_ChangeSeveralBugs(Tracker_View):
 
 
     def get_namespace(self, resource, context):
-        context.scripts.append('/ui/pchack/tracker.js')
+        context.scripts.append('/ui/tchacker/tracker.js')
         namespace = Tracker_View.get_namespace(self, resource, context)
         # Edit several bugs at once
         get_resource = resource.get_resource

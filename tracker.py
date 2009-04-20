@@ -53,16 +53,13 @@ resolution = timedelta.resolution
 
 
 
-default_types = [
-    u'Bug', u'New Feature', u'Security Issue', u'Stability Issue',
-    u'Data Corruption Issue', u'Performance Improvement',
-    u'Technology Upgrade']
+default_types = [u'Décor couleur', u'Décor N&B', u'Props']
 
 default_tables = [
     ('product', []),
     ('type', default_types),
-    ('state', [u'Open', u'Fixed', u'Verified', u'Closed']),
-    ('priority', [u'High', u'Medium', u'Low']),
+    ('state', [u'À valider', u'Validé', u'En cours']),
+    ('priority', [u'Haute', u'Medium', u'Basse']),
     ]
 
 
@@ -70,8 +67,8 @@ class Tracker(Folder):
 
     class_id = 'tracker'
     class_version = '20081214'
-    class_title = MSG(u'Issue Tracker Pchack')
-    class_description = MSG(u'To manage bugs and tasks')
+    class_title = MSG(u'Tchack Issue Tracker')
+    class_description = MSG(u'To manage images, bugs and tasks')
     class_icon16 = 'tracker/tracker16.png'
     class_icon48 = 'tracker/tracker48.png'
     class_views = ['search', 'add_issue', 'browse_content', 'edit']
@@ -103,12 +100,15 @@ class Tracker(Folder):
         metadata = VersionsResource.build_metadata()
         folder.set_handler('%s/version.metadata' % name, metadata)
         # Pre-defined stored searches
-        open = StoredSearchFile(state='0')
+        to_validate = StoredSearchFile(state='0')
+        validate = StoredSearchFile(state='1')
+        work_in_progress = StoredSearchFile(state='2')
         not_assigned = StoredSearchFile(assigned_to='nobody')
         high_priority = StoredSearchFile(state='0', priority='0')
         i = 0
-        for search, title in [(open, u'Open Issues'),
-                              (not_assigned, u'Not Assigned'),
+        for search, title in [(to_validate, u'À valider'),
+                              (validate, u'Validé'),
+                              (not_assigned, u'Non assigné'),
                               (high_priority, u'High Priority')]:
             folder.set_handler('%s/s%s' % (name, i), search)
             metadata = StoredSearch.build_metadata(title={'en': title})

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<stl:block xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:stl="http://www.hforge.org/xml-namespaces/stl">
+  <!-- Javascript -->
+  <script language="javascript">
+  var list_products = {<stl:inline stl:repeat="product list_products">
+                       "${product/id}":
+                          {'module':
+                           [<stl:inline stl:repeat="module product/modules">
+                             {"id": "${module/id}",
+                              "value": "${module/value}"},
+                              </stl:inline>],
+                           'version':
+                           [<stl:inline stl:repeat="version product/versions">
+                             {"id": "${version/id}",
+                              "value": "${version/value}"},
+                              </stl:inline>]}
+                       ,</stl:inline>
+                      }
+  function update_tracker(){
+      update_tracker_list('version');
+      update_tracker_list('module');
+  }
+  </script>
+  <!-- Advanced Search -->
+  <fieldset>
+    <legend>Search<stl:block stl:if="search_name">: ${search_title}</stl:block>
+    </legend>
+    <form action=";view" method="get">
+      <table>
+        <tr>
+          <td colspan="2">
+            <label for="text">Text (search within the title and all comments)
+            </label>
+            <br/>
+            <input type="text" name="text" id="text" size="30" value="${text}"
+              class="tracker_select" />
+          </td>
+          <td colspan="1">
+            <label for="mtime">Modified since:</label><br/>
+            <input type="text" name="mtime" id="mtime" size="2"
+              value="${mtime}" /> days ago
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <label for="product">Product:<stl:inline stl:if="is_admin"> (<a
+              href="./product/;view">Edit</a>)</stl:inline></label>
+            <br/>
+            <select name="product" id="product" class="tracker_select"
+              multiple="multiple" size="4">
+              <option stl:repeat="item products" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top">
+            <label for="module">Module:<stl:inline stl:if="is_admin"> (<a
+              href="./module/;view">Edit</a>)</stl:inline></label>
+            <br/>
+            <select name="module" id="module" class="tracker_select"
+              multiple="multiple" size="4">
+              <option stl:repeat="item modules" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top">
+            <label for="version">Version:<stl:inline stl:if="is_admin"> (<a
+              href="./version/;view">Edit</a>)</stl:inline></label>
+            <br/>
+            <select name="version" id="version" class="tracker_select"
+              multiple="multiple" size="4">
+              <option stl:repeat="item versions" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <label for="type">Type:<stl:inline stl:if="is_admin"> (<a
+              href="./type/;view">Edit</a>)</stl:inline></label>
+            <br/>
+            <select name="type" id="type" class="tracker_select"
+              multiple="multiple" size="4">
+              <option stl:repeat="item types" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top">
+            <label for="state">Status:<stl:inline stl:if="is_admin"> (<a
+              href="./state/;view">Edit</a>)</stl:inline></label>
+            <br/>
+            <select name="state" id="state" class="tracker_select"
+              multiple="multiple" size="4">
+              <option stl:repeat="item states" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top">
+            <label for="priority">Priority:<stl:inline stl:if="is_admin"> (<a
+              href="./priority/;view">Edit</a>)</stl:inline></label>
+            <br/>
+            <select name="priority" id="priority" class="tracker_select"
+              multiple="multiple" size="4">
+              <option stl:repeat="item priorities" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" colspan="3">
+            <label for="assigned_to">Assigned To:<stl:inline stl:if="is_admin">
+            (<a href="${manage_assigned}">Edit</a>)</stl:inline></label>
+            <br/>
+            <select name="assigned_to" id="assigned_to"
+              class="tracker_select" multiple="multiple" size="4">
+              <option stl:repeat="item assigned_to" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <br/>
+      <input type="submit" name=";view" class="button_search" value="Search" />
+    </form>
+  </fieldset>
+
+</stl:block>

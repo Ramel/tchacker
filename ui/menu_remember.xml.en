@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<stl:block xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:stl="http://www.hforge.org/xml-namespaces/stl">
+
+<div class="context_menu">
+  <label>${title}</label>
+  <form action=";remember_search" method="post"
+    style="margin: 4px 0px 0px 5px;">
+    <input type="hidden" name="search_name" value="${search_name}"
+      stl:if="search_name" />
+    <input type="hidden" stl:repeat="item search_fields" name="${item/name}"
+      value="${item/value}" />
+    <input type="text" name="search_title" value="${search_title}" size="18"
+      style="width: 73%" />
+    <input type="submit" class="button_ok" value="OK" />
+  </form>
+
+  <form action=";forget_search" method="post" stl:if="search_name">
+    <input type="hidden" name="search_name" value="${search_name}" />
+    <input type="submit" class="button_delete" value="Forget this Search"
+      onclick="return confirm('Are you sure you want to forget this search?');"
+      />
+  </form>
+</div>
+
+</stl:block>

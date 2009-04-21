@@ -1,369 +1,371 @@
-# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
+# Armel FORTUN <armel@maar.fr>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: fr\n"
 "POT-Creation-Date: 2009-04-21 16:04+CET\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2009-04-21 19:19+0200\n"
+"Last-Translator: Armel FORTUN <armel@maar.fr>\n"
+"Language-Team: en_US <kde-i18n-doc@lists.kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 0.3\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../tracker_views.py:818
 msgid "\n\n%s\n\n%s"
-msgstr ""
+msgstr "\n\n%s\n\n%s"
 
 #: ../tracker_views.py:706
 msgid "#%s"
-msgstr ""
+msgstr "#%s"
 
 #: ../tracker_views.py:845
 msgid "#%s - %s - %s"
-msgstr ""
+msgstr "#%s - %s - %s"
 
 #: ../issue.py:296
 msgid "$field: $old_value to $new_value"
-msgstr ""
+msgstr "$field: $old_value en $new_value"
 
 #: ../issue.py:300
 msgid "$field: $old_value$new_value"
-msgstr ""
+msgstr "$field: $old_value$new_value"
 
 #: ../tracker_views.py:153
 msgid "${search_title} (${issues_nb})"
-msgstr ""
+msgstr "${search_title} (${issues_nb})"
 
 #: ../issue.py:275
 msgid "${title}\n${separator}\n\n${comment}\n"
-msgstr ""
+msgstr "${title}\n${separator}\n\n${comment}\n"
 
 #: ../issue_views.py:375
 msgid ", "
-msgstr ""
+msgstr ", "
 
 #: ../issue.py:274
 msgid "-"
-msgstr ""
+msgstr "-"
 
 #: ../tracker_views.py:840
 msgid "--- Comment from: $user ---\n\n$comment\n\n$issues"
-msgstr ""
+msgstr "--- Commentaire de&nbsp;: $user ---\n\n$comment\n\n$issues"
 
 #: ../issue.py:235
 #: ../tracker_views.py:837
 msgid "ANONYMOUS"
-msgstr ""
+msgstr "ANONYME"
 
 #: ../tracker_views.py:223
 msgid "Add"
-msgstr ""
+msgstr "Ajouter"
 
 #: ../issue_views.py:122
 msgid "Add a new issue"
-msgstr ""
+msgstr "Ajouter une fiche"
 
 #: ../tracker_views.py:169
 msgid "Advanced"
-msgstr ""
+msgstr "Avancé"
 
 #: ../issue.py:344
 #: ../tracker_views.py:59
 msgid "Assigned To"
-msgstr ""
+msgstr "Assigné à"
 
 #: ../tracker.py:62
 #: ../tracker.py:110
 msgid "Awaiting validation"
-msgstr ""
+msgstr "À valider"
 
 #: ../tracker.py:57
 msgid "B&W Set"
-msgstr ""
+msgstr "Décor N&B"
 
 #: ../issue.py:361
 msgid "CC"
-msgstr ""
+msgstr "CC"
 
 #: ../tracker_views.py:178
 #: ../tracker_views.py:728
 msgid "Change Several Issues"
-msgstr ""
+msgstr "Modifier plusieurs fiches"
 
 #: ../tracker.py:57
 msgid "Color Set"
-msgstr ""
+msgstr "Décor couleur"
 
 #: ../issue.py:273
 #: ../resources.py:185
 msgid "Comment"
-msgstr ""
+msgstr "Commentaire"
 
 #: ../tracker.py:324
 msgid "Default"
-msgstr ""
+msgstr "Par défaut"
 
 #: ../issue_views.py:134
 msgid "Edit Issue"
-msgstr ""
+msgstr "Éditer la fiche"
 
 #: ../tracker_views.py:745
 msgid "Edit issues"
-msgstr ""
+msgstr "Éditer les fiches"
 
 #: ../issue_views.py:521
 msgid "Edit resources"
-msgstr ""
+msgstr "Éditer les resources"
 
 #: ../tracker_views.py:176
 msgid "Edit this search"
-msgstr ""
+msgstr "Éditer la recherche "
 
 #: ../resources.py:184
 msgid "End"
-msgstr ""
+msgstr "Fin"
 
 #: ../tracker_views.py:182
 #: ../tracker_views.py:618
 msgid "Export to CSV"
-msgstr ""
+msgstr "Exporter en CSV"
 
 #: ../tracker_views.py:180
 msgid "Export to Text"
-msgstr ""
+msgstr "Exporter en texte"
 
 #: ../tracker_views.py:200
 msgid "Give the title of one Product"
-msgstr ""
+msgstr "Donner le titre d'un produit"
 
 #: ../tracker_views.py:69
 msgid "Go To Issue"
-msgstr ""
+msgstr "Aller à la fiche"
 
 #: ../tracker.py:63
 msgid "High"
-msgstr ""
+msgstr "Haute"
 
 #: ../tracker.py:113
 msgid "High Priority"
-msgstr ""
+msgstr "Priorité haute"
 
 #: ../issue_views.py:252
 msgid "History"
-msgstr ""
+msgstr "Historique"
 
 #: ../tracker_views.py:51
 msgid "Id"
-msgstr ""
+msgstr "Id"
 
 #: ../tracker.py:62
 msgid "In Progress"
-msgstr ""
+msgstr "En cours"
 
 #: ../issue.py:68
 #: ../issue.py:69
 #: ../resources.py:186
 msgid "Issue"
-msgstr ""
+msgstr "Fiche"
 
 #: ../tracker_views.py:570
 #: ../tracker_views.py:574
 msgid "Issue not found."
-msgstr ""
+msgstr "Fiche non trouvée"
 
 #: ../tables.py:56
 msgid "Issues"
-msgstr ""
+msgstr "Fiches"
 
 #: ../tracker.py:63
 msgid "Low"
-msgstr ""
+msgstr "Bas"
 
 #: ../tracker.py:63
 msgid "Medium"
-msgstr ""
+msgstr "Medium"
 
 #: ../tracker_views.py:817
 msgid "Modifications:"
-msgstr ""
+msgstr "Modifications&nbsp;:"
 
 #: ../tracker_views.py:60
 msgid "Modified"
-msgstr ""
+msgstr "Modifié"
 
 #: ../issue.py:312
 #: ../tracker_views.py:54
 msgid "Module"
-msgstr ""
+msgstr "Module"
 
 #: ../issue.py:265
 msgid "New Attachment: $filename"
-msgstr ""
+msgstr "Nouvelle pièce jointe&nbsp;: $filename"
 
 #: ../tracker_views.py:249
 msgid "New issue added."
-msgstr ""
+msgstr "Nouvelle fiche ajoutée."
 
 #: ../tracker_views.py:638
 #: ../tracker_views.py:779
 msgid "No data to export."
-msgstr ""
+msgstr "Aucune donnée à exporter."
 
 #: ../tables.py:163
 msgid "No resource selected."
-msgstr ""
+msgstr "Pas de resource sélectionnée."
 
 #: ../tracker.py:112
 msgid "Non assigned"
-msgstr ""
+msgstr "Non assigné"
 
 #: ../issue.py:315
 #: ../tracker_views.py:58
 msgid "Priority"
-msgstr ""
+msgstr "Priorité"
 
 #: ../tracker_views.py:53
 #: ../tables.py:207
 #: ../tables.py:234
 msgid "Product"
-msgstr ""
+msgstr "Produit"
 
 #: ../tracker.py:57
 msgid "Props"
-msgstr ""
+msgstr "Props"
 
 #: ../tables.py:236
 msgid "Released"
-msgstr ""
+msgstr "Livré"
 
 #: ../tracker_views.py:84
 msgid "Remember this search"
-msgstr ""
+msgstr "Se souvenir de cette recherche"
 
 #: ../resources.py:182
 msgid "Resource"
-msgstr ""
+msgstr "Ressource"
 
 #: ../tracker_views.py:184
 #: ../resources.py:196
 msgid "Resources"
-msgstr ""
+msgstr "Ressources"
 
 #: ../resources.py:197
 msgid "Resources assigned to issues"
-msgstr ""
+msgstr "Ressources attribuées aux fiches"
 
 #: ../tables.py:181
 msgid "Resources removed: $resources."
-msgstr ""
+msgstr "Ressources enlevées&nbsp;: $resources."
 
 #: ../tracker_views.py:398
 msgid "Search"
-msgstr ""
+msgstr "Chercher"
 
 #: ../issue_views.py:120
 msgid "Search for issues"
-msgstr ""
+msgstr "Chercher une fiche"
 
 #: ../tables.py:123
 msgid "Select Table"
-msgstr ""
+msgstr "Sélectionner le tableau"
 
 #: ../resources.py:183
 msgid "Start YYYY-MM-DD HH:MM"
-msgstr ""
+msgstr "Début YYYY-MM-DD HH:MM"
 
 #: ../issue.py:316
 #: ../tracker_views.py:57
 msgid "State"
-msgstr ""
+msgstr "État"
 
 #: ../stored.py:54
 msgid "Stored Search"
-msgstr ""
+msgstr "Recherche sauvegardée"
 
 #: ../tracker_views.py:132
 msgid "Stored Searches"
-msgstr ""
+msgstr "Recherches sauvergardées"
 
 #: ../tracker.py:71
 msgid "Tchack Issue Tracker"
-msgstr ""
+msgstr "Tracker de fiche Tchack"
 
 #: ../tracker_views.py:513
 msgid "The search has been modified."
-msgstr ""
+msgstr "La recherche est modifiée."
 
 #: ../tracker_views.py:555
 msgid "The search has been removed."
-msgstr ""
+msgstr "La recherche est effacée."
 
 #: ../tracker_views.py:520
 msgid "The search has been stored."
-msgstr ""
+msgstr "La recherche est sauvegardée."
 
 #: ../tracker_views.py:524
 msgid "The search title has been changed."
-msgstr ""
+msgstr "Le titre de la recherche est modifié."
 
 #: ../issue.py:260
 msgid "The user $title did some changes."
-msgstr ""
+msgstr "L'utilisateur <b>$title</b> à effectué des modifications."
 
 #: ../issue_views.py:393
 msgid "There are ${n} assignments."
-msgstr ""
+msgstr "Il ya ${n} attributions."
 
 #: ../issue_views.py:392
 msgid "There is 1 assignment."
-msgstr ""
+msgstr "Il y a 1 attribution."
 
 #: ../issue.py:306
 #: ../tracker_views.py:52
 msgid "Title"
-msgstr ""
+msgstr "Titre"
 
 #: ../tracker.py:72
 msgid "To manage images, bugs and tasks"
-msgstr ""
+msgstr "Pour gérer les images, les bogues et les tâches"
 
 #: ../issue_views.py:116
 msgid "Tracker"
-msgstr ""
+msgstr "Tracker"
 
 #: ../issue.py:314
 #: ../tracker_views.py:56
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: ../tracker_views.py:301
 msgid "Unknown stored search \"${sname}\"."
-msgstr ""
+msgstr "Recherche sauvegardée «&nbsp;${sname}&nbsp;» inconnue."
 
 #: ../tracker.py:62
 #: ../tracker.py:111
 msgid "Validated"
-msgstr ""
+msgstr "Validé"
 
 #: ../issue.py:313
 #: ../tracker_views.py:55
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 #: ../tracker_views.py:258
 msgid "View"
-msgstr ""
+msgstr "Vue"
 
 #: ../tracker_views.py:842
 msgid "[%s]"
-msgstr ""
+msgstr "[%s]"
 
 #: ../issue.py:297
+#, fuzzy
 msgid "[empty]"
-msgstr ""
+msgstr "[vide]"
+
 

@@ -65,6 +65,6 @@ function update_tracker_list(list_name)
 $(document).ready(function () {
   update_tracker();
   $("#product").bind("change", update_tracker);
-  //show hidden TDs
+  /* show.hide some TDs */
   $("A.showall").click(function(){$("TD.light").toggle(); return false;});
 });

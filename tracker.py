@@ -54,13 +54,13 @@ resolution = timedelta.resolution
 
 
 
-default_types = [u'Décor couleur', u'Décor N&B', u'Props']
+default_types = [u'Color Set', u'B&W Set', u'Props']
 
 default_tables = [
     ('product', []),
     ('type', default_types),
-    ('state', [u'À valider', u'Validé', u'En cours']),
-    ('priority', [u'Haute', u'Medium', u'Basse']),
+    ('state', [u'Awaiting validation', u'Validated', u'In Progress']),
+    ('priority', [u'High', u'Medium', u'Low']),
     ]
 
 
@@ -107,9 +107,9 @@ class Tracker(Folder):
         not_assigned = StoredSearchFile(assigned_to='nobody')
         high_priority = StoredSearchFile(state='0', priority='0')
         i = 0
-        for search, title in [(to_validate, u'À valider'),
-                              (validate, u'Validé'),
-                              (not_assigned, u'Non assigné'),
+        for search, title in [(to_validate, u'Awaiting validation'),
+                              (validate, u'Validated'),
+                              (not_assigned, u'Non assigned'),
                               (high_priority, u'High Priority')]:
             folder.set_handler('%s/s%s' % (name, i), search)
             metadata = StoredSearch.build_metadata(title={'en': title})

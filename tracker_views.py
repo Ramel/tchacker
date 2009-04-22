@@ -50,12 +50,12 @@ from stored import StoredSearchFile, StoredSearch
 columns = [
     ('id', MSG(u'Id')),
     ('title', MSG(u'Title')),
-    ('product', MSG(u'Product')),
+    #    ('product', MSG(u'Product')),
     ('module', MSG(u'Module')),
-    ('version', MSG(u'Version')),
+    #('version', MSG(u'Version')),
     ('type', MSG(u'Type')),
     ('state', MSG(u'State')),
-    ('priority', MSG(u'Priority')),
+    #('priority', MSG(u'Priority')),
     ('assigned_to', MSG(u'Assigned To')),
     ('mtime', MSG(u'Modified'))]
 

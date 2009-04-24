@@ -67,6 +67,8 @@ $(document).ready(function () {
   $("#product").bind("change", update_tracker);
   /* show.hide some TDs */
   $("A.showall").click(function(){$("TD.light").toggle(); return false;});
-  $("A.showall").click(function(){$("TD.version").toggle(); return false;});
-  $("A.showall").click(function(){$("TH.version").toggle(); return false;});
+  //$("A.showall").click(function(){$("#browse-list th.version").toggle(); return false;});
+  $("A.showall").click(function(){$("TH.version").css('display','block'); return false;});
+  //$("th.version").hide();
+  //$("A.showall").click(function(){$("TH.version").show(); return false;});
 });

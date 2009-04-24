@@ -10,14 +10,14 @@
 <table id="browse_list" class="${css}">
   <thead stl:if="columns">
     <tr>
+      <!-- is_checkbox -->
       <stl:block stl:repeat="column columns">
       <th stl:if="column/is_checkbox" class="checkbox">
-          <!-- is_checkbox -->
           <input type="checkbox" title="Click to select/unselect all rows"
             onclick="select_checkboxes('form_table', this.checked);" />
       </th>
+      <!-- not is_checkbox -->
       <th stl:if="not column/is_checkbox" class="${column/name}">
-          <!-- not is_checkbox -->
           <a stl:if="column/href" href="${column/href}"
             class="sort_${column/order}">${column/title}</a>
           <span stl:if="not column/href" class="no_sort">

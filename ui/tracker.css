@@ -20,7 +20,14 @@
   color: #0A4A0A;
 }
 
-#tracker TD.light,
-#content TH.version, #content TD.version {
+#tracker TD.light {
   display:none;
 }
+TH.version {
+  display:none;
+}
+/*
+#content TD.version {
+  display:none;
+}
+*/

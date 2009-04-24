@@ -10,25 +10,25 @@
   <thead stl:if="columns">
     <tr>
       <stl:block stl:repeat="column columns">
-      <th stl:if="column/is_checkbox" class="${column/title} checkbox">
+      <th stl:if="column/is_checkbox" class="checkbox">
           <!-- is_checkbox -->
           <input type="checkbox" title="Click to select/unselect all rows"
             onclick="select_checkboxes('form_table', this.checked);" />
-        </th>
-	<th stl:if="not column/is_checkbox" class="${column/title}">
+      </th>
+      <th stl:if="not column/is_checkbox" class="${column/name}">
           <!-- not is_checkbox -->
           <a stl:if="column/href" href="${column/href}"
             class="sort_${column/order}">${column/title}</a>
           <span stl:if="not column/href" class="no_sort">
             ${column/title}</span>
-        </th>
+      </th>
       </stl:block>
     </tr>
   </thead>
   <tbody>
     <tr stl:repeat="row rows" class="${repeat/row/even}">
       <stl:block stl:repeat="column row/columns">
-      <td stl:if="column/type" class="${column/type}">
+      <td class="${column/name}">
         <input stl:if="column/is_checkbox" type="checkbox" name="ids"
           value="${column/value}" checked="${column/checked}" class="checkbox" />
         <img stl:if="column/is_icon" src="${column/src}" border="0" />

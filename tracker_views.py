@@ -390,13 +390,57 @@ class Tracker_View(BrowseForm):
     def get_table_columns(self, resource, context):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
-        #from pprint import pprint
+        from pprint import pprint
+        #pprint('__table_columns__')
         #pprint(table_columns)
-        #pprint(table_columns[3][1].gettext().encode('utf-8'))
-        #pprint(table_columns[3][0])
         return table_columns
+    
+    #######################################################################
+    # Table head
+    def get_table_head(self, resource, context, items, actions=None):
+        # Get from the query
+        query = context.query
+        sort_by = query['sort_by']
+        reverse = query['reverse']
 
-
+        columns = self._get_table_columns(resource, context)
+        columns_ns = []
+        for name, title, sortable in columns:
+            if name == 'checkbox':
+                # Type: checkbox
+                if  actions:
+                    columns_ns.append({'is_checkbox': True})
+            elif title is None:
+                # Type: nothing
+                continue
+            elif not sortable:
+                # Type: nothing or not sortable
+                columns_ns.append({
+                    'is_checkbox': False,
+                    'title': title,
+                    'href': None,
+                    'name': name})
+            else:
+                # Type: normal
+                kw = {'sort_by': name}
+                if name == sort_by:
+                    col_reverse = (not reverse)
+                    order = 'up' if reverse else 'down'
+                else:
+                    col_reverse = False
+                    order = 'none'
+                kw['reverse'] = Boolean.encode(col_reverse)
+                columns_ns.append({
+                    'is_checkbox': False,
+                    'title': title,
+                    'order': order,
+                    'href': context.uri.replace(**kw),
+                    'name': name,
+                    })
+        return columns_ns
+     
+    #######################################################################
+    # Table row
     def get_table_namespace(self, resource, context, items):
         ac = resource.get_access_control()
 
@@ -422,6 +466,7 @@ class Tracker_View(BrowseForm):
         # (3) Table Body: rows
         columns = self.get_table_columns(resource, context)
         from pprint import pprint
+        pprint('__columns__')
         pprint(columns)
         rows = []
         for item in items:
@@ -438,11 +483,10 @@ class Tracker_View(BrowseForm):
                     'is_checkbox': False,
                     'is_icon': False,
                     'is_link': False,
-                    #'is_hidden': False,
-                    'type': None,
+                    'name': None,
                 }
-                # The column name
-                column_ns['type'] = column
+                # Column's name
+                column_ns['name'] = column
                 # Type: empty
                 if value is None:
                     pass
@@ -456,10 +500,6 @@ class Tracker_View(BrowseForm):
                 elif column == 'icon':
                     column_ns['is_icon'] = True
                     column_ns['src'] = value
-                # Type: hidden
-                #elif column == 'version':
-                #    column_ns['is_hidden'] = True
-                #   column_ns['value'] = value
                 # Type: normal
                 else:
                     column_ns['is_link'] = True
@@ -470,13 +510,17 @@ class Tracker_View(BrowseForm):
                     column_ns['value'] = value
                     column_ns['href'] = href
                 # DEBUG
-                pprint(column_ns['type'])
-                pprint(value)
+                #pprint(column_ns['name'])
+                #pprint(value)
                 row_columns.append(column_ns)
 
             # Append
             rows.append({'columns': row_columns})
 
+        pprint('__columns-table_head__')
+        pprint(table_head)
+        #pprint('__self__')
+        #pprint(self)
         # Ok
         return {
             'css': self.table_css,

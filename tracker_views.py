@@ -284,7 +284,9 @@ class Tracker_View(BrowseForm):
     }
 
     context_menus = [StoreSearchMenu(), TrackerViewMenu()]
-
+    
+    # Content
+    table_template = '/ui/tchacker/browse_table.xml'
 
     def get_query_schema(self):
         return merge_dicts(BrowseForm.get_query_schema(self),
@@ -388,8 +390,100 @@ class Tracker_View(BrowseForm):
     def get_table_columns(self, resource, context):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
+        #from pprint import pprint
+        #pprint(table_columns)
+        #pprint(table_columns[3][1].gettext().encode('utf-8'))
+        #pprint(table_columns[3][0])
         return table_columns
 
+
+    def get_table_namespace(self, resource, context, items):
+        ac = resource.get_access_control()
+
+        # (1) Actions (submit buttons)
+        actions = []
+        for button in self.get_table_actions(resource, context):
+            if button.show(resource, context, items) is False:
+                continue
+            if button.confirm:
+                confirm = button.confirm.gettext().encode('utf_8')
+                onclick = 'return confirm("%s");' % confirm
+            else:
+                onclick = None
+            actions.append(
+                {'name': button.name,
+                 'value': button.title,
+                 'class': button.css,
+                 'onclick': onclick})
+
+        # (2) Table Head: columns
+        table_head = self.get_table_head(resource, context, items, actions)
+
+        # (3) Table Body: rows
+        columns = self.get_table_columns(resource, context)
+        from pprint import pprint
+        pprint(columns)
+        rows = []
+        for item in items:
+            row_columns = []
+            for column in columns:
+                column = column[0]
+                # Skip the checkbox column if there are not any actions
+                if column == 'checkbox':
+                    if not self.external_form and not actions:
+                        continue
+
+                value = self.get_item_value(resource, context, item, column)
+                column_ns = {
+                    'is_checkbox': False,
+                    'is_icon': False,
+                    'is_link': False,
+                    #'is_hidden': False,
+                    'type': None,
+                }
+                # The column name
+                column_ns['type'] = column
+                # Type: empty
+                if value is None:
+                    pass
+                # Type: checkbox
+                elif column == 'checkbox':
+                    value, checked = value
+                    column_ns['is_checkbox'] = True
+                    column_ns['value'] = value
+                    column_ns['checked'] = checked
+                # Type: icon
+                elif column == 'icon':
+                    column_ns['is_icon'] = True
+                    column_ns['src'] = value
+                # Type: hidden
+                #elif column == 'version':
+                #    column_ns['is_hidden'] = True
+                #   column_ns['value'] = value
+                # Type: normal
+                else:
+                    column_ns['is_link'] = True
+                    if type(value) is tuple:
+                        value, href = value
+                    else:
+                        href = None
+                    column_ns['value'] = value
+                    column_ns['href'] = href
+                # DEBUG
+                pprint(column_ns['type'])
+                pprint(value)
+                row_columns.append(column_ns)
+
+            # Append
+            rows.append({'columns': row_columns})
+
+        # Ok
+        return {
+            'css': self.table_css,
+            'columns': table_head,
+            'rows': rows,
+            'actions': actions,
+        }
 
 
 class Tracker_Search(BaseSearchForm, Tracker_View):

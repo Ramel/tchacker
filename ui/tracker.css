@@ -20,6 +20,7 @@
   color: #0A4A0A;
 }
 
-#tracker TD.light {
+#tracker TD.light,
+#tracker TH.version, #tracker TD.version {
 	display:none;
 }

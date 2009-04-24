@@ -67,5 +67,6 @@ $(document).ready(function () {
   $("#product").bind("change", update_tracker);
   /* show.hide some TDs */
   $("A.showall").click(function(){$("TD.light").toggle(); return false;});
-  $("A.showall").click(function(){$("#browse_list TD.version, #browse_list TH.version").toggle(); return false;});
+  $("A.showall").click(function(){$("TD.version").toggle(); return false;});
+  $("A.showall").click(function(){$("TH.version").toggle(); return false;});
 });

@@ -310,8 +310,8 @@ class Tracker_View(BrowseForm):
     def get_namespace(self, resource, context):
         # Set Style
         context.styles.append('/ui/tchacker/tracker.css')
-        context.styles.append('/ui/tchacker/tracker.js')
-        context.styles.append('/ui/jquery/jquery.js')
+        context.scripts.append('/ui/tchacker/tracker.js')
+        context.scripts.append('/ui/jquery.js')
 
         # Default table namespace
         namespace = BrowseForm.get_namespace(self, resource, context)

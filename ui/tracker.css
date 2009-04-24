@@ -21,6 +21,6 @@
 }
 
 #tracker TD.light,
-#tracker TH.version, #tracker TD.version {
-	display:none;
+#browse_list TH.version, #browse_list TD.version {
+  display:none;
 }

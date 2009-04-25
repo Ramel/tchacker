@@ -392,9 +392,6 @@ class Tracker_View(BrowseForm):
     def get_table_columns(self, resource, context):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
-        from pprint import pprint
-        #pprint('__table_columns__')
-        #pprint(table_columns)
         return table_columns
     
     #######################################################################
@@ -467,9 +464,6 @@ class Tracker_View(BrowseForm):
 
         # (3) Table Body: rows
         columns = self.get_table_columns(resource, context)
-        from pprint import pprint
-        pprint('__columns__')
-        pprint(columns)
         rows = []
         for item in items:
             row_columns = []
@@ -511,18 +505,11 @@ class Tracker_View(BrowseForm):
                         href = None
                     column_ns['value'] = value
                     column_ns['href'] = href
-                # DEBUG
-                #pprint(column_ns['name'])
-                #pprint(value)
                 row_columns.append(column_ns)
 
             # Append
             rows.append({'columns': row_columns})
 
-        pprint('__columns-table_head__')
-        pprint(table_head)
-        #pprint('__self__')
-        #pprint(self)
         # Ok
         return {
             'css': self.table_css,

@@ -66,12 +66,4 @@ $(document).ready(function () {
   $("#product").bind("change", update_tracker);
   /* show.hide some TDs */
   $("A.showall").click(function(){$("TD.light").toggle(); return false;});
-  //$("A.showall").click(function(){$("#browse-list th.version").toggle(); return false;});
-  //$("A.hide").click(function(){$("TH.version, TD.version").style.display = 'none';
-  //$("A.show").click(function(){$("TH.version, TD.version").style.display = 'table-cell';
-  $("A.hide").click(function(){$("#browse_list TH.version, #browse_list TD.version").hide(); return false;});
-  $("A.show").click(function(){$("#browse_list TH.version, #browse_list TD.version").show(); return false;});
-  $("A.toggle").click(function(){$(".version").toggle(); return false;});
-  //$("th.version").hide();
-  //$("A.showall").click(function(){$("TH.version").show(); return false;});
 }

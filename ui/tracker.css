@@ -23,10 +23,3 @@
 #tracker TD.light {
   display:none;
 }
-TH.version {
-  display:table-cell;
-}
-TD.version {
-  display:table-cell;
-}
-

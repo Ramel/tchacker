@@ -24,10 +24,9 @@
   display:none;
 }
 TH.version {
-  display:none;
+  display:table-cell;
 }
-/*
-#content TD.version {
-  display:none;
+TD.version {
+  display:table-cell;
 }
-*/
+

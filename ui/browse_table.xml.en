@@ -6,7 +6,7 @@
 
 <form action="" method="post" name="browse_list" id="form_table"
   stl:omit-tag="not actions">
-<p><a href="#" class="showall">Show/Hide some options</a></p>
+<p><a href="#" class="show">Show some options</a> - <a href="#" class="hide">Hide some options</a> - <a href="#" class="toggle">Toggle some options</a></p>
 <table id="browse_list" class="${css}">
   <thead stl:if="columns">
     <tr>

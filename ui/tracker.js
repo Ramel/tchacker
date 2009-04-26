@@ -82,16 +82,17 @@ $(document).ready(function () {
 		return false;
 	});
 	/* show.hide.toggle some table columns */
+	$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').hide();
 	$('A.hide').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product').hide();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').hide();
 		return false;
 	});
 	$('A.show').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product').show();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').show();
 		return false;
 	});
 	$('A.toggle').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product').toggle();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').toggle();
 		return false;
 	});
 });

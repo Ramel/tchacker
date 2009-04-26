@@ -62,8 +62,36 @@ function update_tracker_list(list_name)
 }
 
 $(document).ready(function () {
-  update_tracker();
-  $("#product").bind("change", update_tracker);
-  /* show.hide some TDs */
-  $("A.showall").click(function(){$("TD.light").toggle(); return false;});
-}
+	// Test if we need to throw the update_tracker() method only if we are in a
+	// ";add_issue", ";change_several_bugs", ";edit", ";search" page,
+	// seems to bug with hide(), show(), toggle(), investigations needed.
+	var href = location.href;
+	var pos = href.lastIndexOf("/");
+	href  = href.substr(pos + 1);
+	pos = href.lastIndexOf("?");
+	href = href.substr(0, pos);
+	// If we are in one of them, apply the method
+	if(href == ";add_issue" || href == ";edit"
+		|| href == ";search" || href == ";change_several_bugs") {
+		update_tracker();
+		$("#product").bind("change", update_tracker);
+	}
+	/* show.hide some TDs */
+	$("A.showall").click(function(){
+		$("TD.light").toggle();
+		return false;
+	});
+	/* show.hide.toggle some table columns */
+	$('A.hide').click(function() {
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product').hide();
+		return false;
+	});
+	$('A.show').click(function() {
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product').show();
+		return false;
+	});
+	$('A.toggle').click(function() {
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product').toggle();
+		return false;
+	});
+});

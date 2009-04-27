@@ -72,7 +72,7 @@ class Tracker(Folder):
     class_description = MSG(u'To manage images, bugs and tasks')
     class_icon16 = 'tracker/tracker16.png'
     class_icon48 = 'tracker/tracker48.png'
-    class_views = ['search', 'add_issue', 'browse_content', 'edit']
+    class_views = ['view', 'add_issue', 'search', 'browse_content', 'edit']
 
     __fixed_handlers__ = ['product', 'module', 'version', 'type', 'priority',
         'state', 'calendar']
@@ -290,7 +290,6 @@ class Tracker(Folder):
     export_to_csv_form = Tracker_ExportToCSVForm()
     export_to_csv = Tracker_ExportToCSV()
     change_several_bugs = Tracker_ChangeSeveralBugs()
-
 
     #######################################################################
     # Update

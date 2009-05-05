@@ -57,6 +57,7 @@ columns = [
     ('state', MSG(u'State')),
     ('priority', MSG(u'Priority')),
     ('assigned_to', MSG(u'Assigned To')),
+    ('last_attachement', MSG(u'Last Attachement')),
     ('mtime', MSG(u'Modified'))]
 
 
@@ -377,7 +378,10 @@ class Tracker_View(BrowseForm):
         if column == 'mtime':
             mtime = datetime.strptime(value, '%Y%m%d%H%M%S')
             return format_datetime(mtime)
-
+        # Last Attachement
+        if column == 'last_attachement':
+            import pprint from pprint
+            pprint('last_attachement')
         # Tables
         table = resource.get_resource(column).handler
         table_record = table.get_record(value)

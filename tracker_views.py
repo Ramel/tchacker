@@ -23,11 +23,11 @@
 from datetime import datetime
 
 # Import from itools
+from itools.core import merge_dicts
 from itools.csv import CSVFile, Property
 from itools.datatypes import Boolean, Integer, String, Unicode, Enumerate
 from itools.gettext import MSG
 from itools.i18n import format_datetime
-from itools.handlers import merge_dicts
 from itools.uri import encode_query, Reference
 from itools.web import BaseView, BaseForm, STLForm
 from itools.web import INFO, ERROR
@@ -37,8 +37,9 @@ from itools.web.views import process_form
 from ikaaro.buttons import Button
 from ikaaro.forms import HiddenWidget, TextWidget
 from ikaaro import messages
-from ikaaro.resource_views import DBResource_NewInstance
+from ikaaro.views_news import NewInstance
 from ikaaro.views import BrowseForm, SearchForm as BaseSearchForm, ContextMenu
+from ikaaro.registry import get_resource_class
 
 # Import from ikaaro.tracker
 from issue import Issue
@@ -93,10 +94,9 @@ class StoreSearchMenu(ContextMenu):
         search_name = context.get_query_value('search_name')
         search = None
         if search_name:
-            try:
-                search = resource.get_resource(search_name)
-            except LookupError:
-                pass
+            search = resource.get_resource(search_name, soft=True)
+        else:
+            search = None
 
         # Set the get function and the title
         if search:
@@ -106,7 +106,7 @@ class StoreSearchMenu(ContextMenu):
             # Warning, a menu is not the default view!
             query = process_form(context.get_query_value, self.query_schema)
             get = query.get
-            search_title = None
+            search_title = None  
 
         # Fill the fields
         fields = []
@@ -151,7 +151,7 @@ class StoredSearchesMenu(ContextMenu):
             issues_nb = len(root.search(query))
             kw = {'search_title': item.get_property('title'),
                   'issues_nb': issues_nb}
-            title = MSG(u'${search_title} (${issues_nb})')
+            title = MSG(u'{search_title} ({issues_nb})')
             title = title.gettext(language=language, **kw)
 
             # Namespace
@@ -191,31 +191,33 @@ class TrackerViewMenu(ContextMenu):
 ###########################################################################
 # Views
 ###########################################################################
-class Tracker_NewInstance(DBResource_NewInstance):
+class Tracker_NewInstance(NewInstance):
 
-    schema = merge_dicts(
-        DBResource_NewInstance.schema,
-        product=Unicode(mandatory=True))
-
-    widgets = DBResource_NewInstance.widgets + \
-        [TextWidget('product', title=MSG(u'Give the title of one Product'))]
+    schema = merge_dicts(NewInstance.schema, product=Unicode(mandatory=True))
+    widgets = NewInstance.widgets + [
+        TextWidget('product', title=MSG(u'Give the title of one Product'))]
 
 
     def action(self, resource, context, form):
-        ok = DBResource_NewInstance.action(self, resource, context, form)
-        if ok is None:
-            return
-
-        # Add the initial product
         name = form['name']
+        title = form['title']
+
+        # Create the resource
+        class_id = context.query['type']
+        cls = get_resource_class(class_id)
+        child = cls.make_resource(cls, resource, name)
+        # The metadata
+        metadata = child.metadata
+        language = resource.get_content_language(context)
+        metadata.set_property('title', title, language=language)
+        # Add the initial product
         product = form['product']
         table = resource.get_resource('%s/product' % name).get_handler()
         product = Property(product, language='en')
         table.add_record({'title': product})
 
-        # Ok
-        return ok
-
+        goto = './%s/' % name
+        return context.come_back(messages.MSG_NEW_RESOURCE, goto=goto)
 
 
 class Tracker_AddIssue(STLForm):
@@ -266,7 +268,7 @@ class Tracker_View(BrowseForm):
         # Do not batch
         'batch_size': Integer(default=0),
         # search_fields
-        'search_name': Unicode(),
+        'search_name': String(),
         'mtime': Integer(default=0),
         'product': Integer(multiple=True),
         'module': Integer(multiple=True),
@@ -298,10 +300,9 @@ class Tracker_View(BrowseForm):
         # Check stored search
         search_name = context.query['search_name']
         if search_name:
-            try:
-                search = resource.get_resource(search_name)
-            except LookupError:
-                msg = MSG(u'Unknown stored search "${sname}".')
+            search = resource.get_resource(search_name, soft=True)
+            if search is None:
+                msg = MSG(u'Unknown stored search "{sname}".')
                 goto = ';search'
                 return context.come_back(msg, goto=goto, sname=search_name)
         # Ok
@@ -350,6 +351,37 @@ class Tracker_View(BrowseForm):
             sort_by = query['sort_by']
         if query['reverse'] is not None:
             reverse = query['reverse']
+        
+        # If an ordered table => sort the result with its natural order
+        if sort_by in ('product', 'module', 'version', 'type', 'state',
+                       'priority'):
+            # Make the key function
+            table_handler = resource.get_resource(sort_by).handler
+            sorted_ids = list(table_handler.get_record_ids_in_order())
+
+            def cmp_xy(x, y):
+                x_value = getattr(x, sort_by)
+                try:
+                    x_idx = sorted_ids.index(x_value)
+                except ValueError:
+                    x_idx = None
+
+                y_value = getattr(y, sort_by)
+                try:
+                    y_idx = sorted_ids.index(y_value)
+                except ValueError:
+                    y_idx = None
+
+                return cmp(x_idx, y_idx)
+
+            # Sort issues
+            issues = results.get_documents()
+            issues.sort(cmp_xy, reverse=reverse)
+
+            # Return the result
+            return issues
+
+        # Else, ...
         return results.get_documents(sort_by=sort_by, reverse=reverse)
 
 
@@ -369,18 +401,16 @@ class Tracker_View(BrowseForm):
         # Assigned to
         if column == 'assigned_to':
             users = resource.get_resource('/users')
-            try:
-                user = users.get_resource(value)
-            except LookupError:
+            user = users.get_resource(value, soft=True)
+            if user is None:
                 return None
             return user.get_title()
         # Mtime
         if column == 'mtime':
-            mtime = datetime.strptime(value, '%Y%m%d%H%M%S')
-            return format_datetime(mtime)
+            return format_datetime(value)
         # Last Attachement
         if column == 'last_attachement':
-            import pprint from pprint
+            from pprint import pprint
             pprint('last_attachement')
         # Tables
         table = resource.get_resource(column).handler
@@ -532,7 +562,7 @@ class Tracker_Search(BaseSearchForm, Tracker_View):
     # Search Form
     search_template = '/ui/tchacker/search.xml'
     search_schema = {
-        'search_name': Unicode(),
+        'search_name': String(),
         'search_title': Unicode(),
         'text': Unicode(),
         'mtime': Integer(),
@@ -700,8 +730,8 @@ class Tracker_GoToIssue(BaseView):
         if not resource.has_resource(issue_name):
             return context.come_back(ERROR(u'Issue not found.'))
 
-        issue = resource.get_resource(issue_name)
-        if not isinstance(issue, Issue):
+        issue = resource.get_resource(issue_name, soft=True)
+        if issue is None or not isinstance(issue, Issue):
             return context.come_back(ERROR(u'Issue not found.'))
 
         return context.uri.resolve2('../%s/;edit' % issue_name)
@@ -1016,15 +1046,12 @@ def get_issue_informations(resource, item):
     infos['assigned_to'] = ''
     if assigned_to:
         users = resource.get_resource('/users')
-        if users.has_resource(assigned_to):
-            user = users.get_resource(assigned_to)
+        user = users.get_resource(assigned_to, soft=True)
+        if users is not None:
             infos['assigned_to'] = user.get_title()
 
     # Modification Time
-    mtime_sort = item.mtime
-    mtime = datetime.strptime(mtime_sort, '%Y%m%d%H%M%S')
-    infos['mtime'] = format_datetime(mtime)
-    infos['mtime_sort'] = mtime_sort
+    infos['mtime'] = format_datetime(item.mtime)
 
     return infos
 

@@ -16,8 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from itools
-from itools.utils import get_abspath
-from itools.utils import get_version
+from itools.core import get_abspath
+from itools.core import get_version
 
 # Import from ikaaro
 from ikaaro.folder import Folder

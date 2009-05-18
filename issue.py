@@ -30,13 +30,14 @@ from itools.datatypes import DateTime, Integer, String, Unicode, Tokens
 from itools.gettext import MSG
 from itools.handlers import checkid
 from itools.vfs import FileName
-from itools.xapian import IntegerField, KeywordField
+from itools.uri import get_uri_path
 from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.file import File
 from ikaaro.folder import Folder
 from ikaaro.registry import register_resource_class, get_resource_class
+from ikaaro.registry import register_field
 from ikaaro.utils import generate_name
 from issue_views import Issue_Edit, Issue_EditResources, Issue_History
 from issue_views import IssueTrackerMenu
@@ -56,7 +57,7 @@ class History(Table):
         'priority': Integer,
         'assigned_to': String,
         'comment': Unicode,
-        'cc_list': Tokens(),
+        'cc_list': Tokens,
         'file': String}
 
 
@@ -76,34 +77,32 @@ class Issue(Folder):
         folder.set_handler('%s/.history' % name, History())
 
 
-    def get_catalog_fields(self):
-        fields = Folder.get_catalog_fields(self)
-        # Metadata
-        names = [
-            'id', 'product', 'module', 'version', 'type', 'state', 'priority']
-        for name in names:
-            field = IntegerField(name, is_stored=True)
-            fields.append(field)
-        # Assign To
-        field = KeywordField('assigned_to', is_stored=True)
-        fields.append(field)
-        # Ok
-        return fields
-
-
     def get_catalog_values(self):
-        document = Folder.get_catalog_values(self)
+        document = Folder._get_catalog_values(self)
         document['id'] = int(self.name)
-        names = 'product', 'module', 'version', 'type', 'priority', 'state'
-        for name in names:
-            document[name] = self.get_value(name)
-        document['assigned_to'] = self.get_value('assigned_to') or 'nobody'
-        document['title'] = self.get_value('title')
-        return document
 
+        # Get the last record
+        history = self.get_history()
+        record = history.get_record(-1)
+        if record:
+            get_record_value = history.get_record_value
+            names = 'product', 'module', 'version', 'type', 'priority', 'state'
+            for name in names:
+                document[name] = get_record_value(record, name)
+            assigned_to = get_record_value(record, 'assigned_to') or 'nobody'
+            document['assigned_to'] = assigned_to
+            document['title'] = get_record_value(record, 'title')
+        return document
 
     def get_document_types(self):
         return [File]
+
+
+    def get_files_to_archive(self, content=False):
+        files = Folder.get_files_to_archive(self, content)
+        history = get_uri_path(self.handler.get_handler('.history').uri)
+        files.append(history)
+        return files
 
 
     def get_mtime(self):
@@ -127,7 +126,7 @@ class Issue(Folder):
         return links
 
 
-    def change_link(self, old_path, new_path):
+    def update_link(self, old_path, new_path):
         base = self.get_abspath()
         old_name = base.get_pathto(old_path)
         history = self.get_history()
@@ -257,12 +256,12 @@ class Issue(Folder):
             uri = context.uri.resolve(';edit')
         body = '#%s %s %s\n\n' % (self.name, self.get_value('title'),
                                   str(uri))
-        message = MSG(u'The user $title did some changes.')
+        message = MSG(u'The user {title} did some changes.')
         body +=  message.gettext(title=user_title)
         body += '\n\n'
         if file:
             filename = unicode(filename, 'utf-8')
-            message = MSG(u'New Attachment: $filename')
+            message = MSG(u'New Attachment: {filename}')
             message = message.gettext(filename=filename)
             body += message + '\n'
         comment = context.get_form_value('comment', type=Unicode)
@@ -272,9 +271,9 @@ class Issue(Folder):
         if comment:
             title = MSG(u'Comment').gettext()
             separator = len(title) * u'-'
-            template = u'${title}\n${separator}\n\n${comment}\n'
+            template = u'{title}\n{separator}\n\n{comment}\n'
             template = Template(template)
-            body += template.substitute(title=title, separator=separator,
+            body += template.format(title=title, separator=separator,
                                         comment=comment)
         # Notify / Send
         for to_addr in to_addrs:
@@ -293,11 +292,11 @@ class Issue(Folder):
         history = self.get_history()
         if history.get_n_records() > 0:
             # Edit issue
-            template = MSG(u'$field: $old_value to $new_value')
+            template = MSG(u'{field}: {old_value} to {new_value}')
             empty = MSG(u'[empty]').gettext()
         else:
             # New issue
-            template = MSG(u'$field: $old_value$new_value')
+            template = MSG(u'{field}: {old_value}{new_value}')
             empty = u''
         # Modification of title
         last_title = self.get_value('title') or empty
@@ -420,4 +419,12 @@ class Issue(Folder):
 ###########################################################################
 # Register
 ###########################################################################
+# The class
 register_resource_class(Issue)
+
+# The fields
+for name in ['id', 'product', 'module', 'version', 'type', 'state',
+             'priority']:
+    register_field(name, Integer(is_stored=True, is_indexed=True))
+register_field('assigned_to', String(is_stored=True, is_indexed=True))
+

@@ -24,14 +24,14 @@ from itools.csv import Table as BaseTable, Record
 from itools.datatypes import DateTime, String, Unicode, Enumerate
 from itools.gettext import MSG
 from itools.ical import Time
-from itools.utils import freeze
+from itools.core import freeze
 from itools.web import get_context
 from itools.xapian import OrQuery, AndQuery, RangeQuery
 
 # Import from ikaaro
-from ikaaro.calendar_ import CalendarBase
-from ikaaro.calendar_views import MonthlyView
-from ikaaro.calendar_views import WeeklyView
+from ikaaro.calendar import CalendarBase
+from ikaaro.calendar import MonthlyView
+from ikaaro.calendar import WeeklyView
 from ikaaro.forms import DateWidget, MultilineWidget, SelectWidget, TextWidget
 from ikaaro.table import Table
 from ikaaro.registry import register_resource_class

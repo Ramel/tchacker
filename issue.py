@@ -22,7 +22,7 @@
 
 # Import from the Standard Library
 from datetime import datetime
-from string import Template
+#from string import Template
 
 # Import from itools
 from itools.csv import Table
@@ -77,7 +77,7 @@ class Issue(Folder):
         folder.set_handler('%s/.history' % name, History())
 
 
-    def get_catalog_values(self):
+    def _get_catalog_values(self):
         document = Folder._get_catalog_values(self)
         document['id'] = int(self.name)
 
@@ -93,6 +93,7 @@ class Issue(Folder):
             document['assigned_to'] = assigned_to
             document['title'] = get_record_value(record, 'title')
         return document
+
 
     def get_document_types(self):
         return [File]
@@ -126,7 +127,7 @@ class Issue(Folder):
         return links
 
 
-    def update_link(self, old_path, new_path):
+    def update_links(self, old_path, new_path):
         base = self.get_abspath()
         old_name = base.get_pathto(old_path)
         history = self.get_history()
@@ -272,7 +273,7 @@ class Issue(Folder):
             title = MSG(u'Comment').gettext()
             separator = len(title) * u'-'
             template = u'{title}\n{separator}\n\n{comment}\n'
-            template = Template(template)
+            #template = Template(template)
             body += template.format(title=title, separator=separator,
                                         comment=comment)
         # Notify / Send
@@ -423,8 +424,8 @@ class Issue(Folder):
 register_resource_class(Issue)
 
 # The fields
-for name in ['id', 'product', 'module', 'version', 'type', 'state',
-             'priority']:
-    register_field(name, Integer(is_stored=True, is_indexed=True))
-register_field('assigned_to', String(is_stored=True, is_indexed=True))
+#for name in ['id', 'product', 'module', 'version', 'type', 'state',
+#             'priority']:
+#    register_field(name, Integer(is_stored=True, is_indexed=True))
+#register_field('assigned_to', String(is_stored=True, is_indexed=True))
 

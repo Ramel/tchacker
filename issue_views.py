@@ -175,9 +175,8 @@ class Issue_Edit(STLForm):
             rdatetime = record.datetime
             # solid in case the user has been removed
             username = record.username
-            user_title = username
-            if users.has_resource(username):
-                user_title = users.get_resource(username).get_title()
+            user = users.get_resource(username, soft=True)
+            user_title = user and user.get_title() or username
             #from pprint import pprint
             # In case of an Image joined as file, show it as a preview
             # (width="256", for now).
@@ -293,9 +292,8 @@ class Issue_History(STLView):
             cc_list = record.get_value('cc_list') or ()
             file = record.get_value('file')
             # Solid in case the user has been removed
-            user_exist = users.has_resource(username)
-            usertitle = (user_exist and
-                         users.get_resource(username).get_title() or username)
+            user = users.get_resource(username, soft=True)
+            usertitle = user and user.get_title() or username
             comment = XMLContent.encode(Unicode.encode(comment))
             comment = XMLParser(comment.replace('\n', '<br />'))
             i += 1
@@ -358,11 +356,12 @@ class Issue_History(STLView):
                         row_ns['priority'] = value
             if assigned_to != previous_assigned_to:
                 previous_assigned_to = assigned_to
-                if assigned_to and users.has_resource(assigned_to):
-                    assigned_to_user = users.get_resource(assigned_to)
-                    row_ns['assigned_to'] = assigned_to_user.get_title()
-                else:
-                    row_ns['assigned_to'] = ' '
+            row_ns['assigned_to'] = ' '
+            if assigned_to:
+                    assigned_to_user = users.get_resource(assigned_to, soft=True)
+                    if assigned_to_user is not None:
+                        row_ns['assigned_to'] = assigned_to_user.get_title()
+ 
             if cc_list != previous_cc_list:
                 root = context.root
                 previous_cc_list = cc_list
@@ -390,7 +389,7 @@ class Issue_ViewResources(Table_View):
     search_template = None
 
     batch_msg1 = MSG(u"There is 1 assignment.")
-    batch_msg2 = MSG(u"There are ${n} assignments.")
+    batch_msg2 = MSG(u"There are {n} assignments.")
 
 
     def get_items(self, resource, context):

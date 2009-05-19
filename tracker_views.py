@@ -37,7 +37,7 @@ from itools.web.views import process_form
 from ikaaro.buttons import Button
 from ikaaro.forms import HiddenWidget, TextWidget
 from ikaaro import messages
-from ikaaro.views_news import NewInstance
+from ikaaro.views_new import NewInstance
 from ikaaro.views import BrowseForm, SearchForm as BaseSearchForm, ContextMenu
 from ikaaro.registry import get_resource_class
 
@@ -58,7 +58,7 @@ columns = [
     ('state', MSG(u'State')),
     ('priority', MSG(u'Priority')),
     ('assigned_to', MSG(u'Assigned To')),
-    ('last_attachement', MSG(u'Last Attachement')),
+    #('last_attachement', MSG(u'Last Attachement')),
     ('mtime', MSG(u'Modified'))]
 
 
@@ -218,6 +218,7 @@ class Tracker_NewInstance(NewInstance):
 
         goto = './%s/' % name
         return context.come_back(messages.MSG_NEW_RESOURCE, goto=goto)
+
 
 
 class Tracker_AddIssue(STLForm):
@@ -1047,7 +1048,7 @@ def get_issue_informations(resource, item):
     if assigned_to:
         users = resource.get_resource('/users')
         user = users.get_resource(assigned_to, soft=True)
-        if users is not None:
+        if user is not None:
             infos['assigned_to'] = user.get_title()
 
     # Modification Time

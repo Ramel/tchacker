@@ -235,6 +235,7 @@ class Tracker_AddIssue(STLForm):
 
     def get_namespace(self, resource, context):
         context.styles.append('/ui/tchacker/tracker.css')
+        context.styles.append('/ui/tchack/tchack.css')
         context.scripts.append('/ui/tchacker/tracker.js')
 
         namespace =  self.build_namespace(resource, context)
@@ -592,6 +593,7 @@ class Tracker_Search(BaseSearchForm, Tracker_View):
     def get_search_namespace(self, resource, context):
         # Set Style & JS
         context.styles.append('/ui/tchacker/tracker.css')
+        context.styles.append('/ui/tchack/tchack.css')
         context.scripts.append('/ui/tchacker/tracker.js')
 
         # Search Form

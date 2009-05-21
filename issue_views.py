@@ -150,6 +150,7 @@ class Issue_Edit(STLForm):
         # Set Style & JS
         context.styles.append('/ui/tchacker/tracker.css')
         context.scripts.append('/ui/tchacker/tracker.js')
+        context.styles.append('/ui/tchack/tchack.css')
         context.styles.append('/ui/thickbox/thickbox.css')
         context.scripts.append('/ui/thickbox/thickbox.js')
 

@@ -258,6 +258,7 @@ class Issue_History(STLView):
     def get_namespace(self, resource, context):
         # Set Style
         context.styles.append('/ui/tchacker/tracker.css')
+        context.styles.append('/ui/tchack/tchack.css')
 
         # Local variables
         users = resource.get_resource('/users')

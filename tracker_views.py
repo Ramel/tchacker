@@ -314,7 +314,10 @@ class Tracker_View(BrowseForm):
     def get_namespace(self, resource, context):
         # Set Style
         context.styles.append('/ui/tchacker/tracker.css')
+        # From Tchack package
+        context.styles.append('/ui/tchack/tchack.css')
         context.scripts.append('/ui/tchacker/tracker.js')
+        # Inside Ikaaro in 0.60, in last version
         context.scripts.append('/ui/jquery.js')
 
         # Default table namespace

@@ -285,7 +285,7 @@ class Tracker_View(BrowseForm):
         # BrowseForm fields
         'sort_by': String,
         'reverse': Boolean(default=None),
-        'last_attachement':String(Multiple=True),
+        #'last_attachement':String(Multiple=True),
     }
 
     context_menus = [StoreSearchMenu(), TrackerViewMenu()]
@@ -395,6 +395,9 @@ class Tracker_View(BrowseForm):
         if column == 'checkbox':
             selected_issues = context.get_form_values('ids') or []
             return item.name, item.name in selected_issues
+        # Print the row content
+        if column == 'last_attachement':
+            return 'attachement' 
         if column == 'id':
             id = item.name
             return id, '%s/;edit' % id
@@ -414,13 +417,15 @@ class Tracker_View(BrowseForm):
         # Mtime
         if column == 'mtime':
             return format_datetime(value)
+        """
         # Last Attachement
-        #if column == 'last_attachement':
-        #    comments = context.get_form_values('comments') or []
-        #    from pprint import pprint
-        #    pprint(comments)
-        #    return comments
-        
+        if column == 'last_attachement':
+            #comments = context.get_form_values('comments') or []
+            from pprint import pprint
+            pprint("Last_attachement")
+            #return comments
+            return None
+        """
         # Tables
         table = resource.get_resource(column).handler
         table_record = table.get_record(value)
@@ -435,6 +440,11 @@ class Tracker_View(BrowseForm):
     def get_table_columns(self, resource, context):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
+        # Insert the last atachement title in the table
+        table_columns.insert(2, ('last_attachement', 'Last Attach.'))
+        #from pprint import pprint
+        #pprint("==table_columns==")
+        #pprint(table_columns)
         return table_columns
     
     #######################################################################
@@ -452,6 +462,9 @@ class Tracker_View(BrowseForm):
                 # Type: checkbox
                 if  actions:
                     columns_ns.append({'is_checkbox': True})
+            #if name == 'last_attachement':
+            #    if actions:
+            #        columns_ns.append({'is_attachement': title})
             elif title is None:
                 # Type: nothing
                 continue
@@ -461,7 +474,9 @@ class Tracker_View(BrowseForm):
                     'is_checkbox': False,
                     'title': title,
                     'href': None,
-                    'name': name})
+                    'name': name,
+                    #'last_attachement': title,
+                    })
             else:
                 # Type: normal
                 kw = {'sort_by': name}
@@ -478,6 +493,7 @@ class Tracker_View(BrowseForm):
                     'order': order,
                     'href': context.uri.replace(**kw),
                     'name': name,
+                    #'last_attachement': title,
                     })
         return columns_ns
      

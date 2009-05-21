@@ -92,6 +92,10 @@ class Issue(Folder):
             assigned_to = get_record_value(record, 'assigned_to') or 'nobody'
             document['assigned_to'] = assigned_to
             document['title'] = get_record_value(record, 'title')
+            #last_attachement = get_record_value(record, 'file') or ''
+            #document['last_attachement'] = last_attachement
+            #from pprint import pprint
+            #pprint(document)
         return document
 
 
@@ -382,6 +386,9 @@ class Issue(Folder):
             if comment:
                 return comment
             i -= 1
+        from pprint import pprint
+        pprint('==i==')
+        pprint(i)
         return ''
 
 
@@ -428,4 +435,3 @@ register_resource_class(Issue)
 #             'priority']:
 #    register_field(name, Integer(is_stored=True, is_indexed=True))
 #register_field('assigned_to', String(is_stored=True, is_indexed=True))
-

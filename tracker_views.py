@@ -285,6 +285,7 @@ class Tracker_View(BrowseForm):
         # BrowseForm fields
         'sort_by': String,
         'reverse': Boolean(default=None),
+        'last_attachement':String(Multiple=True),
     }
 
     context_menus = [StoreSearchMenu(), TrackerViewMenu()]
@@ -387,6 +388,10 @@ class Tracker_View(BrowseForm):
 
 
     def get_item_value(self, resource, context, item, column):
+        # Print the colums
+        #from pprint import pprint
+        #pprint('==column==')
+        #pprint(column)
         if column == 'checkbox':
             selected_issues = context.get_form_values('ids') or []
             return item.name, item.name in selected_issues
@@ -410,9 +415,12 @@ class Tracker_View(BrowseForm):
         if column == 'mtime':
             return format_datetime(value)
         # Last Attachement
-        if column == 'last_attachement':
-            from pprint import pprint
-            pprint('last_attachement')
+        #if column == 'last_attachement':
+        #    comments = context.get_form_values('comments') or []
+        #    from pprint import pprint
+        #    pprint(comments)
+        #    return comments
+        
         # Tables
         table = resource.get_resource(column).handler
         table_record = table.get_record(value)

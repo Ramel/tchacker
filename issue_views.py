@@ -184,9 +184,10 @@ class Issue_Edit(STLForm):
             # And add a thickbox JS+CSS in the STL view
             files = resource.get_names()
             # Count files
-            #nb = len(files)
-            #pprint('===files===')
-            #pprint(files)
+            nb = len(files)
+            from pprint import pprint
+            pprint('===nb===')
+            pprint(nb)
             if file:
                 joinedfile = resource._get_resource(files[j])
                 # If file is an image return True

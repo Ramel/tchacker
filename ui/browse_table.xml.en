@@ -4,11 +4,11 @@
 <stl:block xmlns="http://www.w3.org/1999/xhtml"
   xmlns:stl="http://www.hforge.org/xml-namespaces/stl">
 
-<form action="" method="post" name="browse_list" id="form_table"
+<form action="" method="post" name="browse-list" id="form-table"
   stl:omit-tag="not actions">
 <p><a href="#" class="show">Show</a> - <a href="#" class="hide">Hide</a> - <a href="#" class="toggle">Toggle</a></p>
-<table id="browse_list" class="${css} issues">
-  <thead>
+<table id="browse-list" class="${css} issues">
+  <thead stl:if="columns">
     <tr>
       <!-- is_checkbox -->
       <stl:block stl:repeat="column columns">

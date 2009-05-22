@@ -2,7 +2,14 @@
   background-color: #ddddff;
   font-weight: bold;
 }
-
+TD.last-attachement {
+  width: 128px;
+  height: 128px;
+} 
+TD.last-attachement IMG {
+  position:absolute;
+  clip: rect(0px,128px,128px,0px);
+} 
 .tracker_select {
   width: 97%;
 }

@@ -58,7 +58,6 @@ columns = [
     ('state', MSG(u'State')),
     ('priority', MSG(u'Priority')),
     ('assigned_to', MSG(u'Assigned To')),
-    #('last_attachement', MSG(u'Last Attachement')),
     ('mtime', MSG(u'Modified'))]
 
 
@@ -285,7 +284,6 @@ class Tracker_View(BrowseForm):
         # BrowseForm fields
         'sort_by': String,
         'reverse': Boolean(default=None),
-        #'last_attachement':String(Multiple=True),
     }
 
     context_menus = [StoreSearchMenu(), TrackerViewMenu()]
@@ -396,12 +394,37 @@ class Tracker_View(BrowseForm):
             selected_issues = context.get_form_values('ids') or []
             return item.name, item.name in selected_issues
         # Print the row content
-        if column == 'last_attachement':
-            return 'attachement' 
         if column == 'id':
             id = item.name
             return id, '%s/;edit' % id
-
+        
+        # Last Attachement
+        if column == 'last-attachement':
+            #comments = context.get_form_values('comments') or []
+            #comments = context.query[0]
+            #from pprint import pprint
+            #pprint("==comments==")
+            #pprint(comments)
+            """
+            nb = len(comments)
+            from pprint import pprint
+            pprint("==nb==")
+            pprint(nb)
+            """
+            #record = context.get_history_records()
+            #from pprint import pprint
+            #pprint("==record==")
+            #pprint(record)
+            #return '%s' % getattr(item, 'id')
+            id = '%s' % getattr(item, 'id')
+            issue = resource.get_resource(id)
+            file =''
+            for record in issue.get_history_records():
+                file = record.get_value('file')
+            link = '<img src="%s/%s/;download" width="128" />' % (id, file)
+            value = '%s/%s/;download' % (id, file)
+            # ressource => Tracker
+            return value 
         value = getattr(item, column)
         if value is None:
             return None
@@ -417,15 +440,7 @@ class Tracker_View(BrowseForm):
         # Mtime
         if column == 'mtime':
             return format_datetime(value)
-        """
-        # Last Attachement
-        if column == 'last_attachement':
             #comments = context.get_form_values('comments') or []
-            from pprint import pprint
-            pprint("Last_attachement")
-            #return comments
-            return None
-        """
         # Tables
         table = resource.get_resource(column).handler
         table_record = table.get_record(value)
@@ -440,8 +455,8 @@ class Tracker_View(BrowseForm):
     def get_table_columns(self, resource, context):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
-        # Insert the last atachement title in the table
-        table_columns.insert(2, ('last_attachement', 'Last Attach.'))
+        # Insert the last attachement row's title in the table
+        table_columns.insert(2, ('last-attachement', 'Last Attach.'))
         #from pprint import pprint
         #pprint("==table_columns==")
         #pprint(table_columns)
@@ -534,6 +549,11 @@ class Tracker_View(BrowseForm):
                         continue
 
                 value = self.get_item_value(resource, context, item, column)
+                """
+                from pprint import pprint
+                pprint("==value==")
+                pprint(value)
+                """
                 column_ns = {
                     'is_checkbox': False,
                     'is_icon': False,
@@ -552,7 +572,7 @@ class Tracker_View(BrowseForm):
                     column_ns['value'] = value
                     column_ns['checked'] = checked
                 # Type: icon
-                elif column == 'icon':
+                elif column == 'icon' or column == 'last-attachement':
                     column_ns['is_icon'] = True
                     column_ns['src'] = value
                 # Type: normal

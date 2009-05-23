@@ -402,7 +402,7 @@ class Tracker_View(BrowseForm):
             file =''
             for record in issue.get_history_records():
                 file = record.get_value('file')
-            link = '<img src="%s/%s/;download" width="128" />' % (id, file)
+            #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
             #value = '%s/%s/;download' % (id, file)
             value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
             return value

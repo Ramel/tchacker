@@ -404,6 +404,7 @@ class Tracker_View(BrowseForm):
             i = 0 
             for record in issue.get_history_records():
                 file = record.get_value('file')
+                """
                 files = issue.get_names()
                 #if not file:
                 #    continue
@@ -427,9 +428,20 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
+                """
+                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
             return value
-
+        
         value = getattr(item, column)
+        
+        from pprint import pprint
+        pprint('==item==')
+        pprint(item)
+        pprint('==column==')
+        pprint(column)
+        pprint('==value==')
+        pprint(value)
+
         if value is None:
             return None
         if column == 'title':
@@ -574,7 +586,7 @@ class Tracker_View(BrowseForm):
                     column_ns['src'] = value
                 # Type: last-attachement
                 elif column == 'last-attachement':
-                    column_ns['is_thumb'] = True
+                    column_ns['is_icon'] = True
                     column_ns['src'] = value
                 # Type: normal
                 else:

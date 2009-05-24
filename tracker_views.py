@@ -40,6 +40,7 @@ from ikaaro import messages
 from ikaaro.views_new import NewInstance
 from ikaaro.views import BrowseForm, SearchForm as BaseSearchForm, ContextMenu
 from ikaaro.registry import get_resource_class
+from ikaaro.file import Image
 
 # Import from ikaaro.tracker
 from issue import Issue
@@ -400,11 +401,32 @@ class Tracker_View(BrowseForm):
             id = '%s' % getattr(item, 'id')
             issue = resource.get_resource(id)
             file =''
+            i = 0 
             for record in issue.get_history_records():
                 file = record.get_value('file')
-            #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
-            #value = '%s/%s/;download' % (id, file)
-            value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                files = issue.get_names()
+                #if not file:
+                #    continue
+                if file:
+                    joinedfile = issue._get_resource(files[i])
+                    is_image = isinstance(joinedfile, Image)
+                    from pprint import pprint
+                    pprint('==i==')
+                    pprint(i)
+                    pprint('==files==')
+                    pprint(files[i])
+                    #pprint('==file==')
+                    #pprint(file)
+                    pprint('==is_image==')
+                    pprint(is_image)
+                    if is_image:
+                        #is_thumb = True
+                        #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
+                        #value = '%s/%s/;download' % (id, file)
+                        value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, files[i])
+                    else:
+                        value = None
+                    i += 1
             return value
 
         value = getattr(item, column)
@@ -533,6 +555,7 @@ class Tracker_View(BrowseForm):
                     'is_icon': False,
                     'is_link': False,
                     'name': None,
+                    'is_thumb': False,
                 }
                 # Column's name
                 column_ns['name'] = column
@@ -545,9 +568,13 @@ class Tracker_View(BrowseForm):
                     column_ns['is_checkbox'] = True
                     column_ns['value'] = value
                     column_ns['checked'] = checked
-                # Type: icon or last-attachement
-                elif column == 'icon' or column == 'last-attachement':
+                # Type: icon
+                elif column == 'icon':
                     column_ns['is_icon'] = True
+                    column_ns['src'] = value
+                # Type: last-attachement
+                elif column == 'last-attachement':
+                    column_ns['is_thumb'] = True
                     column_ns['src'] = value
                 # Type: normal
                 else:

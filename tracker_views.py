@@ -393,7 +393,7 @@ class Tracker_View(BrowseForm):
         # Print the row content
         if column == 'id':
             id = item.name
-            return id, '%s/' % id
+            return id, '%s/;edit' % id
         
         # Last Attachement
         if column == 'last-attachement':
@@ -431,11 +431,11 @@ class Tracker_View(BrowseForm):
                         value = None
                     i += 1
                 """
-                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                lastattach = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')
                 #pprint(value)i
-            return value
+            return lastattach
         
         value = getattr(item, column)
         """ 
@@ -450,7 +450,7 @@ class Tracker_View(BrowseForm):
         if value is None:
             return None
         if column == 'title':
-            return value, '%s/' % item.name
+            return value, '%s/;edit' % item.name
         # Assigned to
         if column == 'assigned_to':
             users = resource.get_resource('/users')

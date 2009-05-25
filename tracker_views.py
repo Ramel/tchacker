@@ -459,8 +459,10 @@ class Tracker_View(BrowseForm):
         # Mtime
         if column == 'mtime':
             return format_datetime(value)
+        """
         if column == 'last-attachement':
             return is_thumb 
+        """
         # Tables
         table = resource.get_resource(column).handler
         table_record = table.get_record(value)

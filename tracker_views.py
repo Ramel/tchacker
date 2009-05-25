@@ -394,7 +394,7 @@ class Tracker_View(BrowseForm):
         if column == 'id':
             id = item.name
             return id, '%s/;edit' % id
-        """ 
+         
         # Last Attachement
         if column == 'last-attachement':
             # Get Tracker's id
@@ -404,6 +404,7 @@ class Tracker_View(BrowseForm):
             i = 0 
             for record in issue.get_history_records():
                 file = record.get_value('file')
+                """
                 from pprint import pprint
                 pprint('==file==')
                 files = issue.get_names()
@@ -429,13 +430,15 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
-                lastattach = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                    """
+                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')
                 #pprint(value)i
-            return lastattach
-        """ 
+            return value
+
         value = getattr(item, column)
+
         """ 
         from pprint import pprint
         pprint('==item==')

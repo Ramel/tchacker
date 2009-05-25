@@ -393,7 +393,7 @@ class Tracker_View(BrowseForm):
         # Print the row content
         if column == 'id':
             id = item.name
-            return id, '%s/;edit' % id
+            return id, '%s/' % id
         
         # Last Attachement
         if column == 'last-attachement':
@@ -450,7 +450,7 @@ class Tracker_View(BrowseForm):
         if value is None:
             return None
         if column == 'title':
-            return value, '%s/;edit' % item.name
+            return value, '%s/' % item.name
         # Assigned to
         if column == 'assigned_to':
             users = resource.get_resource('/users')

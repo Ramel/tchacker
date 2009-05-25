@@ -405,9 +405,11 @@ class Tracker_View(BrowseForm):
             for record in issue.get_history_records():
                 file = record.get_value('file')
                 """
+                from pprint import pprint
+                pprint('==file==')
                 files = issue.get_names()
-                #if not file:
-                #    continue
+                if not file:
+                    continue
                 if file:
                     joinedfile = issue._get_resource(files[i])
                     is_image = isinstance(joinedfile, Image)
@@ -421,7 +423,7 @@ class Tracker_View(BrowseForm):
                     pprint('==is_image==')
                     pprint(is_image)
                     if is_image:
-                        #is_thumb = True
+                        is_thumb = True
                         #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
                         #value = '%s/%s/;download' % (id, file)
                         value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, files[i])
@@ -430,10 +432,13 @@ class Tracker_View(BrowseForm):
                     i += 1
                 """
                 value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                #from pprint import pprint
+                #pprint('==value-thumb_lastattach==')
+                #pprint(value)i
             return value
         
         value = getattr(item, column)
-        
+        """ 
         from pprint import pprint
         pprint('==item==')
         pprint(item)
@@ -441,7 +446,7 @@ class Tracker_View(BrowseForm):
         pprint(column)
         pprint('==value==')
         pprint(value)
-
+        """
         if value is None:
             return None
         if column == 'title':
@@ -456,7 +461,8 @@ class Tracker_View(BrowseForm):
         # Mtime
         if column == 'mtime':
             return format_datetime(value)
-            #comments = context.get_form_values('comments') or []
+        if column == 'last-attachement':
+            return is_thumb 
         # Tables
         table = resource.get_resource(column).handler
         table_record = table.get_record(value)

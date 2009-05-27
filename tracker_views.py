@@ -404,7 +404,6 @@ class Tracker_View(BrowseForm):
             i = 0 
             for record in issue.get_history_records():
                 file = record.get_value('file')
-                """
                 from pprint import pprint
                 pprint('==file==')
                 files = issue.get_names()
@@ -430,8 +429,7 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
-                    """
-                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')
                 #pprint(value)i
@@ -1066,7 +1064,7 @@ class Tracker_ChangeSeveralBugs(Tracker_View):
         else:
             user_title = user.get_title()
         template = MSG(u'--- Comment from: $user ---\n\n$comment\n\n$issues')
-        tracker_title = resource.get_property('title') or 'Tracker Issue'
+        tracker_title = resource.get_property('title') or 'Tchack Tracker Issue'
         subject = u'[%s]' % tracker_title
         for user_id in users_issues:
             user_issues = [

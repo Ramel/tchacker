@@ -64,10 +64,10 @@ class History(Table):
 
 class Issue(Folder):
 
-    class_id = 'issue'
+    class_id = 'tchack_issue'
     class_version = '20071216'
-    class_title = MSG(u'Issue')
-    class_description = MSG(u'Issue')
+    class_title = MSG(u'Tchack Issue')
+    class_description = MSG(u'Tchack Issue')
     class_views = ['edit', 'edit_resources', 'browse_content', 'history']
 
 
@@ -252,10 +252,10 @@ class Issue(Folder):
         if user.name in to_addrs:
             to_addrs.remove(user.name)
         # Notify / Subject
-        tracker_title = self.parent.get_property('title') or 'Tracker Issue'
+        tracker_title = self.parent.get_property('title') or 'Tchack Tracker Issue'
         subject = '[%s #%s] %s' % (tracker_title, self.name, title)
         # Notify / Body
-        if context.resource.class_id == 'tracker':
+        if context.resource.class_id == 'tchack_tracker':
             uri = context.uri.resolve('%s/;edit' % self.name)
         else:
             uri = context.uri.resolve(';edit')

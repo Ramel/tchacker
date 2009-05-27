@@ -64,7 +64,7 @@ class History(Table):
 
 class Issue(Folder):
 
-    class_id = 'tchack_issue'
+    class_id = 'issue'
     class_version = '20071216'
     class_title = MSG(u'Tchack Issue')
     class_description = MSG(u'Tchack Issue')
@@ -105,7 +105,7 @@ class Issue(Folder):
 
     def get_files_to_archive(self, content=False):
         files = Folder.get_files_to_archive(self, content)
-        history = get_uri_path(self.handler.get_handler('.history').uri)
+        history = get_uri_path(self.get_history().uri)
         files.append(history)
         return files
 
@@ -255,7 +255,7 @@ class Issue(Folder):
         tracker_title = self.parent.get_property('title') or 'Tchack Tracker Issue'
         subject = '[%s #%s] %s' % (tracker_title, self.name, title)
         # Notify / Body
-        if context.resource.class_id == 'tchack_tracker':
+        if context.resource.class_id == 'tracker':
             uri = context.uri.resolve('%s/;edit' % self.name)
         else:
             uri = context.uri.resolve(';edit')
@@ -386,9 +386,6 @@ class Issue(Folder):
             if comment:
                 return comment
             i -= 1
-        from pprint import pprint
-        pprint('==i==')
-        pprint(i)
         return ''
 
 

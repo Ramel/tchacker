@@ -51,7 +51,7 @@ class StoredSearch(Text):
 
     class_id = 'stored_search'
     class_version = '20071215'
-    class_title = MSG(u'Stored Search')
+    class_title = MSG(u'Tchack Stored Search')
     class_handler = StoredSearchFile
 
 

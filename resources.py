@@ -193,7 +193,7 @@ class Resources(Table, CalendarBase):
 
     class_id = 'tracker_calendar'
     class_version = '20071216'
-    class_title = MSG(u'Resources')
+    class_title = MSG(u'Tchack Resources')
     class_description = MSG(u'Resources assigned to issues')
     class_handler = BaseResources
 

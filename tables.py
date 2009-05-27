@@ -28,9 +28,10 @@ from itools.web import ERROR, INFO
 
 # Import from ikaaro
 from ikaaro.forms import title_widget, BooleanCheckBox, SelectWidget
+from ikaaro.forms import ReadOnlyWidget
 from ikaaro.registry import register_resource_class
 from ikaaro.table import OrderedTable, OrderedTableFile
-from ikaaro.table_views import OrderedTable_View
+from ikaaro.table_views import OrderedTable_View, Table_EditRecord
 
 
 
@@ -107,6 +108,14 @@ class SelectTable_View(OrderedTable_View):
         return items[start:start+size]
 
 
+class SelectTable_EditRecord(Table_EditRecord):
+
+    def get_widgets(self, resource, context):
+        widgets = Table_EditRecord.get_widgets(self, resource, context)
+        return [ widget if widget.name != 'product' else
+                 ReadOnlyWidget('product', title=MSG(u'Product'))
+                 for widget in widgets ]
+
 
 ###########################################################################
 # Resources
@@ -120,7 +129,7 @@ class Tracker_TableHandler(OrderedTableFile):
 class Tracker_TableResource(OrderedTable):
 
     class_id = 'tracker_select_table'
-    class_title = MSG(u'Select Table')
+    class_title = MSG(u'Tchack Select Table')
     class_handler = Tracker_TableHandler
 
     form = [title_widget]
@@ -154,7 +163,8 @@ class Tracker_TableResource(OrderedTable):
 
 
     view = SelectTable_View()
-
+    edit_record = SelectTable_EditRecord()
+    
 
     def del_record_action(self, context):
         # Check input

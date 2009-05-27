@@ -48,6 +48,7 @@ from datatypes import get_issue_fields, TrackerList, ProductInfoList
 from datatypes import UsersList
 from stored import StoredSearchFile, StoredSearch
 
+from    pprint  import    pprint
 
 columns = [
     ('id', MSG(u'Id')),
@@ -112,6 +113,7 @@ class StoreSearchMenu(ContextMenu):
         fields = []
         for name, type in StoredSearchFile.schema.iteritems():
             value = get(name)
+            
             if isinstance(value, list):
                 for x in value:
                     fields.append({'name': name, 'value': type.encode(x)})
@@ -157,7 +159,7 @@ class StoredSearchesMenu(ContextMenu):
             # Namespace
             items.append({'title': title,
                           'href': '%s?search_name=%s' % (base, item.name),
-                          'class': 'nav_active' if (item.name == search_name)
+                          'class': 'nav-active' if (item.name == search_name)
                                                 else None})
         items.sort(lambda x, y: cmp(x['title'], y['title']))
 
@@ -292,16 +294,42 @@ class Tracker_View(BrowseForm):
     # Content
     table_template = '/ui/tchacker/browse_table.xml'
 
+
     def get_query_schema(self):
         return merge_dicts(BrowseForm.get_query_schema(self),
                            self.tracker_schema)
 
 
+    """
+    def get_title(self, context):
+        search_name = context.query['search_name']
+        if search_name:
+            search = context.resource.get_resource(search_name, soft=True)
+            if search:
+                search = search.get_title()
+                template = MSG(u'{title} - {search}')
+                title = self.title.gettext()
+                return template.gettext(title=title, search=search)
+
+        return self.title    
+    """
+    
+    
     def GET(self, resource, context):
         # Check stored search
         search_name = context.query['search_name']
+        """
+        from pprint import pprint
+        pprint('==search_name==')
+        pprint(search_name)
+        """
         if search_name:
             search = resource.get_resource(search_name, soft=True)
+            """
+            from pprint import pprint
+            pprint('==search==')
+            pprint(search)
+            """
             if search is None:
                 msg = MSG(u'Unknown stored search "{sname}".')
                 goto = ';search'
@@ -328,11 +356,17 @@ class Tracker_View(BrowseForm):
         # Keep the search_parameters, clean different actions
         schema = self.get_query_schema()
         namespace['search_parameters'] = encode_query(query, schema)
-
+        """
+        from pprint import pprint
+        pprint('==namespace==')
+        pprint(namespace)
+        """
         return namespace
 
 
-    def get_items(self, resource, context):
+    def get_items(self, resource, context):                                                                                                
+        pprint('==resource.get_search_results(context)==')
+        pprint(resource.get_search_results(context))   
         return resource.get_search_results(context)
 
 
@@ -404,8 +438,8 @@ class Tracker_View(BrowseForm):
             i = 0 
             for record in issue.get_history_records():
                 file = record.get_value('file')
-                from pprint import pprint
-                pprint('==file==')
+                # Need to check if the file is an Image
+                """
                 files = issue.get_names()
                 if not file:
                     continue
@@ -429,7 +463,8 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
-                #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                """
+                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')
                 #pprint(value)i
@@ -479,9 +514,9 @@ class Tracker_View(BrowseForm):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
         # Insert the last attachement row's title in the table
-        table_columns.insert(2, ('last-attachement', 'Last Attach.'))
+        #table_columns.insert(2, ('last-attachement', 'Last Attach.'))
         return table_columns
-    
+
     #######################################################################
     # Table head
     def get_table_head(self, resource, context, items, actions=None):
@@ -553,6 +588,11 @@ class Tracker_View(BrowseForm):
 
         # (3) Table Body: rows
         columns = self.get_table_columns(resource, context)
+        
+        from pprint import pprint
+        pprint("==items==")
+        pprint(items)
+        
         rows = []
         for item in items:
             row_columns = []
@@ -564,11 +604,7 @@ class Tracker_View(BrowseForm):
                         continue
 
                 value = self.get_item_value(resource, context, item, column)
-                """
-                from pprint import pprint
-                pprint("==value==")
-                pprint(value)
-                """
+
                 column_ns = {
                     'is_checkbox': False,
                     'is_icon': False,
@@ -1063,7 +1099,7 @@ class Tracker_ChangeSeveralBugs(Tracker_View):
             user_title = MSG(u'ANONYMOUS').gettext()
         else:
             user_title = user.get_title()
-        template = MSG(u'--- Comment from: $user ---\n\n$comment\n\n$issues')
+        template = MSG(u'--- Comment from: {user} ---\n\n{comment}\n\n{issues}')
         tracker_title = resource.get_property('title') or 'Tchack Tracker Issue'
         subject = u'[%s]' % tracker_title
         for user_id in users_issues:

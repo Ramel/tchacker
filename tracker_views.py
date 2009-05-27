@@ -547,7 +547,7 @@ class Tracker_View(BrowseForm):
                 if name == sort_by:
                     col_reverse = (not reverse)
                     order = 'up' if reverse else 'down'
-                    else:
+                else:
                     col_reverse = False
                     order = 'none'
                 kw['reverse'] = Boolean.encode(col_reverse)

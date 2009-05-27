@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tchacker 0.1\n"
-"POT-Creation-Date: 2009-05-27 15:05+CET\n"
+"POT-Creation-Date: 2009-05-27 16:05+CET\n"
 "PO-Revision-Date: 2009-04-22 13:58+2\n"
 "Last-Translator: Armel FORTUN <armel@maar.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../tracker_views.py:1080
+#: ../tracker_views.py:1078
 msgid ""
 "\n"
 "\n"
@@ -24,11 +24,11 @@ msgid ""
 "%s"
 msgstr ""
 
-#: ../tracker_views.py:968
+#: ../tracker_views.py:966
 msgid "#%s"
 msgstr ""
 
-#: ../tracker_views.py:1107
+#: ../tracker_views.py:1105
 msgid "#%s - %s - %s"
 msgstr ""
 
@@ -201,7 +201,7 @@ msgctxt "table cell"
 msgid "(HH:MM)"
 msgstr ""
 
-#: ../issue_views.py:375
+#: ../issue_views.py:384
 msgid ", "
 msgstr ""
 
@@ -209,7 +209,7 @@ msgstr ""
 msgid "-"
 msgstr ""
 
-#: ../tracker_views.py:1102
+#: ../tracker_views.py:1100
 msgid ""
 "--- Comment from: {user} ---\n"
 "\n"
@@ -269,7 +269,7 @@ msgctxt "link"
 msgid "<g id='5'>${column/title}</g>  <g id='6'> ${column/title}</g>"
 msgstr ""
 
-#: ../issue.py:239 ../tracker_views.py:1099
+#: ../issue.py:239 ../tracker_views.py:1097
 msgid "ANONYMOUS"
 msgstr ""
 
@@ -372,7 +372,7 @@ msgctxt "label"
 msgid "CC:"
 msgstr ""
 
-#: ../tracker_views.py:181 ../tracker_views.py:990
+#: ../tracker_views.py:181 ../tracker_views.py:988
 msgid "Change Several Issues"
 msgstr ""
 
@@ -445,11 +445,11 @@ msgctxt "button"
 msgid "Edit Issues"
 msgstr ""
 
-#: ../tracker_views.py:1007
+#: ../tracker_views.py:1005
 msgid "Edit issues"
 msgstr ""
 
-#: ../issue_views.py:521
+#: ../issue_views.py:530
 msgid "Edit resources"
 msgstr ""
 
@@ -476,7 +476,7 @@ msgctxt "button"
 msgid "Export"
 msgstr ""
 
-#: ../tracker_views.py:185 ../tracker_views.py:880
+#: ../tracker_views.py:185 ../tracker_views.py:878
 msgid "Export to CSV"
 msgstr ""
 
@@ -520,7 +520,7 @@ msgstr ""
 msgid "High Priority"
 msgstr ""
 
-#: ../issue_views.py:252
+#: ../issue_views.py:261
 msgid "History"
 msgstr ""
 
@@ -541,7 +541,7 @@ msgctxt "heading"
 msgid "Issue #${number}"
 msgstr ""
 
-#: ../tracker_views.py:832 ../tracker_views.py:836
+#: ../tracker_views.py:830 ../tracker_views.py:834
 msgid "Issue not found."
 msgstr ""
 
@@ -557,7 +557,7 @@ msgstr ""
 msgid "Medium"
 msgstr ""
 
-#: ../tracker_views.py:1079
+#: ../tracker_views.py:1077
 msgid "Modifications:"
 msgstr ""
 
@@ -608,7 +608,7 @@ msgstr ""
 msgid "New issue added."
 msgstr ""
 
-#: ../tracker_views.py:900 ../tracker_views.py:1041
+#: ../tracker_views.py:898 ../tracker_views.py:1039
 msgid "No data to export."
 msgstr ""
 
@@ -717,7 +717,7 @@ msgctxt "button"
 msgid "Save Changes"
 msgstr ""
 
-#: ../tracker_views.py:660
+#: ../tracker_views.py:658
 msgid "Search"
 msgstr ""
 
@@ -797,19 +797,19 @@ msgctxt "label"
 msgid "Text (search within the title and all comments)"
 msgstr ""
 
-#: ../tracker_views.py:775
+#: ../tracker_views.py:773
 msgid "The search has been modified."
 msgstr ""
 
-#: ../tracker_views.py:817
+#: ../tracker_views.py:815
 msgid "The search has been removed."
 msgstr ""
 
-#: ../tracker_views.py:782
+#: ../tracker_views.py:780
 msgid "The search has been stored."
 msgstr ""
 
-#: ../tracker_views.py:786
+#: ../tracker_views.py:784
 msgid "The search title has been changed."
 msgstr ""
 
@@ -817,11 +817,11 @@ msgstr ""
 msgid "The user {title} did some changes."
 msgstr ""
 
-#: ../issue_views.py:393
+#: ../issue_views.py:402
 msgid "There are {n} assignments."
 msgstr ""
 
-#: ../issue_views.py:392
+#: ../issue_views.py:401
 msgid "There is 1 assignment."
 msgstr ""
 
@@ -871,7 +871,7 @@ msgctxt "label"
 msgid "Type:<g id='20'> (<g id='21'>Edit</g>)</g>"
 msgstr ""
 
-#: ../tracker_views.py:334
+#: ../tracker_views.py:332
 msgid "Unknown stored search \"{sname}\"."
 msgstr ""
 
@@ -908,7 +908,7 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-#: ../tracker_views.py:1104
+#: ../tracker_views.py:1102
 msgid "[%s]"
 msgstr ""
 

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-05-19 18:05+CET\n"
+"POT-Creation-Date: 2009-05-27 15:05+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,36 +15,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../tracker_views.py:980
+#: ../tracker_views.py:1080
 msgid "\n\n%s\n\n%s"
 msgstr ""
 
-#: ../tracker_views.py:868
+#: ../tracker_views.py:968
 msgid "#%s"
 msgstr ""
 
-#: ../tracker_views.py:1007
+#: ../tracker_views.py:1107
 msgid "#%s - %s - %s"
 msgstr ""
 
-#: ../issue_views.py:374
+#: ../issue_views.py:375
 msgid ", "
 msgstr ""
 
-#: ../issue.py:274
+#: ../issue.py:278
 msgid "-"
 msgstr ""
 
-#: ../tracker_views.py:1002
-msgid "--- Comment from: $user ---\n\n$comment\n\n$issues"
+#: ../tracker_views.py:1102
+msgid "--- Comment from: {user} ---\n\n{comment}\n\n{issues}"
 msgstr ""
 
-#: ../issue.py:235
-#: ../tracker_views.py:999
+#: ../issue.py:239
+#: ../tracker_views.py:1099
 msgid "ANONYMOUS"
 msgstr ""
 
-#: ../tracker_views.py:227
+#: ../tracker_views.py:229
 msgid "Add"
 msgstr ""
 
@@ -52,12 +52,12 @@ msgstr ""
 msgid "Add a new issue"
 msgstr ""
 
-#: ../tracker_views.py:170
+#: ../tracker_views.py:172
 msgid "Advanced"
 msgstr ""
 
-#: ../issue.py:344
-#: ../tracker_views.py:60
+#: ../issue.py:348
+#: ../tracker_views.py:62
 msgid "Assigned To"
 msgstr ""
 
@@ -70,12 +70,12 @@ msgstr ""
 msgid "B&W Set"
 msgstr ""
 
-#: ../issue.py:361
+#: ../issue.py:365
 msgid "CC"
 msgstr ""
 
-#: ../tracker_views.py:179
-#: ../tracker_views.py:890
+#: ../tracker_views.py:181
+#: ../tracker_views.py:990
 msgid "Change Several Issues"
 msgstr ""
 
@@ -83,7 +83,7 @@ msgstr ""
 msgid "Color Set"
 msgstr ""
 
-#: ../issue.py:273
+#: ../issue.py:277
 #: ../resources.py:185
 msgid "Comment"
 msgstr ""
@@ -96,15 +96,15 @@ msgstr ""
 msgid "Edit Issue"
 msgstr ""
 
-#: ../tracker_views.py:907
+#: ../tracker_views.py:1007
 msgid "Edit issues"
 msgstr ""
 
-#: ../issue_views.py:520
+#: ../issue_views.py:521
 msgid "Edit resources"
 msgstr ""
 
-#: ../tracker_views.py:177
+#: ../tracker_views.py:179
 msgid "Edit this search"
 msgstr ""
 
@@ -112,20 +112,20 @@ msgstr ""
 msgid "End"
 msgstr ""
 
-#: ../tracker_views.py:183
-#: ../tracker_views.py:780
+#: ../tracker_views.py:185
+#: ../tracker_views.py:880
 msgid "Export to CSV"
 msgstr ""
 
-#: ../tracker_views.py:181
+#: ../tracker_views.py:183
 msgid "Export to Text"
 msgstr ""
 
-#: ../tracker_views.py:198
+#: ../tracker_views.py:200
 msgid "Give the title of one Product"
 msgstr ""
 
-#: ../tracker_views.py:71
+#: ../tracker_views.py:72
 msgid "Go To Issue"
 msgstr ""
 
@@ -137,11 +137,11 @@ msgstr ""
 msgid "High Priority"
 msgstr ""
 
-#: ../issue_views.py:251
+#: ../issue_views.py:252
 msgid "History"
 msgstr ""
 
-#: ../tracker_views.py:52
+#: ../tracker_views.py:54
 msgid "Id"
 msgstr ""
 
@@ -149,18 +149,16 @@ msgstr ""
 msgid "In Progress"
 msgstr ""
 
-#: ../issue.py:69
-#: ../issue.py:70
 #: ../resources.py:186
 msgid "Issue"
 msgstr ""
 
-#: ../tracker_views.py:732
-#: ../tracker_views.py:736
+#: ../tracker_views.py:832
+#: ../tracker_views.py:836
 msgid "Issue not found."
 msgstr ""
 
-#: ../tables.py:56
+#: ../tables.py:57
 msgid "Issues"
 msgstr ""
 
@@ -172,33 +170,33 @@ msgstr ""
 msgid "Medium"
 msgstr ""
 
-#: ../tracker_views.py:979
+#: ../tracker_views.py:1079
 msgid "Modifications:"
 msgstr ""
 
-#: ../tracker_views.py:62
+#: ../tracker_views.py:63
 msgid "Modified"
 msgstr ""
 
-#: ../issue.py:312
-#: ../tracker_views.py:55
+#: ../issue.py:316
+#: ../tracker_views.py:57
 msgid "Module"
 msgstr ""
 
-#: ../issue.py:265
+#: ../issue.py:269
 msgid "New Attachment: {filename}"
 msgstr ""
 
-#: ../tracker_views.py:253
+#: ../tracker_views.py:255
 msgid "New issue added."
 msgstr ""
 
-#: ../tracker_views.py:800
-#: ../tracker_views.py:941
+#: ../tracker_views.py:900
+#: ../tracker_views.py:1041
 msgid "No data to export."
 msgstr ""
 
-#: ../tables.py:163
+#: ../tables.py:173
 msgid "No resource selected."
 msgstr ""
 
@@ -206,14 +204,15 @@ msgstr ""
 msgid "Non assigned"
 msgstr ""
 
-#: ../issue.py:315
-#: ../tracker_views.py:59
+#: ../issue.py:319
+#: ../tracker_views.py:61
 msgid "Priority"
 msgstr ""
 
-#: ../tracker_views.py:54
-#: ../tables.py:207
-#: ../tables.py:234
+#: ../tracker_views.py:56
+#: ../tables.py:116
+#: ../tables.py:217
+#: ../tables.py:244
 msgid "Product"
 msgstr ""
 
@@ -221,11 +220,11 @@ msgstr ""
 msgid "Props"
 msgstr ""
 
-#: ../tables.py:236
+#: ../tables.py:246
 msgid "Released"
 msgstr ""
 
-#: ../tracker_views.py:86
+#: ../tracker_views.py:87
 msgid "Remember this search"
 msgstr ""
 
@@ -233,8 +232,7 @@ msgstr ""
 msgid "Resource"
 msgstr ""
 
-#: ../tracker_views.py:185
-#: ../resources.py:196
+#: ../tracker_views.py:187
 msgid "Resources"
 msgstr ""
 
@@ -242,11 +240,11 @@ msgstr ""
 msgid "Resources assigned to issues"
 msgstr ""
 
-#: ../tables.py:181
+#: ../tables.py:191
 msgid "Resources removed: $resources."
 msgstr ""
 
-#: ../tracker_views.py:560
+#: ../tracker_views.py:660
 msgid "Search"
 msgstr ""
 
@@ -254,61 +252,70 @@ msgstr ""
 msgid "Search for issues"
 msgstr ""
 
-#: ../tables.py:123
-msgid "Select Table"
-msgstr ""
-
 #: ../resources.py:183
 msgid "Start YYYY-MM-DD HH:MM"
 msgstr ""
 
-#: ../issue.py:316
-#: ../tracker_views.py:58
+#: ../issue.py:320
+#: ../tracker_views.py:60
 msgid "State"
 msgstr ""
 
-#: ../stored.py:54
-msgid "Stored Search"
+#: ../tracker_views.py:135
+msgid "Stored Searches"
 msgstr ""
 
-#: ../tracker_views.py:133
-msgid "Stored Searches"
+#: ../issue.py:69
+#: ../issue.py:70
+msgid "Tchack Issue"
 msgstr ""
 
 #: ../tracker.py:71
 msgid "Tchack Issue Tracker"
 msgstr ""
 
-#: ../tracker_views.py:675
+#: ../resources.py:196
+msgid "Tchack Resources"
+msgstr ""
+
+#: ../tables.py:132
+msgid "Tchack Select Table"
+msgstr ""
+
+#: ../stored.py:54
+msgid "Tchack Stored Search"
+msgstr ""
+
+#: ../tracker_views.py:775
 msgid "The search has been modified."
 msgstr ""
 
-#: ../tracker_views.py:717
+#: ../tracker_views.py:817
 msgid "The search has been removed."
 msgstr ""
 
-#: ../tracker_views.py:682
+#: ../tracker_views.py:782
 msgid "The search has been stored."
 msgstr ""
 
-#: ../tracker_views.py:686
+#: ../tracker_views.py:786
 msgid "The search title has been changed."
 msgstr ""
 
-#: ../issue.py:260
+#: ../issue.py:264
 msgid "The user {title} did some changes."
 msgstr ""
 
-#: ../issue_views.py:392
+#: ../issue_views.py:393
 msgid "There are {n} assignments."
 msgstr ""
 
-#: ../issue_views.py:391
+#: ../issue_views.py:392
 msgid "There is 1 assignment."
 msgstr ""
 
-#: ../issue.py:306
-#: ../tracker_views.py:53
+#: ../issue.py:310
+#: ../tracker_views.py:55
 msgid "Title"
 msgstr ""
 
@@ -320,12 +327,12 @@ msgstr ""
 msgid "Tracker"
 msgstr ""
 
-#: ../issue.py:314
-#: ../tracker_views.py:57
+#: ../issue.py:318
+#: ../tracker_views.py:59
 msgid "Type"
 msgstr ""
 
-#: ../tracker_views.py:306
+#: ../tracker_views.py:334
 msgid "Unknown stored search \"{sname}\"."
 msgstr ""
 
@@ -334,40 +341,40 @@ msgstr ""
 msgid "Validated"
 msgstr ""
 
-#: ../issue.py:313
-#: ../tracker_views.py:56
+#: ../issue.py:317
+#: ../tracker_views.py:58
 msgid "Version"
 msgstr ""
 
-#: ../tracker_views.py:262
+#: ../tracker_views.py:264
 msgid "View"
 msgstr ""
 
-#: ../tracker_views.py:1004
+#: ../tracker_views.py:1104
 msgid "[%s]"
 msgstr ""
 
-#: ../issue.py:297
+#: ../issue.py:301
 msgid "[empty]"
 msgstr ""
 
-#: ../issue.py:296
+#: ../issue.py:300
 msgid "{field}: {old_value} to {new_value}"
 msgstr ""
 
-#: ../issue.py:300
+#: ../issue.py:304
 msgid "{field}: {old_value}{new_value}"
 msgstr ""
 
-#: ../tracker_views.py:154
+#: ../tracker_views.py:156
 msgid "{search_title} ({issues_nb})"
 msgstr ""
 
-#: ../issue.py:275
+#: ../issue.py:279
 msgid "{title}\n{separator}\n\n{comment}\n"
 msgstr ""
 
-#: ../ui/browse_table.xml.en:45
+#: ../ui/browse_table.xml.en:46
 msgctxt "button"
 msgid "${action/value}"
 msgstr ""
@@ -740,7 +747,7 @@ msgctxt "legend"
 msgid "select the columns to export"
 msgstr ""
 
-#: ../ui/browse_table.xml.en:37
+#: ../ui/browse_table.xml.en:38
 msgctxt "link"
 msgid "${column/value}"
 msgstr ""

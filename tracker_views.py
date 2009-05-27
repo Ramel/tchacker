@@ -48,7 +48,7 @@ from datatypes import get_issue_fields, TrackerList, ProductInfoList
 from datatypes import UsersList
 from stored import StoredSearchFile, StoredSearch
 
-from    pprint  import    pprint
+from pprint import pprint
 
 columns = [
     ('id', MSG(u'Id')),
@@ -319,14 +319,12 @@ class Tracker_View(BrowseForm):
         # Check stored search
         search_name = context.query['search_name']
         """
-        from pprint import pprint
         pprint('==search_name==')
         pprint(search_name)
         """
         if search_name:
             search = resource.get_resource(search_name, soft=True)
             """
-            from pprint import pprint
             pprint('==search==')
             pprint(search)
             """
@@ -357,16 +355,17 @@ class Tracker_View(BrowseForm):
         schema = self.get_query_schema()
         namespace['search_parameters'] = encode_query(query, schema)
         """
-        from pprint import pprint
         pprint('==namespace==')
         pprint(namespace)
         """
         return namespace
 
 
-    def get_items(self, resource, context):                                                                                                
+    def get_items(self, resource, context):
+        """
         pprint('==resource.get_search_results(context)==')
         pprint(resource.get_search_results(context))   
+        """
         return resource.get_search_results(context)
 
 
@@ -439,14 +438,13 @@ class Tracker_View(BrowseForm):
             for record in issue.get_history_records():
                 file = record.get_value('file')
                 # Need to check if the file is an Image
-                """
                 files = issue.get_names()
                 if not file:
                     continue
                 if file:
                     joinedfile = issue._get_resource(files[i])
                     is_image = isinstance(joinedfile, Image)
-                    from pprint import pprint
+                    """
                     pprint('==i==')
                     pprint(i)
                     pprint('==files==')
@@ -455,6 +453,7 @@ class Tracker_View(BrowseForm):
                     #pprint(file)
                     pprint('==is_image==')
                     pprint(is_image)
+                    """    
                     if is_image:
                         is_thumb = True
                         #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
@@ -463,8 +462,7 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
-                """
-                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')
                 #pprint(value)i
@@ -514,7 +512,7 @@ class Tracker_View(BrowseForm):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
         # Insert the last attachement row's title in the table
-        #table_columns.insert(2, ('last-attachement', 'Last Attach.'))
+        table_columns.insert(2, ('last-attachement', 'Last Attach.'))
         return table_columns
 
     #######################################################################
@@ -549,7 +547,7 @@ class Tracker_View(BrowseForm):
                 if name == sort_by:
                     col_reverse = (not reverse)
                     order = 'up' if reverse else 'down'
-                else:
+                    else:
                     col_reverse = False
                     order = 'none'
                 kw['reverse'] = Boolean.encode(col_reverse)
@@ -588,11 +586,11 @@ class Tracker_View(BrowseForm):
 
         # (3) Table Body: rows
         columns = self.get_table_columns(resource, context)
-        
+        """
         from pprint import pprint
         pprint("==items==")
         pprint(items)
-        
+        """
         rows = []
         for item in items:
             row_columns = []

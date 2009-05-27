@@ -170,6 +170,8 @@ class Issue_Edit(STLForm):
         for record in resource.get_history_records():
             comment = record.comment
             file = record.file
+            thumb_low = ''
+            #thumb_high = ''
             if not comment and not file:
                 continue
             rdatetime = record.datetime
@@ -192,6 +194,10 @@ class Issue_Edit(STLForm):
                 joinedfile = resource._get_resource(files[j])
                 # If file is an image return True
                 is_image = isinstance(joinedfile, Image)
+                if is_image is True:
+                    thumb_low = ';thumb?width=500&size=500&height=500'
+                    #Need to adapt thickbox to accept ;thumb
+                    #thumb_high = ';thumb?width=1000&size=1000&height=1000'
                 j += 1
             if comment and not file:
                 is_image = False
@@ -204,7 +210,10 @@ class Issue_Edit(STLForm):
                 'datetime': format_datetime(rdatetime),
                 'comment': indent(comment),
                 'file': file,
-                'is_image': is_image})
+                'is_image': is_image,
+                'thumb_low': thumb_low,
+                #'thumb_high': thumb_high,   
+                })
         comments.reverse()
         namespace['comments'] = comments
 

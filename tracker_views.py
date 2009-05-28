@@ -439,6 +439,7 @@ class Tracker_View(BrowseForm):
                 file = record.get_value('file')
                 # Need to check if the file is an Image
                 files = issue.get_names()
+
                 if not file:
                     continue
                 if file:
@@ -449,11 +450,10 @@ class Tracker_View(BrowseForm):
                     pprint(i)
                     pprint('==files==')
                     pprint(files[i])
-                    #pprint('==file==')
-                    #pprint(file)
+
                     pprint('==is_image==')
                     pprint(is_image)
-                    """    
+                    """
                     if is_image:
                         is_thumb = True
                         #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
@@ -462,6 +462,7 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
+
                 #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')

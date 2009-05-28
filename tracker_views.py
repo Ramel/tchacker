@@ -144,22 +144,9 @@ class StoredSearchesMenu(ContextMenu):
         
         # Namespace
         search_name = context.get_query_value('search_name')
-        """
-        pprint('==search_name==')
-        pprint(search_name)
-        """
         base = '%s/;view' % context.get_link(resource)
-        """
-        pprint('==base==')
-        pprint(base)
-        """
         items = []
         for item in resource.search_resources(cls=Tchack_StoredSearch):
-            """
-            pprint('==item==')
-            pprint(item.get_values)
-            pprint(resource.get_search_query(item.get_values))
-            """
             # Make the title
             get_value = item.handler.get_value
             query = resource.get_search_query(get_value)
@@ -335,16 +322,8 @@ class Tracker_View(BrowseForm):
     def GET(self, resource, context):
         # Check stored search
         search_name = context.query['search_name']
-        """
-        pprint('==search_name==')
-        pprint(search_name)
-        """
         if search_name:
             search = resource.get_resource(search_name, soft=True)
-            """
-            pprint('==search==')
-            pprint(search)
-            """
             if search is None:
                 msg = MSG(u'Unknown stored search "{sname}".')
                 goto = ';search'
@@ -371,18 +350,12 @@ class Tracker_View(BrowseForm):
         # Keep the search_parameters, clean different actions
         schema = self.get_query_schema()
         namespace['search_parameters'] = encode_query(query, schema)
-        """
-        pprint('==namespace==')
-        pprint(namespace)
-        """
+
         return namespace
 
 
     def get_items(self, resource, context):
-        """
-        pprint('==resource.get_search_results(context)==')
-        pprint(resource.get_search_results(context))   
-        """
+
         return resource.get_search_results(context)
 
 
@@ -451,10 +424,10 @@ class Tracker_View(BrowseForm):
             id = '%s' % getattr(item, 'id')
             issue = resource.get_resource(id)
             file =''
-            i = 0 
+            i = 0
+            value = None
             for record in issue.get_history_records():
                 file = record.get_value('file')
-                """
                 # Need to check if the file is an Image
                 files = issue.get_names()
                 
@@ -481,8 +454,8 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
-                """
-                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+
+                #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')
                 #pprint(value)i

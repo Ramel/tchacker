@@ -138,19 +138,21 @@ class Tchack_Tracker(Folder):
             except ValueError:
                 continue
             ids.append(id)
-
+            
         if ids:
             ids.sort()
             return prefix + str(ids[-1] + 1)
-
+        
         return prefix + '0'
 
 
     def get_issues_query_terms(self):
+        # If the issue is not of Issue's class_type type for xapian
+        issue_type = 'tchack_issue'
         abspath = self.get_canonical_path()
         abspath = '%s/' % abspath
         return [StartQuery('abspath', abspath),
-                PhraseQuery('format', 'issue')]
+                PhraseQuery('format', issue_type)]
 
 
     def get_members_namespace(self, value, not_assigned=False):

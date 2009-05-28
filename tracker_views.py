@@ -137,16 +137,29 @@ class StoredSearchesMenu(ContextMenu):
     def get_items(self, resource, context):
         language = resource.get_content_language(context)
         root = context.root
-
+        
         # If called from a child
         if isinstance(resource, Tchack_Issue):
             resource = resource.parent
-
+        
         # Namespace
         search_name = context.get_query_value('search_name')
+        """
+        pprint('==search_name==')
+        pprint(search_name)
+        """
         base = '%s/;view' % context.get_link(resource)
+        """
+        pprint('==base==')
+        pprint(base)
+        """
         items = []
         for item in resource.search_resources(cls=Tchack_StoredSearch):
+            """
+            pprint('==item==')
+            pprint(item.get_values)
+            pprint(resource.get_search_query(item.get_values))
+            """
             # Make the title
             get_value = item.handler.get_value
             query = resource.get_search_query(get_value)
@@ -207,6 +220,10 @@ class Tracker_NewInstance(NewInstance):
         # Create the resource
         class_id = context.query['type']
         cls = get_resource_class(class_id)
+        """
+        pprint('==class_id==')
+        pprint(class_id)
+        """
         child = cls.make_resource(cls, resource, name)
         # The metadata
         metadata = child.metadata
@@ -437,23 +454,25 @@ class Tracker_View(BrowseForm):
             i = 0 
             for record in issue.get_history_records():
                 file = record.get_value('file')
+                """
                 # Need to check if the file is an Image
                 files = issue.get_names()
-
+                
                 if not file:
                     continue
                 if file:
                     joinedfile = issue._get_resource(files[i])
                     is_image = isinstance(joinedfile, Image)
-                    """
-                    pprint('==i==')
-                    pprint(i)
-                    pprint('==files==')
-                    pprint(files[i])
 
-                    pprint('==is_image==')
-                    pprint(is_image)
-                    """
+                    #pprint('==i==')
+                    #pprint(i)
+                    
+                    #pprint('==files==')
+                    #pprint(files[i])
+
+                    #pprint('==is_image==')
+                    #pprint(is_image)
+
                     if is_image:
                         is_thumb = True
                         #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
@@ -462,8 +481,8 @@ class Tracker_View(BrowseForm):
                     else:
                         value = None
                     i += 1
-
-                #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                """
+                value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
                 #from pprint import pprint
                 #pprint('==value-thumb_lastattach==')
                 #pprint(value)i
@@ -587,11 +606,7 @@ class Tracker_View(BrowseForm):
 
         # (3) Table Body: rows
         columns = self.get_table_columns(resource, context)
-        """
-        from pprint import pprint
-        pprint("==items==")
-        pprint(items)
-        """
+
         rows = []
         for item in items:
             row_columns = []
@@ -776,7 +791,7 @@ class Tracker_RememberSearch(BaseForm):
             else:
                 # Not found => so we make a new search resource
                 search_name = resource.get_new_id('s')
-                search = StoredSearch.make_resource(Tchack_StoredSearch, resource,
+                search = Tchack_StoredSearch.make_resource(Tchack_StoredSearch, resource,
                                                     search_name)
                 message = MSG(u'The search has been stored.')
         # Yes

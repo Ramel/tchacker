@@ -42,6 +42,7 @@ from ikaaro.utils import generate_name
 from issue_views import Issue_Edit, Issue_EditResources, Issue_History
 from issue_views import IssueTrackerMenu
 
+from ikaaro.tracker.issue import Issue
 
 class History(Table):
 
@@ -62,7 +63,7 @@ class History(Table):
 
 
 
-class Tchack_Issue(Folder):
+class Tchack_Issue(Issue):
 
     class_id = 'tchack_issue'
     class_version = '20071216'

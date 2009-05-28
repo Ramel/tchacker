@@ -64,9 +64,9 @@ default_tables = [
     ]
 
 
-class Tracker(Folder):
+class Tchack_Tracker(Folder):
 
-    class_id = 'tracker'
+    class_id = 'tchack_tracker'
     class_version = '20081214'
     class_title = MSG(u'Tchack Issue Tracker')
     class_description = MSG(u'To manage images, bugs and tasks')
@@ -356,4 +356,4 @@ class Tracker(Folder):
 ###########################################################################
 # Register
 ###########################################################################
-register_resource_class(Tracker)
+register_resource_class(Tchack_Tracker)

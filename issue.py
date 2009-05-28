@@ -62,9 +62,9 @@ class History(Table):
 
 
 
-class Issue(Folder):
+class Tchack_Issue(Folder):
 
-    class_id = 'issue'
+    class_id = 'tchack_issue'
     class_version = '20071216'
     class_title = MSG(u'Tchack Issue')
     class_description = MSG(u'Tchack Issue')
@@ -255,7 +255,7 @@ class Issue(Folder):
         tracker_title = self.parent.get_property('title') or 'Tchack Tracker Issue'
         subject = '[%s #%s] %s' % (tracker_title, self.name, title)
         # Notify / Body
-        if context.resource.class_id == 'tracker':
+        if context.resource.class_id == 'tchack_tracker':
             uri = context.uri.resolve('%s/;edit' % self.name)
         else:
             uri = context.uri.resolve(';edit')
@@ -425,7 +425,7 @@ class Issue(Folder):
 # Register
 ###########################################################################
 # The class
-register_resource_class(Issue)
+register_resource_class(Tchack_Issue)
 
 # The fields
 #for name in ['id', 'product', 'module', 'version', 'type', 'state',

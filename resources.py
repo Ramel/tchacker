@@ -189,7 +189,7 @@ class BaseResources(BaseTable):
 
 
 
-class Resources(Table, CalendarBase):
+class Tchack_Resources(Table, CalendarBase):
 
     class_id = 'tracker_calendar'
     class_version = '20071216'
@@ -244,4 +244,4 @@ class Resources(Table, CalendarBase):
 ###########################################################################
 # Register
 ###########################################################################
-register_resource_class(Resources)
+register_resource_class(Tchack_Resources)

@@ -23,9 +23,9 @@ from itools.core import get_version
 from ikaaro.registry import register_document_type
 from ikaaro.skins import register_skin
 
-from issue import Issue
-from resources import Resources
-from tracker import Tracker
+from issue import Tchack_Issue
+from resources import Tchack_Resources
+from tracker import Tchack_Tracker
 
 # The version
 __version__ = get_version()
@@ -35,4 +35,4 @@ path = get_abspath('ui')
 register_skin('tchacker', path)
 
 # Register document type
-register_document_type(Tracker)
+register_document_type(Tchack_Tracker)

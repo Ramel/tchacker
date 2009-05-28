@@ -47,7 +47,7 @@ class StoredSearchFile(ConfigFile):
         }
 
 
-class StoredSearch(Text):
+class Tchack_StoredSearch(Text):
 
     class_id = 'stored_search'
     class_version = '20071215'
@@ -68,4 +68,4 @@ class StoredSearch(Text):
 
 
 # Register
-register_resource_class(StoredSearch)
+register_resource_class(Tchack_StoredSearch)

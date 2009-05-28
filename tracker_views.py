@@ -43,10 +43,10 @@ from ikaaro.registry import get_resource_class
 from ikaaro.file import Image
 
 # Import from ikaaro.tracker
-from issue import Issue
+from issue import Tchack_Issue
 from datatypes import get_issue_fields, TrackerList, ProductInfoList
 from datatypes import UsersList
-from stored import StoredSearchFile, StoredSearch
+from stored import StoredSearchFile, Tchack_StoredSearch
 
 from pprint import pprint
 
@@ -73,7 +73,7 @@ class GoToIssueMenu(ContextMenu):
     template = '/ui/tchacker/menu_goto.xml'
 
     def get_namespace(self, resource, context):
-        path_to_tracker = '..' if isinstance(resource, Issue) else '.'
+        path_to_tracker = '..' if isinstance(resource, Tchack_Issue) else '.'
         return {
             'path_to_tracker': path_to_tracker,
             'title': self.title}
@@ -139,14 +139,14 @@ class StoredSearchesMenu(ContextMenu):
         root = context.root
 
         # If called from a child
-        if isinstance(resource, Issue):
+        if isinstance(resource, Tchack_Issue):
             resource = resource.parent
 
         # Namespace
         search_name = context.get_query_value('search_name')
         base = '%s/;view' % context.get_link(resource)
         items = []
-        for item in resource.search_resources(cls=StoredSearch):
+        for item in resource.search_resources(cls=Tchack_StoredSearch):
             # Make the title
             get_value = item.handler.get_value
             query = resource.get_search_query(get_value)
@@ -248,7 +248,7 @@ class Tracker_AddIssue(STLForm):
     def action(self, resource, context, form):
         # Add
         id = resource.get_new_id()
-        issue = Issue.make_resource(Issue, resource, id)
+        issue = Tchack_Issue.make_resource(Tchack_Issue, resource, id)
         issue._add_record(context, form)
 
         # Ok
@@ -764,9 +764,9 @@ class Tracker_RememberSearch(BaseForm):
         # No
         if search_name is None:
             # Search for a search with the same title
-            if isinstance(resource, Issue):
+            if isinstance(resource, Tchack_Issue):
                 resource = resource.parent
-            searches = resource.search_resources(cls=StoredSearch)
+            searches = resource.search_resources(cls=Tchack_StoredSearch)
             for search in searches:
                 # Found !
                 if title == search.get_property('title'):
@@ -776,7 +776,7 @@ class Tracker_RememberSearch(BaseForm):
             else:
                 # Not found => so we make a new search resource
                 search_name = resource.get_new_id('s')
-                search = StoredSearch.make_resource(StoredSearch, resource,
+                search = StoredSearch.make_resource(Tchack_StoredSearch, resource,
                                                     search_name)
                 message = MSG(u'The search has been stored.')
         # Yes
@@ -827,11 +827,8 @@ class Tracker_GoToIssue(BaseView):
         if not issue_name:
             return context.come_back(messages.MSG_NAME_MISSING)
 
-        if not resource.has_resource(issue_name):
-            return context.come_back(ERROR(u'Issue not found.'))
-
         issue = resource.get_resource(issue_name, soft=True)
-        if issue is None or not isinstance(issue, Issue):
+        if issue is None or not isinstance(issue, Tchack_Issue):
             return context.come_back(ERROR(u'Issue not found.'))
 
         return context.uri.resolve2('../%s/;edit' % issue_name)

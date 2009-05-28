@@ -37,8 +37,8 @@ from itools.xapian import StartQuery
 # Import from ikaaro
 from ikaaro.folder import Folder
 from ikaaro.registry import register_resource_class
-from resources import Resources
-from stored import StoredSearch, StoredSearchFile
+from resources import Tchack_Resources
+from stored import Tchack_StoredSearch, StoredSearchFile
 from tables import Tracker_TableResource, Tracker_TableHandler
 from tables import ModulesResource, ModulesHandler
 from tables import VersionsResource, VersionsHandler
@@ -112,10 +112,10 @@ class Tchack_Tracker(Folder):
                               (not_assigned, u'Non assigned'),
                               (high_priority, u'High Priority')]:
             folder.set_handler('%s/s%s' % (name, i), search)
-            metadata = StoredSearch.build_metadata(title={'en': title})
+            metadata = Tchack_StoredSearch.build_metadata(title={'en': title})
             folder.set_handler('%s/s%s.metadata' % (name, i), metadata)
             i += 1
-        metadata = Resources.build_metadata()
+        metadata = Tchack_Resources.build_metadata()
         folder.set_handler('%s/calendar.metadata' % name, metadata)
 
 
@@ -297,7 +297,7 @@ class Tchack_Tracker(Folder):
     def update_20080407(self):
         """Add calendar to tracker.
         """
-        metadata = Resources.build_metadata()
+        metadata = Tchack_Resources.build_metadata()
         self.handler.set_handler('calendar.metadata', metadata)
 
 
@@ -317,7 +317,7 @@ class Tchack_Tracker(Folder):
     def update_20081120(self):
         """Add a default product.
         """
-        from issue import Issue
+        from issue import Tchack_Issue
         # Add a default product
         products = self.get_resource('products').get_handler()
         title = Property(u'Default', language='en')
@@ -333,7 +333,7 @@ class Tchack_Tracker(Folder):
                 for version in record:
                     version.setdefault('product', product_pro)
         # Update issues
-        for issue in self.search_resources(cls=Issue):
+        for issue in self.search_resources(cls=Tchack_Issue):
             history = issue.get_history()
             handler.incremental_save = False
             for record in history.get_records():

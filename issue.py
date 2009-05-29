@@ -287,7 +287,7 @@ class Tchack_Issue(Issue):
             if not user:
                 continue
             to_addr = user.get_property('email')
-            from_addr='please_use_the_website_to_reply@tchack.com'
+            from_addr = u'please_use_the_website_to_reply@tchack.com'
             root.send_email(from_addr, to_addr, subject, text=body)
 
 

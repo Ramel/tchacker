@@ -172,7 +172,7 @@
         </td>
       </tr>
       <tr>
-        <td valign="top" colspan="2" class="light">
+        <td valign="top" colspan="2">
           <label for="attachement">New Attachement:</label><br/>
           <input type="file" name="file" id="attachement" size="36" />
         </td>

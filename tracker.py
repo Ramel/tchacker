@@ -148,11 +148,11 @@ class Tchack_Tracker(Folder):
 
     def get_issues_query_terms(self):
         # If the issue is not of Issue's class_type type for xapian
-        issue_type = 'tchack_issue'
+        class_id_issue = 'tchack_issue'
         abspath = self.get_canonical_path()
         abspath = '%s/' % abspath
         return [StartQuery('abspath', abspath),
-                PhraseQuery('format', issue_type)]
+                PhraseQuery('format', class_id_issue)]
 
 
     def get_members_namespace(self, value, not_assigned=False):

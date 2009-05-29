@@ -288,7 +288,7 @@ class Tchack_Issue(Issue):
                 continue
             to_addr = user.get_property('email')
             from_addr = MSG(u'please_use_the_website_to_reply@tchack.com')
-            root.send_email(from_addr, to_addr, subject, text=body)
+            root.send_email(to_addr, subject, from_addr, text=body)
 
 
     def get_diff_with(self, record, context):

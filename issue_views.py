@@ -196,6 +196,7 @@ class Issue_Edit(STLForm):
                 is_image = isinstance(joinedfile, Image)
                 if is_image is True:
                     thumb_low = ';thumb?width=500&size=500&height=500'
+                    thumb_high = ';thumb?width=800&size=800&height=800'
                     #Need to adapt thickbox to accept ;thumb
                     #thumb_high = ';thumb?width=1000&size=1000&height=1000'
                 j += 1
@@ -212,7 +213,7 @@ class Issue_Edit(STLForm):
                 'file': file,
                 'is_image': is_image,
                 'thumb_low': thumb_low,
-                #'thumb_high': thumb_high,   
+                'thumb_high': thumb_high, 
                 })
         comments.reverse()
         namespace['comments'] = comments

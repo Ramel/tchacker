@@ -197,7 +197,9 @@ class Issue_Edit(STLForm):
                 if is_image is True:
                     thumb_low = ';thumb?width=500&size=500&height=500'
                     #Need to adapt thickbox to accept ;thumb
-                    thumb_high = ';thumb?width=1000&size=1000&height=1000'
+                    # 1000 is too high, the preview is not completely created in
+                    # time
+                    #thumb_high = ';thumb?width=1000&size=1000&height=1000'
                 j += 1
             if comment and not file:
                 is_image = False
@@ -212,7 +214,7 @@ class Issue_Edit(STLForm):
                 'file': file,
                 'is_image': is_image,
                 'thumb_low': thumb_low,
-                'thumb_high': thumb_high, 
+                #'thumb_high': thumb_high, 
                 })
         comments.reverse()
         namespace['comments'] = comments

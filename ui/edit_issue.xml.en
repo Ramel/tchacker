@@ -47,7 +47,7 @@
     </tr>
     <tr stl:if="comment/is_image">
       <td colspan="5">
-        <a href="${comment/file}/;thumb?width=800&height=600" class="thickbox"><img src="${comment/file}/${comment/thumb_low}" /></a>
+        <a href="${comment/file}/;download" class="thickbox"><img src="${comment/file}/${comment/thumb_low}" /></a>
       </td>
     </tr>
     <tr stl:if="comment/file">

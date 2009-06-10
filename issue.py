@@ -23,10 +23,7 @@
 # Import from the Standard Library
 from datetime import datetime
 from tempfile import mkdtemp
-import commands
 from pprint import pprint
-from subprocess import Popen, PIPE
-#from os import system
 
 # Import from itools
 from itools.csv import Table
@@ -37,7 +34,6 @@ from itools.vfs import FileName
 from itools.uri import get_uri_path
 from itools.web import get_context
 from itools import vfs
-from itools.core.utils import get_pipe
 
 # Import from ikaaro
 from ikaaro.file import File
@@ -231,68 +227,54 @@ class Tchack_Issue(Issue):
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
             name = generate_name(name, self.get_names())
-            # Add attachement
+            
             cls = get_resource_class(mimetype)
-            cls.make_resource(cls, self, name, body=body, filename=filename,
-                            extension=extension, format=mimetype)
-            # If Video file, get ratio for encoding
+            
+            # If the file is a Video(x-msvideo), get ratio for FLV encoding
             if(mimetype == 'video/x-msvideo'):
-                
-                # Create a temp dir to paste the video and encode it
+                # Create a temp dir, where to paste the video
+                # Retrieve the ratio and encode it in FLV
+                # Then remove all, keeping the FLV as the file in the new comment
                 dirname = mkdtemp('videoencoding', 'ikaaro')
+                pprint('===dirname===')
+                pprint(dirname)
                 tempdir = vfs.open(dirname)
-                
                 # Paste the file in the tempdir
                 file = tempdir.make_file(filename)
                 try:
                     file.write(body)
                 finally:
                     file.close()
-                command = ['ffmpeg', '-i', '%s/%s' % (dirname, filename)]
-                """
-                dir_file = '%s/%s' % (dirname, filename)
-                pprint('===dir_file===')
-                pprint(dir_file)
-                file = vfs.open(dir_file)
-                pprint('===file===')
-                pprint(file)
-                """
-                #process = Popen("ffmpeg" + " -i " + '%s' % file, stdout=PIPE)
-                #process = Popen(command, stdout=PIPE)
-                #exit_code = os.waitpid(process.pid, 0)
-                #output2 = process.communicate()[0]
-                output2 = get_pipe(command)
-                pprint('===output2===')
-                pprint(output2)
+
+                #VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, name, 540)
+                flv = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, filename, name, 540)
+                filename, mimetype, body, extension = flv
+                pprint('===filename===')
+                pprint('%s' % flv[0])
+                pprint('===mimetype===')
+                pprint(flv[1])
+                #pprint('===body===')
+                #pprint(flv[2])
+                
+                # mimetype, body = encode_avi_to_flv()
+                # make_flv_thumbnail()
+                # make the resources for FLV and THUMB
+                
+                # Get the video ratio with ffmpeg 
+                #ratio = VideoEncodingToFLV(cls).get_ratio(dirname, filename)
+                
                 file.close()
-                
-                """ 
-                output = commands.getoutput('ffmpeg -i %s/%s') % (dirname, filename)
-                pprint('===output===')
-                pprint(output)
-                """
                 # Clean the temporary folder
-                vfs.remove(dirname)
-                """
-                #vetf = VideoEncodingToFLV
-                #abspath = self.get_canonical_path()
-                abspath = self.get_abspath()
-                abspath = '%s/' % abspath
-                from pprint import pprint
-                pprint('===abspath===')
-                pprint(abspath)
-                context = get_context()
-                site_root = self.get_pathto(root)
-                pprint('===get_context()===')
-                pprint(context)
-                pprint('===site_root===')
-                pprint(site_root)
+                #vfs.remove(dirname)
                 
-                ratio = VideoEncodingToFLV(cls).get_ratio(dirname, filename)
-                #ratio = VideoEncodingToFLV(cls).get_ratio('/home/fortuna/dev/databases/tchacker/database/tchacker-2/0/', 'design_plan_03.avi')
-                pprint("===ratio===")
-                pprint(ratio)
-                """
+                # For now we put the original file
+                cls.make_resource(cls, self, name, body=body, filename=filename,
+                            extension=extension, format=mimetype)
+
+            else:
+                # Add attachement
+                cls.make_resource(cls, self, name, body=body, filename=filename,
+                            extension=extension, format=mimetype)
             # Link
             record['file'] = name
         # Update

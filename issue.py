@@ -231,7 +231,7 @@ class Tchack_Issue(Issue):
             cls = get_resource_class(mimetype)
             
             # If the file is a Video(x-msvideo), get ratio for FLV encoding
-            if(mimetype == 'video/x-msvideo'):
+            if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
                 # Create a temp dir, where to paste the video
                 # Retrieve the ratio and encode it in FLV
                 # Then remove all, keeping the FLV as the file in the new comment
@@ -248,8 +248,10 @@ class Tchack_Issue(Issue):
 
                 #VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, name, 540)
                 encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, filename, name, 540)
-                flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']
-                thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
+                
+                if encoded is not None:
+                    flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']
+                    thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
                 
                 #pprint('===filename===')
                 #pprint('%s' % flv[0])

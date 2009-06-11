@@ -41,11 +41,12 @@ from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.table_views import Table_View
 from ikaaro.views import CompositeForm
 from ikaaro.views import ContextMenu
-from ikaaro.file import Image
+from ikaaro.file import Image, Video
 
 # Local import
 from datatypes import get_issue_fields, UsersList
 
+from pprint import pprint
 
 ###########################################################################
 # Utilities
@@ -200,9 +201,15 @@ class Issue_Edit(STLForm):
                     # 1000 is too high, the preview is not completely created in
                     # time
                     #thumb_high = ';thumb?width=1000&size=1000&height=1000'
+                is_video = isinstance(joinedfile, Video)
+                """
+                if is_video is True:
+                    pprint("Video")
+                """
                 j += 1
             if comment and not file:
                 is_image = False
+                is_video = False
             i += 1
             #pprint('===is_image===')
             #pprint(is_image)
@@ -213,6 +220,7 @@ class Issue_Edit(STLForm):
                 'comment': indent(comment),
                 'file': file,
                 'is_image': is_image,
+                'is_video': is_video,
                 'thumb_low': thumb_low,
                 #'thumb_high': thumb_high, 
                 })

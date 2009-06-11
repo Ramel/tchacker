@@ -247,12 +247,14 @@ class Tchack_Issue(Issue):
                     file.close()
 
                 #VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, name, 540)
-                flv = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, filename, name, 540)
-                filename, mimetype, body, extension = flv
-                pprint('===filename===')
-                pprint('%s' % flv[0])
-                pprint('===mimetype===')
-                pprint(flv[1])
+                encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, filename, name, 540)
+                flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']
+                thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
+                
+                #pprint('===filename===')
+                #pprint('%s' % flv[0])
+                #pprint('===mimetype===')
+                #pprint(flv[1])
                 #pprint('===body===')
                 #pprint(flv[2])
                 
@@ -265,11 +267,15 @@ class Tchack_Issue(Issue):
                 
                 file.close()
                 # Clean the temporary folder
-                #vfs.remove(dirname)
+                vfs.remove(dirname)
                 
-                # For now we put the original file
-                cls.make_resource(cls, self, name, body=body, filename=filename,
-                            extension=extension, format=mimetype)
+                # Create the flv and thumb resource
+                video = get_resource_class(flvmimetype)
+                thumbnail = get_resource_class(thumbmimetype)
+                video.make_resource(video, self, name, body=flvbody, filename=flvfilename,
+                            extension=flvextension, format=flvmimetype)
+                thumbnail.make_resource(thumbnail, self, thumbfilename, body=thumbbody, filename=thumbfilename,
+                            extension=thumbextension, format=thumbmimetype)
 
             else:
                 # Add attachement

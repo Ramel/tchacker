@@ -236,8 +236,10 @@ class Tchack_Issue(Issue):
                 # Retrieve the ratio and encode it in FLV
                 # Then remove all, keeping the FLV as the file in the new comment
                 dirname = mkdtemp('videoencoding', 'ikaaro')
+                """
                 pprint('===dirname===')
                 pprint(dirname)
+                """
                 tempdir = vfs.open(dirname)
                 # Paste the file in the tempdir
                 file = tempdir.make_file(filename)
@@ -247,7 +249,8 @@ class Tchack_Issue(Issue):
                     file.close()
 
                 #VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, name, 540)
-                encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, filename, name, 540)
+                encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname,
+                        filename, name, 540)
                 
                 if encoded is not None:
                     flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']

@@ -153,6 +153,10 @@ class Issue_Edit(STLForm):
         context.scripts.append('/ui/tchacker/tracker.js')
         context.styles.append('/ui/thickbox/thickbox.css')
         context.scripts.append('/ui/thickbox/thickbox.js')
+        #context.scripts.append('/ui/flowplayer/script.js')
+        context.scripts.append('/ui/flowplayer/flowplayer-3.1.1.min.js')
+        #context.scripts.append('/ui/flowplayer/flowplayer-3.1.1.swf')
+        #context.scripts.append('/ui/flowplayer/flowplayer.controls-3.1.1.swf')
 
         # Local variables
         users = resource.get_resource('/users')
@@ -500,9 +504,6 @@ class Issue_AddEditResource(STLForm):
         dtstart = datetime.combine(form['dtstart'], form['tstart'])
         dtend = datetime.combine(form['dtend'], form['tend'])
         record = {
-            'issue': resource.name,
-            'resource': form['resource'],
-            'dtstart': dtstart,
             'dtend': dtend,
             'comment': form['comment']}
 

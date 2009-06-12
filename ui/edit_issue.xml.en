@@ -52,19 +52,7 @@
     </tr>
     <tr stl:if="comment/is_video">
       <td colspan="5">
-        <!--
-        <center>
-          <object type="application/x-shockwave-flash" width="320" height="263" id="FlowPlayer" data="/showvideo/FlowPlayer.swf">
-            <param name="allowScriptAccess" value="sameDomain" />
-            <param name="movie" value="/showvideo/FlowPlayer.swf" />
-            <param name="quality" value="high" />
-            <param name="scale" value="noScale" />
-            <param name="wmode" value="transparent" />
-            <param name="flashvars" value="baseURL=/showvideo&videoFile=flv/{{video.flvfilename}}&autoPlay=false&bufferLength=5&loop=false&progressBarColor1=0xAAAAAA&progressBarColor2=0x555555&autoBuffering=false&splashImageFile=clicktoplay.jpg&hideControls=false" />
-            <p>Your browser seems to not have the Flash-Plugin installed</p>
-          </object>
-        </center>
-        -->
+        <a href="${comment/file}/;download" style="display:block;width:540px;height:304px;" id="player"></a>
       </td>
     </tr>
     <tr stl:if="comment/file">
@@ -203,4 +191,7 @@
   </fieldset>
 </form>
 
+<script language="JavaScript"> 
+    flowplayer("player", "ui/flowplayer/flowplayer-3.1.1.swf"); 
+</script>
 </stl:block>

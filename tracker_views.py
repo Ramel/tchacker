@@ -423,55 +423,32 @@ class Tracker_View(BrowseForm):
             # Get Tracker's id
             id = '%s' % getattr(item, 'id')
             issue = resource.get_resource(id)
-            file =''
-            i = 0
+            #file =''
             value = None
             for record in issue.get_history_records():
                 file = record.get_value('file')
                 # Need to check if the file is an Image
-                files = issue.get_names()
-                
+                #files = issue.get_names()
+                #pprint("file = %s" % file)
+                #pprint("files = %s" % files)
                 if not file:
                     continue
                 if file:
-                    joinedfile = issue._get_resource(files[i])
+                    joinedfile = issue._get_resource(file)
                     is_image = isinstance(joinedfile, Image)
-
-                    #pprint('==i==')
-                    #pprint(i)
-                    
-                    #pprint('==files==')
-                    #pprint(files[i])
-
-                    #pprint('==is_image==')
-                    #pprint(is_image)
-
+                    #pprint("===files[%s]===" % i)
+                    #pprint(files)
                     if is_image:
                         is_thumb = True
-                        #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
-                        #value = '%s/%s/;download' % (id, file)
-                        value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, files[i])
+                        value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                        #break
                     else:
                         value = None
-                    i += 1
-
-                #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
-                #from pprint import pprint
-                #pprint('==value-thumb_lastattach==')
-                #pprint(value)i
+                #i += 1
             return value
 
         value = getattr(item, column)
 
-        """ 
-        from pprint import pprint
-        pprint('==item==')
-        pprint(item)
-        pprint('==column==')
-        pprint(column)
-        pprint('==value==')
-        pprint(value)
-        """
         if value is None:
             return None
         if column == 'title':

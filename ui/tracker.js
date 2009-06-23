@@ -82,17 +82,16 @@ $(document).ready(function () {
 		return false;
 	});
 	/* show.hide.toggle some table columns */
-	$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').hide();
 	$('A.hide').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').hide();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').hide();
 		return false;
 	});
 	$('A.show').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').show();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').show();
 		return false;
 	});
 	$('A.toggle').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.priority, TABLE.issues TD.priority').toggle();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').toggle();
 		return false;
 	});
 });

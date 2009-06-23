@@ -72,7 +72,7 @@
     <table>
       <tr>
         <td colspan="2">
-          <a href="#" class="showall">Afficher/Cacher les options</a>
+          <a href="#" class="showall">Show/Hide options</a>
         </td>
       </tr>
       <tr>

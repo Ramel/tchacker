@@ -410,6 +410,9 @@ class Tracker_View(BrowseForm):
 
 
     def get_item_value(self, resource, context, item, column):
+        # Local variable
+        users = resource.get_resource('/users') 
+        
         if column == 'checkbox':
             selected_issues = context.get_form_values('ids') or []
             return item.name, item.name in selected_issues
@@ -417,7 +420,6 @@ class Tracker_View(BrowseForm):
         if column == 'id':
             id = item.name
             return id, '%s/;edit' % id
-         
         # Last Attachement
         if column == 'last-attachement':
             # Get Tracker's id
@@ -427,8 +429,14 @@ class Tracker_View(BrowseForm):
             value = None
             for record in issue.get_history_records():
                 file = record.get_value('file')
+                # solid in case the user has been removed
+                username = record.username
+                user = users.get_resource(username, soft=True)
+                user_title = user and user.get_title() or username
+                #author = record.get_value('username')
+                #pprint("author= %s" % author)
                 # Need to check if the file is an Image
-                #files = issue.get_names()
+                pprint("author= %s" % user_title)
                 #pprint("file = %s" % file)
                 #pprint("files = %s" % files)
                 if not file:
@@ -436,16 +444,22 @@ class Tracker_View(BrowseForm):
                 if file:
                     joinedfile = issue._get_resource(file)
                     is_image = isinstance(joinedfile, Image)
+                    # Follow, a var for the last joined file (image)
+                    last_img = ''
                     #pprint("===files[%s]===" % i)
                     #pprint(files)
                     if is_image:
                         is_thumb = True
                         value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                        last_img = file
                         #break
                     else:
-                        value = None
+                        value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, last_img)
+                        #value = None
                 #i += 1
             return value
+        # Last Author
+        #if column == 'last-author':
 
         value = getattr(item, column)
 

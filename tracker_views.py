@@ -450,11 +450,11 @@ class Tracker_View(BrowseForm):
                     #pprint(files)
                     if is_image:
                         is_thumb = True
-                        value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
+                        value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, file)
                         last_img = file
                         #break
                     else:
-                        value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, last_img)
+                        value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, last_img)
                         #value = None
                 #i += 1
             return value

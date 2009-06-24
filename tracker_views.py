@@ -412,7 +412,7 @@ class Tracker_View(BrowseForm):
     def get_item_value(self, resource, context, item, column):
         # Local variable
         users = resource.get_resource('/users') 
-        
+ 
         if column == 'checkbox':
             selected_issues = context.get_form_values('ids') or []
             return item.name, item.name in selected_issues
@@ -429,14 +429,8 @@ class Tracker_View(BrowseForm):
             value = None
             for record in issue.get_history_records():
                 file = record.get_value('file')
-                # solid in case the user has been removed
-                username = record.username
-                user = users.get_resource(username, soft=True)
-                user_title = user and user.get_title() or username
-                #author = record.get_value('username')
-                #pprint("author= %s" % author)
                 # Need to check if the file is an Image
-                pprint("author= %s" % user_title)
+                #pprint("author= %s" % last_author)
                 #pprint("file = %s" % file)
                 #pprint("files = %s" % files)
                 if not file:
@@ -459,7 +453,21 @@ class Tracker_View(BrowseForm):
                 #i += 1
             return value
         # Last Author
-        #if column == 'last-author':
+        if column == 'last-author':
+            # Get Tracker's id
+            id = '%s' % getattr(item, 'id')
+            issue = resource.get_resource(id)
+            #file =''
+            value = None
+            for record in issue.get_history_records():
+                file = record.get_value('file')
+                # solid in case the user has been removed
+                username = record.username
+                user = users.get_resource(username, soft=True)
+                last_author = user and user.get_title() or username
+                #pprint("author= %s" % last_author)
+                value = last_author
+            return value
 
         value = getattr(item, column)
 
@@ -497,6 +505,7 @@ class Tracker_View(BrowseForm):
         table_columns.insert(0, ('checkbox', None))
         # Insert the last attachement row's title in the table
         table_columns.insert(2, ('last-attachement', 'Last Attach.'))
+        table_columns.insert(11, ('last-author', 'Last Auth.'))
         return table_columns
 
     #######################################################################

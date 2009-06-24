@@ -77,7 +77,7 @@ $(document).ready(function () {
 		$("#product").bind("change", update_tracker);
 	}
 	/* show.hide some TDs */
-	$("A.showall").click(function(){
+	$("A.showall").click(function() {
 		$("TD.light").toggle();
 		return false;
 	});

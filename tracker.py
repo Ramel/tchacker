@@ -44,6 +44,7 @@ from tables import ModulesResource, ModulesHandler
 from tables import VersionsResource, VersionsHandler
 from tracker_views import GoToIssueMenu, StoredSearchesMenu
 from tracker_views import Tracker_NewInstance, Tracker_Search, Tracker_View
+from tracker_views import Tracker_Zip_Img
 from tracker_views import Tracker_AddIssue, Tracker_GoToIssue
 from tracker_views import Tracker_RememberSearch, Tracker_ForgetSearch
 from tracker_views import Tracker_ExportToText, Tracker_ChangeSeveralBugs
@@ -284,6 +285,7 @@ class Tchack_Tracker(Folder):
     new_instance = Tracker_NewInstance()
     search = Tracker_Search()
     view = Tracker_View()
+    zip = Tracker_Zip_Img()
     add_issue = Tracker_AddIssue()
     remember_search = Tracker_RememberSearch()
     forget_search = Tracker_ForgetSearch()

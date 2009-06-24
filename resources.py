@@ -39,7 +39,6 @@ from ikaaro.registry import register_resource_class
 # Import from ikaaro.tracker
 from tracker_views import Tracker_View
 
-
 resolution = timedelta.resolution
 
 

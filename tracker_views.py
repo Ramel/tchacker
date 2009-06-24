@@ -69,6 +69,7 @@ columns = [
 ###########################################################################
 class GoToIssueMenu(ContextMenu):
 
+    access = 'is_allowed_to_view'
     title = MSG(u'Go To Issue')
     template = '/ui/tchacker/menu_goto.xml'
 
@@ -168,7 +169,6 @@ class StoredSearchesMenu(ContextMenu):
 
 
 class TrackerViewMenu(ContextMenu):
-
     title = MSG(u'Advanced')
 
     def get_items(self, resource, context):
@@ -176,6 +176,8 @@ class TrackerViewMenu(ContextMenu):
         schema = context.view.get_query_schema()
         params = encode_query(context.query, schema)
         items = [
+            {'title': MSG(u'Download as Zip'),
+             'href': ';zip?%s' % params},
             {'title': MSG(u'Edit this search'),
              'href': ';search?%s' % params},
             {'title': MSG(u'Change Several Issues'),
@@ -912,6 +914,28 @@ class Tracker_ExportToCSV(BaseView):
         response.set_header('Content-Disposition',
                             'attachment; filename=export.csv')
         return csv.to_str(separator=separator)
+
+
+class Tracker_Zip_Img(Tracker_ExportToCSVForm):
+
+    access = 'is_allowed_to_view'
+    title = MSG(u'Zip Last Images')
+    #icon = 'view.png'
+    query_schema = {
+        #'editor': String(default='excel'),
+        'ids': String(multiple=True),
+    }
+    
+    def GET(self, resource, context):
+        # Get search results
+        results = resource.get_search_results(context)
+        if isinstance(results, Reference):
+            return results
+
+        # Selected issues
+        issues = results.get_documents()
+        selected_issues = context.query['ids']
+        pprint("selected_issues = %s" % selected_issues)
 
 
 

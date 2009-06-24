@@ -18,12 +18,6 @@
       </th>
       <!-- not is_checkbox -->
       <th stl:if="not column/is_checkbox" class="${column/name}">
-        <!--  
-          <a stl:if="column/href" href="${column/href}"
-            class="sort_${column/order}">${column/title}</a>
-          <span stl:if="not column/href" class="no_sort">
-            ${column/title}</span>
-        -->
         ${column/title}
         <stl:block stl:if="column/sortable">
           <br/>

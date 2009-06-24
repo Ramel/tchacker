@@ -916,26 +916,50 @@ class Tracker_ExportToCSV(BaseView):
         return csv.to_str(separator=separator)
 
 
-class Tracker_Zip_Img(Tracker_ExportToCSVForm):
+class Tracker_Zip_Img(Tracker_View):
 
     access = 'is_allowed_to_view'
     title = MSG(u'Zip Last Images')
     #icon = 'view.png'
-    query_schema = {
-        #'editor': String(default='excel'),
+    schema = {
         'ids': String(multiple=True),
     }
-    
-    def GET(self, resource, context):
-        # Get search results
-        results = resource.get_search_results(context)
-        if isinstance(results, Reference):
-            return results
+    """
+    tracker_schema = {
+        # Do not batch
+        'batch_size': Integer(default=0),
+    }
+    """
+    tracker_schema = Tracker_View().tracker_schema
 
-        # Selected issues
-        issues = results.get_documents()
-        selected_issues = context.query['ids']
-        pprint("selected_issues = %s" % selected_issues)
+    def get_table_namespace(self, resource, context, items):
+        namespace = Tracker_View.get_table_namespace(self, resource,
+                context, items)
+
+        #pprint("namespace = %s" % tablenamespace)
+        for item in namespace:
+            #pprint("item = %s" % item)
+            for row in namespace['rows']:
+                
+                for column in row['columns']:
+                    #column = column[0]
+                    #pprint("column = %s" % column)
+                    if column['name'] == 'last-attachement':
+                        pprint("last = %s" % column['name'])
+                    """
+                    pprint("items = %s" % column.items())
+                    pprint("keys = %s" % column.keys())
+                    pprint("values = %s" % column.values())
+                    """
+        return namespace
+    
+    def get_namespace(self, resource, context):
+        context.scripts.append('ui/tracker/tracker.js')
+        namespace = Tracker_View.get_namespace(self, resource, context)
+
+        #pprint("namespace = %s" % namespace)
+
+        return namespace
 
 
 

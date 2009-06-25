@@ -1001,7 +1001,11 @@ class Tracker_Zip_Img(Tracker_View):
                     #pprint("parent = %s" % parent.get_abspath())
                     #pprint("image => %s" % image)
                     #abspath = destination.get_abspath()
+        return images
         
+    def GET(self, resource, context):
+        images = resource.get_table_namespace()
+
         dirname = mkdtemp('zip', 'ikaaro')
         tempdir = vfs.open(dirname)
         pprint("dirname = %s" % dirname)

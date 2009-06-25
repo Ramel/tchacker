@@ -21,17 +21,22 @@
 
 # Import from the Standard Library
 from datetime import datetime
+from tempfile import mkdtemp
+from subprocess import call
 
 # Import from itools
-from itools.core import merge_dicts
+from itools.core import merge_dicts, guess_extension
 from itools.csv import CSVFile, Property
 from itools.datatypes import Boolean, Integer, String, Unicode, Enumerate
 from itools.gettext import MSG
 from itools.i18n import format_datetime
-from itools.uri import encode_query, Reference
+from itools.uri import encode_query, Reference, get_reference
+from itools import vfs
+from itools.vfs import FileName
 from itools.web import BaseView, BaseForm, STLForm
 from itools.web import INFO, ERROR
 from itools.web.views import process_form
+from itools.handlers import get_handler, File as FileHandler
 
 # Import from ikaaro
 from ikaaro.buttons import Button
@@ -933,25 +938,120 @@ class Tracker_Zip_Img(Tracker_View):
     tracker_schema = Tracker_View().tracker_schema
 
     def get_table_namespace(self, resource, context, items):
+        parent = resource.parent
         namespace = Tracker_View.get_table_namespace(self, resource,
                 context, items)
+        images = []
 
-        #pprint("namespace = %s" % tablenamespace)
-        for item in namespace:
-            #pprint("item = %s" % item)
-            for row in namespace['rows']:
-                
-                for column in row['columns']:
-                    #column = column[0]
-                    #pprint("column = %s" % column)
-                    if column['name'] == 'last-attachement':
-                        pprint("last = %s" % column['name'])
+        """ 
+        for column in namespace['columns']:
+            pprint("column = %s" % column)
+        """
+        for row in namespace['rows']:
+            #pprint("row = %s" % row)
+            for column in row['columns']:
+                #pprint("column = %s" % column)
+                if column['name'] == 'last-attachement':
+                    last = column['src']
+                    last = last.replace('/;thumb?width=256&size=256&height=256','')
+                    pprint("last => %s" % last)
+                    uri = column['src'].encode('utf-8')
+                    #reference = get_reference(uri)
                     """
-                    pprint("items = %s" % column.items())
-                    pprint("keys = %s" % column.keys())
-                    pprint("values = %s" % column.values())
+                    document = resource.get_document()
+                    pprint("document => %s" % document)
                     """
-        return namespace
+                    pprint("uri => %s" % uri)
+                    reference =  get_reference(uri[:-len('/;thumb?width=256&size=256&height=256')])
+                    pprint("reference => %s" % reference)
+                    pprint("reference.path = %s"  % reference.path)
+                    """
+                    try:
+                        image = get_handler(reference)
+                    except LookupError:
+                        image =None
+                    else:
+                        filename = reference.path.get_name()
+                        pprint("filename => %s" % filename)
+                        name, ext, lang = FileName.decode(filename)
+                        if ext is None:
+                            reference = str(reference)
+                            mimetype = vfs.get_mimetype(reference)
+                            ext = guess_extension(mimetype)[1:]
+                            filename = FileName.encode((name, ext,lang))
+                            pprint("filename => %s" % filename)
+                    pprint("image => %s" % image)
+                    """ 
+                    tracker_path = resource.get_abspath()
+                    pprint("tracker_path = %s" % tracker_path)
+                    """
+                    image = parent.get_resource(reference.path, soft=True)
+                    filename = image.name
+                    pprint("filename = %s" % filename)
+                    pprint("reference = %s" % reference)
+                    if image is not None:
+                        filename = image.get_property('filename')
+                    """
+                    image = resource.get_resource('%s' % reference)
+                    filename = image.name
+                    pprint("filename = %s" % filename)
+                    
+                    images.append((image, filename))
+
+                    #pprint("parent = %s" % parent.get_abspath())
+                    #pprint("image => %s" % image)
+                    #abspath = destination.get_abspath()
+        
+        dirname = mkdtemp('zip', 'ikaaro')
+        tempdir = vfs.open(dirname)
+        pprint("dirname = %s" % dirname)
+
+        for image, filename in images:
+            if tempdir.exists(filename):
+                continue
+            file = tempdir.make_file(filename)
+            try:
+                if isinstance(image, FileHandler):
+                    try:
+                        image.save_state_to_file(file)
+                    except XMLError:
+                        pass
+                else:
+                     image.handler.save_state_to_file(file)
+            finally:
+                file.close()
+        
+        # Zip it
+        name = "validated_images"
+        zipname = "%s.zip" % name
+        command = ['zip', '-r', '%s' % zipname, '.', '-i', '*']        
+        
+        try:
+            call(command, cwd=dirname)
+        except OSError:
+            msg = ERROR(u"ZIP generation failed.")
+            return context.com_back(msg)
+        
+        if not tempdir.exists(zipname):
+            return context.come_back(MSG(u"ZIP creation failed."))
+
+        # Read the file's data
+        file = tempdir.open(zipname)
+        try:
+            data = file.read()
+        finally:
+            file.close()
+        
+        # Clean the temp folder
+        #vfs.remove(dirname)
+        
+        # OK
+        response = context.response
+        response.set_header('Content-Type', 'application/zip')
+        response.set_header('Content-Disposition',
+                'attachement; filename=%s' % zipname)
+        return data
+
     
     def get_namespace(self, resource, context):
         context.scripts.append('ui/tracker/tracker.js')

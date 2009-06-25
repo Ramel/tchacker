@@ -930,23 +930,14 @@ class Tracker_Zip_Img(Tracker_View):
         'ids': String(multiple=True),
     }
     """
-    tracker_schema = {
-        # Do not batch
-        'batch_size': Integer(default=0),
-    }
+    def __init__(self):
+        self.images = []
     """
-    tracker_schema = Tracker_View().tracker_schema
-
     def get_table_namespace(self, resource, context, items):
-        parent = resource.parent
+        #parent = resource.parent
         namespace = Tracker_View.get_table_namespace(self, resource,
                 context, items)
         images = []
-
-        """ 
-        for column in namespace['columns']:
-            pprint("column = %s" % column)
-        """
         for row in namespace['rows']:
             #pprint("row = %s" % row)
             for column in row['columns']:
@@ -956,42 +947,15 @@ class Tracker_Zip_Img(Tracker_View):
                     last = last.replace('/;thumb?width=256&size=256&height=256','')
                     pprint("last => %s" % last)
                     uri = column['src'].encode('utf-8')
-                    #reference = get_reference(uri)
-                    """
-                    document = resource.get_document()
-                    pprint("document => %s" % document)
-                    """
+                    
                     pprint("uri => %s" % uri)
                     reference =  get_reference(uri[:-len('/;thumb?width=256&size=256&height=256')])
                     pprint("reference => %s" % reference)
                     pprint("reference.path = %s"  % reference.path)
-                    """
-                    try:
-                        image = get_handler(reference)
-                    except LookupError:
-                        image =None
-                    else:
-                        filename = reference.path.get_name()
-                        pprint("filename => %s" % filename)
-                        name, ext, lang = FileName.decode(filename)
-                        if ext is None:
-                            reference = str(reference)
-                            mimetype = vfs.get_mimetype(reference)
-                            ext = guess_extension(mimetype)[1:]
-                            filename = FileName.encode((name, ext,lang))
-                            pprint("filename => %s" % filename)
-                    pprint("image => %s" % image)
-                    """ 
+                    
                     tracker_path = resource.get_abspath()
                     pprint("tracker_path = %s" % tracker_path)
-                    """
-                    image = parent.get_resource(reference.path, soft=True)
-                    filename = image.name
-                    pprint("filename = %s" % filename)
-                    pprint("reference = %s" % reference)
-                    if image is not None:
-                        filename = image.get_property('filename')
-                    """
+                    
                     image = resource.get_resource('%s' % reference)
                     filename = image.name
                     pprint("filename = %s" % filename)
@@ -1001,29 +965,42 @@ class Tracker_Zip_Img(Tracker_View):
                     #pprint("parent = %s" % parent.get_abspath())
                     #pprint("image => %s" % image)
                     #abspath = destination.get_abspath()
+        self.images = images
+
         return images
         
     def GET(self, resource, context):
-        images = resource.get_table_namespace()
-
+        items = self.get_items(resource, context)
+        items = self.sort_and_batch(resource, context, items)
+        images = self.get_table_namespace(resource, context, items)
+        #images = self.images
+        pprint("images = %s" % images)
+        #images = self.get_table_namespace(self, resource, context, items)
+        """
+        items = self.get_items(resource, context)
+        items = self.sort_and_batch_namespace(resource, context, items)
+        namespace = self.get_table_namespace(resource, context, items)
+        """
         dirname = mkdtemp('zip', 'ikaaro')
         tempdir = vfs.open(dirname)
         pprint("dirname = %s" % dirname)
+        
+        if images is not None:
 
-        for image, filename in images:
-            if tempdir.exists(filename):
-                continue
-            file = tempdir.make_file(filename)
-            try:
-                if isinstance(image, FileHandler):
-                    try:
-                        image.save_state_to_file(file)
-                    except XMLError:
-                        pass
-                else:
-                     image.handler.save_state_to_file(file)
-            finally:
-                file.close()
+            for image, filename in images:
+                if tempdir.exists(filename):
+                    continue
+                file = tempdir.make_file(filename)
+                try:
+                    if isinstance(image, FileHandler):
+                        try:
+                            image.save_state_to_file(file)
+                        except XMLError:
+                            pass
+                    else:
+                        image.handler.save_state_to_file(file)
+                finally:
+                    file.close()
         
         # Zip it
         name = "validated_images"
@@ -1055,15 +1032,6 @@ class Tracker_Zip_Img(Tracker_View):
         response.set_header('Content-Disposition',
                 'attachement; filename=%s' % zipname)
         return data
-
-    
-    def get_namespace(self, resource, context):
-        context.scripts.append('ui/tracker/tracker.js')
-        namespace = Tracker_View.get_namespace(self, resource, context)
-
-        #pprint("namespace = %s" % namespace)
-
-        return namespace
 
 
 

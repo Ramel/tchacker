@@ -937,49 +937,39 @@ class Tracker_Zip_Img(Tracker_View):
         images = []
         for row in namespace['rows']:
             #pprint("row = %s" % row)
+            issue = {}
             for column in row['columns']:
-                #pprint("column = %s" % column)
+                #pprint(column.keys())
                 if column['name'] == 'last-attachement':
-                    """
-                    last = column['src']
-                    last = last.replace('/;thumb?width=256&size=256&height=256','')
-                    pprint("last => %s" % last)
-                    """
                     uri = column['src'].encode('utf-8')
-                    
-                    pprint("uri => %s" % uri)
+                    #pprint("uri => %s" % uri)
                     reference =  get_reference(uri[:-len('/;thumb?width=256&size=256&height=256')])
-                    pprint("reference => %s" % reference)
-                    pprint("reference.path = %s"  % reference.path)
-                    
-                    tracker_path = resource.get_abspath()
-                    pprint("tracker_path = %s" % tracker_path)
-                    
                     image = resource.get_resource('%s' % reference)
                     filename = image.name
-                    #filename = reference.path.get_name()
-                    ###
-                    name, ext, lang = FileName.decode(filename)
-                    #
-                    if ext is None:
-                        #reference = str(reference)
-                        #pprint("reference = %s" % reference)
-                        #mimetype = vfs.get_mimetype("%s/%s" %
-                        #        (tracker_path,reference))
-                        mimetype = image.get_content_type()
-                        pprint("mimetype = %s" % mimetype)
-                        ext = guess_extension(mimetype)[1:]
-                        filename = FileName.encode((name, ext, lang))
-                        pprint("ext = %s" % ext)
-                    ###
-                    
-                    pprint("filename = %s" % filename)
-                    
-                    images.append((image, filename))
-
-                    #pprint("parent = %s" % parent.get_abspath())
-                    #pprint("image => %s" % image)
-                    #abspath = destination.get_abspath()
+                    #images.append((image, filename, reference))
+                    issue['image'] = image
+                    issue['filename'] = filename
+                    issue['reference'] = reference
+                # pprint(issue)
+                if column['name'] == 'title':
+                    name = str(column['value'])
+                    #pprint("issue_name = %s" % issue_name)
+                    #images1].append(issue_name)
+                    #pprint("images = %s" % images)
+                    #image = images[0]
+                    #pprint("image = %s" % image)
+                    """
+                    pprint("image[0] = %s" % image[0])
+                    filename = image[1]
+                    pprint("image[1] = %s" % image[1])
+                    reference = image[2]
+                        #pprint("ext = %s" % ext)
+                    """
+                    issue['name'] = name
+            #pprint(issue)
+            images.append((issue['image'], issue['filename'],
+                       issue['reference'],
+                       issue['name']))
 
         return images
         
@@ -987,16 +977,24 @@ class Tracker_Zip_Img(Tracker_View):
         items = self.get_items(resource, context)
         items = self.sort_and_batch(resource, context, items)
         images = self.get_table_namespace(resource, context, items)
-        #images = self.images
         pprint("images = %s" % images)
         
         dirname = mkdtemp('zip', 'ikaaro')
         tempdir = vfs.open(dirname)
-        pprint("dirname = %s" % dirname)
-        
+        #pprint("dirname = %s" % dirname)
+        """ 
+        tracker_path = resource.get_abspath()
+        pprint("tracker_path = %s" % tracker_path)
+        """
         if images is not None:
-
-            for image, filename in images:
+            for image, filename, reference, name  in images:
+                #
+                filename, ext, lang = FileName.decode(filename)
+                if ext is None:
+                    mimetype = image.get_content_type()
+                    ext = guess_extension(mimetype)[1:]
+                    filename = FileName.encode((name, ext, lang))
+                # 
                 if tempdir.exists(filename):
                     continue
                 file = tempdir.make_file(filename)
@@ -1010,7 +1008,6 @@ class Tracker_Zip_Img(Tracker_View):
                         image.handler.save_state_to_file(file)
                 finally:
                     file.close()
-        
         # Zip it
         name = "validated_images"
         zipname = "%s.zip" % name
@@ -1033,7 +1030,7 @@ class Tracker_Zip_Img(Tracker_View):
             file.close()
         
         # Clean the temp folder
-        #vfs.remove(dirname)
+        vfs.remove(dirname)
         
         # OK
         response = context.response

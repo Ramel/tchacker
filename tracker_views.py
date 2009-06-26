@@ -21,6 +21,7 @@
 
 # Import from the Standard Library
 from datetime import datetime
+from time import strftime
 from tempfile import mkdtemp
 from subprocess import call
 
@@ -991,8 +992,13 @@ class Tracker_Zip_Img(Tracker_View):
                 finally:
                     file.close()
         # Zip it
-        name = "validated_images"
-        zipname = "%s.zip" % name
+        tracker = str(resource.get_abspath()).lstrip('/').capitalize()
+
+        pprint("tracker = %s" % tracker)
+        name = "Images"
+        now = strftime("%y%d%m%H%M")
+        pprint("%s" % now)
+        zipname = "%s_%s_%s.zip" % (tracker, name, now)
         command = ['zip', '-r', '%s' % zipname, '.', '-i', '*']        
         
         try:

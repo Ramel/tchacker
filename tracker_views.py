@@ -931,15 +931,18 @@ class Tracker_Zip_Img(Tracker_View):
     }
     
     def get_table_namespace(self, resource, context, items):
-        #parent = resource.parent
+        
         namespace = Tracker_View.get_table_namespace(self, resource,
                 context, items)
         images = []
+        
         for row in namespace['rows']:
             #pprint("row = %s" % row)
             issue = {}
+        
             for column in row['columns']:
                 #pprint(column.keys())
+            
                 if column['name'] == 'last-attachement':
                     uri = column['src'].encode('utf-8')
                     #pprint("uri => %s" % uri)
@@ -950,26 +953,13 @@ class Tracker_Zip_Img(Tracker_View):
                     issue['image'] = image
                     issue['filename'] = filename
                     issue['reference'] = reference
-                # pprint(issue)
+                    # pprint(issue)
                 if column['name'] == 'title':
                     name = str(column['value'])
-                    #pprint("issue_name = %s" % issue_name)
-                    #images1].append(issue_name)
-                    #pprint("images = %s" % images)
-                    #image = images[0]
-                    #pprint("image = %s" % image)
-                    """
-                    pprint("image[0] = %s" % image[0])
-                    filename = image[1]
-                    pprint("image[1] = %s" % image[1])
-                    reference = image[2]
-                        #pprint("ext = %s" % ext)
-                    """
                     issue['name'] = name
-            #pprint(issue)
+
             images.append((issue['image'], issue['filename'],
-                       issue['reference'],
-                       issue['name']))
+                       issue['reference'], issue['name']))
 
         return images
         
@@ -977,24 +967,16 @@ class Tracker_Zip_Img(Tracker_View):
         items = self.get_items(resource, context)
         items = self.sort_and_batch(resource, context, items)
         images = self.get_table_namespace(resource, context, items)
-        pprint("images = %s" % images)
         
         dirname = mkdtemp('zip', 'ikaaro')
         tempdir = vfs.open(dirname)
-        #pprint("dirname = %s" % dirname)
-        """ 
-        tracker_path = resource.get_abspath()
-        pprint("tracker_path = %s" % tracker_path)
-        """
         if images is not None:
             for image, filename, reference, name  in images:
-                #
                 filename, ext, lang = FileName.decode(filename)
                 if ext is None:
                     mimetype = image.get_content_type()
                     ext = guess_extension(mimetype)[1:]
                     filename = FileName.encode((name, ext, lang))
-                # 
                 if tempdir.exists(filename):
                     continue
                 file = tempdir.make_file(filename)

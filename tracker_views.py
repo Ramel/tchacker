@@ -929,10 +929,7 @@ class Tracker_Zip_Img(Tracker_View):
     schema = {
         'ids': String(multiple=True),
     }
-    """
-    def __init__(self):
-        self.images = []
-    """
+    
     def get_table_namespace(self, resource, context, items):
         #parent = resource.parent
         namespace = Tracker_View.get_table_namespace(self, resource,
@@ -943,9 +940,11 @@ class Tracker_Zip_Img(Tracker_View):
             for column in row['columns']:
                 #pprint("column = %s" % column)
                 if column['name'] == 'last-attachement':
+                    """
                     last = column['src']
                     last = last.replace('/;thumb?width=256&size=256&height=256','')
                     pprint("last => %s" % last)
+                    """
                     uri = column['src'].encode('utf-8')
                     
                     pprint("uri => %s" % uri)
@@ -958,6 +957,22 @@ class Tracker_Zip_Img(Tracker_View):
                     
                     image = resource.get_resource('%s' % reference)
                     filename = image.name
+                    #filename = reference.path.get_name()
+                    ###
+                    name, ext, lang = FileName.decode(filename)
+                    #
+                    if ext is None:
+                        #reference = str(reference)
+                        #pprint("reference = %s" % reference)
+                        #mimetype = vfs.get_mimetype("%s/%s" %
+                        #        (tracker_path,reference))
+                        mimetype = image.get_content_type()
+                        pprint("mimetype = %s" % mimetype)
+                        ext = guess_extension(mimetype)[1:]
+                        filename = FileName.encode((name, ext, lang))
+                        pprint("ext = %s" % ext)
+                    ###
+                    
                     pprint("filename = %s" % filename)
                     
                     images.append((image, filename))
@@ -965,7 +980,6 @@ class Tracker_Zip_Img(Tracker_View):
                     #pprint("parent = %s" % parent.get_abspath())
                     #pprint("image => %s" % image)
                     #abspath = destination.get_abspath()
-        self.images = images
 
         return images
         
@@ -975,12 +989,7 @@ class Tracker_Zip_Img(Tracker_View):
         images = self.get_table_namespace(resource, context, items)
         #images = self.images
         pprint("images = %s" % images)
-        #images = self.get_table_namespace(self, resource, context, items)
-        """
-        items = self.get_items(resource, context)
-        items = self.sort_and_batch_namespace(resource, context, items)
-        namespace = self.get_table_namespace(resource, context, items)
-        """
+        
         dirname = mkdtemp('zip', 'ikaaro')
         tempdir = vfs.open(dirname)
         pprint("dirname = %s" % dirname)

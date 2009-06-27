@@ -936,7 +936,7 @@ class Tracker_Zip_Img(Tracker_View):
         
         namespace = Tracker_View.get_table_namespace(self, resource,
                 context, items)
-        images = []
+        issues = []
         
         for row in namespace['rows']:
             #pprint("row = %s" % row)
@@ -944,7 +944,7 @@ class Tracker_Zip_Img(Tracker_View):
         
             for column in row['columns']:
                 #pprint(column.keys())
-                pprint("column['name'] = %s" % column['name'])
+                #pprint("column['name'] = %s" % column['name'])
                 if column['name'] == 'last-attachement':
                     #pprint("column['src'] = %s" % column['src'])
                     if column['src'] is "Empty":
@@ -964,48 +964,47 @@ class Tracker_Zip_Img(Tracker_View):
                         issue['reference'] = reference
                         # pprint(issue)
                 if column['name'] == 'title':
-                    name = str(column['value']).encode('utf-8')
-                    issue['name'] = name
+                    issue['name'] = column['value'].encode('utf-8')
 
-            images.append((issue['image'], issue['filename'],
+            issues.append((issue['image'], issue['filename'],
                        issue['reference'], issue['name']))
 
-        return images
+        return issues
         
     def GET(self, resource, context):
         items = self.get_items(resource, context)
         items = self.sort_and_batch(resource, context, items)
-        images = self.get_table_namespace(resource, context, items)
+        issues = self.get_table_namespace(resource, context, items)
         
         dirname = mkdtemp('zip', 'ikaaro')
         tempdir = vfs.open(dirname)
-        if images is not None:
-            for image, filename, reference, name  in images:
-                if filename is None:
+        if issues is not None:
+            for lastimage, imagename, reference, name  in issues:
+                if imagename is None:
                     continue
-                filename, ext, lang = FileName.decode(filename)
+                imagename, ext, lang = FileName.decode(imagename)
                 if ext is None:
-                    mimetype = image.get_content_type()
+                    mimetype = lastimage.get_content_type()
                     ext = guess_extension(mimetype)[1:]
-                    filename = FileName.encode((name, ext, lang))
-                if tempdir.exists(filename):
+                    imagename = FileName.encode((name, ext, lang))
+                if tempdir.exists(imagename):
                     continue
-                file = tempdir.make_file(filename)
+                file = tempdir.make_file(imagename)
                 try:
-                    if isinstance(image, FileHandler):
+                    if isinstance(lastimage, FileHandler):
                         try:
-                            image.save_state_to_file(file)
+                            lastimage.save_state_to_file(file)
                         except XMLError:
                             pass
                     else:
-                        image.handler.save_state_to_file(file)
+                        lastimage.handler.save_state_to_file(file)
                 finally:
                     file.close()
         # Zip it
-        tracker = str(resource.get_abspath()).lstrip('/').capitalize()
+        tracker = str(resource.get_abspath()).lstrip('/').replace('/','_').capitalize()
 
         pprint("tracker = %s" % tracker)
-        name = "Images"
+        name = "LastAttachedImages"
         now = strftime("%y%d%m%H%M")
         pprint("%s" % now)
         zipname = "%s_%s_%s.zip" % (tracker, name, now)

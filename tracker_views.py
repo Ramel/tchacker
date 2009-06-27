@@ -182,7 +182,7 @@ class TrackerViewMenu(ContextMenu):
         schema = context.view.get_query_schema()
         params = encode_query(context.query, schema)
         items = [
-            {'title': MSG(u'Download as Zip'),
+            {'title': MSG(u'Download "Last Att." images as one Zip'),
              'href': ';zip?%s' % params},
             {'title': MSG(u'Edit this search'),
              'href': ';search?%s' % params},

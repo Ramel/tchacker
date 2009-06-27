@@ -459,7 +459,7 @@ class Tracker_View(BrowseForm):
                     else:
                         value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, last_img)
                         last_img = last_img
-            pprint("value = %s" % value)
+            #pprint("value = %s" % value)
             return value
         # Last Author
         if column == 'last-author':
@@ -1003,10 +1003,10 @@ class Tracker_Zip_Img(Tracker_View):
         # Zip it
         tracker = str(resource.get_abspath()).lstrip('/').replace('/','_').capitalize()
 
-        pprint("tracker = %s" % tracker)
+        #pprint("tracker = %s" % tracker)
         name = "LastAttachedImages"
         now = strftime("%y%d%m%H%M")
-        pprint("%s" % now)
+        #pprint("%s" % now)
         zipname = "%s_%s_%s.zip" % (tracker, name, now)
         command = ['zip', '-r', '%s' % zipname, '.', '-i', '*']        
         

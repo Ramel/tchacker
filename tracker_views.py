@@ -935,7 +935,7 @@ class Tracker_Zip_Img(Tracker_View):
         
         namespace = Tracker_View.get_table_namespace(self, resource,
                 context, items)
-        issues = []
+        images = []
         
         for row in namespace['rows']:
             #pprint("row = %s" % row)
@@ -949,52 +949,53 @@ class Tracker_Zip_Img(Tracker_View):
                     #pprint("uri => %s" % uri)
                     reference =  get_reference(uri[:-len('/;thumb?width=256&size=256&height=256')])
                     image = resource.get_resource('%s' % reference)
-                    imagename = image.name
+                    filename = image.name
                     #images.append((image, filename, reference))
-                    issue['lastimage'] = image
-                    issue['imagename'] = imagename
+                    issue['image'] = image
+                    issue['filename'] = filename
                     issue['reference'] = reference
                     # pprint(issue)
                 if column['name'] == 'title':
-                    issue['name'] = column['value'].encode('utf-8')
+                    name = str(column['value'])
+                    issue['name'] = name
 
-            issues.append((issue['lastimage'], issue['imagename'],
+            images.append((issue['image'], issue['filename'],
                        issue['reference'], issue['name']))
 
-        return issues
+        return images
         
     def GET(self, resource, context):
         items = self.get_items(resource, context)
         items = self.sort_and_batch(resource, context, items)
-        issues = self.get_table_namespace(resource, context, items)
+        images = self.get_table_namespace(resource, context, items)
         
         dirname = mkdtemp('zip', 'ikaaro')
         tempdir = vfs.open(dirname)
-        if issues is not None:
-            for lastimage, imagename, reference, name  in issues:
-                imagename, ext, lang = FileName.decode(imagename)
+        if images is not None:
+            for image, filename, reference, name  in images:
+                filename, ext, lang = FileName.decode(filename)
                 if ext is None:
-                    mimetype = lastimage.get_content_type()
+                    mimetype = image.get_content_type()
                     ext = guess_extension(mimetype)[1:]
-                    imagename = FileName.encode((name, ext, lang))
-                if tempdir.exists(imagename):
+                    filename = FileName.encode((name, ext, lang))
+                if tempdir.exists(filename):
                     continue
-                file = tempdir.make_file(imagename)
+                file = tempdir.make_file(filename)
                 try:
-                    if isinstance(lastimage, FileHandler):
+                    if isinstance(image, FileHandler):
                         try:
-                            lastimage.save_state_to_file(file)
+                            image.save_state_to_file(file)
                         except XMLError:
                             pass
                     else:
-                        lastimage.handler.save_state_to_file(file)
+                        image.handler.save_state_to_file(file)
                 finally:
                     file.close()
         # Zip it
-        tracker = str(resource.get_abspath()).lstrip('/').replace('/','_').capitalize()
+        tracker = str(resource.get_abspath()).lstrip('/').capitalize()
 
         pprint("tracker = %s" % tracker)
-        name = "LastAtt"
+        name = "Images"
         now = strftime("%y%d%m%H%M")
         pprint("%s" % now)
         zipname = "%s_%s_%s.zip" % (tracker, name, now)
@@ -1003,8 +1004,8 @@ class Tracker_Zip_Img(Tracker_View):
         try:
             call(command, cwd=dirname)
         except OSError:
-            msg = ERROR(u"ZIP generation failed. Please install \"zip\" on the server.")
-            return context.come_back(msg)
+            msg = ERROR(u"ZIP generation failed.")
+            return context.com_back(msg)
         
         if not tempdir.exists(zipname):
             return context.come_back(MSG(u"ZIP creation failed."))

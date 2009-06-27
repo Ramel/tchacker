@@ -434,6 +434,8 @@ class Tracker_View(BrowseForm):
             id = '%s' % getattr(item, 'id')
             issue = resource.get_resource(id)
             value = None
+            # Follow, a var for the last joined file (image)
+            last_img = None
             for record in issue.get_history_records():
                 file = record.get_value('file')
                 # Need to check if the file is an Image
@@ -441,13 +443,14 @@ class Tracker_View(BrowseForm):
                 #pprint("file = %s" % file)
                 #pprint("files = %s" % files)
                 if not file:
-                    value = "Empty"
+                    if last_img is not None:
+                        value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, last_img)
+                    else: 
+                        value = "Empty"
                     #continue
                 if file:
                     joinedfile = issue._get_resource(file)
                     is_image = isinstance(joinedfile, Image)
-                    # Follow, a var for the last joined file (image)
-                    last_img = ''
                     #pprint(files)
                     if is_image:
                         is_thumb = True
@@ -455,6 +458,7 @@ class Tracker_View(BrowseForm):
                         last_img = file
                     else:
                         value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, last_img)
+                        last_img = last_img
             pprint("value = %s" % value)
             return value
         # Last Author
@@ -978,7 +982,7 @@ class Tracker_Zip_Img(Tracker_View):
         if images is not None:
             for image, filename, reference, name  in images:
                 if filename is None:
-                    break
+                    continue
                 filename, ext, lang = FileName.decode(filename)
                 if ext is None:
                     mimetype = image.get_content_type()

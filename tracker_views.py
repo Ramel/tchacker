@@ -964,7 +964,7 @@ class Tracker_Zip_Img(Tracker_View):
                         issue['reference'] = reference
                         # pprint(issue)
                 if column['name'] == 'title':
-                    name = str(column['value'])
+                    name = str(column['value']).encode('utf-8')
                     issue['name'] = name
 
             images.append((issue['image'], issue['filename'],

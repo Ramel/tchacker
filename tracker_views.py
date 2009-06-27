@@ -433,7 +433,6 @@ class Tracker_View(BrowseForm):
             # Get Tracker's id
             id = '%s' % getattr(item, 'id')
             issue = resource.get_resource(id)
-            #file =''
             value = None
             for record in issue.get_history_records():
                 file = record.get_value('file')
@@ -442,23 +441,21 @@ class Tracker_View(BrowseForm):
                 #pprint("file = %s" % file)
                 #pprint("files = %s" % files)
                 if not file:
-                    continue
+                    value = "Empty"
+                    #continue
                 if file:
                     joinedfile = issue._get_resource(file)
                     is_image = isinstance(joinedfile, Image)
                     # Follow, a var for the last joined file (image)
                     last_img = ''
-                    #pprint("===files[%s]===" % i)
                     #pprint(files)
                     if is_image:
                         is_thumb = True
                         value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, file)
                         last_img = file
-                        #break
                     else:
                         value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, last_img)
-                        #value = None
-                #i += 1
+            pprint("value = %s" % value)
             return value
         # Last Author
         if column == 'last-author':
@@ -943,18 +940,25 @@ class Tracker_Zip_Img(Tracker_View):
         
             for column in row['columns']:
                 #pprint(column.keys())
-            
+                pprint("column['name'] = %s" % column['name'])
                 if column['name'] == 'last-attachement':
-                    uri = column['src'].encode('utf-8')
-                    #pprint("uri => %s" % uri)
-                    reference =  get_reference(uri[:-len('/;thumb?width=256&size=256&height=256')])
-                    image = resource.get_resource('%s' % reference)
-                    filename = image.name
-                    #images.append((image, filename, reference))
-                    issue['image'] = image
-                    issue['filename'] = filename
-                    issue['reference'] = reference
-                    # pprint(issue)
+                    #pprint("column['src'] = %s" % column['src'])
+                    if column['src'] is "Empty":
+                        issue['image'] = None 
+                        issue['filename'] = None 
+                        issue['reference'] = None 
+                        issue['name'] = None 
+                    else:
+                        uri = column['src'].encode('utf-8')
+                        #pprint("uri => %s" % uri)
+                        reference =  get_reference(uri[:-len('/;thumb?width=256&size=256&height=256')])
+                        image = resource.get_resource('%s' % reference)
+                        filename = image.name
+                        #images.append((image, filename, reference))
+                        issue['image'] = image
+                        issue['filename'] = filename
+                        issue['reference'] = reference
+                        # pprint(issue)
                 if column['name'] == 'title':
                     name = str(column['value'])
                     issue['name'] = name
@@ -973,6 +977,8 @@ class Tracker_Zip_Img(Tracker_View):
         tempdir = vfs.open(dirname)
         if images is not None:
             for image, filename, reference, name  in images:
+                if filename is None:
+                    break
                 filename, ext, lang = FileName.decode(filename)
                 if ext is None:
                     mimetype = image.get_content_type()

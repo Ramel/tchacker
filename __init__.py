@@ -26,6 +26,7 @@ from ikaaro.skins import register_skin
 from issue import Tchack_Issue
 from resources import Tchack_Resources
 from tracker import Tchack_Tracker
+from utils import which
 
 # The version
 __version__ = get_version()
@@ -36,3 +37,10 @@ register_skin('tchacker', path)
 
 # Register document type
 register_document_type(Tchack_Tracker)
+
+###########################################################################
+# Check required software
+###########################################################################
+for name, cli in [("zip", "zip")]:
+    if(which(cli)) is None:
+        print 'You need to install "%s".' % name

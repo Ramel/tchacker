@@ -991,7 +991,7 @@ class Tracker_Zip_Img(Tracker_View):
                 finally:
                     file.close()
         # Zip it
-        tracker = str(resource.get_abspath()).lstrip('/').capitalize()
+        tracker = str(resource.get_abspath()).lstrip('/').replace('/','_').capitalize()
 
         pprint("tracker = %s" % tracker)
         name = "LastAtt"
@@ -1003,7 +1003,7 @@ class Tracker_Zip_Img(Tracker_View):
         try:
             call(command, cwd=dirname)
         except OSError:
-            msg = ERROR(u"ZIP generation failed.")
+            msg = ERROR(u"ZIP generation failed. Please install \"zip\" on the server.")
             return context.come_back(msg)
         
         if not tempdir.exists(zipname):

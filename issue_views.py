@@ -195,7 +195,7 @@ class Issue_Edit(STLForm):
                 # If file is an image return True
                 is_image = isinstance(joinedfile, Image)
                 if is_image is True:
-                    thumb_low = ';thumb?width=800&size=800&height=800'
+                    thumb_low = ';thumb?size=&width=800&height=800'
                     #Need to adapt thickbox to accept ;thumb
                     # 1000 is too high, the preview is not completely created in
                     # time

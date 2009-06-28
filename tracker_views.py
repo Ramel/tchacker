@@ -444,7 +444,7 @@ class Tracker_View(BrowseForm):
                 #pprint("files = %s" % files)
                 if not file:
                     if last_img is not None:
-                        value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, last_img)
+                        value = '%s/%s/;thumb?size=&width=256&height=256' % (id, last_img)
                     else: 
                         value = "Empty"
                     #continue
@@ -454,10 +454,10 @@ class Tracker_View(BrowseForm):
                     #pprint(files)
                     if is_image:
                         is_thumb = True
-                        value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, file)
+                        value = '%s/%s/;thumb?size=&width=256&height=256' % (id, file)
                         last_img = file
                     else:
-                        value = '%s/%s/;thumb?width=256&size=256&height=256' % (id, last_img)
+                        value = '%s/%s/;thumb?size=&width=256&height=256' % (id, last_img)
                         last_img = last_img
             #pprint("value = %s" % value)
             return value
@@ -955,7 +955,7 @@ class Tracker_Zip_Img(Tracker_View):
                     else:
                         uri = column['src'].encode('utf-8')
                         #pprint("uri => %s" % uri)
-                        reference =  get_reference(uri[:-len('/;thumb?width=256&size=256&height=256')])
+                        reference =  get_reference(uri[:-len('/;thumb?size=&width=256&height=256')])
                         image = resource.get_resource('%s' % reference)
                         filename = image.name
                         #images.append((image, filename, reference))

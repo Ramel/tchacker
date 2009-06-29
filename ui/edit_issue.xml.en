@@ -47,7 +47,7 @@
     </tr>
     <tr stl:if="comment/is_image">
       <td colspan="5">
-        <a href="${comment/file}/;download" class="thickbox"><img src="${comment/file}/${comment/thumb_low}" /></a>
+        <a href="${comment/file}/;download" class="thickbox"><img src="${comment/file}/;thumb?size=&amp;width=800&amp;height=800" /></a>
       </td>
     </tr>
     <tr stl:if="comment/is_video">
@@ -77,7 +77,7 @@
     <table>
       <tr>
         <td colspan="2">
-          <a href="#" class="showall">Afficher/Cacher les options</a>
+          <a href="#" class="showall">Show/Hide options</a>
         </td>
       </tr>
       <tr>

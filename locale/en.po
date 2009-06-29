@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tchacker 0.1\n"
-"POT-Creation-Date: 2009-05-28 16:05+CET\n"
+"POT-Creation-Date: 2009-06-16 19:06+CET\n"
 "PO-Revision-Date: 2009-04-22 13:58+2\n"
 "Last-Translator: Armel FORTUN <armel@maar.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -201,7 +201,7 @@ msgctxt "table cell"
 msgid "(HH:MM)"
 msgstr ""
 
-#: ../issue_views.py:384
+#: ../issue_views.py:386
 msgid ", "
 msgstr ""
 
@@ -390,7 +390,7 @@ msgstr ""
 msgid "Color Set"
 msgstr ""
 
-#: ../issue.py:278 ../resources.py:185
+#: ../issue.py:278 ../resources.py:188
 msgid "Comment"
 msgstr ""
 
@@ -449,7 +449,7 @@ msgstr ""
 msgid "Edit issues"
 msgstr ""
 
-#: ../issue_views.py:530
+#: ../issue_views.py:532
 msgid "Edit resources"
 msgstr ""
 
@@ -462,7 +462,7 @@ msgstr ""
 msgid "Edit this search"
 msgstr ""
 
-#: ../resources.py:184
+#: ../resources.py:187
 msgid "End"
 msgstr ""
 
@@ -520,7 +520,7 @@ msgstr ""
 msgid "High Priority"
 msgstr ""
 
-#: ../issue_views.py:261
+#: ../issue_views.py:263
 msgid "History"
 msgstr ""
 
@@ -532,7 +532,7 @@ msgstr ""
 msgid "In Progress"
 msgstr ""
 
-#: ../resources.py:186
+#: ../resources.py:189
 msgid "Issue"
 msgstr ""
 
@@ -691,7 +691,7 @@ msgctxt "paragraph"
 msgid "Reported by <g id='1'>${reported_by}</g>"
 msgstr ""
 
-#: ../resources.py:182
+#: ../resources.py:185
 msgid "Resource"
 msgstr ""
 
@@ -704,7 +704,7 @@ msgstr ""
 msgid "Resources"
 msgstr ""
 
-#: ../resources.py:197
+#: ../resources.py:200
 msgid "Resources assigned to issues"
 msgstr ""
 
@@ -735,7 +735,7 @@ msgstr ""
 msgid "Search for issues"
 msgstr ""
 
-#: ../resources.py:183
+#: ../resources.py:186
 msgid "Start YYYY-MM-DD HH:MM"
 msgstr ""
 
@@ -780,7 +780,7 @@ msgstr ""
 msgid "Tchack Issue Tracker"
 msgstr ""
 
-#: ../resources.py:196
+#: ../resources.py:199
 msgid "Tchack Resources"
 msgstr ""
 
@@ -817,11 +817,11 @@ msgstr ""
 msgid "The user {title} did some changes."
 msgstr ""
 
-#: ../issue_views.py:402
+#: ../issue_views.py:404
 msgid "There are {n} assignments."
 msgstr ""
 
-#: ../issue_views.py:401
+#: ../issue_views.py:403
 msgid "There is 1 assignment."
 msgstr ""
 

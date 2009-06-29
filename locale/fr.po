@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fr\n"
-"POT-Creation-Date: 2009-05-28 16:05+CET\n"
+"POT-Creation-Date: 2009-06-16 19:06+CET\n"
 "PO-Revision-Date: 2009-05-27 18:45+0200\n"
 "Last-Translator: Armel FORTUN <armel@maar.fr>\n"
 "Language-Team: en_US <kde-i18n-doc@kde.org>\n"
@@ -208,7 +208,7 @@ msgctxt "table cell"
 msgid "(HH:MM)"
 msgstr "(HH:MM)"
 
-#: ../issue_views.py:384
+#: ../issue_views.py:386
 msgid ", "
 msgstr ", "
 
@@ -416,7 +416,7 @@ msgstr "Cliquer pour sélectionner/désélectionner toutes les colonnes"
 msgid "Color Set"
 msgstr "Décor couleur"
 
-#: ../issue.py:278 ../resources.py:185
+#: ../issue.py:278 ../resources.py:188
 msgid "Comment"
 msgstr "Commentaire"
 
@@ -475,7 +475,7 @@ msgstr "Éditer fiches"
 msgid "Edit issues"
 msgstr "Éditer les fiches"
 
-#: ../issue_views.py:530
+#: ../issue_views.py:532
 msgid "Edit resources"
 msgstr "Éditer les ressources "
 
@@ -488,7 +488,7 @@ msgstr "Éditer l'attribution #${id}"
 msgid "Edit this search"
 msgstr "Éditer la recherche"
 
-#: ../resources.py:184
+#: ../resources.py:187
 msgid "End"
 msgstr "Fin"
 
@@ -546,7 +546,7 @@ msgstr "Haute"
 msgid "High Priority"
 msgstr "Priorité haute"
 
-#: ../issue_views.py:261
+#: ../issue_views.py:263
 msgid "History"
 msgstr "Historique"
 
@@ -558,7 +558,7 @@ msgstr "Id"
 msgid "In Progress"
 msgstr "En cours"
 
-#: ../resources.py:186
+#: ../resources.py:189
 msgid "Issue"
 msgstr "Fiche"
 
@@ -718,7 +718,7 @@ msgctxt "paragraph"
 msgid "Reported by <g id='1'>${reported_by}</g>"
 msgstr "Rapporté par <g id='1'>${reported_by}</g>"
 
-#: ../resources.py:182
+#: ../resources.py:185
 msgid "Resource"
 msgstr "Ressource"
 
@@ -731,7 +731,7 @@ msgstr "Ressource&nbsp;:"
 msgid "Resources"
 msgstr "Ressources"
 
-#: ../resources.py:197
+#: ../resources.py:200
 msgid "Resources assigned to issues"
 msgstr "Ressources attribuée aux fiches"
 
@@ -762,7 +762,7 @@ msgstr "Chercher"
 msgid "Search for issues"
 msgstr "Chercher des fiches"
 
-#: ../resources.py:183
+#: ../resources.py:186
 msgid "Start YYYY-MM-DD HH:MM"
 msgstr "Début YYYY-MM-DD HH:MM"
 
@@ -808,7 +808,7 @@ msgstr "Tracker de fiche Tchack"
 msgid "Tchack Issue Tracker"
 msgstr "Tracker de fiche Tchack"
 
-#: ../resources.py:196
+#: ../resources.py:199
 #, fuzzy
 msgid "Tchack Resources"
 msgstr "Ressources"
@@ -849,12 +849,12 @@ msgstr "Le titre de la recherche est changé."
 msgid "The user {title} did some changes."
 msgstr "L'utilisateur  « $title » a effectué des modifications."
 
-#: ../issue_views.py:402
+#: ../issue_views.py:404
 #, fuzzy
 msgid "There are {n} assignments."
 msgstr "Il y a ${n} attributions."
 
-#: ../issue_views.py:401
+#: ../issue_views.py:403
 msgid "There is 1 assignment."
 msgstr "Il y a une attribution."
 

@@ -44,6 +44,7 @@ from tables import ModulesResource, ModulesHandler
 from tables import VersionsResource, VersionsHandler
 from tracker_views import GoToIssueMenu, StoredSearchesMenu
 from tracker_views import Tracker_NewInstance, Tracker_Search, Tracker_View
+from tracker_views import Tracker_Zip_Img
 from tracker_views import Tracker_AddIssue, Tracker_GoToIssue
 from tracker_views import Tracker_RememberSearch, Tracker_ForgetSearch
 from tracker_views import Tracker_ExportToText, Tracker_ChangeSeveralBugs
@@ -284,6 +285,7 @@ class Tchack_Tracker(Folder):
     new_instance = Tracker_NewInstance()
     search = Tracker_Search()
     view = Tracker_View()
+    zip = Tracker_Zip_Img()
     add_issue = Tracker_AddIssue()
     remember_search = Tracker_RememberSearch()
     forget_search = Tracker_ForgetSearch()
@@ -292,66 +294,6 @@ class Tchack_Tracker(Folder):
     export_to_csv_form = Tracker_ExportToCSVForm()
     export_to_csv = Tracker_ExportToCSV()
     change_several_bugs = Tracker_ChangeSeveralBugs()
-
-    #######################################################################
-    # Update
-    #######################################################################
-    def update_20080407(self):
-        """Add calendar to tracker.
-        """
-        metadata = Tchack_Resources.build_metadata()
-        self.handler.set_handler('calendar.metadata', metadata)
-
-
-    def update_20081015(self):
-        """Add the 'products' table.
-        """
-        # Add the products table
-        cls = Tracker_TableResource
-        cls.make_resource(cls, self, 'products')
-        # Change the format of the 'modules' table
-        resource = self.get_resource('modules')
-        metadata = resource.metadata
-        metadata.set_changed()
-        metadata.format = ModulesResource.class_id
-
-
-    def update_20081120(self):
-        """Add a default product.
-        """
-        from issue import Tchack_Issue
-        # Add a default product
-        products = self.get_resource('products').get_handler()
-        title = Property(u'Default', language='en')
-        record = products.add_record({'title': title})
-        product = record.id
-        # Update Modules/Versions
-        product_pro = Property(str(product))
-        for name in 'modules', 'versions':
-            handler = self.get_resource(name).handler
-            handler.set_changed()
-            handler.incremental_save = False
-            for record in handler.get_records():
-                for version in record:
-                    version.setdefault('product', product_pro)
-        # Update issues
-        for issue in self.search_resources(cls=Tchack_Issue):
-            history = issue.get_history()
-            handler.incremental_save = False
-            for record in history.get_records():
-                version = record[-1]
-                version.setdefault('product', product)
-
-
-    def update_20081214(self):
-        """Rename tables.
-        """
-        self.move_resource('products', 'product')
-        self.move_resource('modules', 'module')
-        self.move_resource('versions', 'version')
-        self.move_resource('types', 'type')
-        self.move_resource('states', 'state')
-        self.move_resource('priorities', 'priority')
 
 
 

@@ -35,6 +35,8 @@ from itools.html import xhtml_uri
 from itools.i18n import format_datetime
 from itools.web import STLForm, STLView
 from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
+from itools.vfs import FileName
+from itools.core import guess_extension
 
 # Import from ikaaro
 from ikaaro.messages import MSG_CHANGES_SAVED
@@ -46,7 +48,9 @@ from ikaaro.file import Image, Video
 # Local import
 from datatypes import get_issue_fields, UsersList
 
+# Debug
 from pprint import pprint
+
 
 ###########################################################################
 # Utilities
@@ -170,12 +174,12 @@ class Issue_Edit(STLForm):
         comments = []
         # Count comments
         i = 0
-        # file counter
-        j = 0
+        is_image = False
+        files = resource.get_names()
         for record in resource.get_history_records():
             comment = record.comment
             file = record.file
-            thumb_low = ''
+            #thumb_low = ''
             #thumb_high = ''
             if not comment and not file:
                 continue
@@ -184,36 +188,28 @@ class Issue_Edit(STLForm):
             username = record.username
             user = users.get_resource(username, soft=True)
             user_title = user and user.get_title() or username
-            #from pprint import pprint
             # In case of an Image joined as file, show it as a preview
             # (width="256", for now).
-            # To do: Use a Thumbnail image.
-            # And add a thickbox JS+CSS in the STL view
-            files = resource.get_names()
-            # Count files
-            #from pprint import pprint
-            #pprint('===nb===')
-            #pprint(nb)
             if file:
-                joinedfile = resource._get_resource(file)
+                #pprint("file = %s" % file)
                 # If file is an image return True
-                is_image = isinstance(joinedfile, Image)
-                if is_image is True:
-                    thumb_low = ';thumb?width=500&size=500&height=500'
-                    #Need to adapt thickbox to accept ;thumb
-                    # 1000 is too high, the preview is not completely created in
-                    # time
-                    #thumb_high = ';thumb?width=1000&size=1000&height=1000'
-                is_video = isinstance(joinedfile, Video)
-                if is_video is True:
-                    pprint("Video = %s" % is_video)
-                j += 1
-            if comment and not file:
+                is_image = isinstance(resource._get_resource(file), Image)
+                """
+                filename, ext, lang = FileName.decode(file)
+                pprint("ext = %s" % ext)
+                if ext is None:
+                    mimetype = file.get_content_type()
+                    ext = guess_extension(mimetype)[1:]
+                    pprint("ext = %s" % ext)
+                """
+            if comment and not file: 
                 is_image = False
                 is_video = False
             i += 1
-            #pprint('===is_image===')
-            #pprint(is_image)
+            #
+            #pprint("thumb_low = %s" % thumb_low)
+            #pprint("is_image = %s" % is_image)
+            #pprint("file = %s" % file)
             comments.append({
                 'number': i,
                 'user': user_title,
@@ -222,8 +218,6 @@ class Issue_Edit(STLForm):
                 'file': file,
                 'is_image': is_image,
                 'is_video': is_video,
-                'thumb_low': thumb_low,
-                #'thumb_high': thumb_high, 
                 })
         comments.reverse()
         namespace['comments'] = comments

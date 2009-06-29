@@ -21,17 +21,23 @@
 
 # Import from the Standard Library
 from datetime import datetime
+from time import strftime
+from tempfile import mkdtemp
+from subprocess import call
 
 # Import from itools
-from itools.core import merge_dicts
+from itools.core import merge_dicts, guess_extension
 from itools.csv import CSVFile, Property
 from itools.datatypes import Boolean, Integer, String, Unicode, Enumerate
 from itools.gettext import MSG
 from itools.i18n import format_datetime
-from itools.uri import encode_query, Reference
+from itools.uri import encode_query, Reference, get_reference
+from itools import vfs
+from itools.vfs import FileName
 from itools.web import BaseView, BaseForm, STLForm
 from itools.web import INFO, ERROR
 from itools.web.views import process_form
+from itools.handlers import get_handler, File as FileHandler
 
 # Import from ikaaro
 from ikaaro.buttons import Button
@@ -69,6 +75,7 @@ columns = [
 ###########################################################################
 class GoToIssueMenu(ContextMenu):
 
+    access = 'is_allowed_to_view'
     title = MSG(u'Go To Issue')
     template = '/ui/tchacker/menu_goto.xml'
 
@@ -168,7 +175,6 @@ class StoredSearchesMenu(ContextMenu):
 
 
 class TrackerViewMenu(ContextMenu):
-
     title = MSG(u'Advanced')
 
     def get_items(self, resource, context):
@@ -176,6 +182,8 @@ class TrackerViewMenu(ContextMenu):
         schema = context.view.get_query_schema()
         params = encode_query(context.query, schema)
         items = [
+            {'title': MSG(u'Download "Last Att." images as one Zip'),
+             'href': ';zip?%s' % params},
             {'title': MSG(u'Edit this search'),
              'href': ';search?%s' % params},
             {'title': MSG(u'Change Several Issues'),
@@ -410,6 +418,9 @@ class Tracker_View(BrowseForm):
 
 
     def get_item_value(self, resource, context, item, column):
+        # Local variable
+        users = resource.get_resource('/users') 
+ 
         if column == 'checkbox':
             selected_issues = context.get_form_values('ids') or []
             return item.name, item.name in selected_issues
@@ -417,61 +428,58 @@ class Tracker_View(BrowseForm):
         if column == 'id':
             id = item.name
             return id, '%s/;edit' % id
-         
         # Last Attachement
         if column == 'last-attachement':
             # Get Tracker's id
             id = '%s' % getattr(item, 'id')
             issue = resource.get_resource(id)
-            file =''
-            i = 0
             value = None
+            # Follow, a var for the last joined file (image)
+            last_img = None
             for record in issue.get_history_records():
                 file = record.get_value('file')
                 # Need to check if the file is an Image
-                files = issue.get_names()
-                
+                #pprint("author= %s" % last_author)
+                #pprint("file = %s" % file)
+                #pprint("files = %s" % files)
                 if not file:
-                    continue
+                    if last_img is not None:
+                        value = '%s/%s/;thumb?size=&width=256&height=256' % (id, last_img)
+                    else: 
+                        value = "Empty"
+                    #continue
                 if file:
-                    joinedfile = issue._get_resource(files[i])
+                    joinedfile = issue._get_resource(file)
                     is_image = isinstance(joinedfile, Image)
-
-                    #pprint('==i==')
-                    #pprint(i)
-                    
-                    #pprint('==files==')
-                    #pprint(files[i])
-
-                    #pprint('==is_image==')
-                    #pprint(is_image)
-
+                    #pprint(files)
                     if is_image:
                         is_thumb = True
-                        #link = '<img src="%s/%s/;download" width="128" />' % (id, file)
-                        #value = '%s/%s/;download' % (id, file)
-                        value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, files[i])
+                        value = '%s/%s/;thumb?size=&width=256&height=256' % (id, file)
+                        last_img = file
                     else:
-                        value = None
-                    i += 1
-
-                #value = '%s/%s/;thumb?width=128&size=128&height=128' % (id, file)
-                #from pprint import pprint
-                #pprint('==value-thumb_lastattach==')
-                #pprint(value)i
+                        value = '%s/%s/;thumb?size=&width=256&height=256' % (id, last_img)
+                        last_img = last_img
+            #pprint("value = %s" % value)
+            return value
+        # Last Author
+        if column == 'last-author':
+            # Get Tracker's id
+            id = '%s' % getattr(item, 'id')
+            issue = resource.get_resource(id)
+            #file =''
+            value = None
+            for record in issue.get_history_records():
+                file = record.get_value('file')
+                # solid in case the user has been removed
+                username = record.username
+                user = users.get_resource(username, soft=True)
+                last_author = user and user.get_title() or username
+                #pprint("author= %s" % last_author)
+                value = last_author
             return value
 
         value = getattr(item, column)
 
-        """ 
-        from pprint import pprint
-        pprint('==item==')
-        pprint(item)
-        pprint('==column==')
-        pprint(column)
-        pprint('==value==')
-        pprint(value)
-        """
         if value is None:
             return None
         if column == 'title':
@@ -506,6 +514,7 @@ class Tracker_View(BrowseForm):
         table_columns.insert(0, ('checkbox', None))
         # Insert the last attachement row's title in the table
         table_columns.insert(2, ('last-attachement', 'Last Attach.'))
+        table_columns.insert(11, ('last-author', 'Last Auth.'))
         return table_columns
 
     #######################################################################
@@ -521,38 +530,37 @@ class Tracker_View(BrowseForm):
         for name, title, sortable in columns:
             if name == 'checkbox':
                 # Type: checkbox
-                if  actions:
+                if self.external_form or actions:
                     columns_ns.append({'is_checkbox': True})
-            elif title is None:
-                # Type: nothing
-                continue
-            elif not sortable:
+            elif title is None or not sortable:
                 # Type: nothing or not sortable
                 columns_ns.append({
                     'is_checkbox': False,
                     'title': title,
                     'href': None,
-                    'name': name,
-                    })
+                    'sortable': False,
+                    'name': name})
             else:
                 # Type: normal
-                kw = {'sort_by': name}
+                base_href = context.uri.replace(sort_by=name)
                 if name == sort_by:
-                    col_reverse = (not reverse)
-                    order = 'up' if reverse else 'down'
+                    sort_up_active = reverse is False
+                    sort_down_active = reverse is True
                 else:
-                    col_reverse = False
-                    order = 'none'
-                kw['reverse'] = Boolean.encode(col_reverse)
+                    sort_up_active = sort_down_active = False
                 columns_ns.append({
                     'is_checkbox': False,
                     'title': title,
-                    'order': order,
-                    'href': context.uri.replace(**kw),
+                    'sortable': True,
+                    'href': context.uri.path,
+                    'href_up': base_href.replace(reverse=0),
+                    'href_down': base_href.replace(reverse=1),
+                    'sort_up_active': sort_up_active,
+                    'sort_down_active': sort_down_active,
                     'name': name,
                     })
         return columns_ns
-     
+  
     #######################################################################
     # Table row
     def get_table_namespace(self, resource, context, items):
@@ -913,6 +921,120 @@ class Tracker_ExportToCSV(BaseView):
         response.set_header('Content-Disposition',
                             'attachment; filename=export.csv')
         return csv.to_str(separator=separator)
+
+
+class Tracker_Zip_Img(Tracker_View):
+
+    access = 'is_allowed_to_view'
+    title = MSG(u'Zip Last Images')
+    #icon = 'view.png'
+    schema = {
+        'ids': String(multiple=True),
+    }
+    
+    def get_table_namespace(self, resource, context, items):
+        
+        namespace = Tracker_View.get_table_namespace(self, resource,
+                context, items)
+        issues = []
+        
+        for row in namespace['rows']:
+            #pprint("row = %s" % row)
+            issue = {}
+        
+            for column in row['columns']:
+                #pprint(column.keys())
+                #pprint("column['name'] = %s" % column['name'])
+                if column['name'] == 'last-attachement':
+                    #pprint("column['src'] = %s" % column['src'])
+                    if column['src'] is "Empty":
+                        issue['image'] = None 
+                        issue['filename'] = None 
+                        issue['reference'] = None 
+                        issue['name'] = None 
+                    else:
+                        uri = column['src'].encode('utf-8')
+                        #pprint("uri => %s" % uri)
+                        reference =  get_reference(uri[:-len('/;thumb?size=&width=256&height=256')])
+                        image = resource.get_resource('%s' % reference)
+                        filename = image.name
+                        #images.append((image, filename, reference))
+                        issue['image'] = image
+                        issue['filename'] = filename
+                        issue['reference'] = reference
+                        # pprint(issue)
+                if column['name'] == 'title':
+                    issue['name'] = column['value'].encode('utf-8')
+
+            issues.append((issue['image'], issue['filename'],
+                       issue['reference'], issue['name']))
+
+        return issues
+        
+    def GET(self, resource, context):
+        items = self.get_items(resource, context)
+        items = self.sort_and_batch(resource, context, items)
+        issues = self.get_table_namespace(resource, context, items)
+        
+        dirname = mkdtemp('zip', 'ikaaro')
+        tempdir = vfs.open(dirname)
+        if issues is not None:
+            for lastimage, imagename, reference, name  in issues:
+                if imagename is None:
+                    continue
+                imagename, ext, lang = FileName.decode(imagename)
+                if ext is None:
+                    mimetype = lastimage.get_content_type()
+                    ext = guess_extension(mimetype)[1:]
+                    imagename = FileName.encode((name, ext, lang))
+                if tempdir.exists(imagename):
+                    continue
+                file = tempdir.make_file(imagename)
+                try:
+                    if isinstance(lastimage, FileHandler):
+                        try:
+                            lastimage.save_state_to_file(file)
+                        except XMLError:
+                            pass
+                    else:
+                        lastimage.handler.save_state_to_file(file)
+                finally:
+                    file.close()
+        # Zip it
+        tracker = str(resource.get_abspath()).lstrip('/').replace('/','_').capitalize()
+
+        #pprint("tracker = %s" % tracker)
+        name = "LastAttachedImages"
+        now = strftime("%y%d%m%H%M")
+        #pprint("%s" % now)
+        zipname = "%s_%s_%s.zip" % (tracker, name, now)
+        command = ['zip', '-r', '%s' % zipname, '.', '-i', '*']        
+        
+        try:
+            call(command, cwd=dirname)
+        except OSError:
+            msg = ERROR(u"ZIP generation failed.")
+            return context.com_back(msg)
+        
+        if not tempdir.exists(zipname):
+            return context.come_back(MSG(u"ZIP creation failed."))
+
+        # Read the file's data
+        file = tempdir.open(zipname)
+        try:
+            data = file.read()
+        finally:
+            file.close()
+        
+        # Clean the temp folder
+        vfs.remove(dirname)
+        
+        # OK
+        response = context.response
+        response.set_header('Content-Type', 'application/zip')
+        response.set_header('Content-Disposition',
+                'attachement; filename=%s' % zipname)
+        return data
 
 
 

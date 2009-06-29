@@ -35,6 +35,7 @@ from itools.html import xhtml_uri
 from itools.i18n import format_datetime
 from itools.web import STLForm, STLView
 from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
+from itools.vfs import FileName
 
 # Import from ikaaro
 from ikaaro.messages import MSG_CHANGES_SAVED

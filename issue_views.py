@@ -36,6 +36,7 @@ from itools.i18n import format_datetime
 from itools.web import STLForm, STLView
 from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
 from itools.vfs import FileName
+from itools.core import guess_extension
 
 # Import from ikaaro
 from ikaaro.messages import MSG_CHANGES_SAVED
@@ -189,8 +190,14 @@ class Issue_Edit(STLForm):
                 #pprint("file = %s" % file)
                 # If file is an image return True
                 is_image = isinstance(resource._get_resource(file), Image)
+                """
                 filename, ext, lang = FileName.decode(file)
                 pprint("ext = %s" % ext)
+                if ext is None:
+                    mimetype = file.get_content_type()
+                    ext = guess_extension(mimetype)[1:]
+                    pprint("ext = %s" % ext)
+                """
             if comment and not file: 
                 is_image = False
             i += 1

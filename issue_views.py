@@ -203,8 +203,8 @@ class Issue_Edit(STLForm):
             i += 1
             #
             #pprint("thumb_low = %s" % thumb_low)
-            pprint("is_image = %s" % is_image)
-            pprint("file = %s" % file)
+            #pprint("is_image = %s" % is_image)
+            #pprint("file = %s" % file)
             comments.append({
                 'number': i,
                 'user': user_title,

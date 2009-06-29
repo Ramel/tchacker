@@ -191,12 +191,11 @@ class Issue_Edit(STLForm):
             # And add a thickbox JS+CSS in the STL view
             files = resource.get_names()
             # Count files
-            nb = len(files)
             #from pprint import pprint
             #pprint('===nb===')
             #pprint(nb)
             if file:
-                joinedfile = resource._get_resource(files[j])
+                joinedfile = resource._get_resource(file)
                 # If file is an image return True
                 is_image = isinstance(joinedfile, Image)
                 if is_image is True:
@@ -206,10 +205,8 @@ class Issue_Edit(STLForm):
                     # time
                     #thumb_high = ';thumb?width=1000&size=1000&height=1000'
                 is_video = isinstance(joinedfile, Video)
-                """
                 if is_video is True:
-                    pprint("Video")
-                """
+                    pprint("Video = %s" % is_video)
                 j += 1
             if comment and not file:
                 is_image = False

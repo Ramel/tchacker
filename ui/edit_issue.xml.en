@@ -52,7 +52,7 @@
     </tr>
     <tr stl:if="comment/is_video">
       <td colspan="5">
-        <a href="${comment/file}/;download" style="display:block;width:480px;height:270px;" id="player"></a>
+        <a href="${comment/file}/;download" style="display:block;width:${comment/width}px;height:${comment/height}px;" id="player-${comment/number}"></a>
       </td>
     </tr>
     <tr stl:if="comment/file">
@@ -66,7 +66,15 @@
       </td>
     </tr>
   </table>
-  <br/>
+  <script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.1.1.swf", {
+      clip: {
+        autoPlay: false,
+        autoBuffering: true,
+        scaling: 'fit'
+      }
+  }); 
+  </script>
+  
 </stl:block>
 
 <br/>
@@ -190,13 +198,4 @@
     </table>
   </fieldset>
 </form>
-<script language="JavaScript"> 
-flowplayer("player", "/ui/flowplayer/flowplayer-3.1.1.swf", {
-      clip: {
-        autoPlay: false,
-        autoBuffering: true,
-        scaling: 'fit'
-      }
-    }); 
-</script>
 </stl:block>

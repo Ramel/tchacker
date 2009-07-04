@@ -192,6 +192,8 @@ class Issue_Edit(STLForm):
             user_title = user and user.get_title() or username
             # In case of an Image joined as file, show it as a preview
             # (width="256", for now).
+            width, height = None, None
+            
             if file:
                 is_image = False
                 is_video = False
@@ -200,7 +202,6 @@ class Issue_Edit(STLForm):
                 is_image = isinstance(resource.get_resource(file), Image)
                 is_video = isinstance(resource.get_resource(file), Video)
                 
-                width, height = None
                 pprint("is_image = %s" % is_image)
                 pprint("is_video = %s" % is_video)
                 
@@ -236,6 +237,7 @@ class Issue_Edit(STLForm):
                     #pprint("base = %s" % base)
                     pprint("uri = %s.%s" % (uri, ext))
                     width, height, ratio = VideoEncodingToFLV(resource).get_size_and_ratio("%s.%s" % (uri, ext))
+                    height = int(height) + 22
                     pprint("width x height & ratio = %s x %s & %s" % (width,
                                 height, ratio))
                 """
@@ -270,8 +272,7 @@ class Issue_Edit(STLForm):
                 'is_image': is_image,
                 'is_video': is_video,
                 'width': width,
-                'height': height
-
+                'height': str(height)
                 })
         comments.reverse()
         namespace['comments'] = comments

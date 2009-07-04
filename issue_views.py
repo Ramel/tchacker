@@ -198,13 +198,13 @@ class Issue_Edit(STLForm):
                 pprint("file = %s" % file)
                 # If file is an image return True
                 is_image = isinstance(resource.get_resource(file), Image)
-                if is_image is not True:
-                    is_video = isinstance(resource.get_resource(file), Video)
+                is_video = isinstance(resource.get_resource(file), Video)
                 
+                width, height = None
                 pprint("is_image = %s" % is_image)
                 pprint("is_video = %s" % is_video)
                 
-                if is_video is True and is_image is False:
+                if is_video is True:
                     """
                     if is_image is True:
                         width, height = resource.get_resource(file).get_handler().get_size()
@@ -238,7 +238,6 @@ class Issue_Edit(STLForm):
                     width, height, ratio = VideoEncodingToFLV(resource).get_size_and_ratio("%s.%s" % (uri, ext))
                     pprint("width x height & ratio = %s x %s & %s" % (width,
                                 height, ratio))
-                
                 """
                 if is_image is True:
                     #width, height = resource._get_resource(file).get_size()
@@ -270,6 +269,9 @@ class Issue_Edit(STLForm):
                 'file': file,
                 'is_image': is_image,
                 'is_video': is_video,
+                'width': width,
+                'height': height
+
                 })
         comments.reverse()
         namespace['comments'] = comments

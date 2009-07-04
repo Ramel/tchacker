@@ -36,7 +36,8 @@ from itools.i18n import format_datetime
 from itools.web import STLForm, STLView
 from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
 from itools.vfs import FileName
-from itools.core import guess_extension
+from itools.core import guess_extension, guess_type
+from itools.uri import resolve_uri
 
 # Import from ikaaro
 from ikaaro.messages import MSG_CHANGES_SAVED
@@ -47,6 +48,8 @@ from ikaaro.file import Image, Video
 
 # Local import
 from datatypes import get_issue_fields, UsersList
+
+from videoencoding.video import VideoEncodingToFLV
 
 # Debug
 from pprint import pprint
@@ -159,7 +162,7 @@ class Issue_Edit(STLForm):
         context.scripts.append('/ui/thickbox/thickbox.js')
         #context.scripts.append('/ui/flowplayer/script.js')
         context.scripts.append('/ui/flowplayer/flowplayer-3.1.1.min.js')
-        #context.scripts.append('/ui/flowplayer/flowplayer-3.1.1.swf')
+        context.scripts.append('/ui/flowplayer/flowplayer-3.1.1.swf')
         #context.scripts.append('/ui/flowplayer/flowplayer.controls-3.1.1.swf')
 
         # Local variables
@@ -174,8 +177,7 @@ class Issue_Edit(STLForm):
         comments = []
         # Count comments
         i = 0
-        is_image = False
-        files = resource.get_names()
+        #files = resource.get_names()
         for record in resource.get_history_records():
             comment = record.comment
             file = record.file
@@ -191,9 +193,58 @@ class Issue_Edit(STLForm):
             # In case of an Image joined as file, show it as a preview
             # (width="256", for now).
             if file:
-                #pprint("file = %s" % file)
+                is_image = False
+                is_video = False
+                pprint("file = %s" % file)
                 # If file is an image return True
-                is_image = isinstance(resource._get_resource(file), Image)
+                is_image = isinstance(resource.get_resource(file), Image)
+                if is_image is not True:
+                    is_video = isinstance(resource.get_resource(file), Video)
+                
+                pprint("is_image = %s" % is_image)
+                pprint("is_video = %s" % is_video)
+                
+                if is_video is True and is_image is False:
+                    """
+                    if is_image is True:
+                        width, height = resource.get_resource(file).get_handler().get_size()
+                        pprint("width x height = %s x %s" % (width, height))
+                        #pprint("Handler.get_content_type = %s" % resource.get_resource(file).get_handler().get_size())
+                    """
+                    #pprint("Handler.get_size = %s" % resource.get_resource(file).get_type())
+                    video = resource.get_resource(file)
+                    base = video.metadata.uri
+                    #cls = resource.class_handler
+                    name = video.name
+                        
+                    name, ext, lang = FileName.decode(name)
+                    if ext is None:
+                        mimetype = video.get_content_type()
+                        ext = guess_extension(mimetype)[1:]
+                        
+                    pprint("ext = %s, sortie de is_video" % ext)
+                        
+                    #name, extension, language = FileName.decode(name)
+                    
+                    #pprint("ext = %s" % ext)
+                    #pprint("Name = %s" % name)
+                        
+                    #name = FileName.encode((resource.name, cls.class_extension, None))
+                    uri = resolve_uri(base, name)
+                    #ext = guess_extension(name)
+                    pprint("name = %s" % name)
+                    #pprint("base = %s" % base)
+                    pprint("uri = %s.%s" % (uri, ext))
+                    width, height, ratio = VideoEncodingToFLV(resource).get_size_and_ratio("%s.%s" % (uri, ext))
+                    pprint("width x height & ratio = %s x %s & %s" % (width,
+                                height, ratio))
+                
+                """
+                if is_image is True:
+                    #width, height = resource._get_resource(file).get_size()
+                    width, height = resource.get_resource(file).get_handler().get_size()
+                    pprint("width x height = %s x %s" % (width, height))
+                """
                 """
                 filename, ext, lang = FileName.decode(file)
                 pprint("ext = %s" % ext)
@@ -209,6 +260,7 @@ class Issue_Edit(STLForm):
             #
             #pprint("thumb_low = %s" % thumb_low)
             #pprint("is_image = %s" % is_image)
+            #pprint("is_video = %s" % is_video)
             #pprint("file = %s" % file)
             comments.append({
                 'number': i,

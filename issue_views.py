@@ -197,13 +197,13 @@ class Issue_Edit(STLForm):
             if file:
                 is_image = False
                 is_video = False
-                pprint("file = %s" % file)
+                #pprint("file = %s" % file)
                 # If file is an image return True
                 is_image = isinstance(resource.get_resource(file), Image)
                 is_video = isinstance(resource.get_resource(file), Video)
                 
-                pprint("is_image = %s" % is_image)
-                pprint("is_video = %s" % is_video)
+                #pprint("is_image = %s" % is_image)
+                #pprint("is_video = %s" % is_video)
                 
                 if is_video is True:
                     video = resource.get_resource(file)

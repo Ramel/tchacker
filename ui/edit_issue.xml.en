@@ -70,6 +70,7 @@
       clip: {
         autoPlay: false,
         autoBuffering: true,
+        bufferLength:1,
         scaling: 'fit'
       }
   }); 

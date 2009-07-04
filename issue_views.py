@@ -206,16 +206,8 @@ class Issue_Edit(STLForm):
                 pprint("is_video = %s" % is_video)
                 
                 if is_video is True:
-                    """
-                    if is_image is True:
-                        width, height = resource.get_resource(file).get_handler().get_size()
-                        pprint("width x height = %s x %s" % (width, height))
-                        #pprint("Handler.get_content_type = %s" % resource.get_resource(file).get_handler().get_size())
-                    """
-                    #pprint("Handler.get_size = %s" % resource.get_resource(file).get_type())
                     video = resource.get_resource(file)
                     base = video.metadata.uri
-                    #cls = resource.class_handler
                     name = video.name
                         
                     name, ext, lang = FileName.decode(name)
@@ -223,46 +215,19 @@ class Issue_Edit(STLForm):
                         mimetype = video.get_content_type()
                         ext = guess_extension(mimetype)[1:]
                         
-                    pprint("ext = %s, sortie de is_video" % ext)
-                        
-                    #name, extension, language = FileName.decode(name)
+                    #pprint("ext = %s, sortie de is_video" % ext)
                     
-                    #pprint("ext = %s" % ext)
-                    #pprint("Name = %s" % name)
-                        
-                    #name = FileName.encode((resource.name, cls.class_extension, None))
                     uri = resolve_uri(base, name)
-                    #ext = guess_extension(name)
-                    pprint("name = %s" % name)
+                    #pprint("name = %s" % name)
                     #pprint("base = %s" % base)
-                    pprint("uri = %s.%s" % (uri, ext))
+                    #pprint("uri = %s.%s" % (uri, ext))
                     width, height, ratio = VideoEncodingToFLV(resource).get_size_and_ratio("%s.%s" % (uri, ext))
                     height = int(height) + 22
-                    pprint("width x height & ratio = %s x %s & %s" % (width,
-                                height, ratio))
-                """
-                if is_image is True:
-                    #width, height = resource._get_resource(file).get_size()
-                    width, height = resource.get_resource(file).get_handler().get_size()
-                    pprint("width x height = %s x %s" % (width, height))
-                """
-                """
-                filename, ext, lang = FileName.decode(file)
-                pprint("ext = %s" % ext)
-                if ext is None:
-                    mimetype = file.get_content_type()
-                    ext = guess_extension(mimetype)[1:]
-                    pprint("ext = %s" % ext)
-                """
+                    #pprint("width x height & ratio = %s x %s & %s" % (width, height, ratio))
             if comment and not file: 
                 is_image = False
                 is_video = False
             i += 1
-            #
-            #pprint("thumb_low = %s" % thumb_low)
-            #pprint("is_image = %s" % is_image)
-            #pprint("is_video = %s" % is_video)
-            #pprint("file = %s" % file)
             comments.append({
                 'number': i,
                 'user': user_title,

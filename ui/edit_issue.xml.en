@@ -69,10 +69,14 @@
   <script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.1.1.swf", {
       clip: {
         autoPlay: false,
-        autoBuffering: true,
-        bufferLength:1,
+        autoBuffering: false,
+        //bufferLength: 1,
         scaling: 'fit'
-      }
+      },
+      // canvas background
+      canvas: {
+        backgroundImage: 'url(story/;download)'
+      },
   }); 
   </script>
   

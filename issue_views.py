@@ -177,6 +177,9 @@ class Issue_Edit(STLForm):
         comments = []
         # Count comments
         i = 0
+        records = list(resource.get_history_records())
+        length = len(records) - 1
+        pprint("lenght = %s" % length)
         #files = resource.get_names()
         for record in resource.get_history_records():
             comment = record.comment
@@ -197,6 +200,7 @@ class Issue_Edit(STLForm):
             if file:
                 is_image = False
                 is_video = False
+                last_video = False
                 #pprint("file = %s" % file)
                 # If file is an image return True
                 is_image = isinstance(resource.get_resource(file), Image)
@@ -205,11 +209,17 @@ class Issue_Edit(STLForm):
                 #pprint("is_image = %s" % is_image)
                 #pprint("is_video = %s" % is_video)
                 
-                if is_video is True:
+                if is_video:
+                    """
+                    #pprint("i = %s and length = %s" % (i, length))
+                    if (i == length ):
+                        last_video = True
+                        #pprint("LastVideo = %s" % last_video)
+                    """
                     video = resource.get_resource(file)
                     base = video.metadata.uri
                     name = video.name
-                        
+                     
                     name, ext, lang = FileName.decode(name)
                     if ext is None:
                         mimetype = video.get_content_type()
@@ -237,7 +247,8 @@ class Issue_Edit(STLForm):
                 'is_image': is_image,
                 'is_video': is_video,
                 'width': width,
-                'height': str(height)
+                'height': str(height),
+                #'last_video': last_video
                 })
         comments.reverse()
         namespace['comments'] = comments

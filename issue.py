@@ -249,6 +249,7 @@ class Tchack_Issue(Issue):
                     file.close()
 
                 #VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, name, 540)
+                # Encode to 540 of width
                 encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname,
                         filename, name, 540)
                 
@@ -272,7 +273,7 @@ class Tchack_Issue(Issue):
                 
                 file.close()
                 # Clean the temporary folder
-                vfs.remove(dirname)
+                #vfs.remove(dirname)
                 
                 # Create the flv and thumb resource
                 video = get_resource_class(flvmimetype)

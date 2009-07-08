@@ -179,7 +179,7 @@ class Issue_Edit(STLForm):
         i = 0
         records = list(resource.get_history_records())
         length = len(records) - 1
-        pprint("lenght = %s" % length)
+        #pprint("lenght = %s" % length)
         #files = resource.get_names()
         for record in resource.get_history_records():
             comment = record.comment
@@ -196,6 +196,7 @@ class Issue_Edit(STLForm):
             # In case of an Image joined as file, show it as a preview
             # (width="256", for now).
             width, height = None, None
+            thumbnail = None 
             
             if file:
                 is_image = False
@@ -219,12 +220,13 @@ class Issue_Edit(STLForm):
                     video = resource.get_resource(file)
                     base = video.metadata.uri
                     name = video.name
-                     
+                    #pprint("name = %s" % name)
                     name, ext, lang = FileName.decode(name)
                     if ext is None:
                         mimetype = video.get_content_type()
                         ext = guess_extension(mimetype)[1:]
-                        
+                    
+                    #thumbnail = ("thumb_%s" % name)
                     #pprint("ext = %s, sortie de is_video" % ext)
                     
                     uri = resolve_uri(base, name)
@@ -248,6 +250,7 @@ class Issue_Edit(STLForm):
                 'is_video': is_video,
                 'width': width,
                 'height': str(height),
+                #'thumbnail': thumbnail,
                 #'last_video': last_video
                 })
         comments.reverse()

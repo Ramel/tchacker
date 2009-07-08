@@ -75,7 +75,7 @@
       },
       // canvas background
       canvas: {
-        backgroundImage: 'url(story/;download)'
+        backgroundImage: 'url(thumb_${comment/file}/;download)'
       },
   }); 
   </script>

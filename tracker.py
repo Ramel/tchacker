@@ -68,7 +68,7 @@ default_tables = [
 class Tchack_Tracker(Folder):
 
     class_id = 'tchack_tracker'
-    class_version = '20081214'
+    class_version = '20090706'
     class_title = MSG(u'Tchack Issue Tracker')
     class_description = MSG(u'To manage images, bugs and tasks')
     class_icon16 = 'tracker/tracker16.png'
@@ -295,7 +295,86 @@ class Tchack_Tracker(Folder):
     export_to_csv = Tracker_ExportToCSV()
     change_several_bugs = Tracker_ChangeSeveralBugs()
 
+    #######################################################################
+    # Update
+    #######################################################################
+    def update_20090705(self):
+        """
+        Encode the unencoded MOV or AVI file, and add the thumb, erase the
+        original file.
+        """
+        from pprint import pprint
+        from datetime import datetime
+        from tempfile import mkdtemp
+        
+        from issue import Tchack_Issue
+        from ikaaro.file import Video
+        from ikaaro.exceptions import ConsistencyError
+        from itools import vfs
+        from itools.vfs import FileName
+        from itools.core import guess_extension
+        from itools.uri import get_uri_path
+        from videoencoding import VideoEncodingToFLV
+        from ikaaro.registry import get_resource_class
+        #TODO
+        for issue in self.search_resources(cls=Tchack_Issue):
+            base = issue.get_abspath()
+            history = issue.get_history()
 
+            for record in history.get_records():
+                file = history.get_record_value(record, 'file')
+                if not file:
+                    continue
+                if file:
+                    video = issue.get_resource(file)
+                    is_video = isinstance(video, Video)
+                    pprint("video.handler.uri = %s" % issue.handler.uri)
+                    pprint("====================")
+                    if is_video:
+                        #video = resource.get_resource(file)
+                        pprint("video name = %s" % file)
+                        base = video.metadata.uri
+                        mimetype = video.metadata.format
+                        #body = video.get_handler()
+                        name = video.name
+                        filename, ext, lang = FileName.decode(name)
+                        if ext is None:
+                            mimetype = video.get_content_type()
+                            ext = guess_extension(mimetype)[1:]
+                        #if ext != "flv":
+                        if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
+                            handler_path = get_uri_path(issue.handler.uri)
+                            pprint("MimeType = %s, Handler_path = %s" % (mimetype, handler_path))
+                            pprint("FileName = %s, Base = %s, Ext = %s" % (filename, base, ext))
+                            dirname = mkdtemp('videoencoding', 'ikaaro')
+                            tempdir = vfs.open(dirname)
+                            # Paste the file in the tempdir
+                            file = tempdir.make_file(filename) #"%s.%s" % (filename, ext))
+                            try:
+                                pprint("dirname = %s" % dirname)
+                                file.write(video.handler.to_str())
+                            finally:
+                                file.close()
+                            # Encode to 540 of width
+                            encoded = VideoEncodingToFLV(video).encode_avi_to_flv(
+                                 dirname, filename, name, 540)
+
+                            if encoded is not None:
+                                flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']
+                                thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
+        
+                            file.close()
+                            # Clean the temporary folder
+                            vfs.remove(dirname)
+                            """
+                            # Create the video FLV and thumbnail PNG resources
+                            video = get_resource_class(flvmimetype)
+                            thumbnail = get_resource_class(thumbmimetype)
+                            video.make_resource(video, self, name, body=flvbody, filename=flvfilename,
+                                extension=flvextension, format=flvmimetype)
+                            thumbnail.make_resource(thumbnail, self, thumbfilename, body=thumbbody, filename=thumbfilename,
+                                extension=thumbextension, format=thumbmimetype)
+                            """
 
 ###########################################################################
 # Register

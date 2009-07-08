@@ -227,9 +227,9 @@ class Tchack_Issue(Issue):
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
             name = generate_name(name, self.get_names())
-            
+
             cls = get_resource_class(mimetype)
-            
+
             # If the file is a Video(x-msvideo), get ratio for FLV encoding
             if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
                 # Create a temp dir, where to paste the video
@@ -248,34 +248,26 @@ class Tchack_Issue(Issue):
                 finally:
                     file.close()
 
-                #VideoEncodingToFLV(cls).encode_avi_to_flv(dirname, name, 540)
                 # Encode to 540 of width
-                encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(dirname,
-                        filename, name, 540)
-                
+                encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(
+                        dirname, filename, name, 540)
+
                 if encoded is not None:
                     flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']
                     thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
-                
+
                 #pprint('===filename===')
                 #pprint('%s' % flv[0])
                 #pprint('===mimetype===')
                 #pprint(flv[1])
                 #pprint('===body===')
                 #pprint(flv[2])
-                
-                # mimetype, body = encode_avi_to_flv()
-                # make_flv_thumbnail()
-                # make the resources for FLV and THUMB
-                
-                # Get the video ratio with ffmpeg 
-                #ratio = VideoEncodingToFLV(cls).get_ratio(dirname, filename)
-                
+
                 file.close()
                 # Clean the temporary folder
-                #vfs.remove(dirname)
-                
-                # Create the flv and thumb resource
+                vfs.remove(dirname)
+
+                # Create the FLV and PNG thumbnail resources
                 video = get_resource_class(flvmimetype)
                 thumbnail = get_resource_class(thumbmimetype)
                 video.make_resource(video, self, name, body=flvbody, filename=flvfilename,
@@ -479,16 +471,8 @@ class Tchack_Issue(Issue):
     history = Issue_History()
 
 
-
-
 ###########################################################################
 # Register
 ###########################################################################
 # The class
 register_resource_class(Tchack_Issue)
-
-# The fields
-#for name in ['id', 'product', 'module', 'version', 'type', 'state',
-#             'priority']:
-#    register_field(name, Integer(is_stored=True, is_indexed=True))
-#register_field('assigned_to', String(is_stored=True, is_indexed=True))

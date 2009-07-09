@@ -139,11 +139,11 @@ class Tchack_Tracker(Folder):
             except ValueError:
                 continue
             ids.append(id)
-            
+
         if ids:
             ids.sort()
             return prefix + str(ids[-1] + 1)
-        
+
         return prefix + '0'
 
 
@@ -306,7 +306,7 @@ class Tchack_Tracker(Folder):
         from pprint import pprint
         from datetime import datetime
         from tempfile import mkdtemp
-        
+
         from issue import Tchack_Issue
         from ikaaro.file import Video
         from ikaaro.exceptions import ConsistencyError
@@ -343,7 +343,7 @@ class Tchack_Tracker(Folder):
                             ext = guess_extension(mimetype)[1:]
                         #if ext != "flv":
                         if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
-                        
+
                             handler_path = get_uri_path(issue.handler.uri)
                             pprint("MimeType = %s, Handler_path = %s" % (mimetype, handler_path))
                             pprint("FileName = %s, Base = %s, Ext = %s" % (filename, base, ext))
@@ -363,7 +363,7 @@ class Tchack_Tracker(Folder):
                             if encoded is not None:
                                 flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']
                                 thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
-        
+
                             file.close()
                             # Clean the temporary folder
                             vfs.remove(dirname)

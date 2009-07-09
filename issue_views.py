@@ -234,7 +234,8 @@ class Issue_Edit(STLForm):
                     #pprint("base = %s" % base)
                     #pprint("uri = %s.%s" % (uri, ext))
                     width, height, ratio = VideoEncodingToFLV(resource).get_size_and_ratio("%s.%s" % (uri, ext))
-                    height = int(height) + 22
+                    # Add the Flowplayer menu's height
+                    height = int(height) + 24
                     #pprint("width x height & ratio = %s x %s & %s" % (width, height, ratio))
             if comment and not file: 
                 is_image = False

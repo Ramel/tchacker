@@ -343,6 +343,7 @@ class Tchack_Tracker(Folder):
                             ext = guess_extension(mimetype)[1:]
                         #if ext != "flv":
                         if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
+                        
                             handler_path = get_uri_path(issue.handler.uri)
                             pprint("MimeType = %s, Handler_path = %s" % (mimetype, handler_path))
                             pprint("FileName = %s, Base = %s, Ext = %s" % (filename, base, ext))
@@ -355,9 +356,9 @@ class Tchack_Tracker(Folder):
                                 file.write(video.handler.to_str())
                             finally:
                                 file.close()
-                            # Encode to 540 of width
+                            # Encode to 512 of width
                             encoded = VideoEncodingToFLV(video).encode_avi_to_flv(
-                                 dirname, filename, name, 540)
+                                 dirname, filename, name, 512)
 
                             if encoded is not None:
                                 flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']

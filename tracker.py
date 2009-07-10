@@ -322,25 +322,26 @@ class Tchack_Tracker(Folder):
             history = issue.get_history()
             for record in history.get_records():
                 #file = history.get_record_value(record, 'file')
-                file = record.file
+                filename = record.file
                 comment = record.comment
                 #pprint("Record = %s" % record)
                 #pprint("Title: %s" % history.get_record_value(record, 'title'))
                 #pprint("file = %s" % file)
                 is_video = False
-                if not comment and not file:
+                if not comment and not filename:
                     continue
-                if file:
-                    pprint("File = %s" % file)
-                    issue_file = issue.get_resource(file)
+                if filename:
+                    pprint("Filename = %s" % filename)
+                    file = issue.get_resource(filename)
+                    pprint("Issue_File = %s" % file)
                     is_video = isinstance(file, Video)
                     #is_video = isinstance(issue_file, Video)
-                    pprint("1 <file: %s" % (file))
-                    pprint("1 <Issue_file: %s" % (issue_file))
-                    pprint("1 < Is_video: %s" % (is_video))
                     if not is_video:
                         continue
                     if is_video:
+                        pprint("1 <filename: %s" % (filename))
+                        pprint("1 <Issue_file: %s" % (file))
+                        pprint("1 < Is_video: %s" % (is_video))
                         #pprint("2 <Issue_file: %s" % (issue_file))
                         #pprint("issue_file.handler.uri = %s" % issue_file.handler.uri)
                         #pprint("file.handler.uri = %s" % file.handler.uri)
@@ -354,20 +355,21 @@ class Tchack_Tracker(Folder):
                         #pprint("name = %s" % name)
                         filename, ext, lang = FileName.decode(name)
                         if ext is None:
-                            mimetype = issue_file.get_content_type()
+                            mimetype = file.get_content_type()
                             ext = guess_extension(mimetype)[1:]
                         pprint("Ext = %s" % ext)
                         pprint("Mimetype = %s" % mimetype)
-
-                        if ext != "flv":
+                        """
+                        if ext is not "flv":
                             continue
-                        if(mimetype == 'video/x-msvideo' or mimetype ==
-                                'video/quicktime'):
+                        """
+                        if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
                             #or not mimetype == 'video/x-flv'):
                             pprint("The file %s.%s will be encoded in FLV, replaced by, then erased." % (filename, ext))
                             handler_path = get_uri_path(issue.handler.uri)
                             pprint("MimeType = %s, Handler_path = %s" % (mimetype, handler_path))
-                            pprint("FileName = %s, Base = %s, Ext = %s" % (filename, base, ext))
+                            pprint("FileName = %s, Ext = %s" % (filename, ext))
+                            
                             dirname = mkdtemp('videoencoding', 'ikaaro')
                             tempdir = vfs.open(dirname)
                             # Paste the file in the tempdir
@@ -377,7 +379,7 @@ class Tchack_Tracker(Folder):
                             pprint("to = %s" % tmp_uri)
                             vfs.copy(file.handler.uri, tmp_uri)
                             # Encode to 512 of width
-                            encoded = VideoEncodingToFLV(issue_file).encode_avi_to_flv(
+                            encoded = VideoEncodingToFLV(file).encode_avi_to_flv(
                                  dirname, filename, name, 512)
 
                             if encoded is not None:
@@ -386,21 +388,20 @@ class Tchack_Tracker(Folder):
                             # Create the video FLV and thumbnail PNG resources
                             video = get_resource_class(flvmimetype)
                             thumbnail = get_resource_class(thumbmimetype)
-                            
                             # Remove the original files
                             pprint("Issue_file.handler.uri = %s" % file.handler.uri)
-                            """
                             if vfs.exists(file.handler.uri):
                                 pprint("-----< %s >--------" % file.handler.uri)
                                 vfs.remove(file.handler.uri)
                             if vfs.exists(file.metadata.uri):
                                 vfs.remove(file.metadata.uri)
-
+                            
                             video.make_resource(video, issue, name, body=flvbody, filename=flvfilename, extension=flvextension, format=flvmimetype)
                             thumbnail.make_resource(thumbnail, issue, thumbfilename, body=thumbbody, filename=thumbfilename, extension=thumbextension, format=thumbmimetype)
-                            """
+                            
                             # Clean the temporary folder
                             vfs.remove(dirname)
+                            
                             pprint("====================")
                         pprint("xxxxxxxxxxxxxxxx")
 

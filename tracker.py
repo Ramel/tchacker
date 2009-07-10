@@ -306,7 +306,6 @@ class Tchack_Tracker(Folder):
         from pprint import pprint
         from datetime import datetime
         from tempfile import mkdtemp
-
         from issue import Tchack_Issue
         from ikaaro.file import Video
         from ikaaro.exceptions import ConsistencyError
@@ -316,68 +315,41 @@ class Tchack_Tracker(Folder):
         from itools.uri import get_uri_path
         from videoencoding import VideoEncodingToFLV
         from ikaaro.registry import get_resource_class
-        #TODO
+        
         for issue in self.search_resources(cls=Tchack_Issue):
-            #base = issue.get_abspath()
+        
             history = issue.get_history()
+        
             for record in history.get_records():
-                #file = history.get_record_value(record, 'file')
+            
                 filename = record.file
                 comment = record.comment
-                #pprint("Record = %s" % record)
-                #pprint("Title: %s" % history.get_record_value(record, 'title'))
-                #pprint("file = %s" % file)
                 is_video = False
                 if not comment and not filename:
                     continue
                 if filename:
-                    pprint("Filename = %s" % filename)
                     file = issue.get_resource(filename)
-                    pprint("Issue_File = %s" % file)
                     is_video = isinstance(file, Video)
-                    #is_video = isinstance(issue_file, Video)
+                
                     if not is_video:
                         continue
                     if is_video:
-                        pprint("1 <filename: %s" % (filename))
-                        pprint("1 <Issue_file: %s" % (file))
-                        pprint("1 < Is_video: %s" % (is_video))
-                        #pprint("2 <Issue_file: %s" % (issue_file))
-                        #pprint("issue_file.handler.uri = %s" % issue_file.handler.uri)
-                        #pprint("file.handler.uri = %s" % file.handler.uri)
-                        #video = resource.get_resource(file)
-                        #pprint("issue_file = %s" % issue_file)
-                        #base = file.metadata.uri
-                        #mimetype = issue_file.metadata.format
-                        #body = video.get_handler()
                         name = file.name
-                        #pprint("base = s, mimetype = %s, name = %s" % (mimetype, name))
-                        #pprint("name = %s" % name)
                         filename, ext, lang = FileName.decode(name)
                         if ext is None:
                             mimetype = file.get_content_type()
                             ext = guess_extension(mimetype)[1:]
-                        pprint("Ext = %s" % ext)
-                        pprint("Mimetype = %s" % mimetype)
-                        """
-                        if ext is not "flv":
-                            continue
-                        """
                         if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
-                            #or not mimetype == 'video/x-flv'):
                             pprint("The file %s.%s will be encoded in FLV, replaced by, then erased." % (filename, ext))
                             handler_path = get_uri_path(issue.handler.uri)
-                            pprint("MimeType = %s, Handler_path = %s" % (mimetype, handler_path))
-                            pprint("FileName = %s, Ext = %s" % (filename, ext))
                             
                             dirname = mkdtemp('videoencoding', 'ikaaro')
                             tempdir = vfs.open(dirname)
+                            
                             # Paste the file in the tempdir
-                            pprint("vhu = %s" % file.handler.uri)
-                            #pprint("video.handler.to_str() = %s" % video.handler.to_str())
                             tmp_uri= "file:///%s/%s" % (dirname, filename)
-                            pprint("to = %s" % tmp_uri)
                             vfs.copy(file.handler.uri, tmp_uri)
+                            
                             # Encode to 512 of width
                             encoded = VideoEncodingToFLV(file).encode_avi_to_flv(
                                  dirname, filename, name, 512)
@@ -389,9 +361,7 @@ class Tchack_Tracker(Folder):
                             video = get_resource_class(flvmimetype)
                             thumbnail = get_resource_class(thumbmimetype)
                             # Remove the original files
-                            pprint("Issue_file.handler.uri = %s" % file.handler.uri)
                             if vfs.exists(file.handler.uri):
-                                pprint("-----< %s >--------" % file.handler.uri)
                                 vfs.remove(file.handler.uri)
                             if vfs.exists(file.metadata.uri):
                                 vfs.remove(file.metadata.uri)

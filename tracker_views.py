@@ -46,7 +46,7 @@ from ikaaro import messages
 from ikaaro.views_new import NewInstance
 from ikaaro.views import BrowseForm, SearchForm as BaseSearchForm, ContextMenu
 from ikaaro.registry import get_resource_class
-from ikaaro.file import Image
+from ikaaro.file import Image, Video
 
 # Import from ikaaro.tracker
 from issue import Tchack_Issue
@@ -451,13 +451,19 @@ class Tracker_View(BrowseForm):
                 if file:
                     joinedfile = issue._get_resource(file)
                     is_image = isinstance(joinedfile, Image)
+                    is_video = isinstance(joinedfile, Video)
                     #pprint(files)
                     if is_image:
                         is_thumb = True
                         value = '%s/%s/;thumb?size=&width=256&height=256' % (id, file)
                         last_img = file
+                    if is_video:
+                        is_thumb = True
+                        value = '%s/thumb_%s/;thumb?size=&width=256&height=256' % (id, file)
+                        last_img = 'thumb_%s' % file
                     else:
                         value = '%s/%s/;thumb?size=&width=256&height=256' % (id, last_img)
+                        is_thumb = False
                         last_img = last_img
             #pprint("value = %s" % value)
             return value

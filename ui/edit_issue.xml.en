@@ -70,10 +70,9 @@
       clip: {
         autoPlay: false,
         autoBuffering: false,
-        //bufferLength: 1,
         scaling: 'fit'
       },
-      // canvas background
+      // canvas background, the video thumbnail.
       canvas: {
         backgroundImage: 'url(thumb_${comment/file}/;download)'
       },

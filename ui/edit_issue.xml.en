@@ -70,7 +70,6 @@
       clip: {
         autoPlay: false,
         autoBuffering: false,
-        scaling: 'fit'
       },
       // canvas background, the video thumbnail.
       canvas: {

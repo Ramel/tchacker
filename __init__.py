@@ -24,7 +24,7 @@ from ikaaro.registry import register_document_type
 from ikaaro.skins import register_skin
 
 from issue import Tchack_Issue
-from resources import Tchack_Resources
+#from resources import Tchack_Resources
 from tracker import Tchack_Tracker
 from utils import which
 

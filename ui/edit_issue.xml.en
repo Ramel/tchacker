@@ -45,21 +45,23 @@
       </a>]&nbsp;
       </td>
     </tr>
-    <tr stl:if="comment/is_image">
-      <td colspan="5">
-        <a href="${comment/file}/;thumb?size=&amp;width=1280&amp;height=1280" class="thickbox"><img src="${comment/file}/;thumb?size=&amp;width=800&amp;height=800" /></a>
-      </td>
-    </tr>
-    <tr stl:if="comment/is_video">
-      <td colspan="5">
-        <a href="${comment/file}/;download" style="display:block;width:${comment/width}px;height:${comment/height}px;" id="player-${comment/number}"></a>
-      </td>
-    </tr>
-    <tr stl:if="comment/file">
-      <td colspan="5">
-        Attachement: <a href="${comment/file}/;download">${comment/file}</a>
-      </td>
-    </tr>
+		<stl:block stl:if="comment/file">
+			<tr stl:if="comment/is_image">
+				<td colspan="5">
+					<a href="${comment/file}/;thumb?size=&amp;width=1280&amp;height=1280" class="thickbox"><img src="${comment/file}/;thumb?size=&amp;width=800&amp;height=800" /></a>
+				</td>
+			</tr>
+			<tr stl:if="comment/is_video">
+				<td colspan="5">
+					<a href="${comment/file}/;download" style="display:block;width:${comment/width}px;height:${comment/height}px;" id="player-${comment/number}"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="5">
+					Attachement: <a href="${comment/file}/;download">${comment/file}</a>
+				</td>
+			</tr>
+		</stl:block>
     <tr>
       <td colspan="5">
       <pre class="com" id="comment${comment/number}">${comment/comment}</pre>

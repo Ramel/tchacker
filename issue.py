@@ -20,49 +20,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Import from the Standard Library
-from datetime import datetime
-from tempfile import mkdtemp
-from pprint import pprint
-
 # Import from itools
-from itools.csv import Table
-from itools.datatypes import DateTime, Integer, String, Unicode, Tokens
+from itools.datatypes import String
 from itools.gettext import MSG
-from itools.handlers import checkid
-from itools.vfs import FileName
-from itools.uri import get_uri_path
-from itools.web import get_context
-from itools import vfs
 
 # Import from ikaaro
-from ikaaro.file import File
-from ikaaro.folder import Folder
-from ikaaro.registry import register_resource_class, get_resource_class
+from ikaaro.registry import register_resource_class
 from ikaaro.registry import register_field
-from ikaaro.utils import generate_name
-from issue_views import Issue_Edit, Issue_EditResources, Issue_History
-from issue_views import IssueTrackerMenu
 from ikaaro.tracker.issue import Issue
 
-from videoencoding import VideoEncodingToFLV
+# Import from Tchacker
+from issue_views import TchackIssue_Edit
 
-class History(Table):
-
-    record_schema = {
-        'datetime': DateTime,
-        'username': String,
-        'title': Unicode,
-        'product': Integer,
-        'module': Integer,
-        'version': Integer,
-        'type': Integer,
-        'state': Integer,
-        'priority': Integer,
-        'assigned_to': String,
-        'comment': Unicode,
-        'cc_list': Tokens,
-        'file': String}
+# Import from videoencoding
+#from videoencoding import VideoEncodingToFLV
 
 
 
@@ -72,403 +43,29 @@ class Tchack_Issue(Issue):
     class_version = '20071216'
     class_title = MSG(u'Tchack Issue')
     class_description = MSG(u'Tchack Issue')
-    class_views = ['edit', 'edit_resources', 'browse_content', 'history']
 
-
-    @staticmethod
-    def _make_resource(cls, folder, name):
-        Folder._make_resource(cls, folder, name)
-        folder.set_handler('%s/.history' % name, History())
-
+    # Views
+    edit = TchackIssue_Edit()
 
     def _get_catalog_values(self):
-        document = Folder._get_catalog_values(self)
-        document['id'] = int(self.name)
-
+        values = Issue._get_catalog_values(self)
+        history = self.get_history()
         # Get the last record
-        history = self.get_history()
         record = history.get_record(-1)
         if record:
-            get_record_value = history.get_record_value
-            names = 'product', 'module', 'version', 'type', 'priority', 'state'
-            for name in names:
-                document[name] = get_record_value(record, name)
-            assigned_to = get_record_value(record, 'assigned_to') or 'nobody'
-            document['assigned_to'] = assigned_to
-            document['title'] = get_record_value(record, 'title')
-            #last_attachement = get_record_value(record, 'file') or ''
-            #document['last_attachement'] = last_attachement
-            #from pprint import pprint
-            #pprint(document)
-        return document
-
-
-    def get_document_types(self):
-        return [File]
-
-
-    def get_files_to_archive(self, content=False):
-        files = Folder.get_files_to_archive(self, content)
-        history = get_uri_path(self.get_history().uri)
-        files.append(history)
-        return files
-
-
-    def get_mtime(self):
-        """Return the datetime of the last record.
-        """
-        history = self.get_history()
-        record = history.get_record(-1)
-        if record:
-            return history.get_record_value(record, 'datetime')
-        return self.get_mtime()
-
-
-    def get_links(self):
-        base = self.get_abspath()
-
-        links = []
+            values['issue_last_author'] = history.get_record_value(record, 'username')
+        # Get last attachment
+        values['issue_last_attachment'] = None
         for record in self.get_history_records():
-            filename = record.file
-            if filename:
-                links.append(str(base.resolve2(filename)))
-        return links
+            if record.file:
+                values['issue_last_attachment'] = record.file
+        return values
 
 
-    def update_links(self, old_path, new_path):
-        base = self.get_abspath()
-        old_name = base.get_pathto(old_path)
-        history = self.get_history()
-        for record in history.get_records():
-            file = history.get_record_value(record, 'file')
-            if file == old_name:
-                value = str(base.get_pathto(new_path))
-                history.update_record(record.id, **{'file': value})
-        # Reindex
-        get_context().server.change_resource(self)
+    #def get_context_menus(self):
+    #    return self.parent.get_context_menus() + [IssueTrackerMenu()]
 
 
-    #######################################################################
-    # API
-    #######################################################################
-    def get_title(self, language=None):
-        return '#%s %s' % (self.name, self.get_value('title'))
-
-
-    def get_calendar(self):
-        return self.parent.get_resource('calendar')
-
-
-    def load_handlers(self):
-        Folder.load_handlers(self)
-        self.get_history()
-
-
-    def get_history(self):
-        return self.handler.get_handler('.history', cls=History)
-
-
-    def get_history_records(self):
-        return self.get_history().get_records()
-
-
-    def get_value(self, name):
-        history = self.get_history()
-        record = history.get_record(-1)
-        if record:
-            return history.get_record_value(record, name)
-        return None
-
-
-    def _add_record(self, context, form):
-        user = context.user
-        root = context.root
-        parent = self.parent
-        users = root.get_resource('users')
-
-        record = {}
-        # Datetime
-        record['datetime'] = datetime.now()
-        # User XXX
-        if user is None:
-            record['username'] = ''
-        else:
-            record['username'] = user.name
-        # Title
-        title = context.get_form_value('title', type=Unicode).strip()
-        record['title'] = title
-        # Version, Priority, etc.
-        for name in ['product', 'module', 'version', 'type', 'state',
-                     'priority', 'assigned_to', 'comment']:
-            type = History.record_schema[name]
-            value = context.get_form_value(name, type=type)
-            if type == Unicode:
-                value = value.strip()
-            record[name] = value
-        # CCs
-        cc_list = set(self.get_value('cc_list') or ())
-        cc_remove = context.get_form_value('cc_remove')
-        if cc_remove:
-            cc_remove = context.get_form_values('cc_list')
-            cc_list = cc_list.difference(cc_remove)
-        cc_add = context.get_form_values('cc_add')
-        if cc_add:
-            cc_list = cc_list.union(cc_add)
-        record['cc_list'] = list(cc_list)
-
-        # Files XXX
-        file = context.get_form_value('file')
-        if file is None:
-            record['file'] = ''
-        else:
-            # Upload
-            filename, mimetype, body = form['file']
-            # Find a non used name
-            name = checkid(filename)
-            name, extension, language = FileName.decode(name)
-            name = generate_name(name, self.get_names())
-
-            cls = get_resource_class(mimetype)
-
-            # If the file is a Video(x-msvideo), get ratio for FLV encoding
-            if(mimetype == 'video/x-msvideo' or mimetype == 'video/quicktime'):
-                # Create a temp dir, where to paste the video
-                # Retrieve the ratio and encode it in FLV
-                # Then remove all, keeping the FLV as the file in the new comment
-                dirname = mkdtemp('videoencoding', 'ikaaro')
-                """
-                pprint('===dirname===')
-                pprint(dirname)
-                """
-                tempdir = vfs.open(dirname)
-                # Paste the file in the tempdir
-                file = tempdir.make_file(filename)
-                try:
-                    file.write(body)
-                finally:
-                    file.close()
-
-                # Encode to 512 of width
-                encoded = VideoEncodingToFLV(cls).encode_avi_to_flv(
-                        dirname, filename, name, 512)
-
-                if encoded is not None:
-                    flvfilename, flvmimetype, flvbody, flvextension = encoded['flvfile']
-                    thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
-
-                #pprint('===filename===')
-                #pprint('%s' % flv[0])
-                #pprint('===mimetype===')
-                #pprint(flv[1])
-                #pprint('===body===')
-                #pprint(flv[2])
-
-                file.close()
-                # Clean the temporary folder
-                vfs.remove(dirname)
-
-                # Create the FLV and PNG thumbnail resources
-                video = get_resource_class(flvmimetype)
-                thumbnail = get_resource_class(thumbmimetype)
-                video.make_resource(video, self, name, body=flvbody, filename=flvfilename,
-                            extension=flvextension, format=flvmimetype)
-                thumbnail.make_resource(thumbnail, self, thumbfilename, body=thumbbody, filename=thumbfilename,
-                            extension=thumbextension, format=thumbmimetype)
-
-            else:
-                # Add attachement
-                cls.make_resource(cls, self, name, body=body, filename=filename,
-                            extension=extension, format=mimetype)
-            # Link
-            record['file'] = name
-        # Update
-        modifications = self.get_diff_with(record, context)
-        history = self.get_history()
-        history.add_record(record)
-        # Send a Notification Email
-        # Notify / From
-        if user is None:
-            user_title = MSG(u'ANONYMOUS')
-        else:
-            user_title = user.get_title()
-        # Notify / To
-        to_addrs = set()
-        reported_by = self.get_reported_by()
-        if reported_by:
-            to_addrs.add(reported_by)
-        for cc in cc_list:
-            to_addrs.add(cc)
-        assigned_to = self.get_value('assigned_to')
-        if assigned_to:
-            to_addrs.add(assigned_to)
-        if user.name in to_addrs:
-            to_addrs.remove(user.name)
-        # Notify / Subject
-        tracker_title = self.parent.get_property('title') or 'Tchack Tracker Issue'
-        subject = '[%s #%s] %s' % (tracker_title, self.name, title)
-        # Notify / Body
-        if context.resource.class_id == 'tchack_tracker':
-            uri = context.uri.resolve('%s/;edit' % self.name)
-        else:
-            uri = context.uri.resolve(';edit')
-        body = '#%s %s %s\n\n' % (self.name, self.get_value('title'),
-                                  str(uri))
-        message = MSG(u'The user {title} did some changes.')
-        body +=  message.gettext(title=user_title)
-        body += '\n\n'
-        if file:
-            filename = unicode(filename, 'utf-8')
-            message = MSG(u'New Attachment: {filename}')
-            message = message.gettext(filename=filename)
-            body += message + '\n'
-        comment = context.get_form_value('comment', type=Unicode)
-        if modifications:
-            body += modifications
-            body += '\n\n'
-        if comment:
-            title = MSG(u'Comment').gettext()
-            separator = len(title) * u'-'
-            template = u'{title}\n{separator}\n\n{comment}\n'
-            #template = Template(template)
-            body += template.format(title=title, separator=separator,
-                                        comment=comment)
-        # Notify / Send
-        for to_addr in to_addrs:
-            user = root.get_user(to_addr)
-            if not user:
-                continue
-            to_addr = user.get_property('email')
-            root.send_email(to_addr, subject, text=body)
-
-
-    def get_diff_with(self, record, context):
-        """Return a text with the diff between the last and new issue state
-        """
-        root = context.root
-        modifications = []
-        history = self.get_history()
-        if history.get_n_records() > 0:
-            # Edit issue
-            template = MSG(u'{field}: {old_value} to {new_value}')
-            empty = MSG(u'[empty]').gettext()
-        else:
-            # New issue
-            template = MSG(u'{field}: {old_value}{new_value}')
-            empty = u''
-        # Modification of title
-        last_title = self.get_value('title') or empty
-        new_title = record['title']
-        if last_title != new_title:
-            field = MSG(u'Title').gettext()
-            text = template.gettext(field=field, old_value=last_title,
-                                    new_value=new_title)
-            modifications.append(text)
-        # List modifications
-        fields = [
-            ('module', MSG(u'Module')),
-            ('version', MSG(u'Version')),
-            ('type', MSG(u'Type')),
-            ('priority', MSG(u'Priority')),
-            ('state', MSG(u'State'))]
-        for name, field in fields:
-            field = field.gettext()
-            new_value = record[name]
-            last_value = self.get_value(name)
-            # Detect if modifications
-            if last_value == new_value:
-                continue
-            new_title = last_title = empty
-            csv = self.parent.get_resource(name).handler
-            if last_value or last_value == 0:
-                rec = csv.get_record(last_value)
-                last_title = csv.get_record_value(rec, 'title')
-            if new_value or new_value == 0:
-                rec = csv.get_record(new_value)
-                new_title = csv.get_record_value(rec, 'title')
-            text = template.gettext(field=field, old_value=last_title,
-                                    new_value=new_title)
-            modifications.append(text)
-
-        # Modifications of assigned_to
-        last_user = self.get_value('assigned_to') or ''
-        new_user = record['assigned_to']
-        if last_user != new_user:
-            if last_user:
-                last_user = root.get_user(last_user).get_property('email')
-            if new_user:
-                new_user = root.get_user(new_user).get_property('email')
-            field = MSG(u'Assigned To').gettext()
-            text = template.gettext(field=field, old_value=last_user or empty,
-                                    new_value=new_user or empty)
-            modifications.append(text)
-
-        # Modifications of cc_list
-        last_cc = list(self.get_value('cc_list') or ())
-        new_cc = list(record['cc_list'] or ())
-        if last_cc != new_cc:
-            last_values = []
-            for cc in last_cc:
-                value = root.get_user(cc).get_property('email')
-                last_values.append(value)
-            new_values = []
-            for cc in new_cc:
-                value = root.get_user(cc).get_property('email')
-                new_values.append(value)
-            field = MSG(u'CC').gettext()
-            last_values = ', '.join(last_values) or empty
-            new_values = ', '.join(new_values) or empty
-            text = template.gettext(field=field, old_value=last_values,
-                                    new_value=new_values)
-            modifications.append(text)
-
-        return u'\n'.join(modifications)
-
-
-    def get_reported_by(self):
-        history = self.get_history()
-        return history.get_record(0).username
-
-
-    def get_comment(self):
-        records = list(self.get_history_records())
-        i = len(records) - 1
-        while i >= 0:
-            record = records[i]
-            comment = record.comment
-            if comment:
-                return comment
-            i -= 1
-        return ''
-
-
-    def to_text(self):
-        records = list(self.get_history_records())
-        comments = [ r.comment for r in records
-                     if r.comment ]
-        return u'\n'.join(comments)
-
-
-    def has_text(self, text):
-        if text in self.get_value('title').lower():
-            return True
-        return text in self.get_comment().lower()
-
-
-    def get_size(self):
-        # FIXME Used by the browse list view (size is indexed)
-        return 0
-
-
-    #######################################################################
-    # User Interface
-    #######################################################################
-    def get_context_menus(self):
-        return self.parent.get_context_menus() + [IssueTrackerMenu()]
-
-
-    edit = Issue_Edit()
-    edit_resources = Issue_EditResources()
-    history = Issue_History()
 
 
 ###########################################################################
@@ -476,3 +73,5 @@ class Tchack_Issue(Issue):
 ###########################################################################
 # The class
 register_resource_class(Tchack_Issue)
+register_field('issue_last_attachment', String(is_stored=True))
+register_field('issue_last_author', String(is_stored=True))

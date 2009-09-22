@@ -6,7 +6,6 @@
 
 <form action="" method="post" name="browse-list" id="form-table"
   stl:omit-tag="not actions">
-<p><a href="#" class="show">Show</a> - <a href="#" class="hide">Hide</a> - <a href="#" class="toggle">Toggle</a></p>
 <table id="browse-list" class="${css} issues">
   <thead stl:if="columns">
     <tr>

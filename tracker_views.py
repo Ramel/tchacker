@@ -61,7 +61,6 @@ class Tchacker_ViewMenu(TrackerViewMenu):
 
 class Tchacker_ViewTop(STLView):
 
-
     template = '/ui/tchacker/tchacker_view_top.xml.en'
 
 
@@ -100,7 +99,6 @@ class Tchacker_ViewBottom(Tracker_View):
                                            column)
 
 
-
     def get_table_columns(self, resource, context):
         table_columns = Tracker_View.get_table_columns(self, resource, context)
         # Insert the last attachement row's title in the table
@@ -118,6 +116,12 @@ class Tchacker_View(CompositeView):
 
     context_menus = [StoreSearchMenu(),
                      Tchacker_ViewMenu()]
+    
+
+    def GET(self, resource, context):
+        context.scripts.append('/ui/tchacker/tracker.js')
+        context.styles.append('/ui/tchacker/tracker.css')
+        return CompositeView.GET(self, resource, context)
 
 
 class Tracker_Zip_Img(Tchacker_ViewBottom):

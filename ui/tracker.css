@@ -19,14 +19,14 @@
 .tracker_resource {
   color: #0A4A0A;
 }
-
+/*
 #tracker TD.light {
   display:none;
 }
 TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to {
   display:none;
 }
-
+*/
 #footer {
   width:100%;
 }

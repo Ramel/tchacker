@@ -83,15 +83,39 @@ $(document).ready(function () {
 	});
 	/* show.hide.toggle some table columns */
 	$('A.hide').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').hide();
+		// Product
+		$('TABLE#browse-list THEAD TR TH:nth-child(4)').hide();
+		$('TABLE#browse-list TBODY TR TD:nth-child(4)').hide();
+		// Version
+		$('TABLE#browse-list THEAD TR TH:nth-child(6)').hide();
+		$('TABLE#browse-list TBODY TR TD:nth-child(6)').hide();
+		// Assigned_to
+		$('TABLE#browse-list THEAD TR TH:nth-child(10)').hide();
+		$('TABLE#browse-list TBODY TR TD:nth-child(10)').hide();
 		return false;
 	});
 	$('A.show').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').show();
+		// Product
+		$('TABLE#browse-list THEAD TR TH:nth-child(4)').show();
+		$('TABLE#browse-list TBODY TR TD:nth-child(4)').show();
+		// Version
+		$('TABLE#browse-list THEAD TR TH:nth-child(6)').show();
+		$('TABLE#browse-list TBODY TR TD:nth-child(6)').show();
+		// Assigned_to
+		$('TABLE#browse-list THEAD TR TH:nth-child(10)').show();
+		$('TABLE#browse-list TBODY TR TD:nth-child(10)').show();
 		return false;
 	});
 	$('A.toggle').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').toggle();
+		// Product
+		$('TABLE#browse-list THEAD TR TH:nth-child(4)').toggle();
+		$('TABLE#browse-list TBODY TR TD:nth-child(4)').toggle();
+		// Version
+		$('TABLE#browse-list THEAD TR TH:nth-child(6)').toggle();
+		$('TABLE#browse-list TBODY TR TD:nth-child(6)').toggle();
+		// Assigned_to
+		$('TABLE#browse-list THEAD TR TH:nth-child(10)').toggle();
+		$('TABLE#browse-list TBODY TR TD:nth-child(10)').toggle();
 		return false;
 	});
 });

@@ -81,7 +81,7 @@ $(document).ready(function () {
 		$("TD.light").toggle();
 		return false;
 	});
-	/* show.hide.toggle some table columns */
+	/* show.hide.toggle some table columns in tracker_views.py */
 	$('A.hide').click(function() {
 		// Product
 		$('TABLE#browse-list THEAD TR TH:nth-child(4)').hide();

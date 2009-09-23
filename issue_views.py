@@ -98,7 +98,7 @@ class TchackIssue_Edit(Issue_Edit):
         for comment in namespace['comments']:
             if comment['file']:
                 attachment = resource.get_resource(comment['file'])
-                print type(attachment), attachment
+                #print type(attachment), attachment
                 comment['is_image'] = True
                 comment['is_video'] = False
                 comment['width'] = 200

@@ -132,9 +132,9 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         issues = self.sort_and_batch(resource, context, items)
         # Get path of all attachment to add in zip
         # TODO mkdstemp
-        dirname = mkdtemp('zip', 'ikaaro')
-        tempdir = vfs.open(dirname)
-        zip = ZipFile('%s' % tempdir, 'w')
+        dirname = '%s/zip' % mkdtemp('zip', 'ikaaro')
+        #tempdir = vfs.open(dirname)
+        zip = ZipFile(dirname, 'w')
         for issue in issues:
             attachment_name = issue.issue_last_attachment
             attachment = resource.get_resource('%s/%s' % (issue.name, attachment_name))
@@ -149,7 +149,7 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         #pprint("%s" % now)
         zipname = "%s_%s_%s.zip" % (resource.name, name, now)
         
-        file = open('%s' % tempdir)
+        file = open(dirname)
         try:
             data = file.read()
         finally:

@@ -86,7 +86,7 @@ class TchackIssue_Edit(Issue_Edit):
         #context.scripts.append('/ui/flowplayer/flowplayer.controls-3.1.1.swf')
         # Build namespace
         namespace = Issue_Edit.get_namespace(self, resource, context)
-        namespace['comments'].reverse()
+        #namespace['comments'].reverse()
 
         # Local variables
         users = resource.get_resource('/users')

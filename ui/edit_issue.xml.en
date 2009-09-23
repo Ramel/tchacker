@@ -48,7 +48,7 @@
 		<stl:block stl:if="comment/file">
 			<tr stl:if="comment/is_image">
 				<td colspan="5">
-					<a href="${comment/file}/;thumb?size=&amp;width=1280&amp;height=1280" class="thickbox"><img src="${comment/file}/;thumb?size=&amp;width=800&amp;height=800" /></a>
+					<a href="${comment/file}/;thumb?width=1280&amp;height=1280" class="thickbox"><img src="${comment/file}/;thumb?width=800&amp;height=800" /></a>
 				</td>
 			</tr>
 			<tr stl:if="comment/is_video">

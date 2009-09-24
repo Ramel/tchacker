@@ -44,11 +44,11 @@ from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.table_views import Table_View
 from ikaaro.views import CompositeForm
 from ikaaro.views import ContextMenu
-from ikaaro.file import Image #, Video
+from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
 from ikaaro.tracker.datatypes import get_issue_fields, UsersList
 
-#from videoencoding.video import VideoEncodingToFLV
+from videoencoding.video import VideoEncodingToFLV
 
 # Debug
 from pprint import pprint
@@ -96,9 +96,9 @@ class TchackIssue_Edit(Issue_Edit):
         for comment in namespace['comments']:
             if comment['file']:
                 attachment = resource.get_resource(comment['file'])
-                #print type(attachment), attachment
-                comment['is_image'] = True
-                comment['is_video'] = False
+                print type(attachment), attachment
+                comment['is_image'] = isinstance(attachment, Image)
+                comment['is_video'] = isinstance(attachment, Video)
                 comment['width'] = 200
                 comment['height'] = 200
             else:

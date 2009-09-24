@@ -82,6 +82,7 @@ class Tchacker_ViewBottom(Tracker_View):
             if attach_name is None:
                 return None
             attach = resource.get_resource('%s/%s' % (item.name, attach_name))
+            print item.name, attach
             if isinstance(attach, Image) is True:
                 img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
                 return XMLParser(img_template % (item.name, attach_name))
@@ -131,9 +132,7 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         items = self.get_items(resource, context)
         issues = self.sort_and_batch(resource, context, items)
         # Get path of all attachment to add in zip
-        # TODO mkdstemp
         dirname = '%s/zip' % mkdtemp('zip', 'ikaaro')
-        #tempdir = vfs.open(dirname)
         zip = ZipFile(dirname, 'w')
         for issue in issues:
             attachment_name = issue.issue_last_attachment

@@ -47,6 +47,94 @@ class Tchack_Tracker(Tracker):
     view = Tchacker_View()
     zip = Tracker_Zip_Img()
 
+    #######################################################################
+    # Update
+    #######################################################################
+    def update_20090705(self):
+        """
+        Encode the unencoded MOV or AVI file, and add the thumb, erase the
+        original file.
+        """
+        from pprint import pprint
+        from datetime import datetime
+        from tempfile import mkdtemp
+        from issue import Tchack_Issue
+        from ikaaro.file import Video
+        from ikaaro.exceptions import ConsistencyError
+        from itools import vfs
+        from itools.vfs import FileName
+        from itools.core import guess_extension
+        from itools.uri import get_uri_path
+        from videoencoding import VideoEncodingToFLV
+        from ikaaro.registry import get_resource_class
+        
+        for issue in self.search_resources(cls=Tchack_Issue):
+        
+            history = issue.get_history()
+        
+            for record in history.get_records():
+            
+                filename = record.file
+                comment = record.comment
+                is_video = False
+                if not comment and not filename:
+                    continue
+                if filename:
+                    file = issue.get_resource(filename)
+                    is_video = isinstance(file, Video)
+                
+                    if not is_video:
+                        continue
+                    if is_video:
+                        name = file.name
+                        filename, ext, lang = FileName.decode(name)
+                        if ext is None:
+                            mimetype = file.get_content_type()
+                            ext = guess_extension(mimetype)[1:]
+                        if(mimetype == 'video/x-msvideo'
+                            or mimetype == 'video/quicktime'):
+                            pprint("The file %s.%s will be encoded in FLV, \
+                                replaced by, then erased." % (filename, ext))
+                            
+                            handler_path = get_uri_path(issue.handler.uri)
+                            
+                            dirname = mkdtemp('videoencoding', 'ikaaro')
+                            tempdir = vfs.open(dirname)
+                            
+                            # Paste the file in the tempdir
+                            tmp_uri= "file:///%s/%s" % (dirname, filename)
+                            vfs.copy(file.handler.uri, tmp_uri)
+                            
+                            # Encode to 512 of width
+                            encoded = VideoEncodingToFLV(file).encode_avi_to_flv(
+                                 dirname, filename, name, 512)
+                            
+                            if encoded is not None:
+                                flvfilename, flvmimetype,
+                                flvbody, flvextension = encoded['flvfile']
+                                thumbfilename, thumbmimetype,
+                                thumbbody, thumbextension = encoded['flvthumb']
+                            # Create the video FLV and thumbnail PNG resources
+                            video = get_resource_class(flvmimetype)
+                            thumbnail = get_resource_class(thumbmimetype)
+                            # Remove the original files
+                            if vfs.exists(file.handler.uri):
+                                vfs.remove(file.handler.uri)
+                            if vfs.exists(file.metadata.uri):
+                                vfs.remove(file.metadata.uri)
+                            
+                            video.make_resource(video, issue, name,
+                                body=flvbody, filename=flvfilename,
+                                extension=flvextension, format=flvmimetype)
+                            thumbnail.make_resource(thumbnail, issue, thumbfilename,
+                                body=thumbbody, filename=thumbfilename,
+                                extension=thumbextension, format=thumbmimetype)
+                            
+                            # Clean the temporary folder
+                            vfs.remove(dirname)
+                            
+                            pprint("====================")
+                        pprint("xxxxxxxxxxxxxxxx")
 
 ###########################################################################
 # Register

@@ -24,6 +24,10 @@
   display:none;
 }
 
+A.hide {
+	text-decoration: none;
+}
+
 #footer {
   width:100%;
 }

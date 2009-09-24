@@ -5,6 +5,7 @@
 # Copyright (C) 2007-2008 Hervé Cauwelier <herve@itaapy.com>
 # Copyright (C) 2007-2008 Juan David Ibáñez Palomar <jdavid@itaapy.com>
 # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
+# Copyright (C) 2009 Armel Fortun <armel@maar.fr>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -82,7 +83,7 @@ class Tchacker_ViewBottom(Tracker_View):
             if attach_name is None:
                 return None
             attach = resource.get_resource('%s/%s' % (item.name, attach_name))
-            print item.name, attach
+            print item.name, attach, isinstance(attach, Video)
             if isinstance(attach, Image) is True:
                 img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
                 return XMLParser(img_template % (item.name, attach_name))

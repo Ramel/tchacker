@@ -62,20 +62,7 @@ function update_tracker_list(list_name)
 }
 
 $(document).ready(function () {
-	// Test if we need to throw the update_tracker() method only if we are in a
-	// ";add_issue", ";change_several_bugs", ";edit", ";search" page,
-	// seems to bug with hide(), show(), toggle(), investigations needed.
-	var href = location.href;
-	var pos = href.lastIndexOf("/");
-	href  = href.substr(pos + 1);
-	pos = href.lastIndexOf("?");
-	href = href.substr(0, pos);
-	// If we are in one of them, apply the method
-	if(href == ";add_issue" || href == ";edit"
-		|| href == ";search" || href == ";change_several_bugs") {
-		update_tracker();
-		$("#product").bind("change", update_tracker);
-	}
+	$('TABLE#browse-list THEAD TR TH:nth-child(4), TABLE#browse-list TBODY TR TD:nth-child(4), TABLE#browse-list THEAD TR TH:nth-child(6), TABLE#browse-list TBODY TR TD:nth-child(6), TABLE#browse-list THEAD TR TH:nth-child(10), TABLE#browse-list TBODY TR TD:nth-child(10)').hide(); //css("display","none");
 	/* show.hide some TDs */
 	$("A.showall").click(function() {
 		$("TD.light").toggle();
@@ -92,6 +79,8 @@ $(document).ready(function () {
 		// Assigned_to
 		$('TABLE#browse-list THEAD TR TH:nth-child(10)').hide();
 		$('TABLE#browse-list TBODY TR TD:nth-child(10)').hide();
+		$(this).css("text-decoration","none");
+		$('A.show').css("text-decoration","underline");
 		return false;
 	});
 	$('A.show').click(function() {
@@ -104,18 +93,8 @@ $(document).ready(function () {
 		// Assigned_to
 		$('TABLE#browse-list THEAD TR TH:nth-child(10)').show();
 		$('TABLE#browse-list TBODY TR TD:nth-child(10)').show();
-		return false;
-	});
-	$('A.toggle').click(function() {
-		// Product
-		$('TABLE#browse-list THEAD TR TH:nth-child(4)').toggle();
-		$('TABLE#browse-list TBODY TR TD:nth-child(4)').toggle();
-		// Version
-		$('TABLE#browse-list THEAD TR TH:nth-child(6)').toggle();
-		$('TABLE#browse-list TBODY TR TD:nth-child(6)').toggle();
-		// Assigned_to
-		$('TABLE#browse-list THEAD TR TH:nth-child(10)').toggle();
-		$('TABLE#browse-list TBODY TR TD:nth-child(10)').toggle();
+		$(this).css("text-decoration","none");
+		$('A.hide').css("text-decoration","underline");
 		return false;
 	});
 });

@@ -37,10 +37,3 @@ register_skin('tchacker', path)
 
 # Register document type
 register_document_type(Tchack_Tracker)
-
-###########################################################################
-# Check required software
-###########################################################################
-for name, cli in [("zip", "zip")]:
-    if(which(cli)) is None:
-        print 'You need to install "%s".' % name

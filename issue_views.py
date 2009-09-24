@@ -46,9 +46,7 @@ from ikaaro.views import CompositeForm
 from ikaaro.views import ContextMenu
 from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
-
-# Local import
-from datatypes import get_issue_fields, UsersList
+from ikaaro.tracker.datatypes import get_issue_fields, UsersList
 
 from videoencoding.video import VideoEncodingToFLV
 

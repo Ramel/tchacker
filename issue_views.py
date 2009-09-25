@@ -96,11 +96,40 @@ class TchackIssue_Edit(Issue_Edit):
         for comment in namespace['comments']:
             if comment['file']:
                 attachment = resource.get_resource(comment['file'])
-                print type(attachment), attachment
+                #print type(attachment), attachment
                 comment['is_image'] = isinstance(attachment, Image)
                 comment['is_video'] = isinstance(attachment, Video)
                 comment['width'] = 200
                 comment['height'] = 200
+                if comment['is_video']:
+                    """
+                    #pprint("i = %s and length = %s" % (i, length))
+                    if (i == length ):
+                        last_video = True
+                        #pprint("LastVideo = %s" % last_video)
+                    """
+                    video = attachment #resource.get_resource(file)
+                    base = video.metadata.uri
+                    name = video.name
+                    #pprint("name = %s" % name)
+                    name, ext, lang = FileName.decode(name)
+                    if ext is None:
+                        mimetype = video.get_content_type()
+                        ext = guess_extension(mimetype)[1:]
+                    
+                    #thumbnail = ("thumb_%s" % name)
+                    #pprint("ext = %s, sortie de is_video" % ext)
+                    
+                    uri = resolve_uri(base, name)
+                    #pprint("name = %s" % name)
+                    #pprint("base = %s" % base)
+                    #pprint("uri = %s.%s" % (uri, ext))
+                    comment['width'], height, ratio = VideoEncodingToFLV(
+                       resource).get_size_and_ratio(
+                            "%s.%s" % (uri, ext))
+                    # Add the Flowplayer menu's height
+                    comment['height'] = int(height) + 24
+                    #pprint("width x height & ratio = %s x %s & %s" % (width, height, ratio))
             else:
                 comment['file'] = False
                 comment['is_video'] = False

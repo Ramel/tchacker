@@ -83,9 +83,12 @@ class Tchacker_ViewBottom(Tracker_View):
             if attach_name is None:
                 return None
             attach = resource.get_resource('%s/%s' % (item.name, attach_name))
-            print item.name, attach, isinstance(attach, Video)
+            #print item.name, attach, isinstance(attach, Video)
             if isinstance(attach, Image) is True:
                 img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
+                return XMLParser(img_template % (item.name, attach_name))
+            elif isinstance(attach, Video) is True:
+                img_template = '<img src="./%s/thumb_%s/;thumb?width=256&amp;height=256"/>'
                 return XMLParser(img_template % (item.name, attach_name))
             else:
                 return None

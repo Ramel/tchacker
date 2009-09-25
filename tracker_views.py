@@ -142,7 +142,8 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
             attachment_name = issue.issue_last_attachment
             attachment = resource.get_resource('%s/%s' % (issue.name, attachment_name))
             attachment_uri = attachment.handler.uri[7:]
-            attachment_name = 'issue_%s_%s' % (issue.name, get_uri_name(attachment_uri))
+            #attachment_name = 'issue_%s_%s' % (issue.name, get_uri_name(attachment_uri))
+            attachment_name = '%s' % issue.name
             zip.write(attachment_uri, attachment_name)
         zip.close()
         # Create zip

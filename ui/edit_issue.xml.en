@@ -23,7 +23,42 @@
       update_tracker_list('version');
       update_tracker_list('module');
   }
-  </script>
+
+var req = null;
+var interval = null;
+var progressAjax = null;
+var upid;
+var page;
+
+function uploadFile() {
+  // if there is a File as attachement
+  if($("INPUT#attachement").get(0).value != '') {
+    upid = "";
+    page = location.pathname;
+    // Generate random upload-id
+    // Reverse the "less than" for XML in STL
+    for(i = 0; 32 > i; i++) {
+      upid += Math.floor(Math.random() * 16).toString(16);
+    }
+    // Put the upid in the form values
+    $("INPUT#upid").get(0).value = upid;
+    $("FORM#tracker").get(0).action = ';get_body_loaded?uri='+page;
+    // Throw the progressBar refresh interval
+    if(!interval) {
+      interval = setInterval("updateProgressBar()", 1000);
+    }
+    // Check the iframe for completed upload
+    $("IFRAME#iframe-upload").load(function() {
+      //check for done upload
+      fetchUpload(upid);
+    });
+    // if done, remove PB, and INTERVAL
+  } else {
+    $("FORM#tracker").get(0).action = ';edit';
+    $("FORM#tracker").get(0).target = '_self';
+  }
+}
+</script>
 <p stl:if="reported_by">
   Reported by <em>${reported_by}</em>
 </p>
@@ -83,7 +118,7 @@
 
 <br/>
 
-<form action=";edit" method="post" enctype="multipart/form-data" id="tracker">
+<form action=";edit" method="post" enctype="multipart/form-data" id="tracker" onsubmit="uploadFile();return true;" target="iframe-upload">
   <fieldset>
     <legend>Edit Issue</legend>
     <table>
@@ -192,6 +227,9 @@
         <td valign="top" colspan="2">
           <label for="attachement">New Attachement:</label><br/>
           <input type="file" name="file" id="attachement" size="36" />
+          <input type="hidden" name="upid" id="upid" />
+          <iframe name="iframe-upload" id="iframe-upload"
+            style="width:800px;height:200px;"></iframe>
         </td>
       </tr>
       <tr>

@@ -28,14 +28,14 @@ var req = null;
 var interval = null;
 var progressAjax = null;
 var upid;
-var page;
+var host, page;
 
 function uploadFile() {
   // if there is a File as attachement
   if($("INPUT#attachement").get(0).value != '') {
     upid = "";
-    page = window.location.pathname;
-    window.alert(page);
+    host = location.host;
+    page = location.pathname;
     // Generate random upload-id
     // Reverse the "less than" for XML in STL
     for(i = 0; 32 > i; i++) {
@@ -43,11 +43,14 @@ function uploadFile() {
     }
     // Put the upid in the form values
     $("INPUT#upid").get(0).value = upid;
-    //$("FORM#tracker").get(0).action = ';get_body_loaded?uri='+page+'%3Bedit;
-    $("FORM#tracker").get(0).action = ';get_body_loaded?uri='+page;
+    
+    //$("FORM#tracker").get(0).action = ';body_loaded?uri='+page+'%3Bedit;
+    
+    $("FORM#tracker").get(0).action = ';upload_file';
+    
     // Throw the progressBar refresh interval
     if(!interval) {
-      interval = setInterval("updateProgressBar()", 1000);
+      interval = setInterval("updateProgressBar(host)", 1000);
     }
     // Check the iframe for completed upload
     $("IFRAME#iframe-upload").load(function() {
@@ -58,6 +61,34 @@ function uploadFile() {
   } else {
     $("FORM#tracker").get(0).action = ';edit';
     $("FORM#tracker").get(0).target = '_self';
+  }
+}
+
+function updateProgressBar(host) {
+  if(!progressAjax) {
+    progressAjax = $.ajax({
+    url: "http://" + host + ";body_loaded",
+      data: "uri=" + page + "%3Bupload_file",
+      datatype: "json",
+      complete: function(request) {
+        progressAjax = null;
+      },
+      success: function(data, textStatus) {
+        switch(textStatus) {
+          case 200:
+            $("#tp").get(0).innerHTML = "Base = " + data;
+            progressAjax = null;
+            upid = "";
+            break;
+          default:
+            $("#tp").get(0).innerHTML = "Base = " + data;
+            break;
+        }
+      },
+      error: function(msg, str) {
+        $("#tp").get(0).innerHTML = "Error!: " + str;
+      }
+    });
   }
 }
   </script>
@@ -230,6 +261,14 @@ function uploadFile() {
           <label for="attachement">New Attachement:</label><br/>
           <input type="file" name="file" id="attachement" size="36" />
           <input type="hidden" name="upid" id="upid" />
+          <div>
+            <div id="progress" style="width:400px;border:1px solid black">
+              <div id="progressbar" 
+                style="width:1px;background-color:black;border:1px solid white">&nbsp;</div>
+            </div>
+            <div id="tp">(throughtput)</div>
+            <div id="interval">interval</div>
+          </div>
           <iframe name="iframe-upload" id="iframe-upload"
             style="width:800px;height:200px;"></iframe>
         </td>

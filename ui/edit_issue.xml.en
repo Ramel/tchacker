@@ -34,7 +34,8 @@ function uploadFile() {
   // if there is a File as attachement
   if($("INPUT#attachement").get(0).value != '') {
     upid = "";
-    page = location.pathname;
+    page = window.location.pathname;
+    window.alert(page);
     // Generate random upload-id
     // Reverse the "less than" for XML in STL
     for(i = 0; 32 > i; i++) {
@@ -42,6 +43,7 @@ function uploadFile() {
     }
     // Put the upid in the form values
     $("INPUT#upid").get(0).value = upid;
+    //$("FORM#tracker").get(0).action = ';get_body_loaded?uri='+page+'%3Bedit;
     $("FORM#tracker").get(0).action = ';get_body_loaded?uri='+page;
     // Throw the progressBar refresh interval
     if(!interval) {
@@ -58,7 +60,7 @@ function uploadFile() {
     $("FORM#tracker").get(0).target = '_self';
   }
 }
-</script>
+  </script>
 <p stl:if="reported_by">
   Reported by <em>${reported_by}</em>
 </p>

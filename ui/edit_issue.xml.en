@@ -46,18 +46,40 @@ function uploadFile() {
     
     //$("FORM#tracker").get(0).action = ';body_loaded?uri='+page+'%3Bedit;
     
-    $("FORM#tracker").get(0).action = ';upload_file';
+    $("FORM#tracker").get(0).action = ';edit';
     
     // Throw the progressBar refresh interval
     if(!interval) {
       interval = setInterval("updateProgressBar(host)", 1000);
     }
     // Check the iframe for completed upload
-    $("IFRAME#iframe-upload").load(function() {
-      //check for done upload
-      fetchUpload(upid);
-    });
     // if done, remove PB, and INTERVAL
+    $("IFRAME#iframe-upload").load(function() {
+      // if message exist (like "welcome!"), erase it.
+      $("#body #message").remove();
+      // Get actual "message" content in iframe, and put it in front page
+      msg = $("#iframe-upload").contents().find("#message");
+      $("#body H1", parent.document.body).after(msg);
+      // Reset the Form
+      $("FORM")[0].reset();
+      // Put the iframe's result in front page, and go to top.
+      $.ajax({
+        type:"GET",
+        url:";edit",
+        datatype:"html",
+        success: function(edit){
+          rec = $("#content TABLE:first", edit);
+          $("#content TABLE:first").before(rec);
+        }
+      });
+      // Return to page top
+      location.href = "#";
+      upid = "";
+      $("#tp").get(0).innerHTML = "DONE";
+      clearInterval(interval);
+      interval = null;
+      $("#interval").get(0).innerHTML = interval;
+    });
   } else {
     $("FORM#tracker").get(0).action = ';edit';
     $("FORM#tracker").get(0).target = '_self';
@@ -68,7 +90,7 @@ function updateProgressBar(host) {
   if(!progressAjax) {
     progressAjax = $.ajax({
     url: "http://" + host + ";body_loaded",
-      data: "uri=" + page + "%3Bupload_file",
+      data: "uri=" + page + "%3Bedit",
       datatype: "json",
       complete: function(request) {
         progressAjax = null;
@@ -76,19 +98,58 @@ function updateProgressBar(host) {
       success: function(data, textStatus) {
         switch(textStatus) {
           case 200:
-            $("#tp").get(0).innerHTML = "Base = " + data;
+            $("#tp").get(0).innerHTML = "Base = " + data + " %";
             progressAjax = null;
             upid = "";
             break;
           default:
-            $("#tp").get(0).innerHTML = "Base = " + data;
+            $("#tp").get(0).innerHTML = "Base = " + data + " %";
             break;
         }
       },
       error: function(msg, str) {
         $("#tp").get(0).innerHTML = "Error!: " + str;
+        upid = "";
+        clearInterval(interval);
+        interval = null;
+        $("#tp").get(0).innerHTML = interval;
       }
     });
+  }
+}
+
+function fetchUpload(upid) {
+  // Check if the iframe is loaded
+  var iframe = $("#iframe-upload").contents().find("INPUT#" + upid).html();
+  if(iframe == "") {
+    upid = "";
+    return;
+  }
+  else {
+    // if message exist (like "welcome!"), erase it.
+    $("#body #message").remove();
+    // Get actual "message" content in iframe, and put it in front page
+    msg = $("#iframe-upload").contents().find("#message");
+    $("#body H1", parent.document.body).after(msg);
+    // Reset the Form
+    $("FORM")[0].reset();
+    // Put the iframe's result in front page, and go to top.
+    $.ajax({
+      type:"GET",
+      url:";edit",
+      datatype:"html",
+      success: function(edit){
+        rec = $("#content TABLE:first", edit);
+        $("#content TABLE:first").before(rec);
+      }
+    });
+    // Return to page top
+    location.href = "#";
+    upid = "";
+    $("#tp").get(0).innerHTML = "DONE";
+    clearInterval(interval);
+    interval = null;
+    $("#interval").get(0).innerHTML = interval;
   }
 }
   </script>

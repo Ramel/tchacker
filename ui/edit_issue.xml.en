@@ -76,11 +76,8 @@ function uploadFile() {
       clearInterval(interval);
       interval = null;
       $("#interval").get(0).innerHTML = interval;
-      // For TB
-      var tb_pathToImage = "/ui/thickbox/loadingAnimation.gif"; 
-      tb_init('a.thickbox, area.thickbox, input.thickbox');
-      imgLoader = new Image();
-      imgLoader.src = tb_pathToImage;
+      // Reload ThickBox, otherwise, the popup on added image doesn't work
+			$.getScript("/ui/thickbox/thickbox.js");
     });
   } else {
     $("FORM#tracker").get(0).action = ';edit';

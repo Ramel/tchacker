@@ -77,7 +77,8 @@ function uploadFile() {
       interval = null;
       $("#interval").get(0).innerHTML = interval;
       // Reload ThickBox, otherwise, the popup on added image doesn't work
-			$.getScript("/ui/thickbox/thickbox.js");
+      $.getScript("/ui/thickbox/thickbox.js");
+      $("#iframe-upload").contents().empty();
     });
   } else {
     $("FORM#tracker").get(0).action = ';edit';

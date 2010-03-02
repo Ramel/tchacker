@@ -1,314 +1,317 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <stl:block xmlns="http://www.w3.org/1999/xhtml"
   xmlns:stl="http://www.hforge.org/xml-namespaces/stl">
-    <!-- Javascript -->
+  <!-- Javascript -->
   <script language="javascript">
-  var list_products = {<stl:inline stl:repeat="product list_products">
-                       "${product/id}":
-                          {'module':
-                           [<stl:inline stl:repeat="module product/modules">
-                             {"id": "${module/id}",
-                              "value": "${module/value}"},
-                              </stl:inline>],
-                           'version':
-                           [<stl:inline stl:repeat="version product/versions">
-                             {"id": "${version/id}",
-                              "value": "${version/value}"},
-                              </stl:inline>]}
-                       ,</stl:inline>
-                      }
-  function update_tracker(){
+    var list_products = {<stl:inline stl:repeat="product list_products">
+      "${product/id}":
+      {'module':
+      [<stl:inline stl:repeat="module product/modules">
+        {"id": "${module/id}",
+        "value": "${module/value}"},
+      </stl:inline>],
+      'version':
+      [<stl:inline stl:repeat="version product/versions">
+        {"id": "${version/id}",
+        "value": "${version/value}"},
+      </stl:inline>]}
+      ,</stl:inline>
+    }
+    function update_tracker(){
       update_tracker_list('version');
       update_tracker_list('module');
-  }
-
-var req = null;
-var interval = null;
-var progressAjax = null;
-var upid;
-var host, page;
-
-function uploadFile() {
-  // if there is a File as attachement
-  if($("INPUT#attachement").get(0).value != '') {
-    upid = "";
-    host = location.host;
-    page = location.pathname;
-    // Generate random upload-id
-    // Reverse the "less than" for XML in STL
-    for(i = 0; 32 > i; i++) {
-      upid += Math.floor(Math.random() * 16).toString(16);
     }
-    // Put the upid in the form values
-    $("INPUT#upid").get(0).value = upid;
-    $("FORM#tracker").get(0).action = ';edit';
-    
-    // Throw the progressBar refresh interval
-    if(!interval) {
-      interval = setInterval("updateProgressBar(host)", 1000);
-    }
-    // Check the iframe for completed upload
-    // if done, remove PB, and INTERVAL
-    $("IFRAME#iframe-upload").load(function() {
-      // if message exist (like "welcome!"), erase it.
-      $("#body #message").remove();
-      // Get actual "message" content in iframe, and put it in front page
-      msg = $("#iframe-upload").contents().find("#message");
-      $("#body H1", parent.document.body).after(msg);
-      // Reset the Form
-      $("FORM")[0].reset();
-      // Put the iframe's result in front page, and go to top.
-      $.ajax({
-        type:"GET",
-        url:";edit",
-        datatype:"html",
-        success: function(edit){
-          rec = $("#content TABLE:first", edit);
-          $("#content TABLE:first").before(rec);
-        }
-      });
-      // Return to page top
-      location.href = "#";
-      upid = "";
-      $("#tp").get(0).innerHTML = "DONE";
-      clearInterval(interval);
-      interval = null;
-      $("#interval").get(0).innerHTML = interval;
-      // Reload ThickBox, otherwise, the popup on added image doesn't work
-      $.getScript("/ui/thickbox/thickbox.js");
-      $("#iframe-upload").contents().empty();
-    });
-  } else {
-    $("FORM#tracker").get(0).action = ';edit';
-    $("FORM#tracker").get(0).target = '_self';
-  }
-}
 
-function updateProgressBar(host) {
-  if(!progressAjax) {
-    progressAjax = $.ajax({
-      url: "http://" + host + ";body_loaded",
-      data: "uri=" + page + "%3Bedit",
-      datatype: "json",
-      complete: function(request) {
-        progressAjax = null;
-      },
-      success: function(data) {
-        switch(data) {
-          case "0":
-            $("#tp").get(0).innerHTML = "Upload already DONE, data = "+ data;
-            break;
-          default:
-            $("#tp").get(0).innerHTML = "Uploaded " + data + " %";
-            break;
-        }
-        progressAjax = null;
+    var req = null;
+    var interval = null;
+    var progressAjax = null;
+    var upid;
+    var host, page;
+
+    function uploadFile() {
+      // if there is a File as attachement
+      if($("INPUT#attachement").get(0).value != '') {
         upid = "";
-      },
-      error: function(msg, str) {
-        $("#tp").get(0).innerHTML = "Error!: " + str;
+        host = location.host;
+        page = location.pathname;
+        // Generate random upload-id
+        // Reverse the "less than" for XML in STL
+        for(i = 0; 32 > i; i++) {
+        upid += Math.floor(Math.random() * 16).toString(16);
+      }
+      // Put the upid in the form values
+      $("INPUT#upid").get(0).value = upid;
+      $("FORM#tracker").get(0).action = ';edit';
+
+      // Throw the progressBar refresh interval
+      if(!interval) {
+        interval = setInterval("updateProgressBar(host)", 1000);
+      }
+      // Check the iframe for completed upload
+      // if done, remove PB, and INTERVAL
+      $("IFRAME#iframe-upload").load(function() {
+        // if message exist (like "welcome!"), erase it.
+        $("#body #message").remove();
+        // Get actual "message" content in iframe, and put it in front page
+        msg = $("#iframe-upload").contents().find("#message");
+        $("#body H1", parent.document.body).after(msg);
+        // Reset the Form
+        $("FORM")[0].reset();
+        // Put the iframe's result in front page, and go to top.
+        $.ajax({
+          type:"GET",
+          url:";edit",
+          datatype:"html",
+          success: function(edit){
+            rec = $("#content TABLE:first", edit);
+            $("#content TABLE:first").before(rec);
+          }
+        });
+        // Return to page top
+        location.href = "#";
         upid = "";
+        $("#tp").get(0).innerHTML = "DONE";
         clearInterval(interval);
         interval = null;
-        //$("#tp").get(0).innerHTML = interval;
+        $("#interval").get(0).innerHTML = interval;
+        // Reload ThickBox, otherwise, the popup on added image doesn't work
+        $.getScript("/ui/thickbox/thickbox.js");
+        $("#iframe-upload").contents().empty();
+      });
+      } else {
+        $("FORM#tracker").get(0).action = ';edit';
+        $("FORM#tracker").get(0).target = '_self';
       }
-    });
-  }
-}
-/*
-// Check if the iframe is loaded
-var iframe = $("#iframe-upload").contents().find("INPUT#" + upid).html();
-*/
+    }
+
+    function updateProgressBar(host) {
+      if(!progressAjax) {
+        progressAjax = $.ajax({
+          url: "http://" + host + ";body_loaded",
+          data: "uri=" + page + "%3Bedit",
+          datatype: "json",
+          complete: function(request) {
+            progressAjax = null;
+          },
+          success: function(data) {
+            switch(data) {
+              case "0":
+                $("#tp").get(0).innerHTML = "Upload already DONE, data = "+ data;
+                break;
+              default:
+                $("#tp").get(0).innerHTML = "Uploaded " + data + " %";
+                break;
+            }
+            progressAjax = null;
+            upid = "";
+          },
+          error: function(msg, str) {
+            $("#tp").get(0).innerHTML = "Error!: " + str;
+            upid = "";
+            clearInterval(interval);
+            interval = null;
+            //$("#tp").get(0).innerHTML = interval;
+          }
+        });
+      }
+    }
+    /*
+    // Check if the iframe is loaded
+    var iframe = $("#iframe-upload").contents().find("INPUT#" + upid).html();
+    */
   </script>
-<p stl:if="reported_by">
-  Reported by <em>${reported_by}</em>
-</p>
+  <p stl:if="reported_by">
+    Reported by <em>${reported_by}</em>
+  </p>
 
-<br/>
+  <br/>
 
-<stl:block stl:repeat="comment comments">
-  <table width="100%" border="0" cellpadding="0" cellspacing="0">
-    <tr class="tracker_issue_comment_title">
-      <td><a name="c${comment/number}"/></td>
-      <td>Comment <a href="#c${comment/number}">${comment/number}</a></td>
-      <td>${comment/user}</td>
-      <td align="right">${comment/datetime}</td>
-      <td align="right">
-      &nbsp;[
-      <a href="#new_comment"
-        onclick="javascript:reply('${comment/number}');">
-        Reply
-      </a>]&nbsp;
-      </td>
-    </tr>
-		<stl:block stl:if="comment/file">
-			<tr stl:if="comment/is_image">
-				<td colspan="5">
-					<a href="${comment/file}/;thumb?width=1280&amp;height=1280" class="thickbox"><img src="${comment/file}/;thumb?width=800&amp;height=800" /></a>
-				</td>
-			</tr>
-			<tr stl:if="comment/is_video">
-				<td colspan="5">
-					<a href="${comment/file}/;download" style="display:block;width:${comment/width}px;height:${comment/height}px;" id="player-${comment/number}"></a>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="5">
-					Attachement: <a href="${comment/file}/;download">${comment/file}</a>
-				</td>
-			</tr>
-		</stl:block>
-    <tr>
-      <td colspan="5">
-      <pre class="com" id="comment${comment/number}">${comment/comment}</pre>
-      </td>
-    </tr>
-  </table>
-	<script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.1.1.swf", {
-      clip: {
-        autoPlay: false,
-        autoBuffering: false,
-      },
-      // canvas background, the video thumbnail.
-      canvas: {
-        backgroundImage: 'url(thumb_${comment/file}/;download)'
-      },
-  }); 
-  </script>
-</stl:block>
-
-<br/>
-
-<form action=";edit" method="post" enctype="multipart/form-data" id="tracker" onsubmit="uploadFile();return true;" target="iframe-upload">
-  <fieldset>
-    <legend>Edit Issue</legend>
-    <table>
-      <tr>
-        <td colspan="2">
-          <a href="#" class="showall">Show/Hide options</a>
+  <stl:block stl:repeat="comment comments">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+      <tr class="tracker_issue_comment_title">
+        <td><a name="c${comment/number}"/></td>
+        <td>Comment <a href="#c${comment/number}">${comment/number}</a></td>
+        <td>${comment/user}</td>
+        <td align="right">${comment/datetime}</td>
+        <td align="right">
+          &nbsp;[
+          <a href="#new_comment"
+            onclick="javascript:reply('${comment/number}');">
+            Reply
+          </a>]&nbsp;
         </td>
       </tr>
+      <stl:block stl:if="comment/file">
+        <tr stl:if="comment/is_image">
+          <td colspan="5">
+            <a href="${comment/file}/;thumb?width=1280&amp;height=1280" class="thickbox"><img src="${comment/file}/;thumb?width=800&amp;height=800" /></a>
+          </td>
+        </tr>
+        <tr stl:if="comment/is_video">
+          <td colspan="5">
+            <a href="${comment/file}/;download" style="display:block;width:${comment/width}px;height:${comment/height}px;" id="player-${comment/number}"></a>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="5">
+            Attachement: <a href="${comment/file}/;download">${comment/file}</a>
+          </td>
+        </tr>
+      </stl:block>
       <tr>
-        <td colspan="2" class="light">
-          <label for="title" class="${title/class}">Title (mandatory):</label><br/>
-          <input type="text" name="title" id="title" value="${title/value}"
-            size="48" />
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" class="light">
-          <label for="product" class="${product/class}">Product (mandatory):</label><br/>
-          <select name="product" id="product" class="tracker_select">
-            <option value="-1"></option>
-            <option stl:repeat="item product/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-        <td valign="top" class="light">
-          <label for="module" class="${module/class}">Module:</label><br/>
-          <select name="module" id="module" class="tracker_select">
-            <option value=""></option>
-            <option stl:repeat="item module/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-        <td valign="top" class="light">
-          <label for="version" class="${version/class}">Version:</label><br/>
-          <select name="version" id="version" class="tracker_select">
-            <option value=""></option>
-            <option stl:repeat="item version/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" class="light">
-          <label for="type" class="${type/class}">Type (mandatory):</label><br/>
-          <select name="type" id="type" class="tracker_select">
-            <option value=""></option>
-            <option stl:repeat="item type/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-        <td valign="top">
-          <label for="state" class="${state/class}">Status (mandatory):</label><br/>
-          <select name="state" id="state" class="tracker_select">
-            <option value=""></option>
-            <option stl:repeat="item state/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-        <td valign="top" class="light">
-          <label for="priority" class="${priority/class}">Priority:</label><br/>
-          <select name="priority" id="priority" class="tracker_select">
-            <option value=""></option>
-            <option stl:repeat="item priority/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" class="light">
-          <label for="assigned_to" class="${assigned_to/class}">Assign To:</label><br/>
-          <select name="assigned_to" id="assigned_to" class="tracker_select">
-            <option value=""></option>
-            <option stl:repeat="item assigned_to/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-        <td valign="top" class="light">
-          <label for="cc_add" class="${cc_add/class}">Add CC:</label><br/>
-          <select name="cc_add" id="cc_add" class="tracker_select"
-            multiple="multiple" size="5">
-            <option stl:repeat="item cc_add/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-        </td>
-        <td valign="top" class="light">
-          <label for="cc_list" class="${cc_list/class}">CC:</label><br/>
-          <select name="cc_list" id="cc_list" class="tracker_select"
-            multiple="multiple" size="4">
-            <option stl:repeat="item cc_list/value" value="${item/name}"
-              selected="${item/selected}">${item/value}</option>
-          </select>
-          <input type="checkbox" name="cc_remove" value="1"
-            checked="${cc_remove}" />
-          <label for="cc_remove">Remove selected CCs</label>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" colspan="3">
-          <a name="new_comment"></a>
-          <label for="comment" class="${comment/class}">New Comment:</label><br/>
-          <textarea name="comment" id="comment" cols="80" rows="10"
-            ></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" colspan="2">
-          <label for="attachement">New Attachement:</label><br/>
-          <input type="file" name="file" id="attachement" size="36" />
-          <input type="hidden" name="upid" id="upid" />
-          <div>
-            <div id="progress" style="width:400px;border:1px solid black">
-              <div id="progressbar" 
-                style="width:1px;background-color:black;border:1px solid white">&nbsp;</div>
-            </div>
-            <div id="tp">(throughtput)</div>
-            <div id="interval">interval</div>
-          </div>
-          <iframe name="iframe-upload" id="iframe-upload"
-            style="width:800px;height:200px;"></iframe>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <input type="submit" class="button_ok" value="Edit" />
+        <td colspan="5">
+          <pre class="com" id="comment${comment/number}">${comment/comment}</pre>
         </td>
       </tr>
     </table>
-  </fieldset>
-</form>
+    <script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.1.1.swf", {
+        clip: {
+          autoPlay: false,
+          autoBuffering: false
+        },
+        // canvas background, the video thumbnail.
+        canvas: {
+          backgroundImage: 'url(thumb_${comment/file}/;download)'
+        }
+      }); 
+    </script>
+  </stl:block>
+
+  <br/>
+
+  <form action=";edit" method="post" enctype="multipart/form-data" id="tracker" onsubmit="uploadFile();return true;" target="iframe-upload">
+    <fieldset>
+      <legend>Edit Issue</legend>
+      <table>
+        <tr>
+          <td colspan="2">
+            <a href="#" class="showall">Show/Hide options</a>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" class="light">
+            <label for="title" class="${title/class}">Title (mandatory):</label><br/>
+            <input type="text" name="title" id="title" value="${title/value}"
+              size="48" />
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" class="light">
+            <label for="product" class="${product/class}">Product (mandatory):</label><br/>
+            <select name="product" id="product" class="tracker_select">
+              <option value="-1"></option>
+              <option stl:repeat="item product/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top" class="light">
+            <label for="module" class="${module/class}">Module:</label><br/>
+            <select name="module" id="module" class="tracker_select">
+              <option value=""></option>
+              <option stl:repeat="item module/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top" class="light">
+            <label for="version" class="${version/class}">Version:</label><br/>
+            <select name="version" id="version" class="tracker_select">
+              <option value=""></option>
+              <option stl:repeat="item version/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" class="light">
+            <label for="type" class="${type/class}">Type (mandatory):</label><br/>
+            <select name="type" id="type" class="tracker_select">
+              <option value=""></option>
+              <option stl:repeat="item type/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top">
+            <label for="state" class="${state/class}">Status (mandatory):</label><br/>
+            <select name="state" id="state" class="tracker_select">
+              <option value=""></option>
+              <option stl:repeat="item state/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top" class="light">
+            <label for="priority" class="${priority/class}">Priority:</label><br/>
+            <select name="priority" id="priority" class="tracker_select">
+              <option value=""></option>
+              <option stl:repeat="item priority/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" class="light">
+            <label for="assigned_to" class="${assigned_to/class}">Assign To:</label><br/>
+            <select name="assigned_to" id="assigned_to" class="tracker_select">
+              <option value=""></option>
+              <option stl:repeat="item assigned_to/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top" class="light">
+            <label for="cc_add" class="${cc_add/class}">Add CC:</label><br/>
+            <select name="cc_add" id="cc_add" class="tracker_select"
+              multiple="multiple" size="5">
+              <option stl:repeat="item cc_add/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+          </td>
+          <td valign="top" class="light">
+            <label for="cc_list" class="${cc_list/class}">CC:</label><br/>
+            <select name="cc_list" id="cc_list" class="tracker_select"
+              multiple="multiple" size="4">
+              <option stl:repeat="item cc_list/value" value="${item/name}"
+                selected="${item/selected}">${item/value}</option>
+            </select>
+            <input type="checkbox" name="cc_remove" value="1"
+              checked="${cc_remove}" />
+            <label for="cc_remove">Remove selected CCs</label>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" colspan="3">
+            <a name="new_comment"></a>
+            <label for="comment" class="${comment/class}">New Comment:</label><br/>
+            <textarea name="comment" id="comment" cols="80" rows="10"
+              ></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" colspan="2">
+            <label for="attachement">New Attachement:</label><br/>
+            <input type="file" name="file" id="attachement" size="36" />
+            <input type="hidden" name="upid" id="upid" />
+            <div>
+              <div id="progress" style="width:400px;border:1px solid black">
+                <div id="progressbar" 
+                  style="width:1px;background-color:black;border:1px solid white">&nbsp;</div>
+              </div>
+              <div id="tp"><span style="width:206px; height:11px; border:1px
+              solid blue"><em style="left: 104px; background:
+              url('ui/ajax-loading-blue.gif') repeat-x scroll 0 0 transparent;
+              display:block; position:absolute; top: 0px">50 %</em></span><span>ici le %</span></div>
+              <div id="interval">interval</div>
+            </div>
+            <iframe name="iframe-upload" id="iframe-upload"
+              style="width:800px;height:200px;"></iframe>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <input type="submit" class="button_ok" value="Edit" />
+          </td>
+        </tr>
+      </table>
+    </fieldset>
+  </form>
 </stl:block>

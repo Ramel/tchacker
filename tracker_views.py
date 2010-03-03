@@ -29,9 +29,9 @@ from zipfile import ZipFile
 # Import from itools
 from itools.core import guess_extension
 from itools.gettext import MSG
-from itools import vfs
+from itools.fs import vfs
 from itools.uri import encode_query, get_uri_name
-from itools.vfs import FileName
+from itools.fs import FileName
 from itools.web import BaseView, ERROR, STLView
 from itools.xml import XMLParser
 from itools.handlers import File as FileHandler

@@ -296,10 +296,11 @@
                 <div id="progressbar" 
                   style="width:1px;background-color:black;border:1px solid white">&nbsp;</div>
               </div>
-              <div id="tp"><span style="width:206px; height:11px; border:1px
-              solid blue"><em style="left: 104px; background:
-              url('ui/ajax-loading-blue.gif') repeat-x scroll 0 0 transparent;
-              display:block; position:absolute; top: 0px">50 %</em></span><span>ici le %</span></div>
+              <div id="tp"><span style="position:absolute; display: block; overflow: hidden; background: transparent;
+               width:206px; height:11px; border:1px solid #0080FF;
+               text-indent:-8000px"><em style="width: 206px; right: 0px; background:
+              url('/ui/tchacker/ajax-loader-blue.gif') repeat-x scroll 0 0 transparent;
+              display:block; overflow:hidden; position:absolute; top: 0px; text-indent: -8000px">50 %</em></span><span>ici le %</span></div>
               <div id="interval">interval</div>
             </div>
             <iframe name="iframe-upload" id="iframe-upload"

@@ -32,8 +32,8 @@ from itools.datatypes import Boolean, Integer, String, Unicode, Enumerate
 from itools.gettext import MSG
 from itools.i18n import format_datetime
 from itools.uri import encode_query, Reference, get_reference
-from itools import vfs
-from itools.vfs import FileName
+from itools import fs
+from itools.fs import FileName
 from itools.web import BaseView, BaseForm, STLForm
 from itools.web import INFO, ERROR
 from itools.web.views import process_form

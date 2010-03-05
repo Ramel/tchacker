@@ -36,111 +36,37 @@ from itools.i18n import format_datetime
 from itools.web import STLForm, STLView
 from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
 from itools.fs import FileName
-from itools.core import guess_extension
+from itools.core import guess_extension, guess_type
+from itools.uri import resolve_uri
 
 # Import from ikaaro
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.table_views import Table_View
 from ikaaro.views import CompositeForm
 from ikaaro.views import ContextMenu
-from ikaaro.file import Image
+from ikaaro.file import Image, Video
+from ikaaro.tracker.issue_views import Issue_Edit
+from ikaaro.tracker.datatypes import get_issue_fields, UsersList
 
-# Local import
-from datatypes import get_issue_fields, UsersList
+from videoencoding.video import VideoEncodingToFLV
 
 # Debug
-from pprint import pprint
+#from pprint import pprint
 
 
-###########################################################################
-# Utilities
-###########################################################################
-url_expr = compile('([fh]t?tps?://[\w;/?:@&=+$,.#\-%]*)')
-class OurWrapper(TextWrapper):
-
-    def _split(self, text):
-        # Override default's '_split' method to define URLs as unbreakable,
-        # and reduce URLs if needed.
-        # XXX This is fragile, since it uses TextWrapper private API.
-
-        # Keep a mapping from reduced URL to full URL
-        self.urls_map = {}
-
-        # Get the chunks
-        chunks = []
-        for segment in url_expr.split(text):
-            starts = segment.startswith
-            if starts('http://') or starts('https://') or starts('ftp://'):
-                if len(segment) > 95:
-                    # Reduce URL
-                    url = segment
-                    segment = segment[:46] + '...' + segment[-46:]
-                    self.urls_map[segment] = url
-                else:
-                    self.urls_map[segment] = segment
-                chunks.append(segment)
-            else:
-                chunks.extend(TextWrapper._split(self, segment))
-        return chunks
-
-
-
-def indent(text):
-    """Replace URLs by HTML links.  Wrap lines (with spaces) to 95 chars.
-    """
-    text = text.encode('utf-8')
-    # Wrap
-    buffer = []
-    text_wrapper = OurWrapper(width=95)
-    for line in text.splitlines():
-        line = text_wrapper.fill(line) + '\n'
-        for segment in url_expr.split(line):
-            url = text_wrapper.urls_map.get(segment)
-            if url is None:
-                buffer.append(segment)
-            else:
-                if buffer:
-                    yield TEXT, ''.join(buffer), 1
-                    buffer = []
-                # <a>...</a>
-                attributes = {(None, 'href'): url}
-                yield START_ELEMENT, (xhtml_uri, 'a', attributes), 1
-                yield TEXT, segment, 1
-                yield END_ELEMENT, (xhtml_uri, 'a'), 1
-    if buffer:
-        yield TEXT, ''.join(buffer), 1
-        buffer = []
-
-
-
-###########################################################################
-# Menu
-###########################################################################
-class IssueTrackerMenu(ContextMenu):
-
-    title = MSG(u'Tracker')
-
-    def get_items(self, resource, context):
-        items = [
-            {'title': MSG(u'Search for issues'),
-             'href': '%s/;search' % context.get_link(resource.parent)},
-            {'title': MSG(u'Add a new issue'),
-             'href': '%s/;add_issue' % context.get_link(resource.parent)}]
-        return items
-
-
-
-###########################################################################
-# Views
-###########################################################################
-class Issue_Edit(STLForm):
+class TchackIssue_Edit(Issue_Edit):
 
     access = 'is_allowed_to_edit'
     title = MSG(u'Edit Issue')
     icon = 'edit.png'
     template = '/ui/tchacker/edit_issue.xml'
-    styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
-    scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js']
+    styles = ['ui/tracker/style.css',
+              '/ui/tchacker/style.css', '/ui/thickbox/thickbox.css']
+    scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
+               '/ui/flowplayer/flowplayer-3.1.1.min.js',
+               '/ui/flowplayer/flowplayer-3.1.1.swf']
+    #context.scripts.append('/ui/flowplayer/script.js')
+
 
     def get_schema(self, resource, context):
         return get_issue_fields(resource.parent)
@@ -153,390 +79,50 @@ class Issue_Edit(STLForm):
 
 
     def get_namespace(self, resource, context):
-        namespace = STLForm.get_namespace(self, resource, context)
-
+        namespace = Issue_Edit.get_namespace(self, resource, context)
         # Local variables
         users = resource.get_resource('/users')
         history = resource.get_history()
         record = history.get_record(-1)
-
         # Build the namespace
-        namespace = STLForm.get_namespace(self, resource, context)
-
-        # Comments
-        comments = []
-        # Count comments
-        i = 0
-        is_image = False
-        files = resource.get_names()
-        for record in resource.get_history_records():
-            comment = record.comment
-            file = record.file
-            #thumb_low = ''
-            #thumb_high = ''
-            if not comment and not file:
-                continue
-            rdatetime = record.datetime
-            # solid in case the user has been removed
-            username = record.username
-            user = users.get_resource(username, soft=True)
-            user_title = user and user.get_title() or username
-            # In case of an Image joined as file, show it as a preview
-            # (width="256", for now).
-            if file:
-                #pprint("file = %s" % file)
-                # If file is an image return True
-                is_image = isinstance(resource._get_resource(file), Image)
-                """
-                filename, ext, lang = FileName.decode(file)
-                pprint("ext = %s" % ext)
-                if ext is None:
-                    mimetype = file.get_content_type()
-                    ext = guess_extension(mimetype)[1:]
-                    pprint("ext = %s" % ext)
-                """
-            if comment and not file: 
-                is_image = False
-            i += 1
-            #
-            #pprint("thumb_low = %s" % thumb_low)
-            #pprint("is_image = %s" % is_image)
-            #pprint("file = %s" % file)
-            comments.append({
-                'number': i,
-                'user': user_title,
-                'datetime': format_datetime(rdatetime),
-                'comment': indent(comment),
-                'file': file,
-                'is_image': is_image,
-                #'thumb_low': thumb_low,
-                #'thumb_high': thumb_high, 
-                })
-        comments.reverse()
-        namespace['comments'] = comments
-
-        # cc_list / cc_add / cc_remove
-        cc_list = record.get_value('cc_list') or ()
-        namespace['cc_list']= {'name': 'cc_list',
-                              'value': [],
-                              'class': None}
-        namespace['cc_add']= {'name': 'cc_add',
-                              'value': [],
-                              'class': None}
-        cc_value = namespace['cc_list']['value']
-        add_value = namespace['cc_add']['value']
-        cc_list_userslist = self.get_schema(resource, context)['cc_list']
-        for user in cc_list_userslist.get_options():
-            user['selected'] = False
-            if user['name'] in cc_list:
-                cc_value.append(user)
+        for comment in namespace['comments']:
+            if comment['file']:
+                attachment = resource.get_resource(comment['file'])
+                print type(attachment), attachment
+                comment['is_image'] = isinstance(attachment, Image)
+                comment['is_video'] = isinstance(attachment, Video)
+                comment['width'] = 200
+                comment['height'] = 200
+                if comment['is_video']:
+                    #pprint("i = %s and length = %s" % (i, length))
+                    #if (i == length ):
+                    #    last_video = True
+                    #    #pprint("LastVideo = %s" % last_video)
+                    video = attachment #resource.get_resource(file)
+                    base = video.metadata.uri
+                    name = video.name
+                    #pprint("name = %s" % name)
+                    name, ext, lang = FileName.decode(name)
+                    if ext is None:
+                        mimetype = video.get_content_type()
+                        ext = guess_extension(mimetype)[1:]
+                    
+                    #thumbnail = ("thumb_%s" % name)
+                    #pprint("ext = %s, sortie de is_video" % ext)
+                    
+                    uri = resolve_uri(base, name)
+                    #pprint("name = %s" % name)
+                    #pprint("base = %s" % base)
+                    #pprint("uri = %s.%s" % (uri, ext))
+                    comment['width'], height, ratio = VideoEncodingToFLV(
+                       resource).get_size_and_ratio(
+                            "%s.%s" % (uri, ext))
+                    # Add the Flowplayer menu's height
+                    comment['height'] = int(height) + 24
+                    #pprint("width x height & ratio = %s x %s & %s" % (width, height, ratio))
             else:
-                add_value.append(user)
-        namespace['cc_remove'] = None
-
-        # Reported by
-        reported_by = resource.get_reported_by()
-        namespace['reported_by'] = users.get_resource(reported_by).get_title()
-
-        # list_products
-        tracker = resource.parent
-        namespace['list_products'] = tracker.get_list_products_namespace()
-
+                comment['file'] = False
+                comment['is_image'] = False
+                comment['is_video'] = False
+        
         return namespace
-
-
-    def action(self, resource, context, form):
-        # Edit
-        resource._add_record(context, form)
-        # Change
-        context.server.change_resource(resource)
-        context.message = MSG_CHANGES_SAVED
-
-
-
-class Issue_History(STLView):
-
-    access = 'is_allowed_to_view'
-    title = MSG(u'History')
-    icon = 'history.png'
-    template = '/ui/tchacker/issue_history.xml'
-    styles = ['/ui/tchacker/style.css']
-
-
-    def get_namespace(self, resource, context):
-        # Local variables
-        users = resource.get_resource('/users')
-        tracker = resource.parent
-        versions = tracker.get_resource('version').handler
-        types = tracker.get_resource('type').handler
-        states = tracker.get_resource('state').handler
-        modules = tracker.get_resource('module').handler
-        priorities = tracker.get_resource('priority').handler
-        # Initial values
-        previous_title = None
-        previous_version = None
-        previous_type = None
-        previous_state = None
-        previous_module = None
-        previous_priority = None
-        previous_assigned_to = None
-        previous_cc_list = None
-
-        # Build the namespace
-        rows = []
-        i = 0
-        for record in resource.get_history_records():
-            rdatetime = record.get_value('datetime')
-            username = record.get_value('username')
-            title = record.get_value('title')
-            module = record.get_value('module')
-            version = record.get_value('version')
-            type = record.get_value('type')
-            priority = record.get_value('priority')
-            assigned_to = record.get_value('assigned_to')
-            state = record.get_value('state')
-            comment = record.get_value('comment')
-            cc_list = record.get_value('cc_list') or ()
-            file = record.get_value('file')
-            # Solid in case the user has been removed
-            user = users.get_resource(username, soft=True)
-            usertitle = user and user.get_title() or username
-            comment = XMLContent.encode(Unicode.encode(comment))
-            comment = XMLParser(comment.replace('\n', '<br />'))
-            i += 1
-            row_ns = {'number': i,
-                      'user': usertitle,
-                      'datetime': format_datetime(rdatetime),
-                      'title': None,
-                      'version': None,
-                      'type': None,
-                      'state': None,
-                      'module': None,
-                      'priority': None,
-                      'assigned_to': None,
-                      'comment': comment,
-                      'cc_list': None,
-                      'file': file}
-
-            if title != previous_title:
-                previous_title = title
-                row_ns['title'] = title
-            if version != previous_version:
-                previous_version = version
-                row_ns['version'] = ' '
-                if version is not None:
-                    version = versions.get_record(int(version))
-                    if version:
-                        value = versions.get_record_value(version, 'title')
-                        row_ns['version'] = value
-            if type != previous_type:
-                previous_type = type
-                row_ns['type'] = ' '
-                if type is not None:
-                    type = types.get_record(int(type))
-                    if type is not None:
-                        value = types.get_record_value(type, 'title')
-                        row_ns['type'] = value
-            if state != previous_state:
-                previous_state = state
-                row_ns['state'] = ' '
-                if state is not None:
-                    state = states.get_record(int(state))
-                    if state is not None:
-                        value = states.get_record_value(state, 'title')
-                        row_ns['state'] = value
-            if module != previous_module:
-                previous_module = module
-                row_ns['module'] = ' '
-                if module is not None:
-                    module = modules.get_record(int(module))
-                    if module is not None:
-                        value = modules.get_record_value(module, 'title')
-                        row_ns['module'] = value
-            if priority != previous_priority:
-                previous_priority = priority
-                row_ns['priority'] = ' '
-                if priority is not None:
-                    priority = priorities.get_record(int(priority))
-                    if priority is not None:
-                        value = priorities.get_record_value(priority, 'title')
-                        row_ns['priority'] = value
-            if assigned_to != previous_assigned_to:
-                previous_assigned_to = assigned_to
-            row_ns['assigned_to'] = ' '
-            if assigned_to:
-                    assigned_to_user = users.get_resource(assigned_to, soft=True)
-                    if assigned_to_user is not None:
-                        row_ns['assigned_to'] = assigned_to_user.get_title()
-            if cc_list != previous_cc_list:
-                root = context.root
-                previous_cc_list = cc_list
-                new_values = []
-                for cc in cc_list:
-                    user = root.get_user(cc)
-                    if user:
-                        new_values.append(user.get_property('email'))
-                if new_values:
-                    row_ns['cc_list'] = u', '.join(new_values)
-                else:
-                    row_ns['cc_list'] = ' '
-
-            rows.append(row_ns)
-
-        rows.reverse()
-
-        # Ok
-        return {'number': resource.name, 'rows': rows}
-
-
-
-class Issue_ViewResources(Table_View):
-
-    search_template = None
-
-    batch_msg1 = MSG(u"There is 1 assignment.")
-    batch_msg2 = MSG(u"There are {n} assignments.")
-
-
-    def get_items(self, resource, context):
-        issue = context.resource
-        return resource.handler.search(issue=issue.name)
-
-
-    def get_item_value(self, resource, context, item, column):
-        if column == 'id':
-            id = item.id
-            return id, ';edit_resources?id=%s' % id
-        return Table_View.get_item_value(self, resource, context, item,
-                                         column)
-
-
-    def action_remove(self, resource, context, form):
-        calendar = resource.get_calendar()
-        Table_View.action_remove(self, calendar, context, form)
-
-
-
-class Issue_AddEditResource(STLForm):
-
-    access = 'is_allowed_to_edit'
-    template = '/ui/tchacker/edit_resource.xml'
-
-    query_schema = {
-        'id': Integer}
-
-    schema = {
-        'resource': String,
-        'dtstart': Date(mandatory=True),
-        'dtend': Date(mandatory=True),
-        'tstart': Time(default=time(0, 0)),
-        'tend': Time(default=time(0, 0)),
-        'comment': Unicode}
-
-
-    def get_namespace(self, resource, context):
-        calendar = resource.get_calendar()
-
-        # Add or Edit
-        id = context.query['id']
-        if id is None:
-            # Add a new resource-issue
-            action = ';edit_resources'
-            user = None
-            d_start = d_end = date.today()
-            t_start = t_end = ''
-            comment = u''
-        else:
-            # Edit a resource-issue
-            action = ';edit_resources?id=%s' % id
-            record = calendar.handler.get_record(id)
-            get_value = calendar.handler.get_record_value
-            user = get_value(record, 'resource')
-            dtstart = get_value(record, 'dtstart')
-            dtend = get_value(record, 'dtend')
-            comment = get_value(record, 'comment')
-            d_start, t_start = dtstart.date(), dtstart.time()
-            d_end, t_end = dtend.date(), dtend.time()
-            t_start = t_start.strftime('%H:%M')
-            t_end = t_end.strftime('%H:%M')
-            id = str(id)
-
-        # Time select
-        timetables = calendar.get_timetables()
-        time_select = [
-            {'name': index,
-             'start': start.strftime('%H:%M'),
-             'end': end.strftime('%H:%M')}
-            for index, (start, end) in enumerate(timetables) ]
-
-        # Ok
-        return {
-            'action': action,
-            'id': id,
-            'users': UsersList(tracker=resource,
-                excluded_roles=('guests',)).get_namespace(user),
-            'd_start': d_start.strftime('%Y-%m-%d'),
-            't_start': t_start,
-            'd_end': d_end.strftime('%Y-%m-%d'),
-            't_end': t_end,
-            'time_select': time_select,
-            'comment': comment}
-
-
-    def action_add(self, resource, context, form):
-        dtstart = datetime.combine(form['dtstart'], form['tstart'])
-        dtend = datetime.combine(form['dtend'], form['tend'])
-        record = {
-            'issue': resource.name,
-            'resource': form['resource'],
-            'dtstart': dtstart,
-            'dtend': dtend,
-            'comment': form['comment']}
-
-        # Change
-        calendar = resource.get_calendar()
-        calendar.handler.add_record(record)
-        # Ok
-        context.message = MSG_CHANGES_SAVED
-
-
-    def action_edit(self, resource, context, form):
-        id = context.query['id']
-
-        # New record
-        dtstart = datetime.combine(form['dtstart'], form['tstart'])
-        dtend = datetime.combine(form['dtend'], form['tend'])
-        record = {
-            'issue': resource.name,
-            'resource': form['resource'],
-            'dtstart': dtstart,
-            'dtend': dtend,
-            'comment': form['comment']}
-
-        # Change
-        calendar = resource.get_calendar()
-        calendar.handler.update_record(id, **record)
-        # Ok
-        context.message = MSG_CHANGES_SAVED
-
-
-
-class Issue_EditResources(CompositeForm):
-
-    access = 'is_allowed_to_edit'
-    title = MSG(u'Edit resources')
-    icon = 'edit.png'
-
-    subviews = [
-        Issue_AddEditResource(),
-        Issue_ViewResources(),
-    ]
-
-    def get_namespace(self, resource, context):
-        # Override so we can pass a different resource to Issue_ViewResources
-        calendar = resource.get_calendar()
-        views = [
-            self.subviews[0].GET(resource, context),
-            self.subviews[1].GET(calendar, context) ]
-
-        return {'views': views}

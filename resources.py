@@ -105,9 +105,11 @@ class Resource(Record):
                      out_on=True):
         context = get_context()
         tracker = context.resource.parent
+        """
         from pprint import pprint
         pprint('==issue==')
         pprint(issue)
+        """
         issue = tracker.get_resource(self.get_value('issue'))
         comment = self.get_value('comment')
 

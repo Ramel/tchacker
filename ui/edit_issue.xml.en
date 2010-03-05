@@ -31,8 +31,8 @@
 <br/>
 
 <stl:block stl:repeat="comment comments">
-  <table width="100%" border="0" cellpadding="0" cellspacing="0">
-    <tr class="tracker-issue_comment_title">
+  <table width="100%" border="0" cellpadding="0" cellspacing="0" id="tchacker">
+    <tr class="tracker-issue-comment-title">
       <td><a name="c${comment/number}"/></td>
       <td>Comment <a href="#c${comment/number}">${comment/number}</a></td>
       <td>${comment/user}</td>
@@ -52,7 +52,8 @@
     </tr>
     <tr stl:if="comment/file">
       <td colspan="5">
-        Attachement: <a href="${comment/file}/;download">${comment/file}</a>
+        <p class="attachement">Attachement: <a href="${comment/file}/;download"
+            >${comment/file}</a></p>
       </td>
     </tr>
     <tr>

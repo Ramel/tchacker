@@ -5,7 +5,7 @@
   xmlns:stl="http://www.hforge.org/xml-namespaces/stl">
   <!-- Javascript -->
   <script language="javascript">
-  var list_products =Â {<stl:inline stl:repeat="product list_products">
+  var list_products = {<stl:inline stl:repeat="product list_products">
                        "${product/id}":
                           {'module':
                            [<stl:inline stl:repeat="module product/modules">
@@ -89,7 +89,7 @@
       </tr>
       <tr>
         <td valign="top">
-          <label for="assigned_to" class="${assigned_to/class}">Assign To:</label><br/>
+          <label for="assigned-to" class="${assigned_to/class}">Assign To:</label><br/>
           <select name="assigned_to" id="assigned-to" class="tracker-select">
             <option value=""></option>
             <option stl:repeat="item assigned_to/value" value="${item/name}"
@@ -97,7 +97,7 @@
           </select>
         </td>
         <td valign="top" colspan="2">
-          <label for="cc_add" class="${cc_list/class}">CC:</label><br/>
+          <label for="cc-add" class="${cc_list/class}">CC:</label><br/>
           <select name="cc_add" id="cc-add" class="tracker-select"
             multiple="multiple" size="5">
             <option stl:repeat="item cc_list/value" value="${item/name}"

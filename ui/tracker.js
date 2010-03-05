@@ -83,15 +83,15 @@ $(document).ready(function () {
 	});
 	/* show.hide.toggle some table columns */
 	$('A.hide').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').hide();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned-to, TABLE.issues TD.assigned-to').hide();
 		return false;
 	});
 	$('A.show').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').show();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned-to, TABLE.issues TD.assigned-to').show();
 		return false;
 	});
 	$('A.toggle').click(function() {
-		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to').toggle();
+		$('TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned-to, TABLE.issues TD.assigned-to').toggle();
 		return false;
 	});
 });

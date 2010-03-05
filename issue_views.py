@@ -139,7 +139,8 @@ class Issue_Edit(STLForm):
     title = MSG(u'Edit Issue')
     icon = 'edit.png'
     template = '/ui/tchacker/edit_issue.xml'
-
+    styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
+    scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js']
 
     def get_schema(self, resource, context):
         return get_issue_fields(resource.parent)
@@ -152,11 +153,7 @@ class Issue_Edit(STLForm):
 
 
     def get_namespace(self, resource, context):
-        # Set Style & JS
-        context.styles.append('/ui/tchacker/tracker.css')
-        context.scripts.append('/ui/tchacker/tracker.js')
-        context.styles.append('/ui/thickbox/thickbox.css')
-        context.scripts.append('/ui/thickbox/thickbox.js')
+        namespace = STLForm.get_namespace(self, resource, context)
 
         # Local variables
         users = resource.get_resource('/users')
@@ -164,7 +161,7 @@ class Issue_Edit(STLForm):
         record = history.get_record(-1)
 
         # Build the namespace
-        namespace = self.build_namespace(resource, context)
+        namespace = STLForm.get_namespace(self, resource, context)
 
         # Comments
         comments = []
@@ -228,7 +225,8 @@ class Issue_Edit(STLForm):
                               'class': None}
         cc_value = namespace['cc_list']['value']
         add_value = namespace['cc_add']['value']
-        for user in UsersList(tracker=resource.parent).get_options():
+        cc_list_userslist = self.get_schema(resource, context)['cc_list']
+        for user in cc_list_userslist.get_options():
             user['selected'] = False
             if user['name'] in cc_list:
                 cc_value.append(user)
@@ -262,12 +260,10 @@ class Issue_History(STLView):
     title = MSG(u'History')
     icon = 'history.png'
     template = '/ui/tchacker/issue_history.xml'
+    styles = ['/ui/tchacker/style.css']
 
 
     def get_namespace(self, resource, context):
-        # Set Style
-        context.styles.append('/ui/tchacker/tracker.css')
-
         # Local variables
         users = resource.get_resource('/users')
         tracker = resource.parent
@@ -328,7 +324,7 @@ class Issue_History(STLView):
             if version != previous_version:
                 previous_version = version
                 row_ns['version'] = ' '
-                if module is not None:
+                if version is not None:
                     version = versions.get_record(int(version))
                     if version:
                         value = versions.get_record_value(version, 'title')
@@ -372,7 +368,6 @@ class Issue_History(STLView):
                     assigned_to_user = users.get_resource(assigned_to, soft=True)
                     if assigned_to_user is not None:
                         row_ns['assigned_to'] = assigned_to_user.get_title()
- 
             if cc_list != previous_cc_list:
                 root = context.root
                 previous_cc_list = cc_list
@@ -478,7 +473,8 @@ class Issue_AddEditResource(STLForm):
         return {
             'action': action,
             'id': id,
-            'users': resource.parent.get_members_namespace(user),
+            'users': UsersList(tracker=resource,
+                excluded_roles=('guests',)).get_namespace(user),
             'd_start': d_start.strftime('%Y-%m-%d'),
             't_start': t_start,
             'd_end': d_end.strftime('%Y-%m-%d'),

@@ -37,6 +37,7 @@ from itools.xapian import StartQuery
 # Import from ikaaro
 from ikaaro.folder import Folder
 from ikaaro.registry import register_resource_class
+from issue import Tchack_Issue
 from resources import Tchack_Resources
 from stored import Tchack_StoredSearch, StoredSearchFile
 from tables import Tracker_TableResource, Tracker_TableHandler
@@ -77,6 +78,8 @@ class Tchack_Tracker(Folder):
 
     __fixed_handlers__ = ['product', 'module', 'version', 'type', 'priority',
         'state', 'calendar']
+    
+    issue_class = Tchack_Issue
 
     @staticmethod
     def _make_resource(cls, folder, name):
@@ -226,6 +229,8 @@ class Tchack_Tracker(Folder):
         query = self.get_issues_query_terms()
         # Text search
         if text:
+            # XXX The language of text should be given
+            #     => {'en': text}
             query2 = [PhraseQuery('title', text), PhraseQuery('text', text)]
             query2 = OrQuery(*query2)
             query.append(query2)

@@ -5,6 +5,7 @@
 # Copyright (C) 2007-2008 Hervé Cauwelier <herve@itaapy.com>
 # Copyright (C) 2007-2008 Juan David Ibáñez Palomar <jdavid@itaapy.com>
 # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
+# Copyright (C) 2009-2010 Armel Fortun <armel@tchack.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,20 +32,20 @@ from itools.csv import CSVFile, Property
 from itools.datatypes import Boolean, Integer, String, Unicode, Enumerate
 from itools.gettext import MSG
 from itools.i18n import format_datetime
+from itools.stl import stl
 from itools.uri import encode_query, Reference, get_reference
 from itools import fs
 from itools.fs import FileName
-from itools.web import BaseView, BaseForm, STLForm
-from itools.web import INFO, ERROR
+from itools.web import BaseView, BaseForm, STLForm, FormError, INFO, ERROR
 from itools.web.views import process_form
-from itools.handlers import get_handler, File as FileHandler
+from itools.handlers import ro_database, File as FileHandler
 
 # Import from ikaaro
 from ikaaro.buttons import Button
 from ikaaro.forms import HiddenWidget, TextWidget
 from ikaaro import messages
-from ikaaro.views_new import NewInstance
 from ikaaro.views import BrowseForm, SearchForm as BaseSearchForm, ContextMenu
+from ikaaro.views_new import NewInstance
 from ikaaro.registry import get_resource_class
 from ikaaro.file import Image
 
@@ -75,7 +76,7 @@ columns = [
 ###########################################################################
 class GoToIssueMenu(ContextMenu):
 
-    access = 'is_allowed_to_view'
+    #access = 'is_allowed_to_view'
     title = MSG(u'Go To Issue')
     template = '/ui/tchacker/menu_goto.xml'
 
@@ -100,7 +101,7 @@ class StoreSearchMenu(ContextMenu):
     def get_namespace(self, resource, context):
         # This search exists ?
         search_name = context.get_query_value('search_name')
-        search = None
+        #search = None
         if search_name:
             search = resource.get_resource(search_name, soft=True)
         else:
@@ -175,6 +176,7 @@ class StoredSearchesMenu(ContextMenu):
 
 
 class TrackerViewMenu(ContextMenu):
+    
     title = MSG(u'Advanced')
 
     def get_items(self, resource, context):
@@ -246,21 +248,22 @@ class Tracker_AddIssue(STLForm):
     def get_schema(self, resource, context):
         return get_issue_fields(resource)
 
+    def get_value(self, resource, context, name, datatype):
+        if getattr(datatype, 'mandatory', False):
+            datatype = datatype(mandatory=False)
+        return context.get_query_value(name, type=datatype)
 
     def get_namespace(self, resource, context):
-        context.styles.append('/ui/tchacker/tracker.css')
-        context.scripts.append('/ui/tchacker/tracker.js')
-
-        namespace =  self.build_namespace(resource, context)
+        namespace =  STLForm.get_namespace(self, resource, context)
         namespace['list_products'] = resource.get_list_products_namespace()
-
         return namespace
 
 
     def action(self, resource, context, form):
         # Add
         id = resource.get_new_id()
-        issue = Tchack_Issue.make_resource(Tchack_Issue, resource, id)
+        issue_cls = resource.issue_class
+        issue = issue_cls.make_resource(issue_cls, resource, id)
         issue._add_record(context, form)
 
         # Ok
@@ -275,6 +278,7 @@ class Tracker_View(BrowseForm):
     access = 'is_allowed_to_view'
     title = MSG(u'View')
     icon = 'view.png'
+    styles = ['/ui/tchacker/style.css']
 
     schema = {
         'ids': String(multiple=True, mandatory=True)}
@@ -310,11 +314,17 @@ class Tracker_View(BrowseForm):
     def get_query_schema(self):
         return merge_dicts(BrowseForm.get_query_schema(self),
                            self.tracker_schema)
+   
+
+    def on_query_error(self, resource, context):
+        query = encode_query(context.uri.query)
+        return context.come_back(None, goto=';search?%s' % query)
 
 
-    """
-    def get_title(self, context):
-        search_name = context.query['search_name']
+    # Armel - to comment ?
+    def get_page_title(self, resource, context):
+        query = getattr(context, 'query', {})
+        search_name = query.get('search_name')
         if search_name:
             search = context.resource.get_resource(search_name, soft=True)
             if search:
@@ -323,10 +333,9 @@ class Tracker_View(BrowseForm):
                 title = self.title.gettext()
                 return template.gettext(title=title, search=search)
 
-        return self.title    
-    """
-    
-    
+        return self.title
+
+
     def GET(self, resource, context):
         # Check stored search
         search_name = context.query['search_name']
@@ -341,11 +350,6 @@ class Tracker_View(BrowseForm):
 
 
     def get_namespace(self, resource, context):
-        # Set Style
-        context.styles.append('/ui/tchacker/tracker.css')
-        context.scripts.append('/ui/tchacker/tracker.js')
-        context.scripts.append('/ui/jquery.js')
-
         # Default table namespace
         namespace = BrowseForm.get_namespace(self, resource, context)
 
@@ -363,7 +367,6 @@ class Tracker_View(BrowseForm):
 
 
     def get_items(self, resource, context):
-
         return resource.get_search_results(context)
 
 
@@ -422,7 +425,8 @@ class Tracker_View(BrowseForm):
         users = resource.get_resource('/users') 
  
         if column == 'checkbox':
-            selected_issues = context.get_form_values('ids') or []
+            datatype = String(multiple=True)
+            selected_issues = context.get_form_values('ids', type=datatypes) # or []
             return item.name, item.name in selected_issues
         # Print the row content
         if column == 'id':
@@ -654,6 +658,8 @@ class Tracker_Search(BaseSearchForm, Tracker_View):
     access = 'is_allowed_to_view'
     title = MSG(u'Search')
     icon = 'search.png'
+    styles = ['/ui/tchacker/style.css']
+    scripts = ['/ui/tchacker/tracker.js']
 
     # Search Form
     search_template = '/ui/tchacker/search.xml'
@@ -673,11 +679,23 @@ class Tracker_Search(BaseSearchForm, Tracker_View):
 
     context_menus = []
 
-    def get_search_namespace(self, resource, context):
-        # Set Style & JS
-        context.styles.append('/ui/tchacker/tracker.css')
-        context.scripts.append('/ui/tchacker/tracker.js')
 
+    def get_query(self, context):
+        try:
+            return BaseSearchForm.get_query(self, context)
+        except FormError:
+            schema = self.get_query_schema()
+            query = {}
+            for name in schema:
+                default = schema[name].get_default()
+                query[name] = context.uri.query.get(name, default)
+            return query
+
+
+    on_query_error = BaseSearchForm.on_query_error
+
+
+    def get_search_namespace(self, resource, context):
         # Search Form
         get_resource = resource.get_resource
         query = context.query
@@ -725,17 +743,19 @@ class Tracker_Search(BaseSearchForm, Tracker_View):
                                  tracker=resource).get_namespace(state),
            'priorities': TrackerList(element='priority',
                                  tracker=resource).get_namespace(priority),
-           'assigned_to': UsersList(tracker=resource).get_namespace(
-                                                         assigned_to),
+           'assigned_to': UsersList(tracker=resource,
+                excluded_roles=('guests',)).get_namespace(assigned_to),
            'list_products': resource.get_list_products_namespace()}
 
 
     def get_namespace(self, resource, context):
-        namespace = BaseSearchForm.get_namespace(self, resource, context)
-        namespace['batch'] = None
-        namespace['table'] = None
-        return namespace
+        search_template = resource.get_resource(self.search_template)
+        search_namespace = self.get_search_namespace(resource, context)        
 
+        return {
+            'batch': None,
+            'table': None,
+            'search': stl(search_template, search_namespace)}
 
 
 class Tracker_RememberSearch(BaseForm):
@@ -784,7 +804,8 @@ class Tracker_RememberSearch(BaseForm):
         search.handler.load_state_from_string('')
 
         # Set title
-        search.set_property('title', title)
+        language = resource.get_content_language(context)
+        search.set_property('title', title, language=language)        
 
         # Save the value
         for name, type in StoredSearchFile.schema.iteritems():
@@ -915,11 +936,11 @@ class Tracker_ExportToCSV(BaseView):
                 row.append(value)
             csv.add_row(row)
 
-        # Set response type
-        response = context.response
-        response.set_header('Content-Type', 'text/comma-separated-values')
-        response.set_header('Content-Disposition',
-                            'attachment; filename=export.csv')
+        # Ok
+        context.set_content_type('text/comma-separated-values')
+
+
+        context.set_content_disposition('attachment', 'export.csv')
         return csv.to_str(separator=separator)
 
 
@@ -1095,6 +1116,7 @@ class Tracker_ChangeSeveralBugs(Tracker_View):
     access = 'is_allowed_to_view'
     title = MSG(u'Change Several Issues')
     template = '/ui/tchacker/change_bugs.xml'
+    scripts = ['/ui/tchacker/tracker.js']
     schema = {
         'comment': Unicode,
         'ids': String(multiple=True),
@@ -1124,7 +1146,8 @@ class Tracker_ChangeSeveralBugs(Tracker_View):
         namespace['priorities'] = get_resource('priority').get_options()
         namespace['types'] = get_resource('type').get_options()
         namespace['states'] = get_resource('state').get_options()
-        namespace['users'] = resource.get_members_namespace('')
+        namespace['assigned_to'] = UsersList(tracker=resource,
+                excluded_roles=('guests',)).get_namespace('')
         namespace['list_products'] = resource.get_list_products_namespace()
 
         # Ok
@@ -1205,7 +1228,8 @@ class Tracker_ChangeSeveralBugs(Tracker_View):
             user_title = MSG(u'ANONYMOUS').gettext()
         else:
             user_title = user.get_title()
-        template = MSG(u'--- Comment from: {user} ---\n\n{comment}\n\n{issues}')
+        template = MSG(
+            u'--- Comment from: {user} ---\n\n{comment}\n\n{issues}')
         tracker_title = resource.get_property('title') or 'Tchack Tracker Issue'
         subject = u'[%s]' % tracker_title
         for user_id in users_issues:

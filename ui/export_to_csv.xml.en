@@ -13,17 +13,17 @@
   <fieldset>
     <legend>Export to CSV</legend>
     Please select encoding:<br/><br/>
-    <input type="radio" name="editor" id="editor_oo" value="oo" checked="on" />
+    <input type="radio" name="editor" id="editor-oo" value="oo" checked="on" />
     <label for="editor_oo">
       For OpenOffice (Encoding: UTF-8, Separator: ",")
     </label>
     <br/>
-    <input type="radio" name="editor" id="editor_excel" value="excel" />
+    <input type="radio" name="editor" id="editor-excel" value="excel" />
     <label for="editor_excel">
       For Excel (Encoding: CP1252, Separator: ";")
     </label>
     <br/><br/>
-    <input type="submit" class="button_ok" value="Export" />
+    <input type="submit" class="button-ok" value="Export" />
   </fieldset>
 </form>
 

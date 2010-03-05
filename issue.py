@@ -22,7 +22,6 @@
 
 # Import from the Standard Library
 from datetime import datetime
-#from string import Template
 
 # Import from itools
 from itools.csv import Table
@@ -30,7 +29,7 @@ from itools.datatypes import DateTime, Integer, String, Unicode, Tokens
 from itools.gettext import MSG
 from itools.handlers import checkid
 from itools.fs import FileName
-from itools.uri import get_uri_path
+from itools.uri import Path
 from itools.web import get_context
 
 # Import from ikaaro
@@ -106,7 +105,7 @@ class Tchack_Issue(Issue):
 
     def get_files_to_archive(self, content=False):
         files = Folder.get_files_to_archive(self, content)
-        history = get_uri_path(self.get_history().uri)
+        history = self.get_history().key
         files.append(history)
         return files
 
@@ -125,24 +124,35 @@ class Tchack_Issue(Issue):
         base = self.get_abspath()
 
         links = []
-        for record in self.get_history_records():
-            filename = record.file
+        history = self.get_history()
+        for record in history.get_history_records():
+            filename = history.get_record_value(record, 'file')
             if filename:
                 links.append(str(base.resolve2(filename)))
         return links
 
 
-    def update_links(self, old_path, new_path):
+    def update_links(self, source, target):
         base = self.get_abspath()
-        old_name = base.get_pathto(old_path)
+
+        resources_new2old = get_context().database.resources_new2old
+        base = str(base)
+        old_base = resources_new2old.get(base, base)
+        old_base = Path(old_base)
+        new_base = Path(base)
+
         history = self.get_history()
         for record in history.get_records():
-            file = history.get_record_value(record, 'file')
-            if file == old_name:
-                value = str(base.get_pathto(new_path))
+            filename = history.get_record_value(record, 'file')
+
+            if not filename:
+                continue
+            path = old_base.resolve2(filename)
+            if path == source:
+                value = str(new_base.get_pathto(target))
                 history.update_record(record.id, **{'file': value})
-        # Reindex
-        get_context().server.change_resource(self)
+
+        get_context().database.change_resource(self)
 
 
     #######################################################################
@@ -197,7 +207,7 @@ class Tchack_Issue(Issue):
         # Version, Priority, etc.
         for name in ['product', 'module', 'version', 'type', 'state',
                      'priority', 'assigned_to', 'comment']:
-            type = History.record_schema[name]
+            type = History.record_properties[name]
             value = context.get_form_value(name, type=type)
             if type == Unicode:
                 value = value.strip()
@@ -205,10 +215,11 @@ class Tchack_Issue(Issue):
         # CCs
         cc_list = set(self.get_value('cc_list') or ())
         cc_remove = context.get_form_value('cc_remove')
+        datatype = String(multiple=True)
         if cc_remove:
-            cc_remove = context.get_form_values('cc_list')
+            cc_remove = context.get_form_value('cc_list', type=datatype)
             cc_list = cc_list.difference(cc_remove)
-        cc_add = context.get_form_values('cc_add')
+        cc_add = context.get_form_value('cc_add', type=datatype)
         if cc_add:
             cc_list = cc_list.union(cc_add)
         record['cc_list'] = list(cc_list)
@@ -256,10 +267,10 @@ class Tchack_Issue(Issue):
         tracker_title = self.parent.get_property('title') or 'Tchack Tracker Issue'
         subject = '[%s #%s] %s' % (tracker_title, self.name, title)
         # Notify / Body
-        if context.resource.class_id == 'tchack_tracker':
-            uri = context.uri.resolve('%s/;edit' % self.name)
-        else:
+        if isinstance(context.resource, self.__class__):
             uri = context.uri.resolve(';edit')
+        else:
+            uri = context.uri.resolve('%s/;edit' % self.name)
         body = '#%s %s %s\n\n' % (self.name, self.get_value('title'),
                                   str(uri))
         message = MSG(u'The user {title} did some changes.')
@@ -278,7 +289,6 @@ class Tchack_Issue(Issue):
             title = MSG(u'Comment').gettext()
             separator = len(title) * u'-'
             template = u'{title}\n{separator}\n\n{comment}\n'
-            #template = Template(template)
             body += template.format(title=title, separator=separator,
                                         comment=comment)
         # Notify / Send
@@ -330,7 +340,10 @@ class Tchack_Issue(Issue):
             csv = self.parent.get_resource(name).handler
             if last_value or last_value == 0:
                 rec = csv.get_record(last_value)
-                last_title = csv.get_record_value(rec, 'title')
+                if rec is None:
+                    last_title = 'undefined'
+                else:
+                    last_title = csv.get_record_value(rec, 'title')
             if new_value or new_value == 0:
                 rec = csv.get_record(new_value)
                 new_title = csv.get_record_value(rec, 'title')

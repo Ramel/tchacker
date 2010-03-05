@@ -1,9 +1,9 @@
-.tracker_issue_comment_title {
+.tracker-issue-comment-title {
   background-color: #ddddff;
   font-weight: bold;
 }
 
-.tracker_select {
+.tracker-select {
   width: 97%;
 }
 
@@ -11,19 +11,19 @@
   font-family: "Arial", "DejaVu Sans", sans-serif;
 }
 
-.tracker_product {
+.tracker-product {
   color: #CC0000;
   font-style: italic;
 }
 
-.tracker_resource {
+.tracker-resource {
   color: #0A4A0A;
 }
 
 #tracker TD.light {
   display:none;
 }
-TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned_to, TABLE.issues TD.assigned_to {
+TABLE.issues TH.version, TABLE.issues TD.version, TABLE.issues TH.product, TABLE.issues TD.product, TABLE.issues TH.assigned-to, TABLE.issues TD.assigned-to {
   display:none;
 }
 

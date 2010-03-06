@@ -144,13 +144,11 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         for issue in issues:
             attachment_name = issue.issue_last_attachment
             attachment = resource.get_resource('%s/%s' % (issue.name, attachment_name))
-            attachment_uri = attachment.handler.uri[7:]
+            attachment_uri = attachment.handler.key
             # Get extension
             mimetype = attachment.get_content_type()
             ext = guess_extension(mimetype)[1:]
-            #attachment_name = 'issue_%s_%s' % (issue.name, get_uri_name(attachment_uri))
             attachment_name = '%s_%s.%s' % (issue.name, issue.title, ext) 
-            #print attachment_name, attachment_uri
             zip.write(attachment_uri, attachment_name)
         zip.close()
         # Create zip
@@ -169,9 +167,7 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         vfs.remove(dirname)
 
         # Return the zip
-        response = context.response
-        response.set_header('Content-Type', 'application/zip')
-        response.set_header('Content-Disposition',
-                'attachment; filename=%s' % zipname)
+        context.set_content_type('application/zip')
+        context.set_content_disposition('attachment; filename=%s' % zipname)
         return data
 

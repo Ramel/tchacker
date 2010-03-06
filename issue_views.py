@@ -61,7 +61,7 @@ class TchackIssue_Edit(Issue_Edit):
     icon = 'edit.png'
     template = '/ui/tchacker/edit_issue.xml'
     styles = ['ui/tracker/style.css',
-              '/ui/tchacker/style.css', '/ui/thickbox/thickbox.css']
+              '/ui/tchacker/style.css', '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
                '/ui/flowplayer/flowplayer-3.1.1.min.js',
                '/ui/flowplayer/flowplayer-3.1.1.swf']

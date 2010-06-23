@@ -98,25 +98,26 @@ class TchackIssue_Edit(Issue_Edit):
                     #if (i == length ):
                     #    last_video = True
                     #    #pprint("LastVideo = %s" % last_video)
-                    video = attachment #resource.get_resource(file)
-                    base = video.metadata.key
-                    #pprint("base = %s" % base)
-                    name = video.name
+                    #video = attachment
+                    root_path = attachment.metadata.database.path
+                    name = attachment.name
+                    base = attachment.metadata.key
                     #pprint("name = %s" % name)
                     name, ext, lang = FileName.decode(name)
                     if ext is None:
-                        mimetype = video.get_content_type()
+                        mimetype = attachment.get_content_type()
                         ext = guess_extension(mimetype)[1:]
-                    
-                    pprint("ext = %s, sortie de is_video" % ext)
-                    
-                    uri = video.metadata.database.fs.resolve(base, name)
-                    pprint("name = %s" % name)
-                    pprint("base = %s" % base)
-                    pprint("uri = %s" % uri)
+                    #thumbnail = ("thumb_%s" % name)
+                    #pprint("ext = %s, sortie de is_video" % ext)
+                    uri = attachment.metadata.database.fs.resolve(base, name)
+                    #pprint("path = %s" % path)
+                    #pprint("name = %s" % name)
+                    #pprint("base = %s" % base)
+                    #pprint("uri = %s" % uri)
+                    pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
                     comment['width'], height, ratio = VideoEncodingToFLV(
-                       resource).get_size_and_ratio(
-                            "%s.%s" % (uri, ext))
+                        resource).get_size_and_ratio(
+                            "%s%s.%s" % (root_path, uri, ext))
                     # Add the Flowplayer menu's height
                     comment['height'] = int(height) + 24
                     #pprint("width x height & ratio = %s x %s & %s" % (width, height, ratio))

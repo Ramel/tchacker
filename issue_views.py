@@ -51,7 +51,7 @@ from ikaaro.tracker.datatypes import get_issue_fields, UsersList
 from videoencoding.video import VideoEncodingToFLV
 
 # Debug
-#from pprint import pprint
+from pprint import pprint
 
 
 class TchackIssue_Edit(Issue_Edit):
@@ -99,7 +99,8 @@ class TchackIssue_Edit(Issue_Edit):
                     #    last_video = True
                     #    #pprint("LastVideo = %s" % last_video)
                     video = attachment #resource.get_resource(file)
-                    base = video.metadata.uri
+                    base = video.metadata.key
+                    #pprint("base = %s" % base)
                     name = video.name
                     #pprint("name = %s" % name)
                     name, ext, lang = FileName.decode(name)
@@ -107,13 +108,12 @@ class TchackIssue_Edit(Issue_Edit):
                         mimetype = video.get_content_type()
                         ext = guess_extension(mimetype)[1:]
                     
-                    #thumbnail = ("thumb_%s" % name)
-                    #pprint("ext = %s, sortie de is_video" % ext)
+                    pprint("ext = %s, sortie de is_video" % ext)
                     
-                    uri = resolve_uri(base, name)
-                    #pprint("name = %s" % name)
-                    #pprint("base = %s" % base)
-                    #pprint("uri = %s.%s" % (uri, ext))
+                    uri = video.metadata.database.fs.resolve(base, name)
+                    pprint("name = %s" % name)
+                    pprint("base = %s" % base)
+                    pprint("uri = %s" % uri)
                     comment['width'], height, ratio = VideoEncodingToFLV(
                        resource).get_size_and_ratio(
                             "%s.%s" % (uri, ext))

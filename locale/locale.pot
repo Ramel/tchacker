@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-06-16 19:06+CET\n"
+"POT-Creation-Date: 2010-06-22 22:06+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,367 +15,69 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../tracker_views.py:1064
-msgid "\n\n%s\n\n%s"
-msgstr ""
-
-#: ../tracker_views.py:952
-msgid "#%s"
-msgstr ""
-
-#: ../tracker_views.py:1091
-msgid "#%s - %s - %s"
-msgstr ""
-
-#: ../issue_views.py:386
-msgid ", "
-msgstr ""
-
-#: ../issue.py:279
-msgid "-"
-msgstr ""
-
-#: ../tracker_views.py:1086
-msgid "--- Comment from: {user} ---\n\n{comment}\n\n{issues}"
-msgstr ""
-
-#: ../issue.py:240
-#: ../tracker_views.py:1083
-msgid "ANONYMOUS"
-msgstr ""
-
-#: ../tracker_views.py:233
-msgid "Add"
-msgstr ""
-
-#: ../issue_views.py:122
-msgid "Add a new issue"
-msgstr ""
-
-#: ../tracker_views.py:172
+#: ../tracker_views.py:50
 msgid "Advanced"
 msgstr ""
 
-#: ../issue.py:349
-#: ../tracker_views.py:62
-msgid "Assigned To"
-msgstr ""
-
-#: ../tracker.py:62
-#: ../tracker.py:110
-msgid "Awaiting validation"
-msgstr ""
-
-#: ../tracker.py:57
-msgid "B&W Set"
-msgstr ""
-
-#: ../issue.py:366
-msgid "CC"
-msgstr ""
-
-#: ../tracker_views.py:181
-#: ../tracker_views.py:974
-msgid "Change Several Issues"
-msgstr ""
-
-#: ../tracker.py:57
-msgid "Color Set"
-msgstr ""
-
-#: ../issue.py:278
-#: ../resources.py:188
+#: ../resources.py:189
 msgid "Comment"
 msgstr ""
 
-#: ../tracker.py:325
-msgid "Default"
+#: ../tracker_views.py:57
+msgid "Download \"Last Att.\" images as one Zip"
 msgstr ""
 
-#: ../issue_views.py:134
+#: ../issue_views.py:60
 msgid "Edit Issue"
 msgstr ""
 
-#: ../tracker_views.py:991
-msgid "Edit issues"
-msgstr ""
-
-#: ../issue_views.py:532
-msgid "Edit resources"
-msgstr ""
-
-#: ../tracker_views.py:179
-msgid "Edit this search"
-msgstr ""
-
-#: ../resources.py:187
+#: ../resources.py:188
 msgid "End"
 msgstr ""
 
-#: ../tracker_views.py:185
-#: ../tracker_views.py:864
-msgid "Export to CSV"
-msgstr ""
-
-#: ../tracker_views.py:183
-msgid "Export to Text"
-msgstr ""
-
-#: ../tracker_views.py:200
-msgid "Give the title of one Product"
-msgstr ""
-
-#: ../tracker_views.py:72
-msgid "Go To Issue"
-msgstr ""
-
-#: ../tracker.py:63
-msgid "High"
-msgstr ""
-
-#: ../tracker.py:113
-msgid "High Priority"
-msgstr ""
-
-#: ../issue_views.py:263
-msgid "History"
-msgstr ""
-
-#: ../tracker_views.py:54
-msgid "Id"
-msgstr ""
-
-#: ../tracker.py:62
-msgid "In Progress"
-msgstr ""
-
-#: ../resources.py:189
+#: ../resources.py:190
 msgid "Issue"
 msgstr ""
 
-#: ../tracker_views.py:820
-msgid "Issue not found."
-msgstr ""
-
-#: ../tables.py:57
-msgid "Issues"
-msgstr ""
-
-#: ../tracker.py:63
-msgid "Low"
-msgstr ""
-
-#: ../tracker.py:63
-msgid "Medium"
-msgstr ""
-
-#: ../tracker_views.py:1063
-msgid "Modifications:"
-msgstr ""
-
-#: ../tracker_views.py:63
-msgid "Modified"
-msgstr ""
-
-#: ../issue.py:317
-#: ../tracker_views.py:57
-msgid "Module"
-msgstr ""
-
-#: ../issue.py:270
-msgid "New Attachment: {filename}"
-msgstr ""
-
-#: ../tracker_views.py:259
-msgid "New issue added."
-msgstr ""
-
-#: ../tracker_views.py:884
-#: ../tracker_views.py:1025
-msgid "No data to export."
-msgstr ""
-
-#: ../tables.py:173
-msgid "No resource selected."
-msgstr ""
-
-#: ../tracker.py:112
-msgid "Non assigned"
-msgstr ""
-
-#: ../issue.py:320
-#: ../tracker_views.py:61
-msgid "Priority"
-msgstr ""
-
-#: ../tracker_views.py:56
-#: ../tables.py:116
-#: ../tables.py:217
-#: ../tables.py:244
-msgid "Product"
-msgstr ""
-
-#: ../tracker.py:57
-msgid "Props"
-msgstr ""
-
-#: ../tables.py:246
-msgid "Released"
-msgstr ""
-
-#: ../tracker_views.py:87
-msgid "Remember this search"
-msgstr ""
-
-#: ../resources.py:185
+#: ../resources.py:186
 msgid "Resource"
 msgstr ""
 
-#: ../tracker_views.py:187
-msgid "Resources"
-msgstr ""
-
-#: ../resources.py:200
+#: ../resources.py:201
 msgid "Resources assigned to issues"
 msgstr ""
 
-#: ../tables.py:191
-msgid "Resources removed: $resources."
-msgstr ""
-
-#: ../tracker_views.py:647
-msgid "Search"
-msgstr ""
-
-#: ../issue_views.py:120
-msgid "Search for issues"
-msgstr ""
-
-#: ../resources.py:186
+#: ../resources.py:187
 msgid "Start YYYY-MM-DD HH:MM"
 msgstr ""
 
-#: ../issue.py:321
-#: ../tracker_views.py:60
-msgid "State"
-msgstr ""
-
-#: ../tracker_views.py:135
-msgid "Stored Searches"
-msgstr ""
-
-#: ../issue.py:70
-#: ../issue.py:71
+#: ../issue.py:44
+#: ../issue.py:45
 msgid "Tchack Issue"
 msgstr ""
 
-#: ../tracker.py:71
+#: ../tracker.py:39
 msgid "Tchack Issue Tracker"
 msgstr ""
 
-#: ../resources.py:199
+#: ../resources.py:200
 msgid "Tchack Resources"
-msgstr ""
-
-#: ../tables.py:132
-msgid "Tchack Select Table"
 msgstr ""
 
 #: ../stored.py:54
 msgid "Tchack Stored Search"
 msgstr ""
 
-#: ../tracker_views.py:762
-msgid "The search has been modified."
-msgstr ""
-
-#: ../tracker_views.py:804
-msgid "The search has been removed."
-msgstr ""
-
-#: ../tracker_views.py:769
-msgid "The search has been stored."
-msgstr ""
-
-#: ../tracker_views.py:773
-msgid "The search title has been changed."
-msgstr ""
-
-#: ../issue.py:265
-msgid "The user {title} did some changes."
-msgstr ""
-
-#: ../issue_views.py:404
-msgid "There are {n} assignments."
-msgstr ""
-
-#: ../issue_views.py:403
-msgid "There is 1 assignment."
-msgstr ""
-
-#: ../issue.py:311
-#: ../tracker_views.py:55
-msgid "Title"
-msgstr ""
-
-#: ../tracker.py:72
+#: ../tracker.py:40
 msgid "To manage images, bugs and tasks"
 msgstr ""
 
-#: ../issue_views.py:116
-msgid "Tracker"
-msgstr ""
-
-#: ../issue.py:319
-#: ../tracker_views.py:59
-msgid "Type"
-msgstr ""
-
-#: ../tracker_views.py:328
-msgid "Unknown stored search \"{sname}\"."
-msgstr ""
-
-#: ../tracker.py:62
-#: ../tracker.py:111
-msgid "Validated"
-msgstr ""
-
-#: ../issue.py:318
-#: ../tracker_views.py:58
-msgid "Version"
-msgstr ""
-
-#: ../tracker_views.py:268
+#: ../tracker_views.py:71
 msgid "View"
 msgstr ""
 
-#: ../tracker_views.py:1088
-msgid "[%s]"
-msgstr ""
-
-#: ../issue.py:302
-msgid "[empty]"
-msgstr ""
-
-#: ../issue.py:301
-msgid "{field}: {old_value} to {new_value}"
-msgstr ""
-
-#: ../issue.py:305
-msgid "{field}: {old_value}{new_value}"
-msgstr ""
-
-#: ../tracker_views.py:156
-msgid "{search_title} ({issues_nb})"
-msgstr ""
-
-#: ../issue.py:280
-msgid "{title}\n{separator}\n\n{comment}\n"
-msgstr ""
-
-#: ../ui/browse_table.xml.en:46
-msgctxt "button"
-msgid "${action/value}"
+#: ../tracker_views.py:136
+msgid "Zip Last Images"
 msgstr ""
 
 #: ../ui/add_issue.xml.en:123
@@ -388,7 +90,7 @@ msgctxt "button"
 msgid "Assign"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:182
+#: ../ui/edit_issue.xml.en:183
 msgctxt "button"
 msgid "Edit"
 msgstr ""
@@ -495,21 +197,9 @@ msgctxt "form"
 msgid "${batch} ${table}"
 msgstr ""
 
-#: ../ui/export_to_text.xml.en:8
-#: ../ui/export_to_csv.xml.en:8
-msgctxt "form"
-msgid "${param}"
-msgstr ""
-
 #: ../ui/issue_history.xml.en:7
 msgctxt "heading"
 msgid "Issue #${number}"
-msgstr ""
-
-#: ../ui/menu_goto.xml.en:8
-#: ../ui/menu_remember.xml.en:8
-msgctxt "label"
-msgid "${title}"
 msgstr ""
 
 #: ../ui/export_to_text.xml.en:18
@@ -522,14 +212,14 @@ msgctxt "label"
 msgid "<g id='5'> For OpenOffice (Encoding: UTF-8, Separator: \",\") </g>  <x id='6'/>  <x id='7'/>  <g id='8'> For Excel (Encoding: CP1252, Separator: \";\") </g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:147
+#: ../ui/edit_issue.xml.en:148
 msgctxt "label"
 msgid "Add CC:"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:93
 #: ../ui/add_issue.xml.en:92
-#: ../ui/edit_issue.xml.en:139
+#: ../ui/edit_issue.xml.en:140
 msgctxt "label"
 msgid "Assign To:"
 msgstr ""
@@ -545,7 +235,7 @@ msgid "Attachement:"
 msgstr ""
 
 #: ../ui/add_issue.xml.en:100
-#: ../ui/edit_issue.xml.en:155
+#: ../ui/edit_issue.xml.en:156
 msgctxt "label"
 msgid "CC:"
 msgstr ""
@@ -573,7 +263,7 @@ msgstr ""
 
 #: ../ui/change_bugs.xml.en:46
 #: ../ui/add_issue.xml.en:48
-#: ../ui/edit_issue.xml.en:95
+#: ../ui/edit_issue.xml.en:96
 msgctxt "label"
 msgid "Module:"
 msgstr ""
@@ -583,19 +273,19 @@ msgctxt "label"
 msgid "Module:<g id='12'> (<g id='13'>Edit</g>)</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:176
+#: ../ui/edit_issue.xml.en:177
 msgctxt "label"
 msgid "New Attachement:"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:169
+#: ../ui/edit_issue.xml.en:170
 msgctxt "label"
 msgid "New Comment:"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:82
 #: ../ui/add_issue.xml.en:82
-#: ../ui/edit_issue.xml.en:129
+#: ../ui/edit_issue.xml.en:130
 msgctxt "label"
 msgid "Priority:"
 msgstr ""
@@ -606,7 +296,7 @@ msgid "Priority:<g id='28'> (<g id='29'>Edit</g>)</g>"
 msgstr ""
 
 #: ../ui/add_issue.xml.en:40
-#: ../ui/edit_issue.xml.en:87
+#: ../ui/edit_issue.xml.en:88
 msgctxt "label"
 msgid "Product (mandatory):"
 msgstr ""
@@ -621,7 +311,7 @@ msgctxt "label"
 msgid "Product:<g id='8'> (<g id='9'>Edit</g>)</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:163
+#: ../ui/edit_issue.xml.en:164
 msgctxt "label"
 msgid "Remove selected CCs"
 msgstr ""
@@ -637,7 +327,7 @@ msgid "Start:"
 msgstr ""
 
 #: ../ui/add_issue.xml.en:74
-#: ../ui/edit_issue.xml.en:121
+#: ../ui/edit_issue.xml.en:122
 msgctxt "label"
 msgid "Status (mandatory):"
 msgstr ""
@@ -658,13 +348,13 @@ msgid "Text (search within the title and all comments)"
 msgstr ""
 
 #: ../ui/add_issue.xml.en:33
-#: ../ui/edit_issue.xml.en:80
+#: ../ui/edit_issue.xml.en:81
 msgctxt "label"
 msgid "Title (mandatory):"
 msgstr ""
 
 #: ../ui/add_issue.xml.en:66
-#: ../ui/edit_issue.xml.en:113
+#: ../ui/edit_issue.xml.en:114
 msgctxt "label"
 msgid "Type (mandatory):"
 msgstr ""
@@ -681,7 +371,7 @@ msgstr ""
 
 #: ../ui/change_bugs.xml.en:55
 #: ../ui/add_issue.xml.en:56
-#: ../ui/edit_issue.xml.en:103
+#: ../ui/edit_issue.xml.en:104
 msgctxt "label"
 msgid "Version:"
 msgstr ""
@@ -689,11 +379,6 @@ msgstr ""
 #: ../ui/search.xml.en:69
 msgctxt "label"
 msgid "Version:<g id='16'> (<g id='17'>Edit</g>)</g>"
-msgstr ""
-
-#: ../ui/search.xml.en:29
-msgctxt "legend"
-msgid "${search_title}"
 msgstr ""
 
 #: ../ui/search.xml.en:29
@@ -716,7 +401,7 @@ msgctxt "legend"
 msgid "Change Several Issues"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:71
+#: ../ui/edit_issue.xml.en:72
 msgctxt "legend"
 msgid "Edit Issue"
 msgstr ""
@@ -746,29 +431,14 @@ msgctxt "legend"
 msgid "select the columns to export"
 msgstr ""
 
-#: ../ui/browse_table.xml.en:38
-msgctxt "link"
-msgid "${column/value}"
-msgstr ""
-
-#: ../ui/edit_issue.xml.en:55
-msgctxt "link"
-msgid "${comment/file}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:12
-msgctxt "link"
-msgid "${row/datetime}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:42
-msgctxt "link"
-msgid "${row/file}"
-msgstr ""
-
 #: ../ui/browse_table.xml.en:9
 msgctxt "link"
 msgid "<g id='1'>Show</g> - <g id='2'>Hide</g> - <g id='3'>Toggle</g>"
+msgstr ""
+
+#: ../ui/tchacker_view_top.xml.en:8
+msgctxt "link"
+msgid "<g id='1'>Show</g>/<g id='2'>Hide</g> extra colums."
 msgstr ""
 
 #: ../ui/weekly_template.xml.en:9
@@ -786,54 +456,9 @@ msgctxt "link"
 msgid "<g id='1'>[#${event/issue/number}]</g>  <g id='2'>${event/issue/product}</g> ${event/issue/title} <g id='3'>(${event/resource/title})</g>"
 msgstr ""
 
-#: ../ui/browse_table.xml.en:21
+#: ../ui/edit_issue.xml.en:76
 msgctxt "link"
-msgid "<g id='5'>${column/title}</g>  <g id='6'> ${column/title}</g>"
-msgstr ""
-
-#: ../ui/edit_issue.xml.en:75
-msgctxt "link"
-msgid "Afficher/Cacher les options"
-msgstr ""
-
-#: ../ui/change_bugs.xml.en:42
-#: ../ui/change_bugs.xml.en:51
-#: ../ui/change_bugs.xml.en:60
-#: ../ui/change_bugs.xml.en:70
-#: ../ui/change_bugs.xml.en:78
-#: ../ui/change_bugs.xml.en:87
-#: ../ui/change_bugs.xml.en:99
-#: ../ui/edit_resource.xml.en:17
-msgctxt "option"
-msgid "${item/title}"
-msgstr ""
-
-#: ../ui/search.xml.en:55
-#: ../ui/search.xml.en:65
-#: ../ui/search.xml.en:75
-#: ../ui/search.xml.en:87
-#: ../ui/search.xml.en:97
-#: ../ui/search.xml.en:107
-#: ../ui/search.xml.en:119
-#: ../ui/add_issue.xml.en:44
-#: ../ui/add_issue.xml.en:52
-#: ../ui/add_issue.xml.en:60
-#: ../ui/add_issue.xml.en:70
-#: ../ui/add_issue.xml.en:78
-#: ../ui/add_issue.xml.en:86
-#: ../ui/add_issue.xml.en:96
-#: ../ui/add_issue.xml.en:104
-#: ../ui/edit_issue.xml.en:91
-#: ../ui/edit_issue.xml.en:99
-#: ../ui/edit_issue.xml.en:107
-#: ../ui/edit_issue.xml.en:117
-#: ../ui/edit_issue.xml.en:125
-#: ../ui/edit_issue.xml.en:133
-#: ../ui/edit_issue.xml.en:143
-#: ../ui/edit_issue.xml.en:151
-#: ../ui/edit_issue.xml.en:159
-msgctxt "option"
-msgid "${item/value}"
+msgid "Show/Hide options"
 msgstr ""
 
 #: ../ui/edit_resource.xml.en:41
@@ -852,90 +477,20 @@ msgctxt "option"
 msgid "Do not change"
 msgstr ""
 
+#: ../ui/edit_issue.xml.en:55
+msgctxt "paragraph"
+msgid "Attachement:"
+msgstr ""
+
 #: ../ui/edit_issue.xml.en:28
 msgctxt "paragraph"
 msgid "Reported by <g id='1'>${reported_by}</g>"
-msgstr ""
-
-#: ../ui/edit_issue.xml.en:60
-msgctxt "pre"
-msgid "${comment/comment}"
-msgstr ""
-
-#: ../ui/export_to_text.xml.en:25
-msgctxt "pre"
-msgid "${text}"
-msgstr ""
-
-#: ../ui/edit_issue.xml.en:39
-msgctxt "table cell"
-msgid "${comment/datetime}"
-msgstr ""
-
-#: ../ui/edit_issue.xml.en:38
-msgctxt "table cell"
-msgid "${comment/user}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:36
-msgctxt "table cell"
-msgid "${row/assigned_to}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:39
-msgctxt "table cell"
-msgid "${row/cc_list}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:46
-msgctxt "table cell"
-msgid "${row/comment}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:30
-msgctxt "table cell"
-msgid "${row/module}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:33
-msgctxt "table cell"
-msgid "${row/priority}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:27
-msgctxt "table cell"
-msgid "${row/state}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:18
-msgctxt "table cell"
-msgid "${row/title}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:24
-msgctxt "table cell"
-msgid "${row/type}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:13
-msgctxt "table cell"
-msgid "${row/user}"
-msgstr ""
-
-#: ../ui/issue_history.xml.en:21
-msgctxt "table cell"
-msgid "${row/version}"
 msgstr ""
 
 #: ../ui/edit_resource.xml.en:28
 #: ../ui/edit_resource.xml.en:45
 msgctxt "table cell"
 msgid "(HH:MM)"
-msgstr ""
-
-#: ../ui/edit_issue.xml.en:55
-msgctxt "table cell"
-msgid "Attachement:"
 msgstr ""
 
 #: ../ui/edit_issue.xml.en:37
@@ -956,27 +511,6 @@ msgstr ""
 #: ../ui/edit_resource.xml.en:36
 msgctxt "table cell"
 msgid "  "
-msgstr ""
-
-#: ../ui/add_issue.xml.en:112
-msgctxt "textarea"
-msgid "${comment/value}"
-msgstr ""
-
-#: ../ui/edit_resource.xml.en:52
-msgctxt "textarea"
-msgid "${comment}"
-msgstr ""
-
-#: ../ui/weekly_template.xml.en:9
-msgctxt "title attribute"
-msgid "${cell/content/issue/comment}"
-msgstr ""
-
-#: ../ui/monthly_template.xml.en:10
-#: ../ui/weekly_template_fd.xml.en:8
-msgctxt "title attribute"
-msgid "${event/issue/comment}"
 msgstr ""
 
 #: ../ui/browse_table.xml.en:16

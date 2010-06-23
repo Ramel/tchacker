@@ -88,12 +88,15 @@ class TchackIssue_Edit(Issue_Edit):
         for comment in namespace['comments']:
             if comment['file']:
                 attachment = resource.get_resource(comment['file'])
-                print type(attachment), attachment
+                ## pprint ##
+		print type(attachment), attachment
                 comment['is_image'] = isinstance(attachment, Image)
                 comment['is_video'] = isinstance(attachment, Video)
-                comment['width'] = 200
+		pprint("comment['is_video'] = %s" % comment['is_video'])
+		comment['width'] = 200
                 comment['height'] = 200
-                if comment['is_video']:
+
+		if comment['is_video']:
                     #pprint("i = %s and length = %s" % (i, length))
                     #if (i == length ):
                     #    last_video = True
@@ -102,18 +105,21 @@ class TchackIssue_Edit(Issue_Edit):
                     root_path = attachment.metadata.database.path
                     name = attachment.name
                     base = attachment.metadata.key
-                    #pprint("name = %s" % name)
-                    name, ext, lang = FileName.decode(name)
+                    filename, ext, lang = FileName.decode(name)
+                    pprint("filename = %s" % filename)
+                    #pprint("att.mtdta.name = %s" % attachment.metadata.name)
+                    pprint("ext = %s" % ext)
                     if ext is None:
                         mimetype = attachment.get_content_type()
                         ext = guess_extension(mimetype)[1:]
+			pprint("ext if ext is None = %s" % ext)
                     #thumbnail = ("thumb_%s" % name)
-                    #pprint("ext = %s, sortie de is_video" % ext)
+                    pprint("ext = %s, sortie de is_video" % ext)
                     uri = attachment.metadata.database.fs.resolve(base, name)
                     #pprint("path = %s" % path)
                     #pprint("name = %s" % name)
                     #pprint("base = %s" % base)
-                    #pprint("uri = %s" % uri)
+                    pprint("uri = %s" % uri)
                     pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
                     comment['width'], height, ratio = VideoEncodingToFLV(
                         resource).get_size_and_ratio(

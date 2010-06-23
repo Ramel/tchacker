@@ -70,8 +70,6 @@
     </tr>
   </table>
   <br/>
-</stl:block>
-
 <script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.1.1.swf", {
    clip: {
      autoPlay: false,
@@ -83,6 +81,7 @@
    },
 }); 
 </script>
+</stl:block>
 
 <br/>
 

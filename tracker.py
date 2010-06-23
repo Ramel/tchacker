@@ -79,7 +79,8 @@ class Tchack_Tracker(Tracker):
                 is_video = False
                 if not comment and not filename:
                     continue
-                if filename:
+                """
+		if filename:
                     file = issue.get_resource(filename)
                     is_video = isinstance(file, Video)
                 
@@ -135,7 +136,7 @@ class Tchack_Tracker(Tracker):
                             
                             pprint("====================")
                         pprint("xxxxxxxxxxxxxxxx")
-
+		"""
 ###########################################################################
 # Register
 ###########################################################################

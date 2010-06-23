@@ -19,7 +19,7 @@
                               </stl:inline>]}
                        ,</stl:inline>
                       }
-  function update_tracker(){
+  function update_tracker() {
       update_tracker_list('version');
       update_tracker_list('module');
   }
@@ -56,6 +56,13 @@
             >${comment/file}</a></p>
       </td>
     </tr>
+    <tr stl:if="comment/is_video">
+      <td colspan="5">
+        <a href="${comment/file}/;download"
+          style="display:block;width:${comment/width}px;height:${comment/height}px;"
+          id="player-${comment/number}"></a>
+      </td>
+    </tr>
     <tr>
       <td colspan="5">
       <pre class="com" id="comment${comment/number}">${comment/comment}</pre>
@@ -64,6 +71,18 @@
   </table>
   <br/>
 </stl:block>
+
+<script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.1.1.swf", {
+   clip: {
+     autoPlay: false,
+     autoBuffering: false,
+   },
+   // canvas background, the video thumbnail.
+   canvas: {
+     backgroundImage: 'url(thumb_${comment/file}/;download)'
+   },
+}); 
+</script>
 
 <br/>
 

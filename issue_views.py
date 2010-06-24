@@ -89,31 +89,31 @@ class TchackIssue_Edit(Issue_Edit):
             if comment['file']:
                 attachment = resource.get_resource(comment['file'])
                 ## pprint ##
-		print type(attachment), attachment
+                print type(attachment), attachment
                 comment['is_image'] = isinstance(attachment, Image)
                 comment['is_video'] = isinstance(attachment, Video)
-		pprint("comment['is_video'] = %s" % comment['is_video'])
-		comment['width'] = 200
+                pprint("comment['is_video'] = %s" % comment['is_video'])
+                comment['width'] = 200
                 comment['height'] = 200
 
-		if comment['is_video']:
-                    #pprint("i = %s and length = %s" % (i, length))
-                    #if (i == length ):
-                    #    last_video = True
-                    #    #pprint("LastVideo = %s" % last_video)
-                    #video = attachment
-                    root_path = attachment.metadata.database.path
-                    name = attachment.name
-                    base = attachment.metadata.key
-                    filename, ext, lang = FileName.decode(name)
-                    pprint("filename = %s" % filename)
-                    #pprint("att.mtdta.name = %s" % attachment.metadata.name)
-                    pprint("ext = %s" % ext)
-                    if ext is None:
-                        mimetype = attachment.get_content_type()
-                        ext = guess_extension(mimetype)[1:]
-			pprint("ext if ext is None = %s" % ext)
-                    #thumbnail = ("thumb_%s" % name)
+            if comment['is_video']:
+                #pprint("i = %s and length = %s" % (i, length))
+                #if (i == length )
+                #    last_video = True
+                #    #pprint("LastVideo = %s" % last_video)
+                #video = attachment
+                root_path = attachment.metadata.database.path
+                name = attachment.name
+                base = attachment.metadata.key
+                filename, ext, lang = FileName.decode(name)
+                pprint("filename = %s" % filename)
+                #pprint("att.met.name = %s" % attachment.metadata.name)
+                pprint("ext = %s" % ext)
+                if ext is None:
+                    mimetype = attachment.get_content_type()
+                    ext = guess_extension(mimetype)[1:]
+                    pprint("ext if ext is None = %s" % ext)
+                    thumbnail = ("thumb_%s" % name)
                     pprint("ext = %s, sortie de is_video" % ext)
                     uri = attachment.metadata.database.fs.resolve(base, name)
                     #pprint("path = %s" % path)
@@ -127,9 +127,9 @@ class TchackIssue_Edit(Issue_Edit):
                     # Add the Flowplayer menu's height
                     comment['height'] = int(height) + 24
                     #pprint("width x height & ratio = %s x %s & %s" % (width, height, ratio))
-            else:
-                comment['file'] = False
-                comment['is_image'] = False
-                comment['is_video'] = False
-        
+                else:
+                    comment['file'] = False
+                    comment['is_image'] = False
+                    comment['is_video'] = False
+
         return namespace

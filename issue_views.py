@@ -25,6 +25,7 @@
 from datetime import date, datetime, time
 from re import compile
 from textwrap import TextWrapper
+from tempfile import mkdtemp
 
 # Import from itools
 from itools.datatypes import Boolean, Date, Integer, String, Unicode
@@ -35,7 +36,7 @@ from itools.html import xhtml_uri
 from itools.i18n import format_datetime
 from itools.web import STLForm, STLView
 from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
-from itools.fs import FileName
+from itools.fs import FileName, vfs
 from itools.core import guess_extension, guess_type
 from itools.uri import resolve_uri
 
@@ -94,52 +95,76 @@ class TchackIssue_Edit(Issue_Edit):
                 comment['width'] = 200
                 comment['height'] = 200
 
-            if comment['is_video']:
-                #pprint("i = %s and length = %s" % (i, length))
-                #if (i == length )
-                #    last_video = True
-                #    #pprint("LastVideo = %s" % last_video)
-                #video = attachment
-                root_path = attachment.metadata.database.path
-                name = attachment.name
-                base = attachment.metadata.key
-                key = attachment.key
-                filename, ext, lang = FileName.decode(name)
-                pprint("att.han.key = %s" % attachment.handler.key)
-                pprint("root_path = %s" % root_path)
-                pprint("name = %s" % name)
-                pprint("base = %s" % base)
-                pprint("key = %s" % key)
-                pprint("filename = %s" % filename)
-                #pprint("ext = %s" % ext)
-                if ext is None:
-                    mimetype = attachment.get_content_type()
-                    ext = guess_extension(mimetype)[1:]
-                    #pprint("ext if ext is None = %s" % ext)
+                if comment['is_video']:
+                    #pprint("i = %s and length = %s" % (i, length))
+                    #if (i == length )
+                    #    last_video = True
+                    #    #pprint("LastVideo = %s" % last_video)
+                    #video = attachment
+                    #root_path = attachment.metadata.database.path
+                    root_path = attachment.metadata.database.path
+                    name = attachment.name
+                    base = attachment.handler.key
+                    filename, ext, lang = FileName.decode(name)
+                    pprint("att.han.key = %s" % attachment.handler.key)
+                    pprint("root_path = %s" % root_path)
+                    pprint("name = %s" % name)
+                    pprint("base = %s" % base)
+                    pprint("filename = %s" % filename)
                     #pprint("ext = %s" % ext)
-                if (ext == "flv"):
-                    pprint("I got a FLV")
-                    thumbnail = ("thumb_%s" % name)
-                    if thumbnail.handler.key:
-                       pprint("thumbnail.handler.key = %s"
-                              % thumbnail.handler.key)
-                    else:
-                        pprint(", need to create a thumb if not exists")
-                    uri = attachment.metadata.database.fs.resolve(base, name)
-                    #pprint("uri = %s" % uri)
-                    #pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
-                    
-                    comment['width'], height, ratio = VideoEncodingToFLV(
-                            resource).get_size_and_ratio(
-                                "%s%s.%s" % (root_path, uri, ext))
-                    
-                    # Add the Flowplayer menu's height
-                    comment['height'] = int(height) + 24
-                    pprint("width x height & ratio = %s x %s & %s" %
-                           (comment['width'], height, ratio))
-                else :
-                    pprint("The video is not a FLV or a MP4 but is a : %s" %
-                           ext)
+                    if ext is None:
+                        mimetype = attachment.get_content_type()
+                        ext = guess_extension(mimetype)[1:]
+                        #pprint("ext if ext is None = %s" % ext)
+                        #pprint("ext = %s" % ext)
+                    #if (ext == "flv") or (ext == "mp4"):
+                    if (ext == "mp4"):
+                        pprint("I got a FLV")
+                        thumbnail = ("thumb_%s" % name)
+                        if vfs.exists(thumbnail):
+                           pprint("thumbnail.handler.key = %s"
+                                  % thumbnail.handler.key)
+                        else:
+                            pprint("We need to create a thumb")
+                            dirname = mkdtemp('videoencoding', 'ikaaro')
+                            tempdir = vfs.open(dirname)
+
+                            # Paste the file in the tempdir
+                            tmp_uri= "file:///%s/%s" % (dirname, filename)
+                            vfs.copy(attachment.handler.database.path, tmp_uri)
+
+                            # Thumbnail
+                            thumbnail = VideoEncodingToFLV(attachment).make_thumbnail_only(
+                                dirname, root_path+base, name, ext, 512)
+
+                            if thumbnail is not None:
+                                thumbfilename, thumbmimetype,
+                                thumbbody, thumbextension = thumbnail['flvthumb']
+                            # Create the thumbnail PNG resources
+                            thumbnail = get_resource_class(thumbmimetype)
+                            thumbnail.make_resource(thumbnail, issue, thumbfilename,
+                                body=thumbbody, filename=thumbfilename,
+                                extension=thumbextension, format=thumbmimetype)
+
+                            # Clean the temporary folder
+                            vfs.remove(dirname)
+
+                        uri = attachment.handler.database.fs.resolve(base, name)
+                        #pprint("uri = %s" % uri)
+                        #pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
+                        """
+                        comment['width'], height, ratio = VideoEncodingToFLV(
+                                resource).get_size_and_ratio(
+                                    "%s%s.%s" % (root_path, uri, ext))
+
+                        # Add the Flowplayer menu's height
+                        comment['height'] = int(height) + 24
+                        """
+                        pprint("width x height & ratio = %s x %s & %s" %
+                               (comment['width'], height, ratio))
+                    else :
+                        pprint("The video is not a FLV or a MP4 but is a : %s" %
+                               ext)
             else:
                 comment['file'] = False
                 comment['is_image'] = False

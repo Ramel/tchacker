@@ -36,6 +36,7 @@ from issue_views import TchackIssue_Edit
 # Import from videoencoding
 #from videoencoding import VideoEncodingToFLV
 
+from pprint import pprint
 
 class Tchack_Issue(Issue):
 
@@ -60,7 +61,14 @@ class Tchack_Issue(Issue):
             if record.file:
                 values['issue_last_attachment'] = record.file
         return values
-
+    
+    """
+    def _add_records(self, context, form):
+        # Files XXX
+        values = Issue._add_records(self, context, form)
+        file = values.get_form_value('file')
+        pprint("_add_records : file = %s" % file)
+    """
 
     #def get_context_menus(self):
     #    return self.parent.get_context_menus() + [IssueTrackerMenu()]

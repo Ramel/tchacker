@@ -88,11 +88,9 @@ class TchackIssue_Edit(Issue_Edit):
         for comment in namespace['comments']:
             if comment['file']:
                 attachment = resource.get_resource(comment['file'])
-                ## pprint ##
-                print type(attachment), attachment
                 comment['is_image'] = isinstance(attachment, Image)
                 comment['is_video'] = isinstance(attachment, Video)
-                pprint("comment['is_video'] = %s" % comment['is_video'])
+                #pprint("comment['is_video'] = %s" % comment['is_video'])
                 comment['width'] = 200
                 comment['height'] = 200
 
@@ -105,31 +103,46 @@ class TchackIssue_Edit(Issue_Edit):
                 root_path = attachment.metadata.database.path
                 name = attachment.name
                 base = attachment.metadata.key
+                key = attachment.key
                 filename, ext, lang = FileName.decode(name)
+                pprint("att.han.key = %s" % attachment.handler.key)
+                pprint("root_path = %s" % root_path)
+                pprint("name = %s" % name)
+                pprint("base = %s" % base)
+                pprint("key = %s" % key)
                 pprint("filename = %s" % filename)
-                #pprint("att.met.name = %s" % attachment.metadata.name)
-                pprint("ext = %s" % ext)
+                #pprint("ext = %s" % ext)
                 if ext is None:
                     mimetype = attachment.get_content_type()
                     ext = guess_extension(mimetype)[1:]
-                    pprint("ext if ext is None = %s" % ext)
+                    #pprint("ext if ext is None = %s" % ext)
+                    #pprint("ext = %s" % ext)
+                if (ext == "flv"):
+                    pprint("I got a FLV")
                     thumbnail = ("thumb_%s" % name)
-                    pprint("ext = %s, sortie de is_video" % ext)
+                    if thumbnail.handler.key:
+                       pprint("thumbnail.handler.key = %s"
+                              % thumbnail.handler.key)
+                    else:
+                        pprint(", need to create a thumb if not exists")
                     uri = attachment.metadata.database.fs.resolve(base, name)
-                    #pprint("path = %s" % path)
-                    #pprint("name = %s" % name)
-                    #pprint("base = %s" % base)
-                    pprint("uri = %s" % uri)
-                    pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
+                    #pprint("uri = %s" % uri)
+                    #pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
+                    
                     comment['width'], height, ratio = VideoEncodingToFLV(
-                        resource).get_size_and_ratio(
-                            "%s%s.%s" % (root_path, uri, ext))
+                            resource).get_size_and_ratio(
+                                "%s%s.%s" % (root_path, uri, ext))
+                    
                     # Add the Flowplayer menu's height
                     comment['height'] = int(height) + 24
-                    #pprint("width x height & ratio = %s x %s & %s" % (width, height, ratio))
-                else:
-                    comment['file'] = False
-                    comment['is_image'] = False
-                    comment['is_video'] = False
+                    pprint("width x height & ratio = %s x %s & %s" %
+                           (comment['width'], height, ratio))
+                else :
+                    pprint("The video is not a FLV or a MP4 but is a : %s" %
+                           ext)
+            else:
+                comment['file'] = False
+                comment['is_image'] = False
+                comment['is_video'] = False
 
         return namespace

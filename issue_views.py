@@ -48,6 +48,7 @@ from ikaaro.views import ContextMenu
 from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
 from ikaaro.tracker.datatypes import get_issue_fields, UsersList
+from ikaaro.registry import get_resource_class
 
 from videoencoding.video import VideoEncodingToFLV
 
@@ -96,21 +97,15 @@ class TchackIssue_Edit(Issue_Edit):
                 comment['height'] = 200
 
                 if comment['is_video']:
-                    #pprint("i = %s and length = %s" % (i, length))
-                    #if (i == length )
-                    #    last_video = True
-                    #    #pprint("LastVideo = %s" % last_video)
-                    #video = attachment
-                    #root_path = attachment.metadata.database.path
                     root_path = attachment.metadata.database.path
                     name = attachment.name
                     base = attachment.handler.key
                     filename, ext, lang = FileName.decode(name)
-                    pprint("att.han.key = %s" % attachment.handler.key)
-                    pprint("root_path = %s" % root_path)
-                    pprint("name = %s" % name)
-                    pprint("base = %s" % base)
-                    pprint("filename = %s" % filename)
+                    #pprint("att.han.key = %s" % attachment.handler.key)
+                    #pprint("root_path = %s" % root_path)
+                    #pprint("name = %s" % name)
+                    #pprint("base = %s" % base)
+                    #pprint("filename = %s" % filename)
                     #pprint("ext = %s" % ext)
                     if ext is None:
                         mimetype = attachment.get_content_type()
@@ -119,36 +114,48 @@ class TchackIssue_Edit(Issue_Edit):
                         #pprint("ext = %s" % ext)
                     #if (ext == "flv") or (ext == "mp4"):
                     if (ext == "mp4"):
-                        pprint("I got a FLV")
+                        #pprint("I got a FLV")
                         thumbnail = ("thumb_%s" % name)
+                        """
                         if vfs.exists(thumbnail):
                            pprint("thumbnail.handler.key = %s"
                                   % thumbnail.handler.key)
                         else:
-                            pprint("We need to create a thumb")
+                            pprint("No thumbnail, We need to create a thumb, let's go...")
                             dirname = mkdtemp('videoencoding', 'ikaaro')
                             tempdir = vfs.open(dirname)
 
                             # Paste the file in the tempdir
                             tmp_uri= "file:///%s/%s" % (dirname, filename)
-                            vfs.copy(attachment.handler.database.path, tmp_uri)
+                            #vfs.copy(attachment.handler.database.path, tmp_uri)
+                            vfs.copy(root_path+base, tmp_uri)
 
                             # Thumbnail
-                            thumbnail = VideoEncodingToFLV(attachment).make_thumbnail_only(
-                                dirname, root_path+base, name, ext, 512)
-
-                            if thumbnail is not None:
-                                thumbfilename, thumbmimetype,
-                                thumbbody, thumbextension = thumbnail['flvthumb']
-                            # Create the thumbnail PNG resources
-                            thumbnail = get_resource_class(thumbmimetype)
-                            thumbnail.make_resource(thumbnail, issue, thumbfilename,
-                                body=thumbbody, filename=thumbfilename,
-                                extension=thumbextension, format=thumbmimetype)
+                            thumbnailed = VideoEncodingToFLV(attachment).make_thumbnail_only(
+                                dirname, root_path+base, name, 512)
+                            #pprint("thumbnail = %s" % thumbnail)
+                            
+                            if thumbnailed is not None:
+                                thumbfilename, thumbmimetype, thumbbody, thumbextension = thumbnailed['flvthumb']
+                                
+                                # Create the thumbnail PNG resources
+                                thumb = Image #get_resource_class(thumbmimetype)
+                                #pprint("get_resource_class(thumbmimetype) = %s" % thumb)
+                                issue = context.resource
+                                #pprint("issue.handler.key = %s" % issue.handler.key)
+                                #pprint("thumbfilename= %s" % thumbfilename)
+                                #pprint("thumbmimetype= %s" % thumbmimetype)
+                                #pprint("thumbextension= %s" % thumbextension)
+                                #pprint(thumb.make_resource.__class__.__name__)
+                                thumb.make_resource(thumb, resource, thumbfilename,
+                                    body=thumbbody, filename=thumbfilename,
+                                    extension=thumbextension, format=thumbmimetype)
+                            else:
+                                pprint("Thumbnailed is None")
 
                             # Clean the temporary folder
                             vfs.remove(dirname)
-
+                        """
                         uri = attachment.handler.database.fs.resolve(base, name)
                         #pprint("uri = %s" % uri)
                         #pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
@@ -159,9 +166,9 @@ class TchackIssue_Edit(Issue_Edit):
 
                         # Add the Flowplayer menu's height
                         comment['height'] = int(height) + 24
-                        """
                         pprint("width x height & ratio = %s x %s & %s" %
                                (comment['width'], height, ratio))
+                        """
                     else :
                         pprint("The video is not a FLV or a MP4 but is a : %s" %
                                ext)

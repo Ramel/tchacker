@@ -125,36 +125,30 @@ class Tchack_Issue(Issue):
             cls = get_resource_class(mimetype)
             cls.make_resource(cls, self, name, body=body, filename=filename,
                             extension=extension, format=mimetype)
-            pprint("name = %s" % name)
             # Video
             file = self.get_resource(name)
-            #cls.save_changes()
-            #self.init_resource(**kw)
-            pprint("file = %s" % file)
+            #pprint("file = %s" % file)
             if isinstance(file, Video):
-                pprint("That's a Video file")
+                #pprint("That's a Video file")
                 if extension is None:
                     mimetype = file.get_content_type()
                     extension = guess_extension(mimetype)[1:]
                 if (extension == "mp4"):
-                    pprint("I got an \"%s\" file" % extension)
+                    #pprint("I got an \"%s\" file" % extension)
                     thumbnail = ("thumb_%s" % name)
-                    if vfs.exists(thumbnail):
-                        pprint("thumbnail.handler.key = %s"
-                            % thumbnail.handler.key)
-                    else:
-                        pprint("No thumbnail, We need to create a thumb, let's go...")
+                    if not vfs.exists(thumbnail):
+                        #print("thumbnail.handler.key = %s" % thumbnail.handler.key)
+                        #else:
+                        #pprint("No thumbnail, We need to create a thumb, let's go...")
                         dirname = mkdtemp('videoencoding', 'ikaaro')
                         tempdir = vfs.open(dirname)
                         # Paste the file in the tempdir
                         tmp_uri= "/%s" % (dirname)
                         
                         base = file.handler.key
-                        pprint("base = %s" % base)
+                        #pprint("base = %s" % base)
                         root_path = file.handler.database.path
-                        pprint("root_path = %s" % root_path)
-                        #vfs.copy(file.handler.database.path+base, tmp_uri+os.sep+filename)
-                        #vfs.copy(root_path+base, tmp_uri)
+                        #pprint("root_path = %s" % root_path)
                         tmpfile = open("/%s/%s" % (tmp_uri, name), "w+")
                         tmpfile.write(body)
                         tmpfile.close()
@@ -167,22 +161,17 @@ class Tchack_Issue(Issue):
                             thumbfilename, thumbmimetype, thumbbody, thumbextension = thumbnailed['flvthumb']
                             
                             # Create the thumbnail PNG resources
-                            thumb = Image #get_resource_class(thumbmimetype)
+                            thumb = get_resource_class(thumbmimetype)
                             #pprint("get_resource_class(thumbmimetype) = %s" % thumb)
                             issue = context.resource
-                            #pprint("issue.handler.key = %s" % issue.handler.key)
-                            #pprint("thumbfilename= %s" % thumbfilename)
-                            #pprint("thumbmimetype= %s" % thumbmimetype)
-                            #pprint("thumbextension= %s" % thumbextension)
-                            #pprint(thumb.make_resource.__class__.__name__)
                             thumb.make_resource(thumb, issue, thumbfilename,
                                 body=thumbbody, filename=thumbfilename,
                                 extension=thumbextension, format=thumbmimetype)
-                        else:
-                            pprint("Thumbnailed is None")
+                        #else:
+                        #    pprint("Thumbnailed is None")
 
                         # Clean the temporary folder
-                        #vfs.remove(dirname)
+                        vfs.remove(dirname)
             # Link
             record['file'] = name
         # Update

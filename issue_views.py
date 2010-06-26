@@ -97,78 +97,30 @@ class TchackIssue_Edit(Issue_Edit):
                 comment['height'] = 200
 
                 if comment['is_video']:
-                    root_path = attachment.metadata.database.path
                     name = attachment.name
-                    base = attachment.handler.key
                     filename, ext, lang = FileName.decode(name)
-                    #pprint("att.han.key = %s" % attachment.handler.key)
-                    #pprint("root_path = %s" % root_path)
-                    #pprint("name = %s" % name)
-                    #pprint("base = %s" % base)
-                    #pprint("filename = %s" % filename)
-                    #pprint("ext = %s" % ext)
                     if ext is None:
                         mimetype = attachment.get_content_type()
                         ext = guess_extension(mimetype)[1:]
-                        #pprint("ext if ext is None = %s" % ext)
-                        #pprint("ext = %s" % ext)
-                    #if (ext == "flv") or (ext == "mp4"):
                     if (ext == "mp4"):
                         #pprint("I got a FLV")
                         thumbnail = ("thumb_%s" % name)
-                        """
-                        if vfs.exists(thumbnail):
-                           pprint("thumbnail.handler.key = %s"
-                                  % thumbnail.handler.key)
-                        else:
-                            pprint("No thumbnail, We need to create a thumb, let's go...")
-                            dirname = mkdtemp('videoencoding', 'ikaaro')
-                            tempdir = vfs.open(dirname)
-
-                            # Paste the file in the tempdir
-                            tmp_uri= "file:///%s/%s" % (dirname, filename)
-                            #vfs.copy(attachment.handler.database.path, tmp_uri)
-                            vfs.copy(root_path+base, tmp_uri)
-
-                            # Thumbnail
-                            thumbnailed = VideoEncodingToFLV(attachment).make_thumbnail_only(
-                                dirname, root_path+base, name, 512)
-                            #pprint("thumbnail = %s" % thumbnail)
-                            
-                            if thumbnailed is not None:
-                                thumbfilename, thumbmimetype, thumbbody, thumbextension = thumbnailed['flvthumb']
-                                
-                                # Create the thumbnail PNG resources
-                                thumb = Image #get_resource_class(thumbmimetype)
-                                #pprint("get_resource_class(thumbmimetype) = %s" % thumb)
-                                issue = context.resource
-                                #pprint("issue.handler.key = %s" % issue.handler.key)
-                                #pprint("thumbfilename= %s" % thumbfilename)
-                                #pprint("thumbmimetype= %s" % thumbmimetype)
-                                #pprint("thumbextension= %s" % thumbextension)
-                                #pprint(thumb.make_resource.__class__.__name__)
-                                thumb.make_resource(thumb, resource, thumbfilename,
-                                    body=thumbbody, filename=thumbfilename,
-                                    extension=thumbextension, format=thumbmimetype)
-                            else:
-                                pprint("Thumbnailed is None")
-
-                            # Clean the temporary folder
-                            vfs.remove(dirname)
-                        """
-                        uri = attachment.handler.database.fs.resolve(base, name)
-                        #pprint("uri = %s" % uri)
-                        #pprint("root_path.uri.ext = %s%s.%s" % (root_path, uri, ext))
+                        root_path = attachment.handler.database.path
+                        pprint("root_path = %s" % root_path)
+                        base = attachment.handler.key # tracker/issue/filename.ext
+                        pprint("base = %s" % base)
                         """
                         comment['width'], height, ratio = VideoEncodingToFLV(
                                 resource).get_size_and_ratio(
-                                    "%s%s.%s" % (root_path, uri, ext))
-
+                                    "%s%s" % (root_path, base))
+                        """
+                        comment['width'] = attachment.metadata.get_property('width')
+                        height = attachment.metadata.get_property('height')
+                        comment['ratio'] = attachment.metadata.get_property('ratio')
                         # Add the Flowplayer menu's height
                         comment['height'] = int(height) + 24
-                        pprint("width x height & ratio = %s x %s & %s" %
-                               (comment['width'], height, ratio))
-                        """
+                        #pprint("comment['width'] or width x height & ratio = %s or %s x %s & %s" %
+                        #       (comment['width'], width, height, ratio))
                     else :
                         pprint("The video is not a FLV or a MP4 but is a : %s" %
                                ext)

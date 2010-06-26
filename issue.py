@@ -146,9 +146,9 @@ class Tchack_Issue(Issue):
                         tmp_uri= "/%s" % (dirname)
                         
                         base = file.handler.key
-                        #pprint("base = %s" % base)
+                        pprint("base = %s" % base)
                         root_path = file.handler.database.path
-                        #pprint("root_path = %s" % root_path)
+                        pprint("root_path = %s" % root_path)
                         tmpfile = open("/%s/%s" % (tmp_uri, name), "w+")
                         tmpfile.write(body)
                         tmpfile.close()
@@ -156,6 +156,13 @@ class Tchack_Issue(Issue):
                         thumbnailed = VideoEncodingToFLV(file).make_thumbnail_only(
                             tmp_uri, name, name, 512)
                         #pprint("thumbnail = %s" % thumbnail)
+                        dim = VideoEncodingToFLV(file
+                                ).get_size_and_ratio(tmp_uri+os.sep+name)
+                        pprint("dim = %s" % dim)
+                        width, height, ratio = dim
+                        file.metadata.set_property('height', height)
+                        file.metadata.set_property('width', width)
+                        file.metadata.set_property('ratio', str(ratio))
                         
                         if thumbnailed is not None:
                             thumbfilename, thumbmimetype, thumbbody, thumbextension = thumbnailed['flvthumb']
@@ -164,7 +171,7 @@ class Tchack_Issue(Issue):
                             thumb = get_resource_class(thumbmimetype)
                             #pprint("get_resource_class(thumbmimetype) = %s" % thumb)
                             issue = context.resource
-                            thumb.make_resource(thumb, issue, thumbfilename,
+                            thumb.make_resource(thumb, self, thumbfilename,
                                 body=thumbbody, filename=thumbfilename,
                                 extension=thumbextension, format=thumbmimetype)
                         #else:

@@ -59,7 +59,7 @@
     </tr>
     <tr stl:if="comment/file">
       <td colspan="5">
-        <p class="attachement">Attachement: <a href="${comment/file}/;download"
+        <p class="attachement">Attachment: <a href="${comment/file}/;download"
             >${comment/file}</a></p>
       </td>
     </tr>

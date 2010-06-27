@@ -133,7 +133,7 @@ class Tchack_Issue(Issue):
                 if extension is None:
                     mimetype = file.get_content_type()
                     extension = guess_extension(mimetype)[1:]
-                if (extension == "mp4"):
+                if (extension == "mp4") or (extension == "flv"):
                     #pprint("I got an \"%s\" file" % extension)
                     thumbnail = ("thumb_%s" % name)
                     if not vfs.exists(thumbnail):
@@ -146,9 +146,9 @@ class Tchack_Issue(Issue):
                         tmp_uri= "/%s" % (dirname)
                         
                         base = file.handler.key
-                        pprint("base = %s" % base)
+                        #pprint("base = %s" % base)
                         root_path = file.handler.database.path
-                        pprint("root_path = %s" % root_path)
+                        #pprint("root_path = %s" % root_path)
                         tmpfile = open("/%s/%s" % (tmp_uri, name), "w+")
                         tmpfile.write(body)
                         tmpfile.close()
@@ -160,8 +160,8 @@ class Tchack_Issue(Issue):
                         thumbnailed = VideoEncodingToFLV(file).make_thumbnail_only(
                             tmp_uri, name, name, width)
                         #pprint("thumbnail = %s" % thumbnail)
-                        file.metadata.set_property('height', height)
                         file.metadata.set_property('width', width)
+                        file.metadata.set_property('height', height)
                         file.metadata.set_property('ratio', str(ratio))
                         
                         if thumbnailed is not None:

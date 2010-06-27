@@ -65,8 +65,8 @@ class TchackIssue_Edit(Issue_Edit):
     styles = ['ui/tracker/style.css',
               '/ui/tchacker/style.css', '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
-               '/ui/flowplayer/flowplayer-3.1.1.min.js',
-               '/ui/flowplayer/flowplayer-3.1.1.swf']
+               '/ui/flowplayer/flowplayer-3.2.2.min.js',
+               '/ui/flowplayer/flowplayer-3.2.2.swf']
     #context.scripts.append('/ui/flowplayer/script.js')
 
 
@@ -102,7 +102,8 @@ class TchackIssue_Edit(Issue_Edit):
                     if ext is None:
                         mimetype = attachment.get_content_type()
                         ext = guess_extension(mimetype)[1:]
-                    if ((ext == "mp4") or (ext == "flv")):
+                    #pprint("ext = %s" % ext)
+                    if (ext == "mp4") or (ext == "flv"):
                         #pprint("I got a FLV")
                         thumbnail = ("thumb_%s" % name)
                         root_path = attachment.handler.database.path
@@ -112,15 +113,25 @@ class TchackIssue_Edit(Issue_Edit):
                         comment['width'] = attachment.metadata.get_property('width')
                         comment['height'] = attachment.metadata.get_property('height')
                         comment['ratio'] = attachment.metadata.get_property('ratio')
+                        #pprint("comment['width'] = %s" % comment['width'])
+                        #pprint("comment['height'] = %s" % comment['height'])
+                        #pprint("comment['ratio'] = %s" % comment['ratio'])
                         # Add the Flowplayer menu's height
-                        comment['height'] = int(comment['height']) + 24
+                        #comment['height'] = int(comment['height']) + 24
                         #pprint("comment['width'] or width x height & ratio = %s or %s x %s & %s" %
                         #       (comment['width'], width, height, ratio))
-                    #else :
-                    #    pprint("The video is not a FLV or a MP4 but is a : %s" %  ext)
+                    else :
+                        #pprint("The video is not a FLV or a MP4 but is a : %s" %  ext)
+                        comment['width'] = False
+                        comment['height'] = False
+                        comment['ratio'] = False
+                        comment['is_image'] = False
+                        comment['is_video'] = False
             else:
                 comment['file'] = False
                 comment['is_image'] = False
                 comment['is_video'] = False
+        
+        #pprint("namespace = %s" % namespace)
 
         return namespace

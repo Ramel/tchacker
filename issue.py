@@ -152,14 +152,14 @@ class Tchack_Issue(Issue):
                         tmpfile = open("/%s/%s" % (tmp_uri, name), "w+")
                         tmpfile.write(body)
                         tmpfile.close()
-                        # Thumbnail
-                        thumbnailed = VideoEncodingToFLV(file).make_thumbnail_only(
-                            tmp_uri, name, name, 512)
-                        #pprint("thumbnail = %s" % thumbnail)
                         dim = VideoEncodingToFLV(file
                                 ).get_size_and_ratio(tmp_uri+os.sep+name)
                         pprint("dim = %s" % dim)
                         width, height, ratio = dim
+                        # Thumbnail
+                        thumbnailed = VideoEncodingToFLV(file).make_thumbnail_only(
+                            tmp_uri, name, name, width)
+                        #pprint("thumbnail = %s" % thumbnail)
                         file.metadata.set_property('height', height)
                         file.metadata.set_property('width', width)
                         file.metadata.set_property('ratio', str(ratio))

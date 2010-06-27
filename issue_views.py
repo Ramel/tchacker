@@ -102,28 +102,22 @@ class TchackIssue_Edit(Issue_Edit):
                     if ext is None:
                         mimetype = attachment.get_content_type()
                         ext = guess_extension(mimetype)[1:]
-                    if (ext == "mp4"):
+                    if ((ext == "mp4") or (ext == "flv")):
                         #pprint("I got a FLV")
                         thumbnail = ("thumb_%s" % name)
                         root_path = attachment.handler.database.path
-                        pprint("root_path = %s" % root_path)
+                        #pprint("root_path = %s" % root_path)
                         base = attachment.handler.key # tracker/issue/filename.ext
-                        pprint("base = %s" % base)
-                        """
-                        comment['width'], height, ratio = VideoEncodingToFLV(
-                                resource).get_size_and_ratio(
-                                    "%s%s" % (root_path, base))
-                        """
+                        #pprint("base = %s" % base)
                         comment['width'] = attachment.metadata.get_property('width')
-                        height = attachment.metadata.get_property('height')
+                        comment['height'] = attachment.metadata.get_property('height')
                         comment['ratio'] = attachment.metadata.get_property('ratio')
                         # Add the Flowplayer menu's height
-                        comment['height'] = int(height) + 24
+                        comment['height'] = int(comment['height']) + 24
                         #pprint("comment['width'] or width x height & ratio = %s or %s x %s & %s" %
                         #       (comment['width'], width, height, ratio))
-                    else :
-                        pprint("The video is not a FLV or a MP4 but is a : %s" %
-                               ext)
+                    #else :
+                    #    pprint("The video is not a FLV or a MP4 but is a : %s" %  ext)
             else:
                 comment['file'] = False
                 comment['is_image'] = False

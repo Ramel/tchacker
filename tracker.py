@@ -37,7 +37,7 @@ class Tchack_Tracker(Tracker):
     class_id = 'tchack_tracker'
     class_version = '20090706'
     class_title = MSG(u'Tchack Issue Tracker')
-    class_description = MSG(u'To manage images, bugs and tasks')
+    class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_views = Tracker.class_views + ['zip']
 
     # Configuration
@@ -51,8 +51,7 @@ class Tchack_Tracker(Tracker):
     # Update
     #######################################################################
     def update_20090705(self):
-        """
-        Encode the unencoded MOV or AVI file, and add the thumb, erase the
+        """Encode the unencoded MOV or AVI file, and add the thumb, erase the
         original file.
         """
         from pprint import pprint
@@ -79,7 +78,7 @@ class Tchack_Tracker(Tracker):
                 is_video = False
                 if not comment and not filename:
                     continue
-                """
+        """
 		if filename:
                     file = issue.get_resource(filename)
                     is_video = isinstance(file, Video)
@@ -137,6 +136,7 @@ class Tchack_Tracker(Tracker):
                             pprint("====================")
                         pprint("xxxxxxxxxxxxxxxx")
 		"""
+
 ###########################################################################
 # Register
 ###########################################################################

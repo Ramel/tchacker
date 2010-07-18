@@ -140,7 +140,7 @@ class Tchack_Issue(Issue):
                 dirname = mkdtemp('videoencoding', 'ikaaro')
                 tempdir = vfs.open(dirname)
                 # Paste the file in the tempdir
-                tmpfolder = "/%s" % (dirname)
+                tmpfolder = "%s" % (dirname)
                 root_path = file.handler.database.path
                 #print("root_path = %s" % root_path)
                 tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
@@ -156,7 +156,7 @@ class Tchack_Issue(Issue):
                 #print("venc = %s" % venc)
                 # In case of a video in h264 and widder than 640px
                 # We encode it in Flv and make a thumbnail
-                width_low = 630
+                width_low = 640
                 if int(width) > width_low and venc == "h264":
                     #print("int(width) > 960 and venc == h264")
                     video_low = ("%s_low" % name)
@@ -168,15 +168,16 @@ class Tchack_Issue(Issue):
                     file.metadata.set_property('ratio', str(ratio))
                     file.metadata.set_property('thumbnail', "True")
                     if encoded is not None:
-                        vidfilename, vidmimetype, vidbody,
-                            vidextension = encoded['flvfile']
-                        thumbfilename, thumbmimetype, thumbbody,
-                            thumbextension = encoded['flvthumb']
+                        vidfilename, vidmimetype, vidbody, vidextension = encoded['flvfile']
+                        thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
                         # Create the video resources
                         vid = get_resource_class(vidmimetype)
                         vid.make_resource(vid, self, vidfilename,
                             body=vidbody, filename=vidfilename,
                             extension=vidextension, format=vidmimetype)
+                        height_low = int(round(float(width_low) * ratio))
+                        vid.metadata.set_property('width', width_low)
+                        vid.metadata.set_property('height', height_low)
                         # Create the thumbnail PNG resources
                         thumb = get_resource_class(thumbmimetype)
                         thumb.make_resource(thumb, self, thumbfilename,

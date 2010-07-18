@@ -101,15 +101,19 @@ class TchackIssue_Edit(Issue_Edit):
                     filename, ext, lang = FileName.decode(name)
                     thumb = attachment.metadata.get_property('thumbnail')
                     if thumb == "True":
-                        comment['video_low'] = ("%s_low" % filename)
-                        comment['width'] = attachment.metadata.get_property('width')
-                        comment['height'] = attachment.metadata.get_property('height')
-                        comment['ratio'] = attachment.metadata.get_property('ratio')
+                        video = resource.get_resource("%s_low" % name)
+                        comment['video'] = ("%s_low" % filename)
+                        #comment['width'] = attachment.metadata.get_property('width')
+                        #comment['height'] = attachment.metadata.get_property('height')
+                        comment['width'] = video.metadata.get_property('width')
+                        comment['height'] = video.metadata.get_property('height')
+                        #comment['ratio'] = attachment.metadata.get_property('ratio')
                     else:
                         #pprint("The video is not a FLV or a MP4 but is a : %s" %  ext)
+                        comment['video'] = ("%s" % filename)
                         comment['width'] = False
                         comment['height'] = False
-                        comment['ratio'] = False
+                        #comment['ratio'] = False
                         comment['is_image'] = False
                         comment['is_video'] = False
             else:

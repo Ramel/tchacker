@@ -35,7 +35,7 @@ from tracker_views import Tchacker_View, Tracker_Zip_Img
 class Tchack_Tracker(Tracker):
 
     class_id = 'tchack_tracker'
-    class_version = '20090706'
+    class_version = '20100718'
     class_title = MSG(u'Tchack Issue Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_views = Tracker.class_views + ['zip']
@@ -50,10 +50,12 @@ class Tchack_Tracker(Tracker):
     #######################################################################
     # Update
     #######################################################################
-    def update_20090705(self):
-        """Encode the unencoded MOV or AVI file, and add the thumb, erase the
-        original file.
+
+    def update_20100718(self):
+        """If an issues file is a video, encoded in h264 and widder than 640px,
+        we ecode a low version and create a thumbnail.
         """
+        import os
         from pprint import pprint
         from datetime import datetime
         from tempfile import mkdtemp
@@ -78,64 +80,70 @@ class Tchack_Tracker(Tracker):
                 is_video = False
                 if not comment and not filename:
                     continue
-        """
-		if filename:
+                if filename:
                     file = issue.get_resource(filename)
                     is_video = isinstance(file, Video)
-                
                     if not is_video:
                         continue
                     if is_video:
                         name = file.name
                         filename, ext, lang = FileName.decode(name)
-                        if ext is None:
-                            mimetype = file.get_content_type()
-                            ext = guess_extension(mimetype)[1:]
-                        if(mimetype == 'video/x-msvideo'
-                            or mimetype == 'video/quicktime'):
-                            pprint("The file %s.%s will be encoded in FLV, \
-                                replaced by, then erased." % (filename, ext))
-                            
-                            handler_path = get_uri_path(issue.handler.uri)
-                            
-                            dirname = mkdtemp('videoencoding', 'ikaaro')
-                            tempdir = vfs.open(dirname)
-                            
-                            # Paste the file in the tempdir
-                            tmp_uri= "file:///%s/%s" % (dirname, filename)
-                            vfs.copy(file.handler.uri, tmp_uri)
-                            
-                            # Encode to 512 of width
-                            encoded = VideoEncodingToFLV(file).encode_avi_to_flv(
-                                 dirname, filename, name, 512)
-                            
+                        dirname = mkdtemp('videoencoding', 'ikaaro')
+                        tempdir = vfs.open(dirname)
+                        # Paste the file in the tempdir
+                        tmpfolder = "%s" % (dirname)
+                        root_path = file.handler.database.path
+                        #print("root_path = %s" % root_path)
+                        tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+                        tmpfile = open("%s" % tmp_uri, "w+")
+                        tmpfile.write(file.handler.to_str())
+                        tmpfile.close()
+                        # Get size
+                        dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
+                        #print("dim = %s" % dim)
+                        width, height, ratio = dim
+                        # Codec 
+                        venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+                        #print("venc = %s" % venc)
+                        # In case of a video in h264 and widder than 640px
+                        # We encode it in Flv and make a thumbnail
+                        width_low = 640
+                        print("codec = %s" % venc)
+                        if int(width) > width_low and venc == "h264":
+                            #print("int(width) > 960 and venc == h264")
+                            video_low = ("%s_low" % name)
+                            # video is already in temp dir, so encode it
+                            encoded = VideoEncodingToFLV(file).encode_video_to_flv(
+                                tmpfolder, name, name, width_low)
+                            file.metadata.set_property('width', width)
+                            file.metadata.set_property('height', height)
+                            file.metadata.set_property('ratio', str(ratio))
+                            file.metadata.set_property('thumbnail', "True")
                             if encoded is not None:
-                                flvfilename, flvmimetype,
-                                flvbody, flvextension = encoded['flvfile']
-                                thumbfilename, thumbmimetype,
-                                thumbbody, thumbextension = encoded['flvthumb']
-                            # Create the video FLV and thumbnail PNG resources
-                            video = get_resource_class(flvmimetype)
-                            thumbnail = get_resource_class(thumbmimetype)
-                            # Remove the original files
-                            if vfs.exists(file.handler.uri):
-                                vfs.remove(file.handler.uri)
-                            if vfs.exists(file.metadata.uri):
-                                vfs.remove(file.metadata.uri)
-                            
-                            video.make_resource(video, issue, name,
-                                body=flvbody, filename=flvfilename,
-                                extension=flvextension, format=flvmimetype)
-                            thumbnail.make_resource(thumbnail, issue, thumbfilename,
-                                body=thumbbody, filename=thumbfilename,
-                                extension=thumbextension, format=thumbmimetype)
-                            
+                                vidfilename, vidmimetype, vidbody, vidextension = encoded['flvfile']
+                                thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
+                                # Create the video resources
+                                cls = get_resource_class(vidmimetype)
+                                issue.make_resource(cls, issue, vidfilename,
+                                    body=vidbody, filename=vidfilename,
+                                    extension=vidextension, format=vidmimetype)
+                                height_low = int(round(float(width_low) / ratio))
+                                vid = issue.get_resource(vidfilename)
+                                vid.metadata.set_property('width',
+                                                          str(width_low))
+                                vid.metadata.set_property('height',
+                                                          str(height_low))
+                                # Create the thumbnail PNG resources
+                                cls = get_resource_class(thumbmimetype)
+                                issue.make_resource(cls, issue, thumbfilename,
+                                    body=thumbbody, filename=thumbfilename,
+                                    extension=thumbextension, format=thumbmimetype)
+
                             # Clean the temporary folder
                             vfs.remove(dirname)
-                            
-                            pprint("====================")
-                        pprint("xxxxxxxxxxxxxxxx")
-		"""
+                        else:
+                            file.metadata.set_property('thumbnail', "False")
+
 
 ###########################################################################
 # Register

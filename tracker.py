@@ -62,12 +62,12 @@ class Tchack_Tracker(Tracker):
         from issue import Tchack_Issue
         from ikaaro.file import Video
         from ikaaro.exceptions import ConsistencyError
-        from itools import vfs
-        from itools.vfs import FileName
+        from itools.fs import vfs
+        from itools.fs import FileName
         from itools.core import guess_extension
         from itools.uri import get_uri_path
-        from videoencoding import VideoEncodingToFLV
         from ikaaro.registry import get_resource_class
+        from videoencoding import VideoEncodingToFLV
         
         for issue in self.search_resources(cls=Tchack_Issue):
         

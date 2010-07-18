@@ -50,10 +50,10 @@ from ikaaro.tracker.issue_views import Issue_Edit
 from ikaaro.tracker.datatypes import get_issue_fields, UsersList
 from ikaaro.registry import get_resource_class
 
-from videoencoding.video import VideoEncodingToFLV
+#from videoencoding.video import VideoEncodingToFLV
 
 # Debug
-from pprint import pprint
+#from pprint import pprint
 
 
 class TchackIssue_Edit(Issue_Edit):
@@ -99,28 +99,13 @@ class TchackIssue_Edit(Issue_Edit):
                 if comment['is_video']:
                     name = attachment.name
                     filename, ext, lang = FileName.decode(name)
-                    if ext is None:
-                        mimetype = attachment.get_content_type()
-                        ext = guess_extension(mimetype)[1:]
-                    #pprint("ext = %s" % ext)
-                    if (ext == "mp4") or (ext == "flv"):
-                        #pprint("I got a FLV")
-                        thumbnail = ("thumb_%s" % name)
-                        root_path = attachment.handler.database.path
-                        #pprint("root_path = %s" % root_path)
-                        base = attachment.handler.key # tracker/issue/filename.ext
-                        #pprint("base = %s" % base)
+                    thumb = attachment.metadata.get_property('thumbnail')
+                    if thumb == "True":
+                        comment['video_low'] = ("%s_low" % filename)
                         comment['width'] = attachment.metadata.get_property('width')
                         comment['height'] = attachment.metadata.get_property('height')
                         comment['ratio'] = attachment.metadata.get_property('ratio')
-                        #pprint("comment['width'] = %s" % comment['width'])
-                        #pprint("comment['height'] = %s" % comment['height'])
-                        #pprint("comment['ratio'] = %s" % comment['ratio'])
-                        # Add the Flowplayer menu's height
-                        #comment['height'] = int(comment['height']) + 24
-                        #pprint("comment['width'] or width x height & ratio = %s or %s x %s & %s" %
-                        #       (comment['width'], width, height, ratio))
-                    else :
+                    else:
                         #pprint("The video is not a FLV or a MP4 but is a : %s" %  ext)
                         comment['width'] = False
                         comment['height'] = False
@@ -131,7 +116,5 @@ class TchackIssue_Edit(Issue_Edit):
                 comment['file'] = False
                 comment['is_image'] = False
                 comment['is_video'] = False
-        
-        #pprint("namespace = %s" % namespace)
 
         return namespace

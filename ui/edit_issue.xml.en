@@ -52,7 +52,7 @@
     </tr>
     <tr stl:if="comment/is_video">
       <td colspan="5">
-        <a href="${comment/file}/;download"
+        <a href="${comment/video_low}/;download"
           style="display:block;width:${comment/width}px;height:${comment/height}px;"
           id="player-${comment/number}"></a>
       </td>
@@ -77,7 +77,7 @@
      },
      // canvas background, the video thumbnail.
      canvas: {
-       backgroundImage: 'url(thumb_${comment/file}/;download)'
+       backgroundImage: 'url(${comment/video_low}_thumb/;download)'
      },
   }); 
   </script>

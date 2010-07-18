@@ -130,55 +130,66 @@ class Tchack_Issue(Issue):
             #pprint("file = %s" % file)
             if isinstance(file, Video):
                 #pprint("That's a Video file")
-                if extension is None:
-                    mimetype = file.get_content_type()
-                    extension = guess_extension(mimetype)[1:]
-                if (extension == "mp4") or (extension == "flv"):
-                    #pprint("I got an \"%s\" file" % extension)
-                    thumbnail = ("thumb_%s" % name)
-                    if not vfs.exists(thumbnail):
-                        #print("thumbnail.handler.key = %s" % thumbnail.handler.key)
-                        #else:
-                        #pprint("No thumbnail, We need to create a thumb, let's go...")
-                        dirname = mkdtemp('videoencoding', 'ikaaro')
-                        tempdir = vfs.open(dirname)
-                        # Paste the file in the tempdir
-                        tmp_uri= "/%s" % (dirname)
-                        
-                        base = file.handler.key
-                        #pprint("base = %s" % base)
-                        root_path = file.handler.database.path
-                        #pprint("root_path = %s" % root_path)
-                        tmpfile = open("/%s/%s" % (tmp_uri, name), "w+")
-                        tmpfile.write(body)
-                        tmpfile.close()
-                        dim = VideoEncodingToFLV(file
-                                ).get_size_and_ratio(tmp_uri+os.sep+name)
-                        pprint("dim = %s" % dim)
-                        width, height, ratio = dim
-                        # Thumbnail
-                        thumbnailed = VideoEncodingToFLV(file).make_thumbnail_only(
-                            tmp_uri, name, name, width)
-                        #pprint("thumbnail = %s" % thumbnail)
-                        file.metadata.set_property('width', width)
-                        file.metadata.set_property('height', height)
-                        file.metadata.set_property('ratio', str(ratio))
-                        
-                        if thumbnailed is not None:
-                            thumbfilename, thumbmimetype, thumbbody, thumbextension = thumbnailed['flvthumb']
-                            
-                            # Create the thumbnail PNG resources
-                            thumb = get_resource_class(thumbmimetype)
-                            #pprint("get_resource_class(thumbmimetype) = %s" % thumb)
-                            issue = context.resource
-                            thumb.make_resource(thumb, self, thumbfilename,
-                                body=thumbbody, filename=thumbfilename,
-                                extension=thumbextension, format=thumbmimetype)
-                        #else:
-                        #    pprint("Thumbnailed is None")
+                # So make Thumbnail for it, and encode it in a Low version (960
+                # width)
+                # First, upload it, then encode it, and make a thumb for the
+                # encoded file.
+                # video.mp4, video_low.mp4, video_low_thumb.jpgi
+                # If the video is h264 and wider than 960px, so create a Low
+                # copy.
+                dirname = mkdtemp('videoencoding', 'ikaaro')
+                tempdir = vfs.open(dirname)
+                # Paste the file in the tempdir
+                tmpfolder = "/%s" % (dirname)
+                root_path = file.handler.database.path
+                #print("root_path = %s" % root_path)
+                tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+                tmpfile = open("%s" % tmp_uri, "w+")
+                tmpfile.write(body)
+                tmpfile.close()
+                # Get size
+                dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
+                #print("dim = %s" % dim)
+                width, height, ratio = dim
+                # Codec 
+                venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+                #print("venc = %s" % venc)
+                # In case of a video in h264 and widder than 640px
+                # We encode it in Flv and make a thumbnail
+                width_low = 630
+                if int(width) > width_low and venc == "h264":
+                    #print("int(width) > 960 and venc == h264")
+                    video_low = ("%s_low" % name)
+                    # video is already in temp dir, so encode it
+                    encoded = VideoEncodingToFLV(file).encode_video_to_flv(
+                        tmpfolder, name, name, width_low)
+                    file.metadata.set_property('width', width)
+                    file.metadata.set_property('height', height)
+                    file.metadata.set_property('ratio', str(ratio))
+                    file.metadata.set_property('thumbnail', "True")
+                    if encoded is not None:
+                        vidfilename, vidmimetype, vidbody,
+                            vidextension = encoded['flvfile']
+                        thumbfilename, thumbmimetype, thumbbody,
+                            thumbextension = encoded['flvthumb']
+                        # Create the video resources
+                        vid = get_resource_class(vidmimetype)
+                        vid.make_resource(vid, self, vidfilename,
+                            body=vidbody, filename=vidfilename,
+                            extension=vidextension, format=vidmimetype)
+                        # Create the thumbnail PNG resources
+                        thumb = get_resource_class(thumbmimetype)
+                        thumb.make_resource(thumb, self, thumbfilename,
+                            body=thumbbody, filename=thumbfilename,
+                            extension=thumbextension, format=thumbmimetype)
+                    #else:
+                    #    pprint("Thumbnailed is None")
 
-                        # Clean the temporary folder
-                        vfs.remove(dirname)
+                    # Clean the temporary folder
+                    vfs.remove(dirname)
+                else:
+                    file.metadata.set_property('thumbnail', "False")
+
             # Link
             record['file'] = name
         # Update

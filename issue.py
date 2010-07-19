@@ -175,7 +175,7 @@ class Tchack_Issue(Issue):
                         self.make_resource(cls, self, vidfilename,
                             body=vidbody, filename=vidfilename,
                             extension=vidextension, format=vidmimetype)
-                        height_low = int(round(float(width_low) * ratio))
+                        height_low = int(round(float(width_low) / ratio))
                         vid = self.get_resource(vidfilename)
                         vid.metadata.set_property('width', str(width_low))
                         vid.metadata.set_property('height', str(height_low))

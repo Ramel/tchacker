@@ -52,8 +52,8 @@ class Tchack_Tracker(Tracker):
     #######################################################################
 
     def update_20100718(self):
-        """If an issues file is a video, encoded in h264 and widder than 640px,
-        we ecode a low version and create a thumbnail.
+        """If an issue contains a video file, encoded in h264 and widder than 640px,
+        we encode a low version and create a thumbnail.
         """
         import os
         from pprint import pprint
@@ -108,10 +108,12 @@ class Tchack_Tracker(Tracker):
                         # In case of a video in h264 and widder than 640px
                         # We encode it in Flv and make a thumbnail
                         width_low = 640
-                        print("codec = %s" % venc)
+                        print("Find a video in %s" % venc)
                         if int(width) > width_low and venc == "h264":
                             #print("int(width) > 960 and venc == h264")
                             video_low = ("%s_low" % name)
+                            print("The video is in H264 video codec and wider
+                                  than 640px, create a low version")
                             # video is already in temp dir, so encode it
                             encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                                 tmpfolder, name, name, width_low)
@@ -141,6 +143,7 @@ class Tchack_Tracker(Tracker):
 
                             # Clean the temporary folder
                             vfs.remove(dirname)
+                            print("Done: %s 's low version is created" % name)
                         else:
                             file.metadata.set_property('thumbnail', "False")
 

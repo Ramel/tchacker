@@ -171,21 +171,19 @@ class Tchack_Issue(Issue):
                         vidfilename, vidmimetype, vidbody, vidextension = encoded['flvfile']
                         thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
                         # Create the video resources
-                        vid = get_resource_class(vidmimetype)
-                        vid.make_resource(vid, self, vidfilename,
+                        cls = get_resource_class(vidmimetype)
+                        self.make_resource(cls, self, vidfilename,
                             body=vidbody, filename=vidfilename,
                             extension=vidextension, format=vidmimetype)
                         height_low = int(round(float(width_low) * ratio))
-                        vid.metadata.set_property('width', width_low)
-                        vid.metadata.set_property('height', height_low)
+                        vid = self.get_resource(vidfilename)
+                        vid.metadata.set_property('width', str(width_low))
+                        vid.metadata.set_property('height', str(height_low))
                         # Create the thumbnail PNG resources
-                        thumb = get_resource_class(thumbmimetype)
-                        thumb.make_resource(thumb, self, thumbfilename,
+                        cls = get_resource_class(thumbmimetype)
+                        self.make_resource(cls, self, thumbfilename,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
-                    #else:
-                    #    pprint("Thumbnailed is None")
-
                     # Clean the temporary folder
                     vfs.remove(dirname)
                 else:

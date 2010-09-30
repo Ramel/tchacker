@@ -50,11 +50,6 @@ from ikaaro.tracker.issue_views import Issue_Edit
 from ikaaro.tracker.datatypes import get_issue_fields, UsersList
 from ikaaro.registry import get_resource_class
 
-#from videoencoding.video import VideoEncodingToFLV
-
-# Debug
-#from pprint import pprint
-
 
 class TchackIssue_Edit(Issue_Edit):
 
@@ -67,18 +62,14 @@ class TchackIssue_Edit(Issue_Edit):
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
                '/ui/flowplayer/flowplayer-3.2.2.min.js',
                '/ui/flowplayer/flowplayer-3.2.2.swf']
-    #context.scripts.append('/ui/flowplayer/script.js')
-
 
     def get_schema(self, resource, context):
         return get_issue_fields(resource.parent)
-
 
     def get_value(self, resource, context, name, datatype):
         history = resource.get_history()
         record = history.get_record(-1)
         return  record.get_value(name)
-
 
     def get_namespace(self, resource, context):
         namespace = Issue_Edit.get_namespace(self, resource, context)
@@ -92,7 +83,6 @@ class TchackIssue_Edit(Issue_Edit):
                 attachment = resource.get_resource(comment['file'])
                 comment['is_image'] = isinstance(attachment, Image)
                 comment['is_video'] = isinstance(attachment, Video)
-                #pprint("comment['is_video'] = %s" % comment['is_video'])
                 comment['width'] = 200
                 comment['height'] = 200
 
@@ -103,17 +93,12 @@ class TchackIssue_Edit(Issue_Edit):
                     if thumb == "True":
                         video = resource.get_resource("%s_low" % name)
                         comment['video'] = ("%s_low" % filename)
-                        #comment['width'] = attachment.metadata.get_property('width')
-                        #comment['height'] = attachment.metadata.get_property('height')
                         comment['width'] = video.metadata.get_property('width')
                         comment['height'] = video.metadata.get_property('height')
-                        #comment['ratio'] = attachment.metadata.get_property('ratio')
                     else:
-                        #pprint("The video is not a FLV or a MP4 but is a : %s" %  ext)
                         comment['video'] = ("%s" % filename)
                         comment['width'] = False
                         comment['height'] = False
-                        #comment['ratio'] = False
                         comment['is_image'] = False
                         comment['is_video'] = False
             else:

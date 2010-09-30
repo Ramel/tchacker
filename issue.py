@@ -47,7 +47,6 @@ from issue_views import TchackIssue_Edit
 # Import from videoencoding
 from videoencoding import VideoEncodingToFLV
 
-from pprint import pprint
 
 class Tchack_Issue(Issue):
 
@@ -127,38 +126,32 @@ class Tchack_Issue(Issue):
                             extension=extension, format=mimetype)
             # Video
             file = self.get_resource(name)
-            #pprint("file = %s" % file)
             if isinstance(file, Video):
-                #pprint("That's a Video file")
-                # So make Thumbnail for it, and encode it in a Low version (960
-                # width)
+                # Make Thumbnail for it, and encode it
+                # in a Low version (319px width)
                 # First, upload it, then encode it, and make a thumb for the
                 # encoded file.
-                # video.mp4, video_low.mp4, video_low_thumb.jpgi
-                # If the video is h264 and wider than 960px, so create a Low
-                # copy.
+                # video.mp4, video_low.mp4, video_low_thumb.jpg
+                # If the video is h264 and wider than 319px,
+                # so create a Low copy.
                 dirname = mkdtemp('videoencoding', 'ikaaro')
                 tempdir = vfs.open(dirname)
                 # Paste the file in the tempdir
                 tmpfolder = "%s" % (dirname)
                 root_path = file.handler.database.path
-                #print("root_path = %s" % root_path)
                 tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
                 tmpfile = open("%s" % tmp_uri, "w+")
                 tmpfile.write(body)
                 tmpfile.close()
                 # Get size
                 dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
-                #print("dim = %s" % dim)
                 width, height, ratio = dim
                 # Codec 
                 venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
-                #print("venc = %s" % venc)
-                # In case of a video in h264 and widder than 640px
-                # We encode it in Flv and make a thumbnail
+                # In case of a video in h264 and widder than 319px
+                # We encode it in Flv at 640px width  and make a thumbnail
                 width_low = 640
-                if int(width) > width_low and venc == "h264":
-                    #print("int(width) > 960 and venc == h264")
+                if int(width) > 319 and venc == "h264":
                     video_low = ("%s_low" % name)
                     # video is already in temp dir, so encode it
                     encoded = VideoEncodingToFLV(file).encode_video_to_flv(
@@ -261,4 +254,3 @@ class Tchack_Issue(Issue):
 register_resource_class(Tchack_Issue)
 register_field('issue_last_attachment', String(is_stored=True))
 register_field('issue_last_author', String(is_stored=True))
-

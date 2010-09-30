@@ -56,7 +56,6 @@ class Tchack_Tracker(Tracker):
         we encode a low version and create a thumbnail.
         """
         import os
-        from pprint import pprint
         from datetime import datetime
         from tempfile import mkdtemp
         from issue import Tchack_Issue
@@ -93,27 +92,22 @@ class Tchack_Tracker(Tracker):
                         # Paste the file in the tempdir
                         tmpfolder = "%s" % (dirname)
                         root_path = file.handler.database.path
-                        #print("root_path = %s" % root_path)
                         tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
                         tmpfile = open("%s" % tmp_uri, "w+")
                         tmpfile.write(file.handler.to_str())
                         tmpfile.close()
                         # Get size
                         dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
-                        #print("dim = %s" % dim)
                         width, height, ratio = dim
                         # Codec 
                         venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
-                        #print("venc = %s" % venc)
-                        # In case of a video in h264 and widder than 640px
+                        # In case of a video in h264 and larger than 319px
                         # We encode it in Flv and make a thumbnail
                         width_low = 640
-                        print("Find a video in %s" % venc)
                         if int(width) > width_low and venc == "h264":
-                            #print("int(width) > 960 and venc == h264")
                             video_low = ("%s_low" % name)
-                            print("The video is in H264 video codec and wider
-                                  than 640px, create a low version")
+                            #print("The video is in H264 video codec and wider
+                            #      than 640px, create a low version")
                             # video is already in temp dir, so encode it
                             encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                                 tmpfolder, name, name, width_low)
@@ -143,7 +137,7 @@ class Tchack_Tracker(Tracker):
 
                             # Clean the temporary folder
                             vfs.remove(dirname)
-                            print("Done: %s 's low version is created" % name)
+                            #print("Done: %s 's low version is created" % name)
                         else:
                             file.metadata.set_property('thumbnail', "False")
 
@@ -153,4 +147,3 @@ class Tchack_Tracker(Tracker):
 ###########################################################################
 
 register_resource_class(Tchack_Tracker)
-

@@ -73,12 +73,12 @@
   <script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.2.2.swf", {
      clip: {
        autoPlay: false,
-       autoBuffering: false,
+       autoBuffering: false
      },
      // canvas background, the video thumbnail.
      canvas: {
        backgroundImage: 'url(${comment/video}_thumb/;download)'
-     },
+     }
   }); 
   </script>
 </stl:block>

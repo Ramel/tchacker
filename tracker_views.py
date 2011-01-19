@@ -88,7 +88,7 @@ class Tchacker_ViewBottom(Tracker_View):
                 img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
                 return XMLParser(img_template % (item.name, attach_name))
             elif isinstance(attach, Video) is True:
-                img_template = '<img src="./%s/thumb_%s/;thumb?width=256&amp;height=256"/>'
+                img_template = '<img src="./%s/%s_low_thumb/;thumb?width=256&amp;height=256"/>'
                 return XMLParser(img_template % (item.name, attach_name))
             else:
                 return None

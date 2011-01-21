@@ -90,9 +90,13 @@ class TchackIssue_Edit(Issue_Edit):
                     name = attachment.name
                     filename, ext, lang = FileName.decode(name)
                     thumb = attachment.metadata.get_property('thumbnail')
+                    video = resource.get_resource("%s" % name)
+                    comment['video'] = ("%s" % filename)
+                    comment['width'] = video.metadata.get_property('width')
+                    comment['height'] = video.metadata.get_property('height')
                     if thumb == "True":
-                        video = resource.get_resource("%s_low" % name)
-                        comment['video'] = ("%s_low" % filename)
+                        video = resource.get_resource("%s" % name)
+                        comment['video'] = ("%s" % filename)
                         comment['width'] = video.metadata.get_property('width')
                         comment['height'] = video.metadata.get_property('height')
                     else:

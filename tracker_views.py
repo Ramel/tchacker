@@ -80,16 +80,23 @@ class Tchacker_ViewBottom(Tracker_View):
         # Last Attachement
         if column == 'issue_last_attachment':
             attach_name = item.issue_last_attachment
+            issue = item.name
             if attach_name is None:
                 return None
-            attach = resource.get_resource('%s/%s' % (item.name, attach_name))
+            attach = resource.get_resource('%s/%s' % (issue, attach_name))
             #print item.name, attach, isinstance(attach, Video)
             if isinstance(attach, Image) is True:
                 img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
-                return XMLParser(img_template % (item.name, attach_name))
+                return XMLParser(img_template % (issue, attach_name))
             elif isinstance(attach, Video) is True:
-                img_template = '<img src="./%s/%s_low_thumb/;thumb?width=256&amp;height=256"/>'
-                return XMLParser(img_template % (item.name, attach_name))
+                print("%s.thumbnail = %s" % (issue, attach.metadata.get_property('thumbnail')))
+                if attach.metadata.get_property('thumbnail') == 'True':
+                    img_template = '<img \
+                        src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
+                else:
+                    img_template = '<img \
+                        src="./%s/thumb_%s/;thumb?width=256&amp;height=256"/>'
+                return XMLParser(img_template % (issue, attach_name))
             else:
                 return None
         # Last Author
@@ -122,7 +129,7 @@ class Tchacker_View(CompositeView):
                      Tchacker_ViewMenu()]
     scripts = ['/ui/tchacker/tracker.js']
     styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
-    
+
     """
     def GET(self, resource, context):
         context.scripts.append('/ui/tchacker/tracker.js')
@@ -134,7 +141,7 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
 
     access = 'is_allowed_to_view'
     title = MSG(u'Zip Last Images')
-        
+
     def GET(self, resource, context):
         items = self.get_items(resource, context)
         issues = self.sort_and_batch(resource, context, items)
@@ -157,13 +164,13 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         now = strftime("%y%d%m%H%M")
         #pprint("%s" % now)
         zipname = "%s_%s_%s.zip" % (resource.name, name, now)
-        
+
         file = open(dirname)
         try:
             data = file.read()
         finally:
             file.close()
-        
+
         vfs.remove(dirname)
 
         # Return the zip

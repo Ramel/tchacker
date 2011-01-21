@@ -71,7 +71,7 @@ class Tchack_Issue(Issue):
             if record.file:
                 values['issue_last_attachment'] = record.file
         return values
-    
+
     def _add_record(self, context, form):
         user = context.user
         root = context.root
@@ -124,8 +124,14 @@ class Tchack_Issue(Issue):
             cls = get_resource_class(mimetype)
             cls.make_resource(cls, self, name, body=body, filename=filename,
                             extension=extension, format=mimetype)
-            # Video
+
             file = self.get_resource(name)
+            # Image
+            # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
+            # used instead of a ;thumb
+            #if isintance(file, Image):
+
+            # Video
             if isinstance(file, Video):
                 # Make Thumbnail for it, and encode it
                 # in a Low version (319px width)
@@ -172,6 +178,8 @@ class Tchack_Issue(Issue):
                         vid = self.get_resource(vidfilename)
                         vid.metadata.set_property('width', str(width_low))
                         vid.metadata.set_property('height', str(height_low))
+                        vid.metadata.set_property('ratio', str(ratio))
+                        vid.metadata.set_property('thumbnail', "True")
                         # Create the thumbnail PNG resources
                         cls = get_resource_class(thumbmimetype)
                         self.make_resource(cls, self, thumbfilename,

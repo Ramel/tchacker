@@ -23,21 +23,21 @@
 # Import from the Standard Library
 from time import strftime
 from tempfile import mkdtemp
-from subprocess import call
+#from subprocess import call
 from zipfile import ZipFile
 
 # Import from itools
 from itools.core import guess_extension
 from itools.gettext import MSG
 from itools.fs import vfs
-from itools.uri import encode_query, get_uri_name
-from itools.fs import FileName
-from itools.web import BaseView, ERROR, STLView
+from itools.uri import encode_query #, get_uri_name
+#from itools.fs import FileName
+from itools.web import STLView
 from itools.xml import XMLParser
-from itools.handlers import File as FileHandler
+#from itools.handlers import File as FileHandler
 
 # Import from ikaaro
-from ikaaro.views import ContextMenu
+#from ikaaro.views import ContextMenu
 from ikaaro.views import CompositeView
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu

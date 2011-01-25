@@ -22,7 +22,6 @@
 
 # Import from itools
 from itools.gettext import MSG
-from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.tracker import Tracker
@@ -60,15 +59,15 @@ class Tchack_Tracker(Tracker):
         and erase the original file.
         """
         import os
-        from datetime import datetime
+        #from datetime import datetime
         from tempfile import mkdtemp
         from issue import Tchack_Issue
         from ikaaro.file import Video
-        from ikaaro.exceptions import ConsistencyError
+        #from ikaaro.exceptions import ConsistencyError
         from itools.fs import vfs
-        from itools.fs import FileName
-        from itools.core import guess_extension
-        from itools.uri import get_uri_path
+        #from itools.fs import FileName
+        #from itools.core import guess_extension
+        #from itools.uri import get_uri_path
         from ikaaro.registry import get_resource_class
         from videoencoding import VideoEncodingToFLV
 
@@ -102,7 +101,7 @@ class Tchack_Tracker(Tracker):
                         tempdir = vfs.open(dirname)
                         # Paste the file in the tempdir
                         tmpfolder = "%s" % (dirname)
-                        root_path = file.handler.database.path
+                        #root_path = file.handler.database.path
                         tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
                         tmpfile = open("%s" % tmp_uri, "w+")
                         tmpfile.write(body)
@@ -111,7 +110,7 @@ class Tchack_Tracker(Tracker):
                         dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
                         width, height, ratio = dim
                         # Codec 
-                        venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+                        #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
                         # In case of a video in h264 and widder than 319px
                         # We encode it in Flv at 640px width  and make a thumbnail
                         width_low = 640
@@ -198,11 +197,11 @@ class Tchack_Tracker(Tracker):
         from tempfile import mkdtemp
         from issue import Tchack_Issue
         from ikaaro.file import Video
-        from ikaaro.exceptions import ConsistencyError
+        #from ikaaro.exceptions import ConsistencyError
         from itools.fs import vfs
         from itools.fs import FileName
-        from itools.core import guess_extension
-        from itools.uri import get_uri_path
+        #from itools.core import guess_extension
+        #from itools.uri import get_uri_path
         from ikaaro.registry import get_resource_class
         from videoencoding import VideoEncodingToFLV
 
@@ -229,7 +228,7 @@ class Tchack_Tracker(Tracker):
                         tempdir = vfs.open(dirname)
                         # Paste the file in the tempdir
                         tmpfolder = "%s" % (dirname)
-                        root_path = file.handler.database.path
+                        #root_path = file.handler.database.path
                         tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
                         tmpfile = open("%s" % tmp_uri, "w+")
                         tmpfile.write(file.handler.to_str())
@@ -243,7 +242,6 @@ class Tchack_Tracker(Tracker):
                         # We encode it in Flv and make a thumbnail
                         width_low = 640
                         if int(width) > width_low and venc == "h264":
-                            video_low = ("%s_low" % name)
                             #print("The video is in H264 video codec and wider
                             #      than 640px, create a low version")
                             # video is already in temp dir, so encode it

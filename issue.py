@@ -37,7 +37,7 @@ from itools.datatypes import Unicode
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import register_field
 from ikaaro.tracker.issue import Issue, History
-from ikaaro.file import Image, Video
+from ikaaro.file import Video #, Image
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
 
@@ -75,8 +75,8 @@ class Tchack_Issue(Issue):
     def _add_record(self, context, form):
         user = context.user
         root = context.root
-        parent = self.parent
-        users = root.get_resource('users')
+        #parent = self.parent
+        #users = root.get_resource('users')
 
         record = {}
         # Datetime
@@ -144,7 +144,7 @@ class Tchack_Issue(Issue):
                 tempdir = vfs.open(dirname)
                 # Paste the file in the tempdir
                 tmpfolder = "%s" % (dirname)
-                root_path = file.handler.database.path
+                #root_path = file.handler.database.path
                 tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
                 tmpfile = open("%s" % tmp_uri, "w+")
                 tmpfile.write(body)
@@ -153,13 +153,13 @@ class Tchack_Issue(Issue):
                 dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
                 width, height, ratio = dim
                 # Codec 
-                venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+                #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
                 width_low = 640
                 # In case of a video in h264 and widder than 319px
                 # We encode it in Flv at 640px width  and make a thumbnail
                 #if int(width) > 319 and venc == "h264":
                 if int(width) > 319:
-                    video_low = ("%s_low" % name)
+                    #video_low = ("%s_low" % name)
                     # video is already in temp dir, so encode it
                     encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                         tmpfolder, name, name, width_low)

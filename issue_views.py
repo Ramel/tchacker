@@ -22,33 +22,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from the Standard Library
-from datetime import date, datetime, time
-from re import compile
-from textwrap import TextWrapper
-from tempfile import mkdtemp
+#from datetime import date, datetime, time
+#from re import compile
+#from textwrap import TextWrapper
+#from tempfile import mkdtemp
 
 # Import from itools
-from itools.datatypes import Boolean, Date, Integer, String, Unicode
-from itools.datatypes import XMLContent
+#from itools.datatypes import Boolean, Date, Integer, String, Unicode
+#from itools.datatypes import XMLContent
 from itools.gettext import MSG
-from itools.ical import Time
-from itools.html import xhtml_uri
-from itools.i18n import format_datetime
-from itools.web import STLForm, STLView
-from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
-from itools.fs import FileName, vfs
-from itools.core import guess_extension, guess_type
-from itools.uri import resolve_uri
+#from itools.ical import Time
+#from itools.html import xhtml_uri
+#from itools.i18n import format_datetime
+#from itools.web import STLForm, STLView
+#from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
+from itools.fs import FileName #, vfs
+#from itools.core import guess_extension, guess_type
+#from itools.uri import resolve_uri
 
 # Import from ikaaro
-from ikaaro.messages import MSG_CHANGES_SAVED
-from ikaaro.table_views import Table_View
-from ikaaro.views import CompositeForm
-from ikaaro.views import ContextMenu
+#from ikaaro.messages import MSG_CHANGES_SAVED
+#from ikaaro.table_views import Table_View
+#from ikaaro.views import CompositeForm
+#from ikaaro.views import ContextMenu
 from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
-from ikaaro.tracker.datatypes import get_issue_fields, UsersList
-from ikaaro.registry import get_resource_class
+from ikaaro.tracker.datatypes import get_issue_fields #, UsersList
+#from ikaaro.registry import get_resource_class
 
 
 class TchackIssue_Edit(Issue_Edit):
@@ -74,9 +74,9 @@ class TchackIssue_Edit(Issue_Edit):
     def get_namespace(self, resource, context):
         namespace = Issue_Edit.get_namespace(self, resource, context)
         # Local variables
-        users = resource.get_resource('/users')
+        #users = resource.get_resource('/users')
         history = resource.get_history()
-        record = history.get_record(-1)
+        #record = history.get_record(-1)
         # Build the namespace
         for comment in namespace['comments']:
             if comment['file']:

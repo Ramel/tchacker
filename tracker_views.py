@@ -86,7 +86,7 @@ class Tchacker_ViewBottom(Tracker_View):
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
             #print item.name, attach, isinstance(attach, Video)
             if isinstance(attach, Image) is True:
-                img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
+                img_template = '<img src="./%s/%s_LOW/;download"/>'
                 return XMLParser(img_template % (issue, attach_name))
             elif isinstance(attach, Video) is True:
                 #print("%s.thumbnail = %s" % (issue, attach.metadata.get_property('thumbnail')))

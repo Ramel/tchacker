@@ -26,6 +26,7 @@ from itools.gettext import MSG
 # Import from ikaaro
 from ikaaro.tracker import Tracker
 from ikaaro.registry import register_resource_class
+from ikaaro.registry import get_resource_class
 
 #from resources import Tchack_Resources
 from issue import Tchack_Issue
@@ -36,7 +37,8 @@ class Tchack_Tracker(Tracker):
 
     class_id = 'tchack_tracker'
     #class_version = '20100718'
-    class_version = '20110121'
+    #class_version = '20110121'
+    class_version = '20110125'
     class_title = MSG(u'Tchack Issue Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_views = Tracker.class_views + ['zip']
@@ -52,6 +54,79 @@ class Tchack_Tracker(Tracker):
     # Update
     #######################################################################
 
+    def update_20110125(self):
+        """Create thumbnails for all images present in the Tchacker"
+        """
+        import glob, os
+        from tempfile import mkdtemp
+        from PIL import Image as PILImage
+        from itools.fs import vfs
+        from ikaaro.file import Image
+        from issue import Tchack_Issue
+
+
+        for issue in self.search_resources(cls=Tchack_Issue):
+
+            history = issue.get_history()
+
+            for record in history.get_records():
+
+                filename = record.file
+                comment = record.comment
+                is_image = False
+                if not comment and not filename:
+                    continue
+                if filename:
+                    file = issue.get_resource(filename)
+                    is_image = isinstance(file, Image)
+                    if not is_image:
+                        continue
+                    if is_image:
+                        print("Issue.%s.id.%s contain an image that need a Thumbnail"
+                            % (issue.name, record.id))
+                        name = file.name
+                        mimetype = file.handler.get_mimetype()
+                        body = file.handler.to_str()
+
+                        dirname = mkdtemp('makethumbs', 'ikaaro')
+                        tempdir = vfs.open(dirname)
+                        #print("dirname = %s" % dirname)
+                        # Paste the file in the tempdir
+                        tmpfolder = "%s" % (dirname)
+                        tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+                        tmpfile = open("%s" % tmp_uri, "w+")
+                        tmpfile.write(body)
+                        tmpfile.close()
+        
+                        low = 256, 256
+                        med = 800, 800
+                        hig = 1024, 1024
+
+                        # Create the thumbnail PNG resources
+                        cls = get_resource_class('image/png')
+                        thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
+                        for te in thumbext:
+                            im = PILImage.open(tmp_uri)
+                            im.thumbnail(te[1], PILImage.ANTIALIAS)
+                            uri = tmpfolder + os.sep 
+                            ima = name + te[0] 
+                            ext = "png"
+                            im.save(uri + ima + ext, "PNG")
+                            # Copy the thumb content
+                            thumb_file = tempdir.open(ima + ext)
+                            try:
+                                thumb_data = thumb_file.read()
+                            finally:
+                                thumb_file.close()
+                            self.make_resource(cls, issue, ima,
+                                body=thumb_data, filename=ima,
+                                extension=ext, format='image/png')
+                        
+                        file.metadata.set_property('thumbnail', "True")
+                        # Clean the temporary folder
+                        vfs.remove(dirname)
+
+
     def update_20110121(self):
         """If an issue contains a video file,
         encoded in h264 and widder than 319px,
@@ -59,15 +134,10 @@ class Tchack_Tracker(Tracker):
         and erase the original file.
         """
         import os
-        #from datetime import datetime
         from tempfile import mkdtemp
         from issue import Tchack_Issue
         from ikaaro.file import Video
-        #from ikaaro.exceptions import ConsistencyError
         from itools.fs import vfs
-        #from itools.fs import FileName
-        #from itools.core import guess_extension
-        #from itools.uri import get_uri_path
         from ikaaro.registry import get_resource_class
         from videoencoding import VideoEncodingToFLV
 

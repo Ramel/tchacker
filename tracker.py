@@ -129,8 +129,10 @@ class Tchack_Tracker(Tracker):
                             file.metadata.set_property('thumbnail', "True")
                             """
                             if encoded is not None:
-                                vidfilename, vidmimetype, vidbody, vidextension = encoded['flvfile']
-                                thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
+                                vidfilename, vidmimetype, \
+                                    vidbody, vidextension = encoded['flvfile']
+                                thumbfilename, thumbmimetype, \
+                                    thumbbody, thumbextension = encoded['flvthumb']
                                 # Create the video resources
                                 cls = get_resource_class(vidmimetype)
                                 self.make_resource(cls, issue, vidfilename,
@@ -252,10 +254,10 @@ class Tchack_Tracker(Tracker):
                             file.metadata.set_property('ratio', str(ratio))
                             file.metadata.set_property('thumbnail', "True")
                             if encoded is not None:
-                                vidfilename, vidmimetype, vidbody, vidextension = 
-                                                                encoded['flvfile']
-                                thumbfilename,thumbmimetype,thumbbody,thumbextension = 
-                                                                encoded['flvthumb']
+                                vidfilename, vidmimetype, \
+                                    vidbody, vidextension = encoded['flvfile']
+                                thumbfilename, thumbmimetype, \
+                                    thumbbody,thumbextension = encoded['flvthumb']
                                 # Create the video resources
                                 cls = get_resource_class(vidmimetype)
                                 issue.make_resource(cls, issue, vidfilename,

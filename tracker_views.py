@@ -89,10 +89,11 @@ class Tchacker_ViewBottom(Tracker_View):
                 img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
                 return XMLParser(img_template % (issue, attach_name))
             elif isinstance(attach, Video) is True:
-                print("%s.thumbnail = %s" % (issue, attach.metadata.get_property('thumbnail')))
+                #print("%s.thumbnail = %s" % (issue, attach.metadata.get_property('thumbnail')))
                 if attach.metadata.get_property('thumbnail') == 'True':
                     img_template = '<img \
                         src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
+                #TODO: Don't think it can append, as we encode every video input file
                 else:
                     img_template = '<img \
                         src="./%s/thumb_%s/;thumb?width=256&amp;height=256"/>'

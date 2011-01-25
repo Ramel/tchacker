@@ -154,21 +154,26 @@ class Tchack_Issue(Issue):
                 width, height, ratio = dim
                 # Codec 
                 venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+                width_low = 640
                 # In case of a video in h264 and widder than 319px
                 # We encode it in Flv at 640px width  and make a thumbnail
-                width_low = 640
-                if int(width) > 319 and venc == "h264":
+                #if int(width) > 319 and venc == "h264":
+                if int(width) > 319:
                     video_low = ("%s_low" % name)
                     # video is already in temp dir, so encode it
                     encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                         tmpfolder, name, name, width_low)
+                    """
                     file.metadata.set_property('width', width)
                     file.metadata.set_property('height', height)
                     file.metadata.set_property('ratio', str(ratio))
                     file.metadata.set_property('thumbnail', "True")
+                    """
                     if encoded is not None:
-                        vidfilename, vidmimetype, vidbody, vidextension = encoded['flvfile']
-                        thumbfilename, thumbmimetype, thumbbody, thumbextension = encoded['flvthumb']
+                        vidfilename, vidmimetype, \
+                                vidbody, vidextension = encoded['flvfile']
+                        thumbfilename, thumbmimetype, \
+                                thumbbody, thumbextension = encoded['flvthumb']
                         # Create the video resources
                         cls = get_resource_class(vidmimetype)
                         self.make_resource(cls, self, vidfilename,
@@ -185,10 +190,26 @@ class Tchack_Issue(Issue):
                         self.make_resource(cls, self, thumbfilename,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
-                    # Clean the temporary folder
-                    vfs.remove(dirname)
+                """
+                # Create a thumbnail for a big file, instead of encoding it
                 else:
+                    mkthumb = VideoEncodingToFLV(file).make_thumbnail(
+                        tmpfolder, name, width_low)
+                    if mkthumb is not None:
+                        thumbfilename, thumbmimetype, \
+                                thumbbody, thumbextension = mkthumb
+                        # Create the thumbnail PNG resources
+                        cls = get_resource_class(thumbmimetype)
+                        self.make_resource(cls, self, thumbfilename,
+                            body=thumbbody, filename=thumbfilename,
+                            extension=thumbextension, format=thumbmimetype)
+                    file.metadata.set_property('width', width)
+                    file.metadata.set_property('height', height)
+                    file.metadata.set_property('ratio', str(ratio))
                     file.metadata.set_property('thumbnail', "False")
+                """
+                # Clean the temporary folder
+                vfs.remove(dirname)
 
             # Link
             record['file'] = name

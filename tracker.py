@@ -22,16 +22,49 @@
 
 # Import from itools
 from itools.gettext import MSG
+from itools.web import get_context
+from itools.csv import Property
+from itools.csv import Table
 
 # Import from ikaaro
 from ikaaro.tracker import Tracker
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import get_resource_class
+from ikaaro.exceptions import ConsistencyError
 
 #from resources import Tchack_Resources
 from issue import Tchack_Issue
 from tracker_views import Tchacker_View, Tracker_Zip_Img
 
+"""
+class Table(Table):
+
+    def update_record(self, id, **kw):
+
+        record = self.records[id]
+        if record is None:
+            msg = 'cannot modify record "%s" because it has been deleted'
+            raise LookupError, msg % id
+        # Check for duplicate
+        for name in kw:
+            datatype = self.get_record_datatype(name)
+            if getattr(datatype, 'unique', False) is True:
+                search = self.search(PhraseQuery(name, kw[name]))
+                if search and (search[0] != self.records[id]):
+                    raise UniqueError(name, kw[name])
+        # Version of record
+        #version = record[0]
+        #self.properties_to_dict(kw, version)
+        #version['ts'] = Property(datetime.now())
+        # Change
+        self.set_changed()
+        self.catalog.unindex_document(record.id)
+        print("self.added_records = %s" %
+            self.added_records)
+        self.added_records.append(id)
+        # Index
+        self.catalog.index_document(record)
+"""
 
 class Tchack_Tracker(Tracker):
 
@@ -97,7 +130,7 @@ class Tchack_Tracker(Tracker):
                         tmpfile = open("%s" % tmp_uri, "w+")
                         tmpfile.write(body)
                         tmpfile.close()
-        
+
                         low = 256, 256
                         med = 800, 800
                         hig = 1024, 1024
@@ -121,7 +154,7 @@ class Tchack_Tracker(Tracker):
                             self.make_resource(cls, issue, ima,
                                 body=thumb_data, filename=ima,
                                 extension=ext, format='image/png')
-                        
+
                         file.metadata.set_property('thumbnail', "True")
                         # Clean the temporary folder
                         vfs.remove(dirname)
@@ -187,16 +220,15 @@ class Tchack_Tracker(Tracker):
                         print("Video without Thumbnail, encode it")
                         video_low = ("%s_low" % name)
                         height_low = int(round(float(width_low) / ratio))
-                        if thumb == "False":
+                        #if thumb == "False":
+                        if (thumb == "False" and not issue.get_resource(
+                                                        "%s_low" % name, soft=True)):
+                            print("Need to rename the Thumb_ file, as the file \
+                                is already encoded")
+                        elif (thumb == "False"):              
                             # video is already in temp dir, so encode it
                             encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                                 tmpfolder, name, name, width_low)
-                            """
-                            file.metadata.set_property('width', width)
-                            file.metadata.set_property('height', height)
-                            file.metadata.set_property('ratio', str(ratio))
-                            file.metadata.set_property('thumbnail', "True")
-                            """
                             if encoded is not None:
                                 vidfilename, vidmimetype, \
                                     vidbody, vidextension = encoded['flvfile']
@@ -219,10 +251,37 @@ class Tchack_Tracker(Tracker):
                                     extension=thumbextension, format=thumbmimetype)
                             #print("Old: %s, New: %s" % (name, video_low))
                             #print("issue.get_links() = %s" % issue.get_links())
-                            #issue.update_links(record.file, video_low)
+                            #history.update_links(name, video_low)
+                            #ts = history.get_record_value(id, 'timestamp')
+                            #print("ts = %s" % ts)
+                            #rc = history.records[record.id]
+                            #record['file'] = Property(video_low)
+                            """
+                            record.file = video_low
+                            #record['file'] = Property(video_low)
+                            history.set_changed()
+                            history.catalog.index_document(record)
+                            """
+                            """
+                            print(record.get_catalog_values())
+                            copy = record.get_catalog_values()
+                            print("ANTE.file = %s" % copy['file'])
+                            copy['file'] = video_low
+                            print("POST.file = %s" % copy['file'])
+                            history.del_record(record)
+                            history.add_record(copy)
+                            """
+                            #record.update_properties(**{'file': video_low})
                             history.update_record(record.id, **{'file': video_low})
+                            print("History changed")
+                            history.catalog.unindex_document(name)
+                            #history.set_record(record.id, **{'file': video_low})
                             #database = get_context().database
-                            issue.del_resource(name)
+                            #database.change_resource(issue)
+                            #database.remove_resource(name)
+
+                            #issue.del_resource(name)
+
                             try:
                                 issue.del_resource("thumb_%s" % name)
                             except LookupError:
@@ -237,13 +296,39 @@ class Tchack_Tracker(Tracker):
                             vid.metadata.set_property('ratio', str(ratio))
                             vid.metadata.set_property('thumbnail', "True")
                             #issue.update_links(name, "%s_low" % name)
+                            #history.update_links(name, video_low)
+                            #
+                            """
+                            print("record.id = %s" % record.id)
+                            #rc = history.records[record.id]
+                            print("ANTErecord.file = %s" % record.file)
+                            record.file = video_low
+                            print("POSTrecord.file = %s" % record.file)
+                            #record['file'] = Property(video_low)
+                            history.set_changed()
+                            history.catalog.index_document(record)
+                            """
+                            """
+                            print(record.get_catalog_values())
+                            copy = record.get_catalog_values()
+                            print("ANTE.file = %s" % copy['file'])
+                            copy['file'] = video_low
+                            print("POST.file = %s" % copy['file'])
+                            history.del_record(record)
+                            history.add_record(copy)
+                            """
+                            #record.update_properties(**{'file': video_low})
                             history.update_record(
-                                record.id, **{'file': "%s_low" % name})
+                               record.id, **{'file': "%s_low" % name})
+                            history.catalog.unindex_document(name)
+                            #
                             #get_context().database.change_resource(issue)
                             try:
                                 issue.del_resource(name)
                             except LookupError:
                                 pass
+                            #except ConsistencyError:
+                            #    issue.del_resource(name)
                         else :
                             try:
                                 issue.del_resource("thumb_%s" % name)
@@ -355,3 +440,4 @@ class Tchack_Tracker(Tracker):
 ###########################################################################
 
 register_resource_class(Tchack_Tracker)
+#register_resource_class(Table)

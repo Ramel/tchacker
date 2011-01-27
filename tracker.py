@@ -20,11 +20,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from os.path import basename
+
 # Import from itools
 from itools.gettext import MSG
 from itools.web import get_context
 from itools.csv import Property
 from itools.csv import Table
+from itools.fs import FileName
 
 # Import from ikaaro
 from ikaaro.tracker import Tracker
@@ -36,35 +39,7 @@ from ikaaro.exceptions import ConsistencyError
 from issue import Tchack_Issue
 from tracker_views import Tchacker_View, Tracker_Zip_Img
 
-"""
-class Table(Table):
 
-    def update_record(self, id, **kw):
-
-        record = self.records[id]
-        if record is None:
-            msg = 'cannot modify record "%s" because it has been deleted'
-            raise LookupError, msg % id
-        # Check for duplicate
-        for name in kw:
-            datatype = self.get_record_datatype(name)
-            if getattr(datatype, 'unique', False) is True:
-                search = self.search(PhraseQuery(name, kw[name]))
-                if search and (search[0] != self.records[id]):
-                    raise UniqueError(name, kw[name])
-        # Version of record
-        #version = record[0]
-        #self.properties_to_dict(kw, version)
-        #version['ts'] = Property(datetime.now())
-        # Change
-        self.set_changed()
-        self.catalog.unindex_document(record.id)
-        print("self.added_records = %s" %
-            self.added_records)
-        self.added_records.append(id)
-        # Index
-        self.catalog.index_document(record)
-"""
 
 class Tchack_Tracker(Tracker):
 
@@ -96,8 +71,9 @@ class Tchack_Tracker(Tracker):
         from itools.fs import vfs
         from ikaaro.file import Image
         from issue import Tchack_Issue
-
-
+        
+        i = 0
+        
         for issue in self.search_resources(cls=Tchack_Issue):
 
             history = issue.get_history()
@@ -115,8 +91,10 @@ class Tchack_Tracker(Tracker):
                     if not is_image:
                         continue
                     if is_image:
-                        print("Issue.%s.id.%s contain an image that need a Thumbnail"
-                            % (issue.name, record.id))
+                        if file.metadata.format == "image/x-photoshop":
+                            break
+                        print("%s.Tracker.%s.Issue.%s.id.%s contain an image that need a Thumbnail"
+                            % (i, issue.parent.parent.name, issue.name, record.id))
                         name = file.name
                         mimetype = file.handler.get_mimetype()
                         body = file.handler.to_str()
@@ -138,12 +116,12 @@ class Tchack_Tracker(Tracker):
                         # Create the thumbnail PNG resources
                         cls = get_resource_class('image/png')
                         thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
+                        uri = tmpfolder + os.sep 
+                        ext = "png"
+                        im = PILImage.open(tmp_uri)
                         for te in thumbext:
-                            im = PILImage.open(tmp_uri)
                             im.thumbnail(te[1], PILImage.ANTIALIAS)
-                            uri = tmpfolder + os.sep 
                             ima = name + te[0] 
-                            ext = "png"
                             im.save(uri + ima + ext, "PNG")
                             # Copy the thumb content
                             thumb_file = tempdir.open(ima + ext)
@@ -158,6 +136,13 @@ class Tchack_Tracker(Tracker):
                         file.metadata.set_property('thumbnail', "True")
                         # Clean the temporary folder
                         vfs.remove(dirname)
+                        i+= 1
+            """
+            if i > 10:
+                    break
+            if i > 10:
+                break
+            """
 
 
     def update_20110121(self):
@@ -196,10 +181,12 @@ class Tchack_Tracker(Tracker):
                         body = file.handler.to_str()
 
                         thumb = file.metadata.get_property('thumbnail')
-                        print("issue = %s, name = %s, thumbnail = %s" %
-                            (issue.name, name, thumb))
-                        print("issue = %s, name = %s, mimetype = %s" %
-                            (issue.name, name, mimetype))
+                        as_low = issue.get_resource("%s_low" % name, soft=True)
+                        as_thumb = issue.get_resource("thumb_%s" % name, soft=True)
+
+                        print("project = %s, issue = %s, name = %s, thumbnail = %s" %
+                            (issue.parent.parent.name, issue.name, name, thumb))
+                        print("mimetype = %s" % (mimetype))
                         dirname = mkdtemp('videoencoding', 'ikaaro')
                         tempdir = vfs.open(dirname)
                         # Paste the file in the tempdir
@@ -217,15 +204,94 @@ class Tchack_Tracker(Tracker):
                         # In case of a video in h264 and widder than 319px
                         # We encode it in Flv at 640px width  and make a thumbnail
                         width_low = 640
-                        print("Video without Thumbnail, encode it")
+                        #print("Video without Thumbnail, encode it")
                         video_low = ("%s_low" % name)
                         height_low = int(round(float(width_low) / ratio))
                         #if thumb == "False":
-                        if (thumb == "False" and not issue.get_resource(
-                                                        "%s_low" % name, soft=True)):
-                            print("Need to rename the Thumb_ file, as the file \
-                                is already encoded")
-                        elif (thumb == "False"):              
+                        if (thumb == "False" and not as_low and not as_thumb):
+                            """The video as no Thumb value, and is not
+                            encoded in Flv.
+                            """
+                            print("111 - No Thumb_ file, need to encode it, an add the Thumb values")
+                        elif (thumb == "False" and not as_low and as_thumb):
+                            """The video as old Thumb file, and is
+                            encoded in Flv.
+                            """
+                            print("222 - File not encoded, but already have a thumb. Encode, create _low_thumb. Modify Thumb to True, AND modify issue value to %s_low (hard part?)")
+                            #print("file_views/action()")
+                            encoded = VideoEncodingToFLV(file).encode_video_to_flv(
+                                tmpfolder, name, name, width_low)
+                            if encoded is not None:
+                                vidfilename, vidmimetype, \
+                                    vidbody, vidextension = encoded['flvfile']
+                                thumbfilename, thumbmimetype, \
+                                    thumbbody, thumbextension = encoded['flvthumb']
+
+                                handler = file.handler
+                                print("vidfilename = %s" % vidfilename)
+                                print("filename = %s" % filename)
+                                # Replace
+                                try:
+                                    handler.load_state_from_string(vidbody)
+                                except Exception, e:
+                                    handler.load_state()
+                                    print("Failed to load the file: %s" % str(e))
+                                # Update "filename" property
+                                file.set_property("filename", filename + "." + vidextension)
+                                # Update metadata format
+                                metadata = file.metadata
+                                print("metadata.format = %s" % metadata.format)
+                                if '/' in metadata.format:
+                                    if vidmimetype != metadata.format:
+                                        metadata.format = vidmimetype
+
+                                # Update handler name
+                                handler_name = basename(handler.key)
+                                print("handler_name = %s" % handler_name)
+                                old_name, old_extension, old_lang = FileName.decode(handler_name)
+                                new_name , new_extension, new_lang = FileName.decode(filename)
+                                # FIXME Should 'FileName.decode' return lowercase extensions?
+                                new_extension = vidextension.lower()
+                                print("""old_name = %s, old_extension = %s, old_lang = %s,
+                                            new_extension = %s""" % (old_name, old_extension,
+                                             old_lang, new_extension))
+                                if old_extension != new_extension:
+                                    # "handler.png" -> "handler.jpg"
+                                    folder = file.parent.handler
+                                    filename = FileName.encode((old_name, new_extension, old_lang))
+                                    #folder.move_handler(handler_name,
+                                    #        vidfilename +"."+ vidextension)
+                                    folder.move_handler(handler_name, filename)
+                                """
+                                # Create the video resources
+                                cls = get_resource_class(vidmimetype)
+                                self.make_resource(cls, issue, vidfilename,
+                                    body=vidbody, filename=vidfilename,
+                                    extension=vidextension, format=vidmimetype)
+                                vid = issue.get_resource(vidfilename)
+                                vid.metadata.set_property('width', str(width_low))
+                                vid.metadata.set_property('height', str(height_low))
+                                vid.metadata.set_property('ratio', str(ratio))
+                                vid.metadata.set_property('thumbnail', "True")
+                                """
+                                # Create the thumbnail PNG resources
+                                cls = get_resource_class(thumbmimetype)
+                                self.make_resource(cls, issue, thumbfilename,
+                                    body=thumbbody, filename=thumbfilename,
+                                    extension=thumbextension, format=thumbmimetype) 
+                                # We keep the 'thumbnail' to False
+                                # to make difference between old & new video files
+                                file.set_property("thumbnail", "False")
+                            """
+                            Move the metadata value for filename and mimetype
+                            file.metadata(filename=file.mov) -> filename=file_low.flv
+                            """
+                        elif (thumb == "False" and as_low):
+                            """The video as thumb value to False, but already
+                            encoded in LOW. Erase the original file.
+                            """
+                            print("333 - Need to change the Thumb value to True, and erase the Big original file, and modify issue value to %s_low")
+                            """
                             # video is already in temp dir, so encode it
                             encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                                 tmpfolder, name, name, width_low)
@@ -249,47 +315,18 @@ class Tchack_Tracker(Tracker):
                                 self.make_resource(cls, issue, thumbfilename,
                                     body=thumbbody, filename=thumbfilename,
                                     extension=thumbextension, format=thumbmimetype)
-                            #print("Old: %s, New: %s" % (name, video_low))
-                            #print("issue.get_links() = %s" % issue.get_links())
-                            #history.update_links(name, video_low)
-                            #ts = history.get_record_value(id, 'timestamp')
-                            #print("ts = %s" % ts)
-                            #rc = history.records[record.id]
-                            #record['file'] = Property(video_low)
-                            """
-                            record.file = video_low
-                            #record['file'] = Property(video_low)
-                            history.set_changed()
-                            history.catalog.index_document(record)
-                            """
-                            """
-                            print(record.get_catalog_values())
-                            copy = record.get_catalog_values()
-                            print("ANTE.file = %s" % copy['file'])
-                            copy['file'] = video_low
-                            print("POST.file = %s" % copy['file'])
-                            history.del_record(record)
-                            history.add_record(copy)
-                            """
-                            #record.update_properties(**{'file': video_low})
-                            history.update_record(record.id, **{'file': video_low})
-                            print("History changed")
-                            history.catalog.unindex_document(name)
-                            #history.set_record(record.id, **{'file': video_low})
-                            #database = get_context().database
-                            #database.change_resource(issue)
-                            #database.remove_resource(name)
-
-                            #issue.del_resource(name)
 
                             try:
                                 issue.del_resource("thumb_%s" % name)
                             except LookupError:
                                 pass
-                        elif (thumb == "True" and issue.get_resource(
-                                                        "%s_low" % name, soft=True)):
-                            # The thumbnail value was not attributed to the
-                            # "low" resource in first version, add it now.
+                            """
+                        elif (thumb == "True" and not as_low):
+                            """The thumbnail value was not attributed to the
+                            "low" resource in first version, add it now.
+                            """
+                            print("444 - In case of the thumb is not created while the Thumb value is True, _low = %s, _thumb = %s." % (as_low, as_thumb))
+                            """
                             vid = issue.get_resource(video_low, soft=True)
                             vid.metadata.set_property('width', str(width_low))
                             vid.metadata.set_property('height', str(height_low))
@@ -298,25 +335,6 @@ class Tchack_Tracker(Tracker):
                             #issue.update_links(name, "%s_low" % name)
                             #history.update_links(name, video_low)
                             #
-                            """
-                            print("record.id = %s" % record.id)
-                            #rc = history.records[record.id]
-                            print("ANTErecord.file = %s" % record.file)
-                            record.file = video_low
-                            print("POSTrecord.file = %s" % record.file)
-                            #record['file'] = Property(video_low)
-                            history.set_changed()
-                            history.catalog.index_document(record)
-                            """
-                            """
-                            print(record.get_catalog_values())
-                            copy = record.get_catalog_values()
-                            print("ANTE.file = %s" % copy['file'])
-                            copy['file'] = video_low
-                            print("POST.file = %s" % copy['file'])
-                            history.del_record(record)
-                            history.add_record(copy)
-                            """
                             #record.update_properties(**{'file': video_low})
                             history.update_record(
                                record.id, **{'file': "%s_low" % name})
@@ -329,6 +347,8 @@ class Tchack_Tracker(Tracker):
                                 pass
                             #except ConsistencyError:
                             #    issue.del_resource(name)
+                            """
+                        """
                         else :
                             try:
                                 issue.del_resource("thumb_%s" % name)
@@ -337,6 +357,7 @@ class Tchack_Tracker(Tracker):
                             #issue.del_resource("thumb_%s" % name)
                             #file.metadata.set_property('thumbnail', 'True')
                             #database.remove_resource(name)
+                        """
 
                         # Clean the temporary folder
                         vfs.remove(dirname)

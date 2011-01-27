@@ -77,7 +77,7 @@
      },
      // canvas background, the video thumbnail.
      canvas: {
-       backgroundImage: 'url(${comment/video}_thumb/;download)'
+       backgroundImage: 'url(${comment/video}${comment/old}_thumb/;download)'
      }
   }); 
   </script>

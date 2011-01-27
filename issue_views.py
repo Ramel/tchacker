@@ -73,10 +73,7 @@ class TchackIssue_Edit(Issue_Edit):
 
     def get_namespace(self, resource, context):
         namespace = Issue_Edit.get_namespace(self, resource, context)
-        # Local variables
-        #users = resource.get_resource('/users')
         history = resource.get_history()
-        #record = history.get_record(-1)
         # Build the namespace
         for comment in namespace['comments']:
             if comment['file']:
@@ -85,7 +82,6 @@ class TchackIssue_Edit(Issue_Edit):
                 comment['is_video'] = isinstance(attachment, Video)
                 comment['width'] = 200
                 comment['height'] = 200
-
                 if comment['is_video']:
                     name = attachment.name
                     filename, ext, lang = FileName.decode(name)
@@ -95,16 +91,15 @@ class TchackIssue_Edit(Issue_Edit):
                     comment['width'] = video.metadata.get_property('width')
                     comment['height'] = video.metadata.get_property('height')
                     if thumb == "True":
-                        video = resource.get_resource("%s" % name)
-                        comment['video'] = ("%s" % filename)
-                        comment['width'] = video.metadata.get_property('width')
-                        comment['height'] = video.metadata.get_property('height')
+                        comment['old'] = False
+                    if thumb == "False":
+                        comment['old'] = "_low"
                     else:
-                        comment['video'] = ("%s" % filename)
                         comment['width'] = False
                         comment['height'] = False
                         comment['is_image'] = False
                         comment['is_video'] = False
+                        comment['old'] = False
             else:
                 comment['file'] = False
                 comment['is_image'] = False

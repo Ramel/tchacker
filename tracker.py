@@ -123,7 +123,9 @@ class Tchack_Tracker(Tracker):
                         tmpfile = open("%s" % tmp_uri, "w+")
                         tmpfile.write(body)
                         tmpfile.close()
-
+                        
+                        #TODO: Check that is used, all the thumbs seems to have
+                        # the same width
                         low = 256, 256
                         med = 800, 800
                         hig = 1024, 1024
@@ -133,7 +135,10 @@ class Tchack_Tracker(Tracker):
                         thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
                         uri = tmpfolder + os.sep 
                         ext = "png"
-                        im = PILImage.open(tmp_uri)
+                        try:
+                            im = PILImage.open(tmp_uri)
+                        except IOError:
+                            print("IOError = %s" % fileabspath)
                         for te in thumbext:
                             im.thumbnail(te[1], PILImage.ANTIALIAS)
                             ima = name + te[0] 

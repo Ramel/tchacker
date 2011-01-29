@@ -28,12 +28,15 @@ from itools.web import get_context
 from itools.csv import Property
 from itools.csv import Table
 from itools.fs import FileName
+from itools.core import get_abspath
 
 # Import from ikaaro
 from ikaaro.tracker import Tracker
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import get_resource_class
 from ikaaro.exceptions import ConsistencyError
+from ikaaro.file import File
+from ikaaro.resource_ import DBResource
 
 #from resources import Tchack_Resources
 from issue import Tchack_Issue
@@ -95,10 +98,22 @@ class Tchack_Tracker(Tracker):
                             break
                         print("%s.Tracker.%s.Issue.%s.id.%s contain an image that need a Thumbnail"
                             % (i, issue.parent.parent.name, issue.name, record.id))
+                        
                         name = file.name
                         mimetype = file.handler.get_mimetype()
-                        body = file.handler.to_str()
-
+                        # Handler is cached, and cache grow so much that it kill
+                        # the process, so need to use a simple file open().
+                        #body = file.handler.to_str()
+                        #path = get_abspath(issue)
+                        handler = file.handler
+                        filename, extension, language = FileName.decode(basename(handler.key))
+                        
+                        fs = self.metadata.database.fs
+                        print("Image that need Thumbnail = %s" % fs.get_absolute_path(file.handler.key))
+                        fileabspath = fs.get_absolute_path(file.handler.key)
+                        with open("%s" % fileabspath, "r") as f:
+                            body = f.read()
+                        
                         dirname = mkdtemp('makethumbs', 'ikaaro')
                         tempdir = vfs.open(dirname)
                         #print("dirname = %s" % dirname)
@@ -112,7 +127,7 @@ class Tchack_Tracker(Tracker):
                         low = 256, 256
                         med = 800, 800
                         hig = 1024, 1024
-
+                        
                         # Create the thumbnail PNG resources
                         cls = get_resource_class('image/png')
                         thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
@@ -122,27 +137,24 @@ class Tchack_Tracker(Tracker):
                         for te in thumbext:
                             im.thumbnail(te[1], PILImage.ANTIALIAS)
                             ima = name + te[0] 
-                            im.save(uri + ima + ext, "PNG")
+                            im.save(uri + ima + "." + ext, "PNG")
                             # Copy the thumb content
-                            thumb_file = tempdir.open(ima + ext)
+                            thumb_file = tempdir.open(ima + "." + ext)
                             try:
                                 thumb_data = thumb_file.read()
                             finally:
                                 thumb_file.close()
-                            self.make_resource(cls, issue, ima,
+                            self.make_resource(cls, issue, ima,               
                                 body=thumb_data, filename=ima,
                                 extension=ext, format='image/png')
-
+                        
                         file.metadata.set_property('thumbnail', "True")
+                        #del file._handler
+                        """
                         # Clean the temporary folder
                         vfs.remove(dirname)
-                        i+= 1
-            """
-            if i > 10:
-                    break
-            if i > 10:
-                break
-            """
+                        """
+                    i+= 1
 
 
     def update_20110121(self):

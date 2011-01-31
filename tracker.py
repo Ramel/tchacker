@@ -134,15 +134,17 @@ class Tchack_Tracker(Tracker):
                         cls = get_resource_class('image/png')
                         thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
                         uri = tmpfolder + os.sep 
-                        ext = "png"
-                        try:
-                            im = PILImage.open(tmp_uri)
-                        except IOError:
-                            print("IOError = %s" % fileabspath)
+                        ext = "jpeg"
                         for te in thumbext:
+                            try:
+                                im = PILImage.open(tmp_uri)
+                            except IOError:
+                                print("IOError = %s" % fileabspath)
                             im.thumbnail(te[1], PILImage.ANTIALIAS)
                             ima = name + te[0] 
-                            im.save(uri + ima + "." + ext, "PNG")
+                            if im.mode != "RGB":
+                                im = im.convert("RGB")
+                            im.save(uri + ima + "." + ext, ext, quality=75)
                             # Copy the thumb content
                             thumb_file = tempdir.open(ima + "." + ext)
                             try:
@@ -151,14 +153,12 @@ class Tchack_Tracker(Tracker):
                                 thumb_file.close()
                             self.make_resource(cls, issue, ima,               
                                 body=thumb_data, filename=ima,
-                                extension=ext, format='image/png')
-                        
+                                extension=ext, format='image/%s' % ext)
+                            print("Image %s, Taille %s" % (ima, te[1])) 
                         file.metadata.set_property('thumbnail', "True")
                         #del file._handler
-                        """
                         # Clean the temporary folder
                         vfs.remove(dirname)
-                        """
                     i+= 1
 
 

@@ -21,6 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from os.path import basename
+
 # Import from the Standard Library
 from datetime import datetime
 from tempfile import mkdtemp
@@ -37,7 +39,7 @@ from itools.datatypes import Unicode
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import register_field
 from ikaaro.tracker.issue import Issue, History
-from ikaaro.file import Video #, Image
+from ikaaro.file import Video, Image
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
 
@@ -46,6 +48,9 @@ from issue_views import TchackIssue_Edit
 
 # Import from videoencoding
 from videoencoding import VideoEncodingToFLV
+
+from PIL import Image as PILImage
+
 
 
 class Tchack_Issue(Issue):
@@ -126,10 +131,59 @@ class Tchack_Issue(Issue):
                             extension=extension, format=mimetype)
 
             file = self.get_resource(name)
+            
             # Image
-            # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
-            # used instead of a ;thumb
-            #if isintance(file, Image):
+            if isinstance(file, Image):
+                # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
+                # used instead of a ;thumb
+                if extension == "psd":
+                    pass
+                else:
+                    name = file.name
+                    mimetype = file.handler.get_mimetype()
+                    body = file.handler.to_str()
+                    
+                    dirname = mkdtemp('makethumbs', 'ikaaro')
+                    tempdir = vfs.open(dirname)
+                    # Paste the file in the tempdir
+                    tmpfolder = "%s" % (dirname)
+                    tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+                    tmpfile = open("%s" % tmp_uri, "w+")
+                    tmpfile.write(body)
+                    tmpfile.close()
+
+                    low = 256, 256
+                    med = 800, 800
+                    hig = 1024, 1024
+
+                    # Create the thumbnail PNG resources
+                    cls = get_resource_class('image/jpeg')
+                    thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
+                    uri = tmpfolder + os.sep 
+                    ext = "jpeg"
+                    for te in thumbext:
+                        try:
+                            im = PILImage.open(tmp_uri)
+                        except IOError:
+                            print("IOError = %s" % fileabspath)
+                        im.thumbnail(te[1], PILImage.ANTIALIAS)
+                        ima = name + te[0]
+                        # Some images are in CMYB, force RVB if needed
+                        if im.mode != "RGB":
+                            im = im.convert("RGB")
+                        im.save(uri + ima + "." + ext, ext, quality=75)
+                        # Copy the thumb content
+                        thumb_file = tempdir.open(ima + "." + ext)
+                        try:
+                            thumb_data = thumb_file.read()
+                        finally:
+                            thumb_file.close()
+                        self.make_resource(cls, self, ima,               
+                            body=thumb_data, filename=ima,
+                            extension=ext, format='image/%s' % ext)
+                    file.metadata.set_property('thumbnail', "True")
+                    # Clean the temporary folder
+                    vfs.remove(dirname)
 
             # Video
             if isinstance(file, Video):

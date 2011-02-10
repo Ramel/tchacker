@@ -72,9 +72,9 @@ class Tchack_Tracker(Tracker):
         from itools.fs import vfs
         from ikaaro.file import Image
         from issue import Tchack_Issue
-        
+
         i = 0
-        
+
         for issue in self.search_resources(cls=Tchack_Issue):
 
             history = issue.get_history()
@@ -96,7 +96,7 @@ class Tchack_Tracker(Tracker):
                             break
                         print("%s.Tracker.%s.Issue.%s.id.%s contain an image that need a Thumbnail"
                             % (i, issue.parent.parent.name, issue.name, record.id))
-                        
+
                         name = file.name
                         mimetype = file.handler.get_mimetype()
                         # Handler is cached, and cache grow so much that it kill
@@ -105,13 +105,13 @@ class Tchack_Tracker(Tracker):
                         #path = get_abspath(issue)
                         handler = file.handler
                         filename, extension, language = FileName.decode(basename(handler.key))
-                        
+
                         fs = self.metadata.database.fs
-                        print("Image that need Thumbnail = %s" % fs.get_absolute_path(file.handler.key))
+                        #print("Image that need Thumbnail = %s" % fs.get_absolute_path(file.handler.key))
                         fileabspath = fs.get_absolute_path(file.handler.key)
                         with open("%s" % fileabspath, "r") as f:
                             body = f.read()
-                        
+
                         dirname = mkdtemp('makethumbs', 'ikaaro')
                         tempdir = vfs.open(dirname)
                         # Paste the file in the tempdir
@@ -120,11 +120,11 @@ class Tchack_Tracker(Tracker):
                         tmpfile = open("%s" % tmp_uri, "w+")
                         tmpfile.write(body)
                         tmpfile.close()
-                        
+
                         low = 256, 256
                         med = 800, 800
                         hig = 1024, 1024
-                        
+
                         # Create the thumbnail PNG resources
                         cls = get_resource_class('image/jpeg')
                         thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
@@ -473,4 +473,3 @@ class Tchack_Tracker(Tracker):
 ###########################################################################
 
 register_resource_class(Tchack_Tracker)
-#register_resource_class(Table)

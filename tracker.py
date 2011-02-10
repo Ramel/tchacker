@@ -47,8 +47,6 @@ from tracker_views import Tchacker_View, Tracker_Zip_Img
 class Tchack_Tracker(Tracker):
 
     class_id = 'tchack_tracker'
-    #class_version = '20100718'
-    #class_version = '20110121'
     class_version = '20110125'
     class_title = MSG(u'Tchack Issue Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
@@ -102,7 +100,7 @@ class Tchack_Tracker(Tracker):
                         name = file.name
                         mimetype = file.handler.get_mimetype()
                         # Handler is cached, and cache grow so much that it kill
-                        # the process, so need to use a simple file open().
+                        # the process, so we need to use a simple os file open().
                         #body = file.handler.to_str()
                         #path = get_abspath(issue)
                         handler = file.handler
@@ -116,7 +114,6 @@ class Tchack_Tracker(Tracker):
                         
                         dirname = mkdtemp('makethumbs', 'ikaaro')
                         tempdir = vfs.open(dirname)
-                        #print("dirname = %s" % dirname)
                         # Paste the file in the tempdir
                         tmpfolder = "%s" % (dirname)
                         tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
@@ -124,14 +121,12 @@ class Tchack_Tracker(Tracker):
                         tmpfile.write(body)
                         tmpfile.close()
                         
-                        #TODO: Check that is used, all the thumbs seems to have
-                        # the same width
                         low = 256, 256
                         med = 800, 800
                         hig = 1024, 1024
                         
                         # Create the thumbnail PNG resources
-                        cls = get_resource_class('image/png')
+                        cls = get_resource_class('image/jpeg')
                         thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
                         uri = tmpfolder + os.sep 
                         ext = "jpeg"
@@ -141,7 +136,8 @@ class Tchack_Tracker(Tracker):
                             except IOError:
                                 print("IOError = %s" % fileabspath)
                             im.thumbnail(te[1], PILImage.ANTIALIAS)
-                            ima = name + te[0] 
+                            ima = name + te[0]
+                            # Some images are in CMYB, force RVB if needed
                             if im.mode != "RGB":
                                 im = im.convert("RGB")
                             im.save(uri + ima + "." + ext, ext, quality=75)
@@ -156,7 +152,6 @@ class Tchack_Tracker(Tracker):
                                 extension=ext, format='image/%s' % ext)
                             print("Image %s, Taille %s" % (ima, te[1])) 
                         file.metadata.set_property('thumbnail', "True")
-                        #del file._handler
                         # Clean the temporary folder
                         vfs.remove(dirname)
                     i+= 1

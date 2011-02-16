@@ -127,7 +127,7 @@ class Tchack_Tracker(Tracker):
 
                         # Create the thumbnail PNG resources
                         cls = get_resource_class('image/jpeg')
-                        thumbext = (["_LOW", low], ["_MED", med], ["_HIG", hig])
+                        thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
                         uri = tmpfolder + os.sep 
                         ext = "jpeg"
                         for te in thumbext:

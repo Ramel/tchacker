@@ -146,6 +146,57 @@ class Tchack_Tracker(Tracker):
                         vfs.remove(dirname)
                     i+= 1
 
+    
+    def update_20110122(self):
+        """If an issue contains a video file,
+        encoded in h264 and widder than 319px,
+        we encode a low version and create a thumbnail,
+        and erase the original file.
+        """
+        import os
+        from tempfile import mkdtemp
+        from issue import Tchack_Issue
+        from ikaaro.file import Video
+        from itools.fs import vfs
+        from ikaaro.registry import get_resource_class
+        from videoencoding import VideoEncodingToFLV
+
+        for issue in self.search_resources(cls=Tchack_Issue):
+
+            history = issue.get_history()
+
+            for record in history.get_records():
+
+                filename = record.file
+                comment = record.comment
+                is_video = False
+                if not comment and not filename:
+                    continue
+                if filename:
+                    file = issue.get_resource(filename)
+                    is_video = isinstance(file, Video)
+                    if not is_video:
+                        continue
+                    if is_video:
+                        name = file.name
+                        mimetype = file.handler.get_mimetype()
+                        body = file.handler.to_str()
+
+                        thumb = file.metadata.get_property('thumbnail')
+                        as_low = issue.get_resource("%s_low_thumb" % name, soft=True)
+                        old_thumb = "thumb_%s" % name
+                        as_thumb = issue.get_resource(old_thumb, soft=True)
+
+                        print("project = %s, issue = %s, name = %s, thumbnail = %s" %
+                            (issue.parent.parent.name, issue.name, name, thumb))
+                        if (thumb == "False" and as_low and as_thumb is not None):
+                            """The video as thumb value to False, but already
+                            encoded in LOW. Erase the original file.
+                            """
+                            print("Remove the Old thumb = '%s'" % as_thumb.name)
+                            issue.del_resource(old_thumb, soft='False')
+
+
 
     def update_20110121(self):
         """If an issue contains a video file,
@@ -201,26 +252,14 @@ class Tchack_Tracker(Tracker):
                         # Get size
                         dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
                         width, height, ratio = dim
-                        # Codec 
-                        #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
                         # In case of a video in h264 and widder than 319px
                         # We encode it in Flv at 640px width  and make a thumbnail
                         width_low = 640
-                        #print("Video without Thumbnail, encode it")
-                        #video_low = ("%s_low" % name)
-                        #height_low = int(round(float(width_low) / ratio))
-                        #if thumb == "False":
-                        if (thumb == "False" and not as_low and not as_thumb):
-                            """The video as no Thumb value, and is not
-                            encoded in Flv.
-                            """
-                            print("111 - No Thumb_ file, need to encode it, an add the Thumb values")
-                        elif (thumb == "False" and not as_low and as_thumb):
+                        if (thumb == "False" and not as_low):
                             """The video as old Thumb file, and is
                             encoded in Flv.
                             """
-                            print("222 - File not encoded, but already have a thumb. Encode, create _low_thumb. Modify Thumb to True, AND modify issue value to %s_low (hard part?)")
-                            #print("file_views/action()")
+                            print("222 - File not encoded, but already have an old thumb. Encode, create _low_thumb. Modify Thumb to True, AND modify issue value to %s_low (hard part?)")
                             encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                                 tmpfolder, name, name, width_low)
                             if encoded is not None:
@@ -254,28 +293,15 @@ class Tchack_Tracker(Tracker):
                                 new_name , new_extension, new_lang = FileName.decode(filename)
                                 # FIXME Should 'FileName.decode' return lowercase extensions?
                                 new_extension = vidextension.lower()
-                                print("""old_name = %s, old_extension = %s, old_lang = %s,
-                                            new_extension = %s""" % (old_name, old_extension,
-                                             old_lang, new_extension))
-                                if old_extension != new_extension:
+                                print("old_name = %s, old_extension = %s, old_lang = %s, new_extension = %s" % (
+                                    old_name, old_extension, old_lang, new_extension))
+                                if old_extension is not new_extension:
                                     # "handler.png" -> "handler.jpg"
                                     folder = file.parent.handler
                                     filename = FileName.encode((old_name, new_extension, old_lang))
                                     #folder.move_handler(handler_name,
                                     #        vidfilename +"."+ vidextension)
                                     folder.move_handler(handler_name, filename)
-                                """
-                                # Create the video resources
-                                cls = get_resource_class(vidmimetype)
-                                self.make_resource(cls, issue, vidfilename,
-                                    body=vidbody, filename=vidfilename,
-                                    extension=vidextension, format=vidmimetype)
-                                vid = issue.get_resource(vidfilename)
-                                vid.metadata.set_property('width', str(width_low))
-                                vid.metadata.set_property('height', str(height_low))
-                                vid.metadata.set_property('ratio', str(ratio))
-                                vid.metadata.set_property('thumbnail', "True")
-                                """
                                 # Create the thumbnail PNG resources
                                 cls = get_resource_class(thumbmimetype)
                                 self.make_resource(cls, issue, thumbfilename,
@@ -284,72 +310,18 @@ class Tchack_Tracker(Tracker):
                                 # We keep the 'thumbnail' to False
                                 # to make difference between old & new video files
                                 file.set_property("thumbnail", "False")
-                            """
-                            Move the metadata value for filename and mimetype
-                            file.metadata(filename=file.mov) -> filename=file_low.flv
-                            """
+                        
                         elif (thumb == "False" and as_low):
                             """The video as thumb value to False, but already
                             encoded in LOW. Erase the original file.
                             """
                             print("333 - Need to change the Thumb value to True, and erase the Big original file, and modify issue value to %s_low")
-                            """
-                            # video is already in temp dir, so encode it
-                            encoded = VideoEncodingToFLV(file).encode_video_to_flv(
-                                tmpfolder, name, name, width_low)
-                            if encoded is not None:
-                                vidfilename, vidmimetype, \
-                                    vidbody, vidextension = encoded['flvfile']
-                                thumbfilename, thumbmimetype, \
-                                    thumbbody, thumbextension = encoded['flvthumb']
-                                # Create the video resources
-                                cls = get_resource_class(vidmimetype)
-                                self.make_resource(cls, issue, vidfilename,
-                                    body=vidbody, filename=vidfilename,
-                                    extension=vidextension, format=vidmimetype)
-                                vid = issue.get_resource(vidfilename)
-                                vid.metadata.set_property('width', str(width_low))
-                                vid.metadata.set_property('height', str(height_low))
-                                vid.metadata.set_property('ratio', str(ratio))
-                                vid.metadata.set_property('thumbnail', "True")
-                                # Create the thumbnail PNG resources
-                                cls = get_resource_class(thumbmimetype)
-                                self.make_resource(cls, issue, thumbfilename,
-                                    body=thumbbody, filename=thumbfilename,
-                                    extension=thumbextension, format=thumbmimetype)
-
-                            try:
-                                issue.del_resource("thumb_%s" % name)
-                            except LookupError:
-                                pass
-                            """
+                        
                         elif (thumb == "True" and not as_low):
                             """The thumbnail value was not attributed to the
                             "low" resource in first version, add it now.
                             """
                             print("444 - In case of the thumb is not created while the Thumb value is True, _low = %s, _thumb = %s." % (as_low, as_thumb))
-                            """
-                            vid = issue.get_resource(video_low, soft=True)
-                            vid.metadata.set_property('width', str(width_low))
-                            vid.metadata.set_property('height', str(height_low))
-                            vid.metadata.set_property('ratio', str(ratio))
-                            vid.metadata.set_property('thumbnail', "True")
-                            #issue.update_links(name, "%s_low" % name)
-                            #history.update_links(name, video_low)
-                            #
-                            #record.update_properties(**{'file': video_low})
-                            history.update_record(
-                               record.id, **{'file': "%s_low" % name})
-                            history.catalog.unindex_document(name)
-                            #
-                            #get_context().database.change_resource(issue)
-                            try:
-                                issue.del_resource(name)
-                            except LookupError:
-                                pass
-                            #except ConsistencyError:
-                            #    issue.del_resource(name)
-                            """
                         """
                         else :
                             try:

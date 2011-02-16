@@ -24,19 +24,12 @@ from os.path import basename
 
 # Import from itools
 from itools.gettext import MSG
-from itools.web import get_context
-from itools.csv import Property
-from itools.csv import Table
 from itools.fs import FileName
-from itools.core import get_abspath
 
 # Import from ikaaro
 from ikaaro.tracker import Tracker
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import get_resource_class
-from ikaaro.exceptions import ConsistencyError
-from ikaaro.file import File
-from ikaaro.resource_ import DBResource
 
 #from resources import Tchack_Resources
 from issue import Tchack_Issue
@@ -66,7 +59,7 @@ class Tchack_Tracker(Tracker):
     def update_20110125(self):
         """Create thumbnails for all images present in the Tchacker"
         """
-        import glob, os
+        import os
         from tempfile import mkdtemp
         from PIL import Image as PILImage
         from itools.fs import vfs
@@ -98,11 +91,8 @@ class Tchack_Tracker(Tracker):
                             % (i, issue.parent.parent.name, issue.name, record.id))
 
                         name = file.name
-                        mimetype = file.handler.get_mimetype()
                         # Handler is cached, and cache grow so much that it kill
                         # the process, so we need to use a simple os file open().
-                        #body = file.handler.to_str()
-                        #path = get_abspath(issue)
                         handler = file.handler
                         filename, extension, language = FileName.decode(basename(handler.key))
 
@@ -217,8 +207,8 @@ class Tchack_Tracker(Tracker):
                         # We encode it in Flv at 640px width  and make a thumbnail
                         width_low = 640
                         #print("Video without Thumbnail, encode it")
-                        video_low = ("%s_low" % name)
-                        height_low = int(round(float(width_low) / ratio))
+                        #video_low = ("%s_low" % name)
+                        #height_low = int(round(float(width_low) / ratio))
                         #if thumb == "False":
                         if (thumb == "False" and not as_low and not as_thumb):
                             """The video as no Thumb value, and is not
@@ -381,7 +371,6 @@ class Tchack_Tracker(Tracker):
         we encode a low version and create a thumbnail.
         """
         import os
-        from datetime import datetime
         from tempfile import mkdtemp
         from issue import Tchack_Issue
         from ikaaro.file import Video

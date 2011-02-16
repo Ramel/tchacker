@@ -21,8 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from os.path import basename
-
 # Import from the Standard Library
 from datetime import datetime
 from tempfile import mkdtemp
@@ -165,7 +163,7 @@ class Tchack_Issue(Issue):
                         try:
                             im = PILImage.open(tmp_uri)
                         except IOError:
-                            print("IOError = %s" % fileabspath)
+                            print("IOError = %s" % tmp_uri)
                         im.thumbnail(te[1], PILImage.ANTIALIAS)
                         ima = name + te[0]
                         # Some images are in CMYB, force RVB if needed

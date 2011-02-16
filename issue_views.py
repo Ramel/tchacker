@@ -73,7 +73,6 @@ class TchackIssue_Edit(Issue_Edit):
 
     def get_namespace(self, resource, context):
         namespace = Issue_Edit.get_namespace(self, resource, context)
-        history = resource.get_history()
         # Build the namespace
         for comment in namespace['comments']:
             if comment['file']:

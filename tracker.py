@@ -118,7 +118,7 @@ class Tchack_Tracker(Tracker):
                         # Create the thumbnail PNG resources
                         cls = get_resource_class('image/jpeg')
                         thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-                        uri = tmpfolder + os.sep 
+                        uri = tmpfolder + os.sep
                         ext = "jpeg"
                         for te in thumbext:
                             try:
@@ -137,16 +137,16 @@ class Tchack_Tracker(Tracker):
                                 thumb_data = thumb_file.read()
                             finally:
                                 thumb_file.close()
-                            self.make_resource(cls, issue, ima,               
+                            self.make_resource(cls, issue, ima,
                                 body=thumb_data, filename=ima,
                                 extension=ext, format='image/%s' % ext)
-                            print("Image %s, Taille %s" % (ima, te[1])) 
+                            print("Image %s, Taille %s" % (ima, te[1]))
                         file.metadata.set_property('thumbnail', "True")
                         # Clean the temporary folder
                         vfs.remove(dirname)
                     i+= 1
 
-    
+
     def update_20110122(self):
         """If an issue contains a video file,
         encoded in h264 and widder than 319px,
@@ -259,7 +259,10 @@ class Tchack_Tracker(Tracker):
                             """The video as old Thumb file, and is
                             encoded in Flv.
                             """
-                            print("222 - File not encoded, but already have an old thumb. Encode, create _low_thumb. Modify Thumb to True, AND modify issue value to %s_low (hard part?)")
+                            print("""XXX - File not encoded, but already have an
+                                    old thumb. Encode & create a "_low_thumb".
+                                    Keep Thumb property to False for late update, AND modify
+                                    issue value to %s_low_thumb.""")
                             encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                                 tmpfolder, name, name, width_low)
                             if encoded is not None:
@@ -306,17 +309,17 @@ class Tchack_Tracker(Tracker):
                                 cls = get_resource_class(thumbmimetype)
                                 self.make_resource(cls, issue, thumbfilename,
                                     body=thumbbody, filename=thumbfilename,
-                                    extension=thumbextension, format=thumbmimetype) 
+                                    extension=thumbextension, format=thumbmimetype)
                                 # We keep the 'thumbnail' to False
                                 # to make difference between old & new video files
                                 file.set_property("thumbnail", "False")
-                        
+
                         elif (thumb == "False" and as_low):
                             """The video as thumb value to False, but already
                             encoded in LOW. Erase the original file.
                             """
                             print("333 - Need to change the Thumb value to True, and erase the Big original file, and modify issue value to %s_low")
-                        
+
                         elif (thumb == "True" and not as_low):
                             """The thumbnail value was not attributed to the
                             "low" resource in first version, add it now.

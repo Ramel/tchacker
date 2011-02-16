@@ -28,27 +28,14 @@
 #from tempfile import mkdtemp
 
 # Import from itools
-#from itools.datatypes import Boolean, Date, Integer, String, Unicode
-#from itools.datatypes import XMLContent
 from itools.gettext import MSG
-#from itools.ical import Time
-#from itools.html import xhtml_uri
-#from itools.i18n import format_datetime
-#from itools.web import STLForm, STLView
-#from itools.xml import XMLParser, START_ELEMENT, END_ELEMENT, TEXT
 from itools.fs import FileName #, vfs
-#from itools.core import guess_extension, guess_type
-#from itools.uri import resolve_uri
 
 # Import from ikaaro
-#from ikaaro.messages import MSG_CHANGES_SAVED
-#from ikaaro.table_views import Table_View
-#from ikaaro.views import CompositeForm
-#from ikaaro.views import ContextMenu
 from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
 from ikaaro.tracker.datatypes import get_issue_fields #, UsersList
-#from ikaaro.registry import get_resource_class
+
 
 
 class TchackIssue_Edit(Issue_Edit):
@@ -60,8 +47,7 @@ class TchackIssue_Edit(Issue_Edit):
     styles = ['ui/tracker/style.css',
               '/ui/tchacker/style.css', '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
-               '/ui/flowplayer/flowplayer-3.2.2.min.js',
-               '/ui/flowplayer/flowplayer-3.2.2.swf']
+               '/ui/flowplayer/flowplayer-3.2.2.min.js']
 
     def get_schema(self, resource, context):
         return get_issue_fields(resource.parent)

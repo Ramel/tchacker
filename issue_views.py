@@ -67,6 +67,7 @@ class TchackIssue_Edit(Issue_Edit):
                 comment['is_video'] = isinstance(attachment, Video)
                 comment['width'] = 200
                 comment['height'] = 200
+                #print("is_video = %s" % comment['is_video'])
                 if comment['is_video']:
                     name = attachment.name
                     filename, ext, lang = FileName.decode(name)
@@ -76,8 +77,8 @@ class TchackIssue_Edit(Issue_Edit):
                     comment['width'] = video.metadata.get_property('width')
                     comment['height'] = video.metadata.get_property('height')
                     if thumb == "True":
-                        comment['old'] = False
-                    if thumb == "False":
+                        comment['old'] = ""
+                    elif thumb == "False":
                         comment['old'] = "_low"
                     else:
                         comment['width'] = False

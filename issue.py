@@ -129,7 +129,7 @@ class Tchack_Issue(Issue):
                             extension=extension, format=mimetype)
 
             file = self.get_resource(name)
-            
+
             # Image
             if isinstance(file, Image):
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
@@ -140,7 +140,7 @@ class Tchack_Issue(Issue):
                     name = file.name
                     mimetype = file.handler.get_mimetype()
                     body = file.handler.to_str()
-                    
+
                     dirname = mkdtemp('makethumbs', 'ikaaro')
                     tempdir = vfs.open(dirname)
                     # Paste the file in the tempdir
@@ -157,7 +157,7 @@ class Tchack_Issue(Issue):
                     # Create the thumbnail PNG resources
                     cls = get_resource_class('image/jpeg')
                     thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-                    uri = tmpfolder + os.sep 
+                    uri = tmpfolder + os.sep
                     ext = "jpeg"
                     for te in thumbext:
                         try:
@@ -176,7 +176,7 @@ class Tchack_Issue(Issue):
                             thumb_data = thumb_file.read()
                         finally:
                             thumb_file.close()
-                        self.make_resource(cls, self, ima,               
+                        self.make_resource(cls, self, ima,
                             body=thumb_data, filename=ima,
                             extension=ext, format='image/%s' % ext)
                     file.metadata.set_property('thumbnail', "True")
@@ -204,7 +204,7 @@ class Tchack_Issue(Issue):
                 # Get size
                 dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
                 width, height, ratio = dim
-                # Codec 
+                # Codec
                 #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
                 width_low = 640
                 # In case of a video in h264 and widder than 319px
@@ -215,12 +215,7 @@ class Tchack_Issue(Issue):
                     # video is already in temp dir, so encode it
                     encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                         tmpfolder, name, name, width_low)
-                    """
-                    file.metadata.set_property('width', width)
-                    file.metadata.set_property('height', height)
-                    file.metadata.set_property('ratio', str(ratio))
-                    file.metadata.set_property('thumbnail', "True")
-                    """
+
                     if encoded is not None:
                         vidfilename, vidmimetype, \
                                 vidbody, vidextension = encoded['flvfile']
@@ -242,6 +237,10 @@ class Tchack_Issue(Issue):
                         self.make_resource(cls, self, thumbfilename,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
+                        # Remove the original uploaded file, an handler is
+                        # created at :126
+                        self.del_resource(name)
+                        #XXX: But the history keep the old name ?
                 """
                 # Create a thumbnail for a big file, instead of encoding it
                 else:

@@ -195,6 +195,7 @@ class Tchack_Tracker(Tracker):
                             """
                             print("Remove the Old thumb = '%s'" % as_thumb.name)
                             issue.del_resource(old_thumb, soft='False')
+                            file.set_property("thumbnail", "True")
 
 
 

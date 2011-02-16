@@ -140,7 +140,7 @@ class Tchack_Tracker(Tracker):
                             # Some images are in CMYB, force RVB if needed
                             if im.mode != "RGB":
                                 im = im.convert("RGB")
-                            im.save(uri + ima + "." + ext, ext, quality=75)
+                            im.save(uri + ima + "." + ext, ext, quality=85)
                             # Copy the thumb content
                             thumb_file = tempdir.open(ima + "." + ext)
                             try:

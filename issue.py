@@ -123,15 +123,17 @@ class Tchack_Issue(Issue):
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
             name = generate_name(name, self.get_names())
-            # Add attachement
-            cls = get_resource_class(mimetype)
-            cls.make_resource(cls, self, name, body=body, filename=filename,
-                            extension=extension, format=mimetype)
-
-            file = self.get_resource(name)
+            
+            mtype = mimetype.split("/")[0]
 
             # Image
-            if isinstance(file, Image):
+            if (mtype == "image"):
+                # Add attachement
+                cls = get_resource_class(mimetype)
+                cls.make_resource(cls, self, name, body=body, filename=filename,
+                                extension=extension, format=mimetype)
+                file = self.get_resource(name)
+                
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
                 # used instead of a ;thumb
                 if extension == "psd":
@@ -184,7 +186,7 @@ class Tchack_Issue(Issue):
                     vfs.remove(dirname)
 
             # Video
-            if isinstance(file, Video):
+            elif (mtype == "video"):
                 # Make Thumbnail for it, and encode it
                 # in a Low version (319px width)
                 # First, upload it, then encode it, and make a thumb for the
@@ -202,7 +204,7 @@ class Tchack_Issue(Issue):
                 tmpfile.write(body)
                 tmpfile.close()
                 # Get size
-                dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
+                dim = VideoEncodingToFLV(tmpfile).get_size_and_ratio(tmp_uri)
                 width, height, ratio = dim
                 # Codec
                 #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
@@ -213,7 +215,7 @@ class Tchack_Issue(Issue):
                 if int(width) > 319:
                     #video_low = ("%s_low" % name)
                     # video is already in temp dir, so encode it
-                    encoded = VideoEncodingToFLV(file).encode_video_to_flv(
+                    encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
                         tmpfolder, name, name, width_low)
 
                     if encoded is not None:
@@ -237,10 +239,7 @@ class Tchack_Issue(Issue):
                         self.make_resource(cls, self, thumbfilename,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
-                        # Remove the original uploaded file, an handler is
-                        # created at :126
-                        self.del_resource(name)
-                        #XXX: But the history keep the old name ?
+
                 """
                 # Create a thumbnail for a big file, instead of encoding it
                 else:

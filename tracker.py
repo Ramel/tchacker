@@ -179,24 +179,25 @@ class Tchack_Tracker(Tracker):
                         continue
                     if is_video:
                         name = file.name
-                        mimetype = file.handler.get_mimetype()
-                        body = file.handler.to_str()
+                        #mimetype = file.handler.get_mimetype()
+                        #body = file.handler.to_str()
 
                         thumb = file.metadata.get_property('thumbnail')
-                        as_low = issue.get_resource("%s_low_thumb" % name, soft=True)
+                        as_low = issue.get_resource("%s_thumb" % name, soft=True)
                         old_thumb = "thumb_%s" % name
                         as_thumb = issue.get_resource(old_thumb, soft=True)
-
-                        print("project = %s, issue = %s, name = %s, thumbnail = %s" %
+                        """
+                        print("project = %s, issue = %s, name = %s, thumb = %s" %
                             (issue.parent.parent.name, issue.name, name, thumb))
-                        if (thumb == "False" and as_low and as_thumb is not None):
-                            """The video as thumb value to False, but already
-                            encoded in LOW. Erase the original file.
-                            """
-                            print("Remove the Old thumb = '%s'" % as_thumb.name)
-                            issue.del_resource(old_thumb, soft='False')
+                        print("as_thumb = %s, as_low = %s" % (as_thumb, as_low))
+                        print("old_thumb = %s" % old_thumb)
+                        """
+                        if thumb == "False" and as_low:
+                            print("Set thumbnail to True : %s" % name)
                             file.set_property("thumbnail", "True")
-
+                        if as_thumb:
+                            print("Remove the Old thumb for '%s'" % name)
+                            issue.del_resource(old_thumb, soft='False')
 
 
     def update_20110121(self):
@@ -260,10 +261,10 @@ class Tchack_Tracker(Tracker):
                             """The video as old Thumb file, and is
                             encoded in Flv.
                             """
-                            print("""XXX - File not encoded, but already have an
-                                    old thumb. Encode & create a "_low_thumb".
-                                    Keep Thumb property to False for late update, AND modify
-                                    issue value to %s_low_thumb.""")
+                            print("XXX - File not encoded, but already have " +
+                                "an old thumb. Encode & create a \"_low_thumb\"." +
+                                " Keep Thumb property to False for late " +
+                                "update AND modify issue value to %s_low_thumb.")
                             encoded = VideoEncodingToFLV(file).encode_video_to_flv(
                                 tmpfolder, name, name, width_low)
                             if encoded is not None:
@@ -285,14 +286,14 @@ class Tchack_Tracker(Tracker):
                                 file.set_property("filename", filename + "." + vidextension)
                                 # Update metadata format
                                 metadata = file.metadata
-                                print("metadata.format = %s" % metadata.format)
+                                #print("metadata.format = %s" % metadata.format)
                                 if '/' in metadata.format:
                                     if vidmimetype != metadata.format:
                                         metadata.format = vidmimetype
 
                                 # Update handler name
                                 handler_name = basename(handler.key)
-                                print("handler_name = %s" % handler_name)
+                                #print("handler_name = %s" % handler_name)
                                 old_name, old_extension, old_lang = FileName.decode(handler_name)
                                 new_name , new_extension, new_lang = FileName.decode(filename)
                                 # FIXME Should 'FileName.decode' return lowercase extensions?
@@ -311,6 +312,10 @@ class Tchack_Tracker(Tracker):
                                 self.make_resource(cls, issue, thumbfilename,
                                     body=thumbbody, filename=thumbfilename,
                                     extension=thumbextension, format=thumbmimetype)
+                                height_low = int(round(float(width_low) / ratio))
+                                file.metadata.set_property('width', str(width_low))
+                                file.metadata.set_property('height', str(height_low))
+                                file.metadata.set_property('ratio', str(ratio))
                                 # We keep the 'thumbnail' to False
                                 # to make difference between old & new video files
                                 file.set_property("thumbnail", "False")

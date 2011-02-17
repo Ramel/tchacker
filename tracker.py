@@ -198,7 +198,7 @@ class Tchack_Tracker(Tracker):
                         if as_thumb:
                             print("Remove the Old thumb for '%s'" % name)
                             issue.del_resource(old_thumb, soft='False')
-
+                        #XXX Need to erase the original file (big one)
 
     def update_20110121(self):
         """If an issue contains a video file,
@@ -233,34 +233,52 @@ class Tchack_Tracker(Tracker):
                     if is_video:
                         name = file.name
                         mimetype = file.handler.get_mimetype()
-                        body = file.handler.to_str()
+                        nam , ext, lan = FileName.decode(filename)
 
                         thumb = file.metadata.get_property('thumbnail')
-                        as_low = issue.get_resource("%s_low" % name, soft=True)
-                        as_thumb = issue.get_resource("thumb_%s" % name, soft=True)
+                        fn = file.metadata.get_property('filename')
+                        #as_low = issue.get_resource("%s_low" % name, soft=True)
+                        
+                        as_low = issue.get_handler().has_handler("%s_low.flv" % name)
+                        as_big = issue.get_handler().has_handler("%s" % fn.lower())
+                        print("nam = %s, ext = %s, fn = %s" % (nam, file.handler.get_mimetype(), fn))
+                        print("file.handler.class_extension = %s" % file.handler.class_extension) 
+                        print("as_low = %s" % (as_low))
+                        print("as_big = %s" % (as_big))
+                        print("%s" % file.handler.key)
+                        """ 
+                        handler = file.handler
+                        path = ("%s" % file.handler.key)
+                        print("path = %s" % path)
+                        """
+                        #as_low = os.path.exists(file.handler.key)
+                        #as_low = file.handler("%s_low" % name, soft=True)
+                        #as_oldthumb = issue.get_resource("thumb_%s" % name, soft=True)
 
-                        print("project = %s, issue = %s, name = %s, thumbnail = %s" %
+                        print("project = %s, issue = %s, name = %s, thumb = %s" %
                             (issue.parent.parent.name, issue.name, name, thumb))
                         print("mimetype = %s" % (mimetype))
-                        dirname = mkdtemp('videoencoding', 'ikaaro')
-                        tempdir = vfs.open(dirname)
-                        # Paste the file in the tempdir
-                        tmpfolder = "%s" % (dirname)
-                        #root_path = file.handler.database.path
-                        tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
-                        tmpfile = open("%s" % tmp_uri, "w+")
-                        tmpfile.write(body)
-                        tmpfile.close()
-                        # Get size
-                        dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
-                        width, height, ratio = dim
-                        # In case of a video in h264 and widder than 319px
-                        # We encode it in Flv at 640px width  and make a thumbnail
-                        width_low = 640
+                        
                         if (thumb == "False" and not as_low):
+                            body = file.handler.to_str()
                             """The video as old Thumb file, and is
                             encoded in Flv.
                             """
+                            dirname = mkdtemp('videoencoding', 'ikaaro')
+                            tempdir = vfs.open(dirname)
+                            # Paste the file in the tempdir
+                            tmpfolder = "%s" % (dirname)
+                            #root_path = file.handler.database.path
+                            tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+                            tmpfile = open("%s" % tmp_uri, "w+")
+                            tmpfile.write(body)
+                            tmpfile.close()
+                            # Get size
+                            dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
+                            width, height, ratio = dim
+                            # In case of a video in h264 and widder than 319px
+                            # We encode it in Flv at 640px width  and make a thumbnail
+                            width_low = 640
                             print("XXX - File not encoded, but already have " +
                                 "an old thumb. Encode & create a \"_low_thumb\"." +
                                 " Keep Thumb property to False for late " +
@@ -319,6 +337,8 @@ class Tchack_Tracker(Tracker):
                                 # We keep the 'thumbnail' to False
                                 # to make difference between old & new video files
                                 file.set_property("thumbnail", "False")
+                            # Clean the temporary folder
+                            vfs.remove(dirname)
 
                         elif (thumb == "False" and as_low):
                             """The video as thumb value to False, but already
@@ -326,11 +346,13 @@ class Tchack_Tracker(Tracker):
                             """
                             print("333 - Need to change the Thumb value to True, and erase the Big original file, and modify issue value to %s_low")
 
-                        elif (thumb == "True" and not as_low):
+                        elif (thumb == "True" and as_low):
                             """The thumbnail value was not attributed to the
                             "low" resource in first version, add it now.
                             """
-                            print("444 - In case of the thumb is not created while the Thumb value is True, _low = %s, _thumb = %s." % (as_low, as_thumb))
+                            print("444 - Thumb and Low exist, erase the original and put the Low link in history or use the STL to do that (the old), %s." % (filename))
+                            record = history.get_record(-1)
+                            history.update_record(record.id, ** {'file':"%s_low" % filename})
                         """
                         else :
                             try:
@@ -342,8 +364,6 @@ class Tchack_Tracker(Tracker):
                             #database.remove_resource(name)
                         """
 
-                        # Clean the temporary folder
-                        vfs.remove(dirname)
 
 
 

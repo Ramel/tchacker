@@ -181,28 +181,60 @@ class Tchack_Tracker(Tracker):
                         name = file.name
                         #mimetype = file.handler.get_mimetype()
                         #body = file.handler.to_str()
-
                         thumb = file.metadata.get_property('thumbnail')
-                        as_low = issue.get_resource("%s_thumb" % name, soft=True)
-                        old_thumb = "thumb_%s" % name
-                        as_thumb = issue.get_resource(old_thumb, soft=True)
-                        """
+                        filename = file.metadata.get_property('filename')
+                        
                         print("project = %s, issue = %s, name = %s, thumb = %s" %
                             (issue.parent.parent.name, issue.name, name, thumb))
-                        print("as_thumb = %s, as_low = %s" % (as_thumb, as_low))
-                        print("old_thumb = %s" % old_thumb)
-                        """
-                        if thumb == "False" and as_low:
+                        
+                        handler = file.handler.key
+                        video = os.path.basename(handler)
+                        print("video = %s" % video)
+                        videoname, videoext = os.path.splitext(video)
+                        print("videoname = %s, videoext = %s" % (videoname, videoext))
+                        
+                        as_low = issue.get_handler().has_handler(
+                            "%s_low.flv" % videoname)
+                        low = video.rfind("_low")
+                        if low == -1:
+                            is_low = False
+                        else:
+                            is_low = True
+                            bigfile = name.replace("_low","")
+                        is_big = issue.get_handler().has_handler(
+                            "%s" % video)
+                       
+                        print("as_low = %s" % (as_low))
+                        print("is_low = %s" % (is_low))
+                        print("is_big = %s" % (is_big))
+                        
+                        old_thumb = "thumb_%s" % name
+                        as_old_thumb = issue.get_handler().has_handler(
+                            "%s" % old_thumb)
+                        print("as_old_thumb = %s" % (as_old_thumb))
+
+                        if thumb == "False" and as_low and is_big:
+                            print("Remove Big original file : %s" % name)
+                            #handler = file.handler.key
+                            #videoname = os.path.basename(handler)
+                            issue.del_resource(
+                                name, soft='False')
+                        if thumb == "False" and is_low:
                             print("Set thumbnail to True : %s" % name)
                             file.set_property("thumbnail", "True")
-                        if as_thumb:
+                            print("Remove Big original file : %s" % name)
+                            print("You need to update-catalog first")
+                            issue.del_resource(
+                                bigfile, soft='False')
+                        if as_old_thumb:
                             print("Remove the Old thumb for '%s'" % name)
                             issue.del_resource(old_thumb, soft='False')
                         #XXX Need to erase the original file (big one)
 
+
     def update_20110121(self):
         """If an issue contains a video file,
-        encoded in h264 and widder than 319px,
+        larger than 319px,
         we encode a low version and create a thumbnail,
         and erase the original file.
         """
@@ -213,6 +245,7 @@ class Tchack_Tracker(Tracker):
         from itools.fs import vfs
         from ikaaro.registry import get_resource_class
         from videoencoding import VideoEncodingToFLV
+        from itools.web import get_context
 
         for issue in self.search_resources(cls=Tchack_Issue):
 
@@ -228,131 +261,170 @@ class Tchack_Tracker(Tracker):
                 if filename:
                     file = issue.get_resource(filename)
                     is_video = isinstance(file, Video)
+                    mimetype = file.handler.get_mimetype()
+                    print("file = %s, filename = %s, mimetype = %s" % (file, filename, mimetype))
+                    mtype = mimetype.split("/")[0]
+                    
                     if not is_video:
                         continue
                     if is_video:
                         name = file.name
                         mimetype = file.handler.get_mimetype()
-                        nam , ext, lan = FileName.decode(filename)
-
+                        name , ext, lang = FileName.decode(filename)
+                        handler = file.handler.key
+                        videoname = os.path.basename(handler)
+                        print(handler)
+                        """
+                        if ext is None:
+                            #extfilename =
+                            print(file.metadata.get_property('filename').lower().rfind("."))
+                            handler = file.handler.key
+                            p = handler.rfind("/")
+                            attname = handler[:p]
+                            print(attname)
+                            print(os.path.basename(handler))
+                            print(os.path.basename(handler))
+                            print("file.handler.key = %s" % file.handler.key)
+                            mtype = mimetype.split("/")[1]
+                            print(mtype)
+                            print(file.handler.class_extension)
+                        """
                         thumb = file.metadata.get_property('thumbnail')
-                        fn = file.metadata.get_property('filename')
-                        #as_low = issue.get_resource("%s_low" % name, soft=True)
+                        joinfilename = file.metadata.get_property('filename')
                         
                         as_low = issue.get_handler().has_handler("%s_low.flv" % name)
-                        as_big = issue.get_handler().has_handler("%s" % fn.lower())
-                        print("nam = %s, ext = %s, fn = %s" % (nam, file.handler.get_mimetype(), fn))
+                        is_low = name.rfind("_low")
+                        #is_big = issue.get_handler().has_handler("%s" % joinfilename.lower())
+                        is_big = issue.get_handler().has_handler(
+                            "%s" % videoname)
+                       
+                        #print("nam = %s, ext = %s, fn = %s" % (
+                        #    nam, file.handler.get_mimetype(), joinfilename))
+                        """
                         print("file.handler.class_extension = %s" % file.handler.class_extension) 
                         print("as_low = %s" % (as_low))
-                        print("as_big = %s" % (as_big))
+                        print("is_low = %s" % (is_low))
+                        print("is_big = %s" % (is_big))
                         print("%s" % file.handler.key)
-                        """ 
-                        handler = file.handler
-                        path = ("%s" % file.handler.key)
-                        print("path = %s" % path)
-                        """
-                        #as_low = os.path.exists(file.handler.key)
-                        #as_low = file.handler("%s_low" % name, soft=True)
-                        #as_oldthumb = issue.get_resource("thumb_%s" % name, soft=True)
 
                         print("project = %s, issue = %s, name = %s, thumb = %s" %
                             (issue.parent.parent.name, issue.name, name, thumb))
                         print("mimetype = %s" % (mimetype))
-                        
-                        if (thumb == "False" and not as_low):
-                            body = file.handler.to_str()
-                            """The video as old Thumb file, and is
-                            encoded in Flv.
-                            """
-                            dirname = mkdtemp('videoencoding', 'ikaaro')
-                            tempdir = vfs.open(dirname)
-                            # Paste the file in the tempdir
-                            tmpfolder = "%s" % (dirname)
-                            #root_path = file.handler.database.path
-                            tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
-                            tmpfile = open("%s" % tmp_uri, "w+")
-                            tmpfile.write(body)
-                            tmpfile.close()
-                            # Get size
-                            dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
-                            width, height, ratio = dim
-                            # In case of a video in h264 and widder than 319px
-                            # We encode it in Flv at 640px width  and make a thumbnail
-                            width_low = 640
-                            print("XXX - File not encoded, but already have " +
-                                "an old thumb. Encode & create a \"_low_thumb\"." +
-                                " Keep Thumb property to False for late " +
-                                "update AND modify issue value to %s_low_thumb.")
-                            encoded = VideoEncodingToFLV(file).encode_video_to_flv(
-                                tmpfolder, name, name, width_low)
-                            if encoded is not None:
-                                vidfilename, vidmimetype, \
-                                    vidbody, vidextension = encoded['flvfile']
-                                thumbfilename, thumbmimetype, \
-                                    thumbbody, thumbextension = encoded['flvthumb']
+                        print("-----\n")
+                        """
+                        if thumb == "False" and not as_low and is_big:
+                            # Not low encoded
+                            if is_low == -1:
+                                print("--> is_low = -1\nThe file '%s' is not \
+                                    a low one" % name) 
+                                print("is_low = -1")
+                                body = file.handler.to_str()
+                                dirname = mkdtemp('videoencoding', 'ikaaro')
+                                tempdir = vfs.open(dirname)
+                                # Paste the file in the tempdir
+                                tmpfolder = "%s" % (dirname)
+                                #root_path = file.handler.database.path
+                                tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+                                tmpfile = open("%s" % tmp_uri, "w+")
+                                tmpfile.write(body)
+                                tmpfile.close()
+                                # Get size
+                                dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
+                                width, height, ratio = dim
+                                # In case of a video in h264 and widder than 319px
+                                # We encode it in Flv at 640px width  and make a thumbnail
+                                width_low = 640
+                                print("XXX - File not encoded, but already have " +
+                                    "an old thumb. Encode & create a \"_low_thumb\"." +
+                                    " Keep Thumb property to False for late " +
+                                    "update AND modify issue value to %s_low_thumb.")
+                                encoded = VideoEncodingToFLV(file).encode_video_to_flv(
+                                    tmpfolder, name, name, width_low)
+                                if encoded is not None:
+                                    vidfilename, vidmimetype, \
+                                        vidbody, vidextension = encoded['flvfile']
+                                    thumbfilename, thumbmimetype, \
+                                        thumbbody, thumbextension = encoded['flvthumb']
 
-                                handler = file.handler
-                                print("vidfilename = %s" % vidfilename)
-                                print("filename = %s" % filename)
-                                # Replace
-                                try:
-                                    handler.load_state_from_string(vidbody)
-                                except Exception, e:
-                                    handler.load_state()
-                                    print("Failed to load the file: %s" % str(e))
-                                # Update "filename" property
-                                file.set_property("filename", filename + "." + vidextension)
-                                # Update metadata format
-                                metadata = file.metadata
-                                #print("metadata.format = %s" % metadata.format)
-                                if '/' in metadata.format:
-                                    if vidmimetype != metadata.format:
-                                        metadata.format = vidmimetype
+                                    handler = file.handler
+                                    print("vidfilename = %s" % vidfilename)
+                                    print("filename = %s" % filename)
+                                    # Replace
+                                    try:
+                                        handler.load_state_from_string(vidbody)
+                                    except Exception, e:
+                                        handler.load_state()
+                                        print("Failed to load the file: %s" % str(e))
+                                    # Update "filename" property
+                                    file.set_property("filename", filename + "." + vidextension)
+                                    # Update metadata format
+                                    metadata = file.metadata
+                                    #print("metadata.format = %s" % metadata.format)
+                                    if '/' in metadata.format:
+                                        if vidmimetype != metadata.format:
+                                            metadata.format = vidmimetype
 
-                                # Update handler name
-                                handler_name = basename(handler.key)
-                                #print("handler_name = %s" % handler_name)
-                                old_name, old_extension, old_lang = FileName.decode(handler_name)
-                                new_name , new_extension, new_lang = FileName.decode(filename)
-                                # FIXME Should 'FileName.decode' return lowercase extensions?
-                                new_extension = vidextension.lower()
-                                print("old_name = %s, old_extension = %s, old_lang = %s, new_extension = %s" % (
-                                    old_name, old_extension, old_lang, new_extension))
-                                if old_extension is not new_extension:
-                                    # "handler.png" -> "handler.jpg"
-                                    folder = file.parent.handler
-                                    filename = FileName.encode((old_name, new_extension, old_lang))
-                                    #folder.move_handler(handler_name,
-                                    #        vidfilename +"."+ vidextension)
-                                    folder.move_handler(handler_name, filename)
-                                # Create the thumbnail PNG resources
-                                cls = get_resource_class(thumbmimetype)
-                                self.make_resource(cls, issue, thumbfilename,
-                                    body=thumbbody, filename=thumbfilename,
-                                    extension=thumbextension, format=thumbmimetype)
-                                height_low = int(round(float(width_low) / ratio))
-                                file.metadata.set_property('width', str(width_low))
-                                file.metadata.set_property('height', str(height_low))
-                                file.metadata.set_property('ratio', str(ratio))
-                                # We keep the 'thumbnail' to False
-                                # to make difference between old & new video files
-                                file.set_property("thumbnail", "False")
-                            # Clean the temporary folder
-                            vfs.remove(dirname)
+                                    # Update handler name
+                                    handler_name = basename(handler.key)
+                                    #print("handler_name = %s" % handler_name)
+                                    old_name, old_extension, old_lang = FileName.decode(handler_name)
+                                    new_name , new_extension, new_lang = FileName.decode(filename)
+                                    # FIXME Should 'FileName.decode' return lowercase extensions?
+                                    new_extension = vidextension.lower()
+                                    print("old_name = %s, old_extension = %s, old_lang = %s, new_extension = %s" % (
+                                        old_name, old_extension, old_lang, new_extension))
+                                    if old_extension is not new_extension:
+                                        # "handler.png" -> "handler.jpg"
+                                        folder = file.parent.handler
+                                        filename = FileName.encode((old_name, new_extension, old_lang))
+                                        #folder.move_handler(handler_name,
+                                        #        vidfilename +"."+ vidextension)
+                                        folder.move_handler(handler_name, filename)
+                                    # Create the thumbnail PNG resources
+                                    cls = get_resource_class(thumbmimetype)
+                                    self.make_resource(cls, issue, thumbfilename,
+                                        body=thumbbody, filename=thumbfilename,
+                                        extension=thumbextension, format=thumbmimetype)
+                                    height_low = int(round(float(width_low) / ratio))
+                                    file.metadata.set_property('width', str(width_low))
+                                    file.metadata.set_property('height', str(height_low))
+                                    file.metadata.set_property('ratio', str(ratio))
+                                    # We keep the 'thumbnail' to False
+                                    # to make difference between old & new video files
+                                    file.set_property("thumbnail", "False")
+                                # Clean the temporary folder
+                                vfs.remove(dirname)
+                                print("\n------")
+                            else:
+                                print("--> is_low = xxx\nThe file '%s' is already \
+                                    a low one\n------" % name) 
 
-                        elif (thumb == "False" and as_low):
-                            """The video as thumb value to False, but already
-                            encoded in LOW. Erase the original file.
-                            """
+                        if thumb == "False" and as_low:
+                            #The video as thumb value to False, but already
+                            #encoded in LOW. Erase the original file.
                             print("333 - Need to change the Thumb value to True, and erase the Big original file, and modify issue value to %s_low")
 
-                        elif (thumb == "True" and as_low):
-                            """The thumbnail value was not attributed to the
-                            "low" resource in first version, add it now.
-                            """
-                            print("444 - Thumb and Low exist, erase the original and put the Low link in history or use the STL to do that (the old), %s." % (filename))
-                            record = history.get_record(-1)
-                            history.update_record(record.id, ** {'file':"%s_low" % filename})
+                        if thumb == "True" and as_low and is_big:
+                            #The thumbnail value was not attributed to the
+                            #low" resource in first version, add it now.
+                            print("444 - Thumb=True and as_lox=True, put the " +
+                                "Low link in history. Set thumb to False, %s." % (filename))
+                            #record = history.get_record(-1)
+                            lowname = "%s_low" % filename
+                            history.update_record(
+                                record.id, ** {'file':"%s" % lowname})
+                            print("history.%s change from '%s' to '%s'" % (
+                                record.id, name, lowname))
+                            database = get_context().database
+                            database.save_changes()
+                            print("record.id = %s, lowname = %s" % (
+                                record.id, lowname))
+                            # copy metadat Big > Low
+                            newfile = issue.get_resource(lowname)
+                            newfile.metadata.set_property("thumbnail", "False")
+                            # Erase Big in next upgrade
+                            #issue.del_resource(filename)
+                            print("-----\n")
                         """
                         else :
                             try:

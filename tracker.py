@@ -160,6 +160,7 @@ class Tchack_Tracker(Tracker):
         from itools.fs import vfs
         from ikaaro.registry import get_resource_class
         from videoencoding import VideoEncodingToFLV
+        from ikaaro.exceptions import ConsistencyError
 
         for issue in self.search_resources(cls=Tchack_Issue):
 
@@ -183,16 +184,16 @@ class Tchack_Tracker(Tracker):
                         #body = file.handler.to_str()
                         thumb = file.metadata.get_property('thumbnail')
                         filename = file.metadata.get_property('filename')
-                        
-                        print("project = %s, issue = %s, name = %s, thumb = %s" %
-                            (issue.parent.parent.name, issue.name, name, thumb))
-                        
+
+                        #print("project = %s, issue = %s, name = %s, thumb = %s" %
+                        #    (issue.parent.parent.name, issue.name, name, thumb))
+
                         handler = file.handler.key
-                        video = os.path.basename(handler)
-                        print("video = %s" % video)
+                        video = basename(handler)
+                        #print("video = %s" % video)
                         videoname, videoext = os.path.splitext(video)
-                        print("videoname = %s, videoext = %s" % (videoname, videoext))
-                        
+                        #print("videoname = %s, videoext = %s" % (videoname, videoext))
+
                         as_low = issue.get_handler().has_handler(
                             "%s_low.flv" % videoname)
                         low = video.rfind("_low")
@@ -203,15 +204,14 @@ class Tchack_Tracker(Tracker):
                             bigfile = name.replace("_low","")
                         is_big = issue.get_handler().has_handler(
                             "%s" % video)
-                       
-                        print("as_low = %s" % (as_low))
-                        print("is_low = %s" % (is_low))
-                        print("is_big = %s" % (is_big))
-                        
+
+                        #print("as_low = %s" % (as_low))
+                        #print("is_low = %s" % (is_low))
+                        #print("is_big = %s" % (is_big))
+
                         old_thumb = "thumb_%s" % name
                         as_old_thumb = issue.get_handler().has_handler(
                             "%s" % old_thumb)
-                        print("as_old_thumb = %s" % (as_old_thumb))
 
                         if thumb == "False" and as_low and is_big:
                             print("Remove Big original file : %s" % name)
@@ -222,10 +222,16 @@ class Tchack_Tracker(Tracker):
                         if thumb == "False" and is_low:
                             print("Set thumbnail to True : %s" % name)
                             file.set_property("thumbnail", "True")
-                            print("Remove Big original file : %s" % name)
-                            print("You need to update-catalog first")
-                            issue.del_resource(
-                                bigfile, soft='False')
+                            print("Remove Big original file : %s" % video)
+                            try:
+                                issue.del_resource(
+                                    bigfile, soft='False')
+                            except ConsistencyError:
+                                print '*'
+                                print '* Before going further, you nedd to run the following command on the instance:'
+                                print '     $ icms-update-catalog.py <instance>'
+                                print '*'
+                                exit(0)
                         if as_old_thumb:
                             print("Remove the Old thumb for '%s'" % name)
                             issue.del_resource(old_thumb, soft='False')
@@ -247,6 +253,7 @@ class Tchack_Tracker(Tracker):
         from videoencoding import VideoEncodingToFLV
         from itools.web import get_context
 
+
         for issue in self.search_resources(cls=Tchack_Issue):
 
             history = issue.get_history()
@@ -264,54 +271,26 @@ class Tchack_Tracker(Tracker):
                     mimetype = file.handler.get_mimetype()
                     print("file = %s, filename = %s, mimetype = %s" % (file, filename, mimetype))
                     mtype = mimetype.split("/")[0]
-                    
+
                     if not is_video:
                         continue
                     if is_video:
                         name = file.name
                         mimetype = file.handler.get_mimetype()
                         name , ext, lang = FileName.decode(filename)
+
                         handler = file.handler.key
-                        videoname = os.path.basename(handler)
-                        print(handler)
-                        """
-                        if ext is None:
-                            #extfilename =
-                            print(file.metadata.get_property('filename').lower().rfind("."))
-                            handler = file.handler.key
-                            p = handler.rfind("/")
-                            attname = handler[:p]
-                            print(attname)
-                            print(os.path.basename(handler))
-                            print(os.path.basename(handler))
-                            print("file.handler.key = %s" % file.handler.key)
-                            mtype = mimetype.split("/")[1]
-                            print(mtype)
-                            print(file.handler.class_extension)
-                        """
+                        videoname = basename(handler)
+
                         thumb = file.metadata.get_property('thumbnail')
                         joinfilename = file.metadata.get_property('filename')
-                        
-                        as_low = issue.get_handler().has_handler("%s_low.flv" % name)
+
+                        as_low = issue.get_handler().has_handler(
+                            "%s_low.flv" % name)
                         is_low = name.rfind("_low")
-                        #is_big = issue.get_handler().has_handler("%s" % joinfilename.lower())
                         is_big = issue.get_handler().has_handler(
                             "%s" % videoname)
-                       
-                        #print("nam = %s, ext = %s, fn = %s" % (
-                        #    nam, file.handler.get_mimetype(), joinfilename))
-                        """
-                        print("file.handler.class_extension = %s" % file.handler.class_extension) 
-                        print("as_low = %s" % (as_low))
-                        print("is_low = %s" % (is_low))
-                        print("is_big = %s" % (is_big))
-                        print("%s" % file.handler.key)
 
-                        print("project = %s, issue = %s, name = %s, thumb = %s" %
-                            (issue.parent.parent.name, issue.name, name, thumb))
-                        print("mimetype = %s" % (mimetype))
-                        print("-----\n")
-                        """
                         if thumb == "False" and not as_low and is_big:
                             # Not low encoded
                             if is_low == -1:
@@ -347,8 +326,8 @@ class Tchack_Tracker(Tracker):
                                         thumbbody, thumbextension = encoded['flvthumb']
 
                                     handler = file.handler
-                                    print("vidfilename = %s" % vidfilename)
-                                    print("filename = %s" % filename)
+                                    #print("vidfilename = %s" % vidfilename)
+                                    #print("filename = %s" % filename)
                                     # Replace
                                     try:
                                         handler.load_state_from_string(vidbody)
@@ -371,8 +350,8 @@ class Tchack_Tracker(Tracker):
                                     new_name , new_extension, new_lang = FileName.decode(filename)
                                     # FIXME Should 'FileName.decode' return lowercase extensions?
                                     new_extension = vidextension.lower()
-                                    print("old_name = %s, old_extension = %s, old_lang = %s, new_extension = %s" % (
-                                        old_name, old_extension, old_lang, new_extension))
+                                    #print("old_name = %s, old_extension = %s, old_lang = %s, new_extension = %s" % (
+                                    #    old_name, old_extension, old_lang, new_extension))
                                     if old_extension is not new_extension:
                                         # "handler.png" -> "handler.jpg"
                                         folder = file.parent.handler
@@ -409,21 +388,17 @@ class Tchack_Tracker(Tracker):
                             #low" resource in first version, add it now.
                             print("444 - Thumb=True and as_lox=True, put the " +
                                 "Low link in history. Set thumb to False, %s." % (filename))
-                            #record = history.get_record(-1)
                             lowname = "%s_low" % filename
                             history.update_record(
                                 record.id, ** {'file':"%s" % lowname})
                             print("history.%s change from '%s' to '%s'" % (
                                 record.id, name, lowname))
-                            database = get_context().database
-                            database.save_changes()
                             print("record.id = %s, lowname = %s" % (
                                 record.id, lowname))
                             # copy metadat Big > Low
                             newfile = issue.get_resource(lowname)
                             newfile.metadata.set_property("thumbnail", "False")
                             # Erase Big in next upgrade
-                            #issue.del_resource(filename)
                             print("-----\n")
                         """
                         else :
@@ -435,7 +410,6 @@ class Tchack_Tracker(Tracker):
                             #file.metadata.set_property('thumbnail', 'True')
                             #database.remove_resource(name)
                         """
-
 
 
 

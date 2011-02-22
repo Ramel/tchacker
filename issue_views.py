@@ -36,6 +36,7 @@ from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
 from ikaaro.tracker.datatypes import get_issue_fields #, UsersList
 
+from comments import TchackerCommentsView
 
 
 class TchackIssue_Edit(Issue_Edit):
@@ -50,16 +51,49 @@ class TchackIssue_Edit(Issue_Edit):
                '/ui/flowplayer/flowplayer-3.2.2.min.js']
 
     def get_schema(self, resource, context):
-        return get_issue_fields(resource.parent)
+        tracker = resource.parent
+        return get_issue_fields(tracker)
 
     def get_value(self, resource, context, name, datatype):
-        history = resource.get_history()
-        record = history.get_record(-1)
-        return  record.get_value(name)
+        if name in ('comment'):
+            return datatype.get_default()
+        return resource.get_property(name)
 
     def get_namespace(self, resource, context):
         namespace = Issue_Edit.get_namespace(self, resource, context)
-        # Build the namespace
+
+        # Local variables
+        root = context.root
+        
+        # Comments
+        namespace['comments'] = TchackerCommentsView().GET(resource, context)
+        
+        print("namespace['comments'] = %s" % namespace['comments']) 
+        """ 
+        # Attachments
+        links = []
+        get_user = root.get_user_title
+        for attachment_name in resource.get_property('attachment'):
+            attachment = resource.get_resource(attachment_name, soft=True)
+            missing = (attachment is None)
+            author = mtime = None
+            if missing is False:
+                mtime = attachment.get_property('mtime')
+                mtime = context.format_datetime(mtime)
+                author = get_user(attachment.get_property('last_author'))
+
+            links.append({
+                'author': author,
+                'missing': missing,
+                'mtime': mtime,
+                'name': attachment_name,
+                'is_image': isinstance(attachment_name, Image)})
+
+        namespace['attachments'] = links
+        """
+        #print("namespace = %s" % namespace) 
+        """ 
+        # Build the namespace for comments
         for comment in namespace['comments']:
             if comment['file']:
                 attachment = resource.get_resource(comment['file'])
@@ -90,5 +124,5 @@ class TchackIssue_Edit(Issue_Edit):
                 comment['file'] = False
                 comment['is_image'] = False
                 comment['is_video'] = False
-
+        """
         return namespace

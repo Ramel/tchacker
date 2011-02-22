@@ -31,15 +31,21 @@ from itools.datatypes import String
 from itools.gettext import MSG
 from itools.handlers import checkid
 from itools.fs import FileName, vfs
-from itools.datatypes import Unicode
+#from itools.datatypes import Unicode
+from itools.core import merge_dicts
+from itools.database import register_field
+from itools.csv import Property
+from itools.datatypes import Integer, String, Unicode, Tokens
+from itools.datatypes import Boolean
 
 # Import from ikaaro
 from ikaaro.registry import register_resource_class
-from ikaaro.registry import register_field
-from ikaaro.tracker.issue import Issue, History
+from ikaaro.tracker.issue import Issue
+from ikaaro.tracker.obsolete import History
 from ikaaro.file import Video, Image
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
+from ikaaro.folder import Folder
 
 # Import from Tchacker
 from issue_views import TchackIssue_Edit
@@ -49,6 +55,21 @@ from videoencoding import VideoEncodingToFLV
 
 from PIL import Image as PILImage
 
+from comments import tchacker_comment_datatype
+
+
+
+class TchackerImage(Image):
+
+    class_schema = merge_dicts(
+        Image.class_schema,
+        # Metadata
+        thumbnail=Boolean(source='metadata', stored=True))
+    """
+        width=Integer(source='metadata', stored=True),
+        height=Integer(source='metadata', stored=True),
+        ratio=Integer(source='metadata', indexed=True, stored=True),
+    """
 
 
 class Tchack_Issue(Issue):
@@ -60,6 +81,34 @@ class Tchack_Issue(Issue):
 
     # Views
     edit = TchackIssue_Edit()
+
+    class_schema = Issue.class_schema
+    class_schema['comment'] = tchacker_comment_datatype
+    """
+    class_schema = merge_dicts(
+        Issue.class_schema,
+        # Metadata
+        comment=tchacker_comment_datatype)
+    """
+    """
+    class_schema = merge_dicts(
+        Folder.class_schema,
+        # Metadata
+        product=Integer(source='metadata', indexed=True, stored=True),
+        module=Integer(source='metadata', indexed=True, stored=True),
+        version=Integer(source='metadata', indexed=True, stored=True),
+        type=Integer(source='metadata', indexed=True, stored=True),
+        state=Integer(source='metadata', indexed=True, stored=True),
+        priority=Integer(source='metadata', indexed=True, stored=True),
+        assigned_to=String(source='metadata', indexed=True, stored=True),
+        cc_list=Tokens(source='metadata'),
+        comment=tchacker_comment_datatype,
+        # Other
+        id=Integer(indexed=True, stored=True),
+        attachment=String(source='metadata', multiple=True))
+    """
+
+    #print("Issue.class_schema = %s" % Issue.class_schema)
 
     def _get_catalog_values(self):
         values = Issue._get_catalog_values(self)
@@ -75,65 +124,45 @@ class Tchack_Issue(Issue):
                 values['issue_last_attachment'] = record.file
         return values
 
-    def _add_record(self, context, form):
-        user = context.user
-        root = context.root
-        #parent = self.parent
-        #users = root.get_resource('users')
-
-        record = {}
-        # Datetime
-        record['datetime'] = datetime.now()
-        # User XXX
-        if user is None:
-            record['username'] = ''
-        else:
-            record['username'] = user.name
+    def add_comment(self, context, form, new=False):
+        # Keep a copy of the current metadata
+        old_metadata = self.metadata.clone()
         # Title
-        title = context.get_form_value('title', type=Unicode).strip()
-        record['title'] = title
+        title = form['title'].strip()
+        language = self.get_edit_languages(context)[0]
+        self.set_property('title', title, language=language)
         # Version, Priority, etc.
         for name in ['product', 'module', 'version', 'type', 'state',
-                     'priority', 'assigned_to', 'comment']:
-            type = History.record_properties[name]
-            value = context.get_form_value(name, type=type)
-            if type == Unicode:
-                value = value.strip()
-            record[name] = value
+                     'priority', 'assigned_to']:
+            value = form[name]
+            self.set_property(name, value)
         # CCs
-        cc_list = set(self.get_value('cc_list') or ())
-        cc_remove = context.get_form_value('cc_remove')
-        datatype = String(multiple=True)
-        if cc_remove:
-            cc_remove = context.get_form_value('cc_list', type=datatype)
-            cc_list = cc_list.difference(cc_remove)
-        cc_add = context.get_form_value('cc_add', type=datatype)
-        if cc_add:
-            cc_list = cc_list.union(cc_add)
-        record['cc_list'] = list(cc_list)
+        cc_list = form['cc_list']
+        self.set_property('cc_list', tuple(cc_list))
 
-        # Files XXX
-        file = context.get_form_value('file')
-        if file is None:
-            record['file'] = ''
-        else:
+        # Attachment
+        attachment = form['attachment']
+        name = "None"
+        if attachment is not None:
             # Upload
-            filename, mimetype, body = form['file']
+            filename, mimetype, body = attachment
             # Find a non used name
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
             name = generate_name(name, self.get_names())
-            
-            mtype = mimetype.split("/")[0]
 
+            mtype = mimetype.split("/")[0]
+            
             # Image
             if (mtype == "image"):
-                # Add attachement
+                # Add attachment
                 cls = get_resource_class(mimetype)
-                cls.make_resource(cls, self, name, body=body, filename=filename,
+                print("cls = %s" % cls)
+                #self.make_resource(name, cls, body=body, filename=filename,
+                self.make_resource(name, TchackerImage, body=body, filename=filename,
                                 extension=extension, format=mimetype)
                 file = self.get_resource(name)
-                
+
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
                 # used instead of a ;thumb
                 if extension == "psd":
@@ -178,13 +207,14 @@ class Tchack_Issue(Issue):
                             thumb_data = thumb_file.read()
                         finally:
                             thumb_file.close()
-                        self.make_resource(cls, self, ima,
+                        self.make_resource(ima, Image,
                             body=thumb_data, filename=ima,
                             extension=ext, format='image/%s' % ext)
-                    file.metadata.set_property('thumbnail', "True")
+                    thumbnail = Property(True)
+                    file.metadata.set_property('thumbnail', thumbnail)
                     # Clean the temporary folder
                     vfs.remove(dirname)
-
+            """
             # Video
             elif (mtype == "video"):
                 # Make Thumbnail for it, and encode it
@@ -239,8 +269,8 @@ class Tchack_Issue(Issue):
                         self.make_resource(cls, self, thumbfilename,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
-
-                """
+            """
+            """
                 # Create a thumbnail for a big file, instead of encoding it
                 else:
                     mkthumb = VideoEncodingToFLV(file).make_thumbnail(
@@ -257,16 +287,28 @@ class Tchack_Issue(Issue):
                     file.metadata.set_property('height', height)
                     file.metadata.set_property('ratio', str(ratio))
                     file.metadata.set_property('thumbnail', "False")
-                """
+            """
+            """
                 # Clean the temporary folder
                 vfs.remove(dirname)
+            """
 
             # Link
-            record['file'] = name
-        # Update
-        modifications = self.get_diff_with(record, context)
-        history = self.get_history()
-        history.add_record(record)
+            attachment = name
+            self.set_property('attachment', attachment)
+
+
+        # Comment
+        date = context.timestamp
+        user = context.user
+        author = user.name if user else None
+        comment = form['comment']
+        attachment = name
+        print("attachment = %s" % attachment)
+        comment = Property(comment, date=date, author=author,
+            attachment=attachment)
+        self.set_property('comment', comment)
+
         # Send a Notification Email
         # Notify / From
         if user is None:
@@ -274,13 +316,8 @@ class Tchack_Issue(Issue):
         else:
             user_title = user.get_title()
         # Notify / To
-        to_addrs = set()
-        reported_by = self.get_reported_by()
-        if reported_by:
-            to_addrs.add(reported_by)
-        for cc in cc_list:
-            to_addrs.add(cc)
-        assigned_to = self.get_value('assigned_to')
+        to_addrs = set(cc_list)
+        assigned_to = self.get_property('assigned_to')
         if assigned_to:
             to_addrs.add(assigned_to)
         if user.name in to_addrs:
@@ -298,16 +335,17 @@ class Tchack_Issue(Issue):
                 u'issue, please visit:\n{issue_uri}')
         body = message.gettext(issue_uri=uri)
         body += '\n\n'
-        body += '#%s %s\n\n' % (self.name, self.get_value('title'))
+        body += '#%s %s\n\n' % (self.name, self.get_property('title'))
         message = MSG(u'The user {title} did some changes.')
         body +=  message.gettext(title=user_title)
         body += '\n\n'
-        if file:
+        if attachment:
             filename = unicode(filename, 'utf-8')
             message = MSG(u'New Attachment: {filename}')
             message = message.gettext(filename=filename)
             body += message + '\n'
         comment = context.get_form_value('comment', type=Unicode)
+        modifications = self.get_diff_with(old_metadata, context, new=new)
         if modifications:
             body += modifications
             body += '\n\n'
@@ -318,6 +356,7 @@ class Tchack_Issue(Issue):
             body += template.format(title=title, separator=separator,
                                     comment=comment)
         # Notify / Send
+        root = context.root
         for to_addr in to_addrs:
             user = root.get_user(to_addr)
             if not user:
@@ -326,11 +365,11 @@ class Tchack_Issue(Issue):
             root.send_email(to_addr, subject, text=body)
 
 
-
 ###########################################################################
 # Register
 ###########################################################################
 # The class
 register_resource_class(Tchack_Issue)
+register_resource_class(TchackerImage)
 register_field('issue_last_attachment', String(is_stored=True))
 register_field('issue_last_author', String(is_stored=True))

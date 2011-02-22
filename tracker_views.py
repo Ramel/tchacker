@@ -49,28 +49,27 @@ class Tchacker_ViewMenu(TrackerViewMenu):
 
     title = MSG(u'Advanced')
 
-    def get_items(self, resource, context):
+    def get_items(self):
         # Keep the query parameters
-        schema = context.view.get_query_schema()
-        params = encode_query(context.query, schema)
+        schema = self.context.view.get_query_schema()
+        params = encode_query(self.context.query, schema)
         return [
             {'title': MSG(u'Download "Last Att." images as one Zip'),
              'href': ';zip?%s' % params}
-              ] + TrackerViewMenu.get_items(self, resource, context)
+              ] + TrackerViewMenu.get_items(self)
 
 
 
-class Tchacker_ViewTop(STLView):
-
-    template = '/ui/tchacker/tchacker_view_top.xml.en'
-
-
-class Tchacker_ViewBottom(Tracker_View):
+class Tchacker_View(Tracker_View):
 
     access = 'is_allowed_to_view'
     title = MSG(u'View')
     icon = 'view.png'
+    scripts = ['/ui/tchacker/tracker.js']
+    styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
 
+    context_menus = [StoreSearchMenu(),
+                     Tchacker_ViewMenu()]
     # XXX
     #table_template = '/ui/tchacker/browse_table.xml'
     #context.styles.append('/ui/tchacker/tracker.css')
@@ -121,25 +120,7 @@ class Tchacker_ViewBottom(Tracker_View):
         return table_columns
 
 
-
-class Tchacker_View(CompositeView):
-
-    access = 'is_allowed_to_view'
-    subviews = [Tchacker_ViewTop(),
-                Tchacker_ViewBottom()]
-
-    context_menus = [StoreSearchMenu(),
-                     Tchacker_ViewMenu()]
-    scripts = ['/ui/tchacker/tracker.js']
-    styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
-
-    """
-    def GET(self, resource, context):
-        context.scripts.append('/ui/tchacker/tracker.js')
-        context.styles.append('/ui/tchacker/tracker.css')
-        return CompositeView.GET(self, resource, context)
-    """
-
+"""
 class Tracker_Zip_Img(Tchacker_ViewBottom):
 
     access = 'is_allowed_to_view'
@@ -180,4 +161,4 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         context.set_content_type('application/zip')
         context.set_content_disposition('attachment; filename=%s' % zipname)
         return data
-
+"""

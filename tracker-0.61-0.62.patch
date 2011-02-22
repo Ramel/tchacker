@@ -1,0 +1,3013 @@
+Seulement dans .: build
+diff -u ./datatypes.py ../ikaaro/tracker/datatypes.py
+--- ./datatypes.py	2011-02-16 11:50:16.998398177 +0100
++++ ../ikaaro/tracker/datatypes.py	2011-02-20 18:42:14.149180919 +0100
+@@ -14,13 +14,22 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-# Import from the Standard Library
+-from operator import itemgetter
+-
+ # Import from itools
+-from itools.datatypes import Enumerate, String
++from itools.core import thingy_property
++from itools.datatypes import Enumerate, Unicode
+ from itools.web import get_context
+ 
++# Import from ikaaro
++from ikaaro.cc import UsersList
++from ikaaro.datatypes import FileDataType
++
++
++class Tracker_UsersList(UsersList):
++
++    @thingy_property
++    def included_roles(self):
++        return self.resource.get_property('included_roles')
++
+ 
+ 
+ class TrackerList(Enumerate):
+@@ -39,7 +48,6 @@
+         return str(value)
+ 
+ 
+-    @classmethod
+     def get_options(cls):
+         elements = cls.tracker.get_resource(cls.element).handler
+         return [{'name': record.id,
+@@ -64,7 +72,6 @@
+         return str(value)
+ 
+ 
+-    @classmethod
+     def get_options(cls):
+         tracker = cls.tracker
+         products = tracker.get_resource('product').handler
+@@ -87,7 +94,6 @@
+         return options
+ 
+ 
+-    @classmethod
+     def is_valid(cls, name):
+         # Get the product number
+         product =  get_context().get_form_value('product')
+@@ -105,39 +111,18 @@
+ 
+ 
+ 
+-class UsersList(Enumerate):
+-    @classmethod
+-    def get_options(cls):
+-        site_root = cls.tracker.get_site_root()
+-        users = site_root.get_resource('/users')
+-        options = [{'name': x,
+-                    'value': users.get_resource(x).get_title()}
+-                    for x in site_root.get_members()]
+-        options.sort(key=itemgetter('value'))
+-        return options
+-
+-
+-def get_issue_fields(resource_tracker):
+-    return {'title': String(mandatory=True),
+-            'product': TrackerList(element='product',
+-                                   tracker=resource_tracker, mandatory=True),
+-            'module': ProductInfoList(element='module',
+-                                      tracker=resource_tracker),
+-            'version': ProductInfoList(element='version',
+-                                       tracker=resource_tracker),
+-            'type': TrackerList(element='type', tracker=resource_tracker,
+-                                mandatory=True),
+-            'state': TrackerList(element='state', tracker=resource_tracker,
+-                                 mandatory=True),
+-            'priority': TrackerList(element='priority',
+-                                    tracker=resource_tracker),
+-            'assigned_to': UsersList(tracker=resource_tracker),
+-            'cc_list': UsersList(tracker=resource_tracker, multiple=True),
+-            'comment': String,
+-            'file': String}
+-
+-
+-
+-
+-
++def get_issue_fields(tracker):
++    return {
++        'title': Unicode(mandatory=True),
++        'product': TrackerList(element='product', tracker=tracker,
++                               mandatory=True),
++        'module': ProductInfoList(element='module', tracker=tracker),
++        'version': ProductInfoList(element='version', tracker=tracker),
++        'type': TrackerList(element='type', tracker=tracker, mandatory=True),
++        'state': TrackerList(element='state', tracker=tracker, mandatory=True),
++        'priority': TrackerList(element='priority', tracker=tracker),
++        'assigned_to': Tracker_UsersList(resource=tracker),
++        'cc_list': Tracker_UsersList(resource=tracker, multiple=True),
++        'comment': Unicode,
++        'attachment': FileDataType}
+ 
+Seulement dans .: dist
+Seulement dans .: .git
+Seulement dans .: .gitignore
+diff -u ./__init__.py ../ikaaro/tracker/__init__.py
+--- ./__init__.py	2011-01-27 09:26:02.339751693 +0100
++++ ../ikaaro/tracker/__init__.py	2011-02-20 18:42:14.149180919 +0100
+@@ -17,30 +17,17 @@
+ 
+ # Import from itools
+ from itools.core import get_abspath
+-from itools.core import get_version
+ 
+ # Import from ikaaro
+ from ikaaro.registry import register_document_type
+ from ikaaro.skins import register_skin
++from ikaaro.website import WebSite
++from tracker import Tracker
+ 
+-from issue import Tchack_Issue
+-from resources import Tchack_Resources
+-from tracker import Tchack_Tracker
+-from utils import which
+-
+-# The version
+-__version__ = get_version()
+ 
+ # Register skin
+ path = get_abspath('ui')
+-register_skin('tchacker', path)
+-
+-# Register document type
+-register_document_type(Tchack_Tracker)
++register_skin('tracker', path)
+ 
+-###########################################################################
+-# Check required software
+-###########################################################################
+-for name, cli in [("zip", "zip")]:
+-    if(which(cli)) is None:
+-        print 'You need to install "%s".' % name
++# Add trackers to websites
++register_document_type(Tracker, WebSite.class_id)
+diff -u ./issue.py ../ikaaro/tracker/issue.py
+--- ./issue.py	2011-02-18 19:40:33.393008143 +0100
++++ ../ikaaro/tracker/issue.py	2011-02-20 18:43:17.613612765 +0100
+@@ -6,7 +6,6 @@
+ # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
+ # Copyright (C) 2007-2008 Sylvain Taverne <sylvain@itaapy.com>
+ # Copyright (C) 2008 Gautier Hayoun <gautier.hayoun@itaapy.com>
+-# Copyright (C) 2009 Armel FORTUN <armel@maar.fr>
+ #
+ # This program is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+@@ -21,252 +20,160 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-# Import from the Standard Library
+-from datetime import datetime
+-from tempfile import mkdtemp
+-import os
+-
+ # Import from itools
+-from itools.datatypes import String
++from itools.core import merge_dicts
++from itools.csv import Property
++from itools.datatypes import Integer, String, Unicode, Tokens
+ from itools.gettext import MSG
+ from itools.handlers import checkid
+-from itools.fs import FileName, vfs
+-from itools.datatypes import Unicode
++from itools.fs import FileName
++from itools.uri import Path
++from itools.web import get_context
+ 
+ # Import from ikaaro
+-from ikaaro.registry import register_resource_class
+-from ikaaro.registry import register_field
+-from ikaaro.tracker.issue import Issue, History
+-from ikaaro.file import Video, Image
+-from ikaaro.utils import generate_name
++from ikaaro.comments import comment_datatype
++from ikaaro.file import File
++from ikaaro.folder import Folder
++from ikaaro.metadata import Metadata
++from ikaaro.obsolete.metadata import OldMetadata
+ from ikaaro.registry import get_resource_class
++from ikaaro.utils import generate_name
++from issue_views import Issue_Edit, Issue_History
++from issue_views import IssueTrackerMenu
+ 
+-# Import from Tchacker
+-from issue_views import TchackIssue_Edit
+-
+-# Import from videoencoding
+-from videoencoding import VideoEncodingToFLV
+-
+-from PIL import Image as PILImage
+-
+-
+-
+-class Tchack_Issue(Issue):
+-
+-    class_id = 'tchack_issue'
+-    class_version = '20071216'
+-    class_title = MSG(u'Tchack Issue')
+-    class_description = MSG(u'Tchack Issue')
+-
+-    # Views
+-    edit = TchackIssue_Edit()
+-
+-    def _get_catalog_values(self):
+-        values = Issue._get_catalog_values(self)
+-        history = self.get_history()
+-        # Get the last record
+-        record = history.get_record(-1)
+-        if record:
+-            values['issue_last_author'] = history.get_record_value(record, 'username')
+-        # Get last attachment
+-        values['issue_last_attachment'] = None
+-        for record in self.get_history_records():
+-            if record.file:
+-                values['issue_last_attachment'] = record.file
+-        return values
+ 
+-    def _add_record(self, context, form):
+-        user = context.user
+-        root = context.root
+-        #parent = self.parent
+-        #users = root.get_resource('users')
++class Issue(Folder):
+ 
+-        record = {}
+-        # Datetime
+-        record['datetime'] = datetime.now()
+-        # User XXX
+-        if user is None:
+-            record['username'] = ''
+-        else:
+-            record['username'] = user.name
++    class_id = 'issue'
++    class_version = '20100507'
++    class_title = MSG(u'Issue')
++    class_description = MSG(u'Issue')
++    class_views = ['edit', 'edit_resources', 'browse_content', 'history']
++
++
++    class_schema = merge_dicts(
++        Folder.class_schema,
++        # Metadata
++        product=Integer(source='metadata', indexed=True, stored=True),
++        module=Integer(source='metadata', indexed=True, stored=True),
++        version=Integer(source='metadata', indexed=True, stored=True),
++        type=Integer(source='metadata', indexed=True, stored=True),
++        state=Integer(source='metadata', indexed=True, stored=True),
++        priority=Integer(source='metadata', indexed=True, stored=True),
++        assigned_to=String(source='metadata', indexed=True, stored=True),
++        cc_list=Tokens(source='metadata'),
++        comment=comment_datatype,
++        # Other
++        id=Integer(indexed=True, stored=True),
++        attachment=String(source='metadata', multiple=True))
++
++
++    def get_catalog_values(self):
++        document = Folder.get_catalog_values(self)
++        document['id'] = int(self.name)
++        # Override default (FIXME should set default to 'nobody' instead?)
++        document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
++        return document
++
++
++    def get_document_types(self):
++        return []
++
++
++    def get_links(self):
++        attachments = self.metadata.get_property('attachment')
++        if not attachments:
++            return set()
++
++        base = self.get_canonical_path()
++        return set([ str(base.resolve2(x.value)) for x in attachments ])
++
++
++    def update_links(self, source, target):
++        base = self.get_canonical_path()
++        resources_new2old = get_context().database.resources_new2old
++        base = str(base)
++        old_base = resources_new2old.get(base, base)
++        old_base = Path(old_base)
++        new_base = Path(base)
++
++        attachments = self.metadata.get_property('attachment')
++        new_attachments = []
++        for attachment in attachments:
++            path = old_base.resolve2(str(attachment.value))
++            if path == source:
++                value = str(new_base.get_pathto(target))
++                new_attachments.append(value)
++            else:
++                new_attachments.append(attachment)
++
++        self.set_property('attachment', new_attachments)
++        get_context().database.change_resource(self)
++
++
++    #######################################################################
++    # API
++    #######################################################################
++    def get_title(self, language=None):
++        return u'#%s %s' % (self.name, self.get_property('title'))
++
++
++    def get_history(self):
++        context = get_context()
++        database = context.database
++        filename = '%s.metadata' % self.get_abspath()
++        filename = filename[1:]
++
++        get_blob = database.get_blob_by_revision_and_path
++
++        for hash in database.get_commit_hashs(filename):
++            try:
++                yield get_blob(hash, filename, Metadata)
++            except SyntaxError:
++                yield get_blob(hash, filename, OldMetadata)
++
++
++    def add_comment(self, context, form, new=False):
++        # Keep a copy of the current metadata
++        old_metadata = self.metadata.clone()
+         # Title
+-        title = context.get_form_value('title', type=Unicode).strip()
+-        record['title'] = title
++        title = form['title'].strip()
++        language = self.get_edit_languages(context)[0]
++        self.set_property('title', title, language=language)
+         # Version, Priority, etc.
+         for name in ['product', 'module', 'version', 'type', 'state',
+-                     'priority', 'assigned_to', 'comment']:
+-            type = History.record_properties[name]
+-            value = context.get_form_value(name, type=type)
+-            if type == Unicode:
+-                value = value.strip()
+-            record[name] = value
++                     'priority', 'assigned_to']:
++            value = form[name]
++            self.set_property(name, value)
+         # CCs
+-        cc_list = set(self.get_value('cc_list') or ())
+-        cc_remove = context.get_form_value('cc_remove')
+-        datatype = String(multiple=True)
+-        if cc_remove:
+-            cc_remove = context.get_form_value('cc_list', type=datatype)
+-            cc_list = cc_list.difference(cc_remove)
+-        cc_add = context.get_form_value('cc_add', type=datatype)
+-        if cc_add:
+-            cc_list = cc_list.union(cc_add)
+-        record['cc_list'] = list(cc_list)
+-
+-        # Files XXX
+-        file = context.get_form_value('file')
+-        if file is None:
+-            record['file'] = ''
+-        else:
++        cc_list = form['cc_list']
++        self.set_property('cc_list', tuple(cc_list))
++
++        # Attachment
++        attachment = form['attachment']
++        if attachment is not None:
+             # Upload
+-            filename, mimetype, body = form['file']
++            filename, mimetype, body = form['attachment']
+             # Find a non used name
+             name = checkid(filename)
+             name, extension, language = FileName.decode(name)
+             name = generate_name(name, self.get_names())
+-            
+-            mtype = mimetype.split("/")[0]
+-
+-            # Image
+-            if (mtype == "image"):
+-                # Add attachement
+-                cls = get_resource_class(mimetype)
+-                cls.make_resource(cls, self, name, body=body, filename=filename,
+-                                extension=extension, format=mimetype)
+-                file = self.get_resource(name)
+-                
+-                # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
+-                # used instead of a ;thumb
+-                if extension == "psd":
+-                    pass
+-                else:
+-                    name = file.name
+-                    mimetype = file.handler.get_mimetype()
+-                    body = file.handler.to_str()
+-
+-                    dirname = mkdtemp('makethumbs', 'ikaaro')
+-                    tempdir = vfs.open(dirname)
+-                    # Paste the file in the tempdir
+-                    tmpfolder = "%s" % (dirname)
+-                    tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+-                    tmpfile = open("%s" % tmp_uri, "w+")
+-                    tmpfile.write(body)
+-                    tmpfile.close()
+-
+-                    low = 256, 256
+-                    med = 800, 800
+-                    hig = 1024, 1024
+-
+-                    # Create the thumbnail PNG resources
+-                    cls = get_resource_class('image/jpeg')
+-                    thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
+-                    uri = tmpfolder + os.sep
+-                    ext = "jpeg"
+-                    for te in thumbext:
+-                        try:
+-                            im = PILImage.open(tmp_uri)
+-                        except IOError:
+-                            print("IOError = %s" % tmp_uri)
+-                        im.thumbnail(te[1], PILImage.ANTIALIAS)
+-                        ima = name + te[0]
+-                        # Some images are in CMYB, force RVB if needed
+-                        if im.mode != "RGB":
+-                            im = im.convert("RGB")
+-                        im.save(uri + ima + "." + ext, ext, quality=85)
+-                        # Copy the thumb content
+-                        thumb_file = tempdir.open(ima + "." + ext)
+-                        try:
+-                            thumb_data = thumb_file.read()
+-                        finally:
+-                            thumb_file.close()
+-                        self.make_resource(cls, self, ima,
+-                            body=thumb_data, filename=ima,
+-                            extension=ext, format='image/%s' % ext)
+-                    file.metadata.set_property('thumbnail', "True")
+-                    # Clean the temporary folder
+-                    vfs.remove(dirname)
+-
+-            # Video
+-            elif (mtype == "video"):
+-                # Make Thumbnail for it, and encode it
+-                # in a Low version (319px width)
+-                # First, upload it, then encode it, and make a thumb for the
+-                # encoded file.
+-                # video.mp4, video_low.mp4, video_low_thumb.jpg
+-                # If the video is h264 and wider than 319px,
+-                # so create a Low copy.
+-                dirname = mkdtemp('videoencoding', 'ikaaro')
+-                tempdir = vfs.open(dirname)
+-                # Paste the file in the tempdir
+-                tmpfolder = "%s" % (dirname)
+-                #root_path = file.handler.database.path
+-                tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+-                tmpfile = open("%s" % tmp_uri, "w+")
+-                tmpfile.write(body)
+-                tmpfile.close()
+-                # Get size
+-                dim = VideoEncodingToFLV(tmpfile).get_size_and_ratio(tmp_uri)
+-                width, height, ratio = dim
+-                # Codec
+-                #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+-                width_low = 640
+-                # In case of a video in h264 and widder than 319px
+-                # We encode it in Flv at 640px width  and make a thumbnail
+-                #if int(width) > 319 and venc == "h264":
+-                if int(width) > 319:
+-                    #video_low = ("%s_low" % name)
+-                    # video is already in temp dir, so encode it
+-                    encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
+-                        tmpfolder, name, name, width_low)
+-
+-                    if encoded is not None:
+-                        vidfilename, vidmimetype, \
+-                                vidbody, vidextension = encoded['flvfile']
+-                        thumbfilename, thumbmimetype, \
+-                                thumbbody, thumbextension = encoded['flvthumb']
+-                        # Create the video resources
+-                        cls = get_resource_class(vidmimetype)
+-                        self.make_resource(cls, self, vidfilename,
+-                            body=vidbody, filename=vidfilename,
+-                            extension=vidextension, format=vidmimetype)
+-                        height_low = int(round(float(width_low) / ratio))
+-                        vid = self.get_resource(vidfilename)
+-                        vid.metadata.set_property('width', str(width_low))
+-                        vid.metadata.set_property('height', str(height_low))
+-                        vid.metadata.set_property('ratio', str(ratio))
+-                        vid.metadata.set_property('thumbnail', "True")
+-                        # Create the thumbnail PNG resources
+-                        cls = get_resource_class(thumbmimetype)
+-                        self.make_resource(cls, self, thumbfilename,
+-                            body=thumbbody, filename=thumbfilename,
+-                            extension=thumbextension, format=thumbmimetype)
++            # Add attachment
++            cls = get_resource_class(mimetype)
++            self.make_resource(name, cls, body=body, filename=filename,
++                               extension=extension, format=mimetype)
++            # Link
++            attachment = name
++            self.set_property('attachment', attachment)
+ 
+-                """
+-                # Create a thumbnail for a big file, instead of encoding it
+-                else:
+-                    mkthumb = VideoEncodingToFLV(file).make_thumbnail(
+-                        tmpfolder, name, width_low)
+-                    if mkthumb is not None:
+-                        thumbfilename, thumbmimetype, \
+-                                thumbbody, thumbextension = mkthumb
+-                        # Create the thumbnail PNG resources
+-                        cls = get_resource_class(thumbmimetype)
+-                        self.make_resource(cls, self, thumbfilename,
+-                            body=thumbbody, filename=thumbfilename,
+-                            extension=thumbextension, format=thumbmimetype)
+-                    file.metadata.set_property('width', width)
+-                    file.metadata.set_property('height', height)
+-                    file.metadata.set_property('ratio', str(ratio))
+-                    file.metadata.set_property('thumbnail', "False")
+-                """
+-                # Clean the temporary folder
+-                vfs.remove(dirname)
++        # Comment
++        date = context.timestamp
++        user = context.user
++        author = user.name if user else None
++        comment = form['comment']
++        comment = Property(comment, date=date, author=author)
++        self.set_property('comment', comment)
+ 
+-            # Link
+-            record['file'] = name
+-        # Update
+-        modifications = self.get_diff_with(record, context)
+-        history = self.get_history()
+-        history.add_record(record)
+         # Send a Notification Email
+         # Notify / From
+         if user is None:
+@@ -274,13 +181,8 @@
+         else:
+             user_title = user.get_title()
+         # Notify / To
+-        to_addrs = set()
+-        reported_by = self.get_reported_by()
+-        if reported_by:
+-            to_addrs.add(reported_by)
+-        for cc in cc_list:
+-            to_addrs.add(cc)
+-        assigned_to = self.get_value('assigned_to')
++        to_addrs = set(cc_list)
++        assigned_to = self.get_property('assigned_to')
+         if assigned_to:
+             to_addrs.add(assigned_to)
+         if user.name in to_addrs:
+@@ -298,16 +200,17 @@
+                 u'issue, please visit:\n{issue_uri}')
+         body = message.gettext(issue_uri=uri)
+         body += '\n\n'
+-        body += '#%s %s\n\n' % (self.name, self.get_value('title'))
++        body += '#%s %s\n\n' % (self.name, self.get_property('title'))
+         message = MSG(u'The user {title} did some changes.')
+         body +=  message.gettext(title=user_title)
+         body += '\n\n'
+-        if file:
++        if attachment:
+             filename = unicode(filename, 'utf-8')
+             message = MSG(u'New Attachment: {filename}')
+             message = message.gettext(filename=filename)
+             body += message + '\n'
+         comment = context.get_form_value('comment', type=Unicode)
++        modifications = self.get_diff_with(old_metadata, context, new=new)
+         if modifications:
+             body += modifications
+             body += '\n\n'
+@@ -318,6 +221,7 @@
+             body += template.format(title=title, separator=separator,
+                                     comment=comment)
+         # Notify / Send
++        root = context.root
+         for to_addr in to_addrs:
+             user = root.get_user(to_addr)
+             if not user:
+@@ -326,11 +230,169 @@
+             root.send_email(to_addr, subject, text=body)
+ 
+ 
++    def get_diff_with(self, old_metadata, context, new=False):
++        """Return a text with the diff between the given Metadata and new
++        issue state.
++        """
++        root = context.root
++        modifications = []
++        if new:
++            # New issue
++            template = MSG(u'{field}: {old_value}{new_value}')
++            empty = u''
++        else:
++            # Edit issue
++            template = MSG(u'{field}: {old_value} to {new_value}')
++            empty = MSG(u'[empty]').gettext()
++        # Modification of title
++        last_prop = old_metadata.get_property('title')
++        last_title = last_prop.value if last_prop else empty
++        new_title = self.get_property('title') or empty
++        if last_title != new_title:
++            field = MSG(u'Title').gettext()
++            text = template.gettext(field=field, old_value=last_title,
++                                    new_value=new_title)
++            modifications.append(text)
++        # List modifications
++        fields = [
++            ('module', MSG(u'Module')),
++            ('version', MSG(u'Version')),
++            ('type', MSG(u'Type')),
++            ('priority', MSG(u'Priority')),
++            ('state', MSG(u'State'))]
++        for name, field in fields:
++            field = field.gettext()
++            last_prop = old_metadata.get_property(name)
++            last_value = last_prop.value if last_prop else None
++            new_value = self.get_property(name)
++            # Detect if modifications
++            if last_value == new_value:
++                continue
++            new_title = last_title = empty
++            csv = self.parent.get_resource(name).handler
++            if last_value or last_value == 0:
++                rec = csv.get_record(last_value)
++                if rec is None:
++                    last_title = 'undefined'
++                else:
++                    last_title = csv.get_record_value(rec, 'title')
++            if new_value or new_value == 0:
++                rec = csv.get_record(new_value)
++                new_title = csv.get_record_value(rec, 'title')
++            text = template.gettext(field=field, old_value=last_title,
++                                    new_value=new_title)
++            modifications.append(text)
++
++        # Modifications of assigned_to
++        new_user = self.get_property('assigned_to') or ''
++        last_prop = old_metadata.get_property('assigned_to')
++        last_user = last_prop.value if last_prop else None
++        if last_user != new_user:
++            if last_user:
++                last_user = root.get_user(last_user).get_property('email')
++            if new_user:
++                new_user = root.get_user(new_user).get_property('email')
++            field = MSG(u'Assigned To').gettext()
++            text = template.gettext(field=field, old_value=last_user or empty,
++                                    new_value=new_user or empty)
++            modifications.append(text)
++
++        # Modifications of cc_list
++        last_prop = old_metadata.get_property('cc_list')
++        last_cc = list(last_prop.value) if last_prop else ()
++        new_cc = self.get_property('cc_list')
++        new_cc = list(new_cc) if new_cc else []
++        if last_cc != new_cc:
++            last_values = []
++            for cc in last_cc:
++                value = root.get_user(cc).get_property('email')
++                last_values.append(value)
++            new_values = []
++            for cc in new_cc:
++                value = root.get_user(cc).get_property('email')
++                new_values.append(value)
++            field = MSG(u'CC').gettext()
++            last_values = ', '.join(last_values) or empty
++            new_values = ', '.join(new_values) or empty
++            text = template.gettext(field=field, old_value=last_values,
++                                    new_value=new_values)
++            modifications.append(text)
++
++        return u'\n'.join(modifications)
++
++
++    def get_reported_by(self):
++        comments = self.metadata.get_property('comment')
++        return comments[0].get_parameter('author')
++
++
++    def to_text(self):
++        comments = self.get_property('comment')
++        return u'\n'.join(comments)
++
++
++    #######################################################################
++    # User Interface
++    #######################################################################
++    def get_context_menus(self):
++        return self.parent.get_context_menus() + [IssueTrackerMenu()]
++
++
++    edit = Issue_Edit()
++    history = Issue_History()
++
++
++    #######################################################################
++    # Update
++    #######################################################################
++    def update_20100507(self):
++        from itools.core import utc
++        from obsolete import History
++
++        metadata = self.metadata
++        history = self.handler.get_handler('.history', History)
++
++        record = history.records[-1]
++        # Title
++        lang = self.get_site_root().get_default_language()
++        title = history.get_record_value(record, 'title')
++        title = Property(title, lang=lang)
++        metadata.set_property('title', title)
++        # Product, module, etc.
++        names = 'product', 'module', 'version', 'type', 'state', 'priority'
++        for name in names:
++            value = history.get_record_value(record, name)
++            if value is not None:
++                metadata.set_property(name, value)
++        # Assigned
++        value = history.get_record_value(record, 'assigned_to')
++        if value:
++            metadata.set_property('assigned_to', value)
++
++        # Comments / Files
++        attachments = []
++        for record in history.records:
++            if record is None:
++                # deleted record
++                continue
++            comment = history.get_record_value(record, 'comment')
++            date = history.get_record_value(record, 'datetime')
++            date = date.replace(tzinfo=utc)
++            author = history.get_record_value(record, 'username')
++            comment = Property(comment, date=date, author=author)
++            metadata.set_property('comment', comment)
++            file = history.get_record_value(record, 'file')
++            if file:
++                attachments.append(file)
++        if attachments:
++            metadata.set_property('attachment', attachments)
++
++        # CC
++        reporter = history.records[0].username
++        value = history.get_record_value(record, 'cc_list')
++        if reporter not in value:
++            value = value + (reporter,)
++        metadata.set_property('cc_list', value)
+ 
+-###########################################################################
+-# Register
+-###########################################################################
+-# The class
+-register_resource_class(Tchack_Issue)
+-register_field('issue_last_attachment', String(is_stored=True))
+-register_field('issue_last_author', String(is_stored=True))
++        # Remove .history
++        self.handler.del_handler('.history')
+diff -u ./issue_views.py ../ikaaro/tracker/issue_views.py
+--- ./issue_views.py	2011-02-17 09:09:47.990706934 +0100
++++ ../ikaaro/tracker/issue_views.py	2011-02-20 18:42:14.149180919 +0100
+@@ -6,7 +6,7 @@
+ # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
+ # Copyright (C) 2007-2008 Sylvain Taverne <sylvain@itaapy.com>
+ # Copyright (C) 2008 Gautier Hayoun <gautier.hayoun@itaapy.com>
+-# Copyright (C) 2009 Armel FORTUN <armel@maar.fr>
++# Copyright (C) 2010 Alexis Huet <alexis@itaapy.com>
+ #
+ # This program is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+@@ -21,74 +21,288 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-# Import from the Standard Library
+-#from datetime import date, datetime, time
+-#from re import compile
+-#from textwrap import TextWrapper
+-#from tempfile import mkdtemp
+-
+ # Import from itools
++from itools.csv import Property
++from itools.datatypes import Unicode, XMLContent
+ from itools.gettext import MSG
+-from itools.fs import FileName #, vfs
++from itools.web import STLForm, STLView
++from itools.xml import XMLParser
+ 
+ # Import from ikaaro
+-from ikaaro.file import Image, Video
+-from ikaaro.tracker.issue_views import Issue_Edit
+-from ikaaro.tracker.datatypes import get_issue_fields #, UsersList
++from ikaaro.comments import CommentsView
++from ikaaro.messages import MSG_CHANGES_SAVED
++from ikaaro.views import ContextMenu
++
++# Local import
++from datatypes import get_issue_fields
++
++
++def check_properties_differencies(prop1, prop2):
++    "Check for differences of properties values"
++    if type(prop1) in (Property, list):
++        return prop1 != prop2
++    elif prop1 is None:
++        return prop2 is not None
++    else:
++        raise TypeError('This method wait for Property, or list of Property')
++
++###########################################################################
++# Menu
++###########################################################################
++class IssueTrackerMenu(ContextMenu):
++
++    title = MSG(u'Tracker')
++
++    def get_items(self):
++        path = self.context.get_link(self.resource.parent)
++        return [
++            {'title': MSG(u'Search for issues'), 'href': '%s/;search' % path},
++            {'title': MSG(u'Add a new issue'), 'href': '%s/;add_issue' % path}]
+ 
+ 
+ 
+-class TchackIssue_Edit(Issue_Edit):
++###########################################################################
++# Views
++###########################################################################
++class Issue_Edit(STLForm):
+ 
+     access = 'is_allowed_to_edit'
+     title = MSG(u'Edit Issue')
+     icon = 'edit.png'
+-    template = '/ui/tchacker/edit_issue.xml'
+-    styles = ['ui/tracker/style.css',
+-              '/ui/tchacker/style.css', '/ui/thickbox/style.css']
+-    scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
+-               '/ui/flowplayer/flowplayer-3.2.2.min.js']
++    template = '/ui/tracker/edit_issue.xml'
++    styles = ['/ui/tracker/style.css']
++    scripts = ['/ui/tracker/tracker.js']
++
+ 
+     def get_schema(self, resource, context):
+-        return get_issue_fields(resource.parent)
++        tracker = resource.parent
++        return get_issue_fields(tracker)
++
+ 
+     def get_value(self, resource, context, name, datatype):
+-        history = resource.get_history()
+-        record = history.get_record(-1)
+-        return  record.get_value(name)
++        if name in ('comment'):
++            return datatype.get_default()
++        return resource.get_property(name)
++
+ 
+     def get_namespace(self, resource, context):
+-        namespace = Issue_Edit.get_namespace(self, resource, context)
+-        # Build the namespace
+-        for comment in namespace['comments']:
+-            if comment['file']:
+-                attachment = resource.get_resource(comment['file'])
+-                comment['is_image'] = isinstance(attachment, Image)
+-                comment['is_video'] = isinstance(attachment, Video)
+-                comment['width'] = 200
+-                comment['height'] = 200
+-                #print("is_video = %s" % comment['is_video'])
+-                if comment['is_video']:
+-                    name = attachment.name
+-                    filename, ext, lang = FileName.decode(name)
+-                    thumb = attachment.metadata.get_property('thumbnail')
+-                    video = resource.get_resource("%s" % name)
+-                    comment['video'] = ("%s" % filename)
+-                    comment['width'] = video.metadata.get_property('width')
+-                    comment['height'] = video.metadata.get_property('height')
+-                    if thumb == "True":
+-                        comment['old'] = ""
+-                    elif thumb == "False":
+-                        comment['old'] = "_low"
+-                    else:
+-                        comment['width'] = False
+-                        comment['height'] = False
+-                        comment['is_image'] = False
+-                        comment['is_video'] = False
+-                        comment['old'] = False
++        namespace = STLForm.get_namespace(self, resource, context)
++
++        tracker = resource.parent
++        namespace['list_products'] = tracker.get_list_products_namespace()
++
++        # Local variables
++        root = context.root
++
++        # Comments
++        namespace['comments'] = CommentsView().GET(resource, context)
++
++        # cc_list
++        cc_list = resource.get_property('cc_list')
++        cc_list_userslist = self.get_schema(resource, context)['cc_list']
++        cc = []
++        nocc = []
++        for user in cc_list_userslist.get_options():
++            if user['name'] in cc_list:
++                cc.append(user)
+             else:
+-                comment['file'] = False
+-                comment['is_image'] = False
+-                comment['is_video'] = False
++                nocc.append(user)
++        namespace['cc'] = cc
++        namespace['nocc'] = nocc
++
++        # Reported by
++        reported_by = resource.get_reported_by()
++        namespace['reported_by'] = root.get_user_title(reported_by)
++
++        # Attachments
++        links = []
++        get_user = root.get_user_title
++        for attachment_name in resource.get_property('attachment'):
++            attachment = resource.get_resource(attachment_name, soft=True)
++            missing = (attachment is None)
++            author = mtime = None
++            if missing is False:
++                mtime = attachment.get_property('mtime')
++                mtime = context.format_datetime(mtime)
++                author = get_user(attachment.get_property('last_author'))
++
++            links.append({
++                'author': author,
++                'missing': missing,
++                'mtime': mtime,
++                'name': attachment_name})
++
++        namespace['attachments'] = links
+ 
+         return namespace
++
++
++    def action(self, resource, context, form):
++        # Edit
++        resource.add_comment(context, form)
++        # Change
++        context.database.change_resource(resource)
++        context.message = MSG_CHANGES_SAVED
++
++
++
++class Issue_History(STLView):
++
++    access = 'is_allowed_to_view'
++    title = MSG(u'History')
++    icon = 'history.png'
++    template = '/ui/tracker/issue_history.xml'
++    styles = ['/ui/tracker/style.css']
++
++
++    def get_namespace(self, resource, context):
++        # Local variables
++        users = resource.get_resource('/users')
++        tracker = resource.parent
++        versions = tracker.get_resource('version').handler
++        types = tracker.get_resource('type').handler
++        states = tracker.get_resource('state').handler
++        products = tracker.get_resource('product').handler
++        modules = tracker.get_resource('module').handler
++        priorities = tracker.get_resource('priority').handler
++        # Initial values
++        previous_title = None
++        previous_version = None
++        previous_type = None
++        previous_state = None
++        previous_module = None
++        previous_priority = None
++        previous_assigned_to = None
++        previous_cc_list = None
++        previous_product = None
++        previous_attachment = None
++
++        # Build the namespace
++        rows = []
++        i = 0
++        for metadata in resource.get_history():
++            # Skip old data (before 0.62) FIXME
++            mtime = metadata.get_property('mtime')
++            if mtime is None:
++                continue
++
++            username = metadata.get_property('last_author').value
++            title = metadata.get_property('title')
++            module = metadata.get_property('module')
++            version = metadata.get_property('version')
++            type_prop = metadata.get_property('type')
++            priority = metadata.get_property('priority')
++            assigned_to = metadata.get_property('assigned_to')
++            state = metadata.get_property('state')
++            comments = metadata.get_property('comment')
++            cc_list = metadata.get_property('cc_list')
++            product = metadata.get_property('product')
++            attachment = metadata.get_property('attachment')
++
++            # Solid in case the user has been removed
++            user = users.get_resource(username, soft=True)
++            usertitle = user and user.get_title() or username
++
++            if comments and comments[-1].get_parameter('date') == mtime.value:
++                comment = comments[-1].value
++                comment = XMLContent.encode(Unicode.encode(comment))
++                comment = XMLParser(comment.replace('\n', '<br />'))
++            else:
++                comment = None
++            i += 1
++            row_ns = {'number': i,
++                      'user': usertitle,
++                      'datetime': context.format_datetime(mtime.value),
++                      'title': None,
++                      'version': None,
++                      'type': None,
++                      'state': None,
++                      'module': None,
++                      'priority': None,
++                      'assigned_to': None,
++                      'comment': comment,
++                      'cc_list': None,
++                      'product': None,
++                      'attachment': None}
++            if check_properties_differencies(title, previous_title):
++                previous_title = title
++                row_ns['title'] = title.value
++            if check_properties_differencies(version, previous_version):
++                previous_version = version
++                row_ns['version'] = ' '
++                if version is not None:
++                    version = versions.get_record(int(version.value))
++                    if version:
++                        value = versions.get_record_value(version, 'title')
++                        row_ns['version'] = value
++            if check_properties_differencies(type_prop, previous_type):
++                previous_type = type_prop
++                row_ns['type'] = ' '
++                if type_prop is not None:
++                    type_prop = types.get_record(int(type_prop.value))
++                    if type_prop is not None:
++                        value = types.get_record_value(type_prop, 'title')
++                        row_ns['type'] = value
++            if check_properties_differencies(state, previous_state):
++                previous_state = state
++                row_ns['state'] = ' '
++                if state is not None:
++                    state = states.get_record(int(state.value))
++                    if state is not None:
++                        value = states.get_record_value(state, 'title')
++                        row_ns['state'] = value
++            if check_properties_differencies(module, previous_module):
++                previous_module = module
++                row_ns['module'] = ' '
++                if module is not None:
++                    module = modules.get_record(int(module.value))
++                    if module is not None:
++                        value = modules.get_record_value(module, 'title')
++                        row_ns['module'] = value
++            if check_properties_differencies(priority, previous_priority):
++                previous_priority = priority
++                row_ns['priority'] = ' '
++                if priority is not None:
++                    priority = priorities.get_record(int(priority.value))
++                    if priority is not None:
++                        value = priorities.get_record_value(priority, 'title')
++                        row_ns['priority'] = value
++            if check_properties_differencies(assigned_to, previous_assigned_to):
++                previous_assigned_to = assigned_to
++                row_ns['assigned_to'] = ' '
++                if assigned_to and len(assigned_to.value):
++                    assigned_to_user = users.get_resource(assigned_to.value, soft=True)
++                    if assigned_to_user is not None:
++                        row_ns['assigned_to'] = assigned_to_user.get_title()
++            if check_properties_differencies(cc_list, previous_cc_list):
++                root = context.root
++                previous_cc_list = cc_list
++                new_values = []
++                for cc in cc_list.value:
++                    user = root.get_user(cc)
++                    if user:
++                        new_values.append(user.get_property('email'))
++                if new_values:
++                    row_ns['cc_list'] = u', '.join(new_values)
++                else:
++                    row_ns['cc_list'] = ' '
++            if check_properties_differencies(product, previous_product):
++                previous_product = product
++                row_ns['product'] = ' '
++                if product is not None:
++                    product = products.get_record(int(product.value))
++                    if product is not None:
++                        value = products.get_record_value(product, 'title')
++                        row_ns['product'] = value
++            if check_properties_differencies(attachment, previous_attachment):
++                previous_attachment= attachment
++                row_ns['attachment'] = attachment[-1].value
++
++            rows.append(row_ns)
++            # Avoid attachment repetition for next comment
++            attachment = None
++
++        rows.reverse()
++
++        # Ok
++        return {'number': resource.name, 'rows': rows}
+Seulement dans .: locale
+Seulement dans .: MANIFEST
+Seulement dans ../ikaaro/tracker/: obsolete.py
+Seulement dans .: out
+Seulement dans .: out.flakes
+Seulement dans .: pip-log.txt
+Seulement dans .: resources.py
+Seulement dans .: setup.conf
+Seulement dans .: setup.py
+diff -u ./stored.py ../ikaaro/tracker/stored.py
+--- ./stored.py	2011-01-27 09:26:02.343944409 +0100
++++ ../ikaaro/tracker/stored.py	2011-02-20 18:43:17.613612765 +0100
+@@ -25,7 +25,6 @@
+ from itools.handlers import ConfigFile
+ 
+ # Import from ikaaro
+-from ikaaro.registry import register_resource_class
+ from ikaaro.text import Text
+ 
+ 
+@@ -47,12 +46,19 @@
+         }
+ 
+ 
+-class Tchack_StoredSearch(Text):
++class StoredSearch(Text):
+ 
+-    class_id = 'tchack_stored_search'
+-    class_version = '20071215'
+-    class_title = MSG(u'Tchack Stored Search')
++    class_id = 'stored_search'
++    class_title = MSG(u'Stored Search')
+     class_handler = StoredSearchFile
++    class_views = ['view', 'links', 'backlinks', 'commit_log']
++
++    # Disable edit view
++    edit = None
++    external_edit = None
++
++    # Hide in browse_content
++    is_content = False
+ 
+ 
+     def get_values(self, name, type=None):
+@@ -64,8 +70,3 @@
+             value = ' '.join(value)
+         self.handler.set_value(name, value)
+ 
+-
+-
+-
+-# Register
+-register_resource_class(Tchack_StoredSearch)
+Seulement dans ../ikaaro/tracker/: tables.py
+Seulement dans .: tracker-0.61-0.62.patch
+diff -u ./tracker.py ../ikaaro/tracker/tracker.py
+--- ./tracker.py	2011-02-20 11:12:12.577196074 +0100
++++ ../ikaaro/tracker/tracker.py	2011-02-20 18:42:14.161182321 +0100
+@@ -5,7 +5,6 @@
+ # Copyright (C) 2007-2008 Hervé Cauwelier <herve@itaapy.com>
+ # Copyright (C) 2007-2008 Juan David Ibáñez Palomar <jdavid@itaapy.com>
+ # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
+-# Copyright (C) 2009 Armel FORTUN <armel@maar.fr>
+ #
+ # This program is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+@@ -20,492 +19,247 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-from os.path import basename
++# Import from the Standard Library
++from datetime import datetime, timedelta
+ 
+ # Import from itools
++from itools.core import merge_dicts
++from itools.csv import Property
++from itools.datatypes import Integer, String, Tokens, Unicode
+ from itools.gettext import MSG
+-from itools.fs import FileName
++from itools.database import RangeQuery, AndQuery, OrQuery, PhraseQuery
++from itools.database import StartQuery
+ 
+ # Import from ikaaro
+-from ikaaro.tracker import Tracker
+-from ikaaro.registry import register_resource_class
+-from ikaaro.registry import get_resource_class
+-
+-#from resources import Tchack_Resources
+-from issue import Tchack_Issue
+-from tracker_views import Tchacker_View, Tracker_Zip_Img
+-
+-
+-
+-class Tchack_Tracker(Tracker):
++from ikaaro.folder import Folder
++from issue import Issue
++from stored import StoredSearch, StoredSearchFile
++from tables import ModulesResource, ModulesHandler
++from tables import Tracker_TableResource, Tracker_TableHandler
++from tables import VersionsResource, VersionsHandler
++from tracker_views import GoToIssueMenu, StoredSearchesMenu
++from tracker_views import Tracker_AddIssue, Tracker_Edit, Tracker_GoToIssue
++from tracker_views import Tracker_ExportToCSVForm, Tracker_ExportToCSV
++from tracker_views import Tracker_ExportToText, Tracker_ChangeSeveralBugs
++from tracker_views import Tracker_NewInstance, Tracker_Search, Tracker_View
++from tracker_views import Tracker_RememberSearch, Tracker_ForgetSearch
++
++
++resolution = timedelta.resolution
++
++
++
++default_types = [
++    u'Bug', u'New Feature', u'Security Issue', u'Stability Issue',
++    u'Data Corruption Issue', u'Performance Improvement',
++    u'Technology Upgrade']
++
++default_tables = [
++    ('product', []),
++    ('type', default_types),
++    ('state', [u'Open', u'Fixed', u'Verified', u'Closed']),
++    ('priority', [u'High', u'Medium', u'Low']),
++    ]
++
++
++class Tracker(Folder):
++
++    class_id = 'tracker'
++    class_version = '20100429'
++    class_title = MSG(u'Issue Tracker')
++    class_description = MSG(u'To manage bugs and tasks')
++    class_icon16 = 'tracker/tracker16.png'
++    class_icon48 = 'tracker/tracker48.png'
++    class_views = ['search', 'add_issue', 'browse_content', 'edit']
++
++    __fixed_handlers__ = ['product', 'module', 'version', 'type', 'priority',
++        'state']
++
++    class_schema = merge_dicts(Folder.class_schema,
++         included_roles=Tokens(source='metadata',
++                               default=('members', 'reviewers', 'admins')))
++
++
++    issue_class = Issue
++    stored_search_class = StoredSearch
++
++    def init_resource(self, **kw):
++        Folder.init_resource(self, **kw)
++        # Products / Types / Priorities / States
++        folder = self.handler
++        for table_name, values in default_tables:
++            self.make_resource(table_name, Tracker_TableResource)
++            table = Tracker_TableHandler()
++            for title in values:
++                title = Property(title, language='en')
++                table.add_record({'title': title})
++            folder.set_handler(table_name, table)
++        # Modules
++        self.make_resource('module', ModulesResource)
++        table = ModulesHandler()
++        folder.set_handler('module', table)
++        # Versions
++        self.make_resource('version', VersionsResource)
++        table = VersionsHandler()
++        folder.set_handler('version', table)
++        # Pre-defined stored searches
++        open = StoredSearchFile(state='0')
++        not_assigned = StoredSearchFile(assigned_to='nobody')
++        high_priority = StoredSearchFile(state='0', priority='0')
++        i = 0
++        for search, title in [(open, u'Open Issues'),
++                              (not_assigned, u'Not Assigned'),
++                              (high_priority, u'High Priority')]:
++            self.make_resource('s%s' % i, StoredSearch, title={'en': title})
++            folder.set_handler('s%s' % i, search)
++            i += 1
+ 
+-    class_id = 'tchack_tracker'
+-    class_version = '20110125'
+-    class_title = MSG(u'Tchack Issue Tracker')
+-    class_description = MSG(u'To manage images, videos, bugs and tasks')
+-    class_views = Tracker.class_views + ['zip']
+ 
+-    # Configuration
+-    issue_class = Tchack_Issue
++    def get_document_types(self):
++        return []
+ 
+-    # Views
+-    view = Tchacker_View()
+-    zip = Tracker_Zip_Img()
+ 
+     #######################################################################
+-    # Update
++    # API
+     #######################################################################
++    def get_new_id(self, prefix=''):
++        ids = []
++        for name in self.get_names():
++            if prefix:
++                if not name.startswith(prefix):
++                    continue
++                name = name[len(prefix):]
++            try:
++                id = int(name)
++            except ValueError:
++                continue
++            ids.append(id)
++
++        if ids:
++            ids.sort()
++            return prefix + str(ids[-1] + 1)
++
++        return prefix + '0'
++
++
++    def get_issues_query_terms(self):
++        abspath = self.get_canonical_path()
++        abspath = '%s/' % abspath
++        return [StartQuery('abspath', abspath),
++                PhraseQuery('format', self.issue_class.class_id)]
++
++
++    def get_list_products_namespace(self):
++        # Build javascript list of products/modules/versions
++        products = self.get_resource('product').handler
++
++        list_products = [{'id': '-1', 'modules': [], 'versions': []}]
++        for product_record in products.get_records_in_order():
++            product = {'id': product_record.id}
++            for element in ['module', 'version']:
++                elements = self.get_resource(element).handler
++
++                content = []
++                for record in elements.get_records_in_order():
++                    product_id = elements.get_record_value(record, 'product')
++                    if product_id is None:
++                        continue
++                    product_id = int(product_id)
++                    if product_id == product_record.id:
++                        content.append( {
++                         'id': record.id,
++                         'value': elements.get_record_value(record, 'title')})
++                product[element + 's'] = content
++            list_products.append(product)
++
++        return list_products
++
+ 
+-    def update_20110125(self):
+-        """Create thumbnails for all images present in the Tchacker"
++    def get_search_query(self, get_value):
++        """This method is like get_search_results, but works with
++           get_value and returns a query
+         """
+-        import os
+-        from tempfile import mkdtemp
+-        from PIL import Image as PILImage
+-        from itools.fs import vfs
+-        from ikaaro.file import Image
+-        from issue import Tchack_Issue
++        # Get search criteria
++        text = get_value('text', type=Unicode)
++        if text is not None:
++            text = text.strip().lower()
++        mtime = get_value('mtime', type=Integer)
++
++        # Build the query
++        query = self.get_issues_query_terms()
++        # Text search
++        if text:
++            # XXX The language of text should be given
++            #     => {'en': text}
++            query2 = [PhraseQuery('title', text), PhraseQuery('text', text)]
++            query2 = OrQuery(*query2)
++            query.append(query2)
++        # Metadata
++        integers_type = Integer(multiple=True)
++        names = 'product', 'module', 'version', 'type', 'priority', 'state'
++        for name in names:
++            data = get_value(name, type=integers_type)
++            if len(data) > 0:
++                query2 = [ PhraseQuery(name, value) for value in data ]
++                query2 = OrQuery(*query2)
++                query.append(query2)
++        # Modification time
++        if mtime:
++            date = datetime.now() - timedelta(mtime)
++            query2 = RangeQuery('mtime', date, None)
++            query.append(query2)
++        # Assign To
++        assigns = get_value('assigned_to', type=String(multiple=True))
++        if len(assigns) > 0:
++            query2 = []
++            for value in assigns:
++                value = value or 'nobody'
++                query2.append(PhraseQuery('assigned_to', value))
++            query2 = OrQuery(*query2)
++            query.append(query2)
+ 
+-        i = 0
++        # Return the query
++        return AndQuery(*query)
+ 
+-        for issue in self.search_resources(cls=Tchack_Issue):
+ 
+-            history = issue.get_history()
++    def get_search_results(self, context):
++        """Method that return a list of issues that correspond to the search.
++        """
++        # Choose stored Search or personalized search
++        search_name = context.query.get('search_name')
++        if search_name:
++            search = self.get_resource(search_name)
++            get_value = search.handler.get_value
++        else:
++            get_value = context.get_query_value
++
++        # Compute the query and return the result
++        query = self.get_search_query(get_value)
++        return context.root.search(query)
+ 
+-            for record in history.get_records():
+ 
+-                filename = record.file
+-                comment = record.comment
+-                is_image = False
+-                if not comment and not filename:
+-                    continue
+-                if filename:
+-                    file = issue.get_resource(filename)
+-                    is_image = isinstance(file, Image)
+-                    if not is_image:
+-                        continue
+-                    if is_image:
+-                        if file.metadata.format == "image/x-photoshop":
+-                            break
+-                        print("%s.Tracker.%s.Issue.%s.id.%s contain an image that need a Thumbnail"
+-                            % (i, issue.parent.parent.name, issue.name, record.id))
+-
+-                        name = file.name
+-                        # Handler is cached, and cache grow so much that it kill
+-                        # the process, so we need to use a simple os file open().
+-                        handler = file.handler
+-                        filename, extension, language = FileName.decode(basename(handler.key))
+-
+-                        fs = self.metadata.database.fs
+-                        #print("Image that need Thumbnail = %s" % fs.get_absolute_path(file.handler.key))
+-                        fileabspath = fs.get_absolute_path(file.handler.key)
+-                        with open("%s" % fileabspath, "r") as f:
+-                            body = f.read()
+-
+-                        dirname = mkdtemp('makethumbs', 'ikaaro')
+-                        tempdir = vfs.open(dirname)
+-                        # Paste the file in the tempdir
+-                        tmpfolder = "%s" % (dirname)
+-                        tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+-                        tmpfile = open("%s" % tmp_uri, "w+")
+-                        tmpfile.write(body)
+-                        tmpfile.close()
+-
+-                        low = 256, 256
+-                        med = 800, 800
+-                        hig = 1024, 1024
+-
+-                        # Create the thumbnail PNG resources
+-                        cls = get_resource_class('image/jpeg')
+-                        thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
+-                        uri = tmpfolder + os.sep
+-                        ext = "jpeg"
+-                        for te in thumbext:
+-                            try:
+-                                im = PILImage.open(tmp_uri)
+-                            except IOError:
+-                                print("IOError = %s" % fileabspath)
+-                            im.thumbnail(te[1], PILImage.ANTIALIAS)
+-                            ima = name + te[0]
+-                            # Some images are in CMYB, force RVB if needed
+-                            if im.mode != "RGB":
+-                                im = im.convert("RGB")
+-                            im.save(uri + ima + "." + ext, ext, quality=85)
+-                            # Copy the thumb content
+-                            thumb_file = tempdir.open(ima + "." + ext)
+-                            try:
+-                                thumb_data = thumb_file.read()
+-                            finally:
+-                                thumb_file.close()
+-                            self.make_resource(cls, issue, ima,
+-                                body=thumb_data, filename=ima,
+-                                extension=ext, format='image/%s' % ext)
+-                            print("Image %s, Taille %s" % (ima, te[1]))
+-                        file.metadata.set_property('thumbnail', "True")
+-                        # Clean the temporary folder
+-                        vfs.remove(dirname)
+-                    i+= 1
+-
+-
+-    def update_20110122(self):
+-        """If an issue contains a video file,
+-        encoded in h264 and widder than 319px,
+-        we encode a low version and create a thumbnail,
+-        and erase the original file.
+-        """
+-        import os
+-        from tempfile import mkdtemp
+-        from issue import Tchack_Issue
+-        from ikaaro.file import Video
+-        from itools.fs import vfs
+-        from ikaaro.registry import get_resource_class
+-        from videoencoding import VideoEncodingToFLV
+-        from ikaaro.exceptions import ConsistencyError
+-
+-        for issue in self.search_resources(cls=Tchack_Issue):
+-
+-            history = issue.get_history()
+-
+-            for record in history.get_records():
+-
+-                filename = record.file
+-                comment = record.comment
+-                is_video = False
+-                if not comment and not filename:
+-                    continue
+-                if filename:
+-                    file = issue.get_resource(filename)
+-                    is_video = isinstance(file, Video)
+-                    if not is_video:
+-                        continue
+-                    if is_video:
+-                        name = file.name
+-                        #mimetype = file.handler.get_mimetype()
+-                        #body = file.handler.to_str()
+-                        thumb = file.metadata.get_property('thumbnail')
+-                        filename = file.metadata.get_property('filename')
+-
+-                        #print("project = %s, issue = %s, name = %s, thumb = %s" %
+-                        #    (issue.parent.parent.name, issue.name, name, thumb))
+-
+-                        handler = file.handler.key
+-                        video = basename(handler)
+-                        #print("video = %s" % video)
+-                        videoname, videoext = os.path.splitext(video)
+-                        #print("videoname = %s, videoext = %s" % (videoname, videoext))
+-
+-                        as_low = issue.get_handler().has_handler(
+-                            "%s_low.flv" % videoname)
+-                        low = video.rfind("_low")
+-                        if low == -1:
+-                            is_low = False
+-                        else:
+-                            is_low = True
+-                            bigfile = name.replace("_low","")
+-                        is_big = issue.get_handler().has_handler(
+-                            "%s" % video)
+-
+-                        #print("as_low = %s" % (as_low))
+-                        #print("is_low = %s" % (is_low))
+-                        #print("is_big = %s" % (is_big))
+-
+-                        old_thumb = "thumb_%s" % name
+-                        as_old_thumb = issue.get_handler().has_handler(
+-                            "%s" % old_thumb)
+-
+-                        if thumb == "False" and as_low and is_big:
+-                            print("Remove Big original file : %s" % name)
+-                            #handler = file.handler.key
+-                            #videoname = os.path.basename(handler)
+-                            issue.del_resource(
+-                                name, soft='False')
+-                        if thumb == "False" and is_low:
+-                            print("Set thumbnail to True : %s" % name)
+-                            file.set_property("thumbnail", "True")
+-                            print("Remove Big original file : %s" % video)
+-                            try:
+-                                issue.del_resource(
+-                                    bigfile, soft='False')
+-                            except ConsistencyError:
+-                                print '*'
+-                                print '* Before going further, you nedd to run the following command on the instance:'
+-                                print '     $ icms-update-catalog.py <instance>'
+-                                print '*'
+-                                exit(0)
+-                        if as_old_thumb:
+-                            print("Remove the Old thumb for '%s'" % name)
+-                            issue.del_resource(old_thumb, soft='False')
+-                        #XXX Need to erase the original file (big one)
+-
+-
+-    def update_20110121(self):
+-        """If an issue contains a video file,
+-        larger than 319px,
+-        we encode a low version and create a thumbnail,
+-        and erase the original file.
+-        """
+-        import os
+-        from tempfile import mkdtemp
+-        from issue import Tchack_Issue
+-        from ikaaro.file import Video
+-        from itools.fs import vfs
+-        from ikaaro.registry import get_resource_class
+-        from videoencoding import VideoEncodingToFLV
+-        from itools.web import get_context
+-
+-
+-        for issue in self.search_resources(cls=Tchack_Issue):
+-
+-            history = issue.get_history()
+-
+-            for record in history.get_records():
+-
+-                filename = record.file
+-                comment = record.comment
+-                is_video = False
+-                if not comment and not filename:
+-                    continue
+-                if filename:
+-                    file = issue.get_resource(filename)
+-                    is_video = isinstance(file, Video)
+-                    mimetype = file.handler.get_mimetype()
+-                    print("file = %s, filename = %s, mimetype = %s" % (file, filename, mimetype))
+-                    mtype = mimetype.split("/")[0]
++    #######################################################################
++    # User Interface
++    #######################################################################
++    context_menus = [GoToIssueMenu(), StoredSearchesMenu()]
+ 
+-                    if not is_video:
+-                        continue
+-                    if is_video:
+-                        name = file.name
+-                        mimetype = file.handler.get_mimetype()
+-                        name , ext, lang = FileName.decode(filename)
+-
+-                        handler = file.handler.key
+-                        videoname = basename(handler)
+-
+-                        thumb = file.metadata.get_property('thumbnail')
+-                        joinfilename = file.metadata.get_property('filename')
+-
+-                        as_low = issue.get_handler().has_handler(
+-                            "%s_low.flv" % name)
+-                        is_low = name.rfind("_low")
+-                        is_big = issue.get_handler().has_handler(
+-                            "%s" % videoname)
+-
+-                        if thumb == "False" and not as_low and is_big:
+-                            # Not low encoded
+-                            if is_low == -1:
+-                                print("--> is_low = -1\nThe file '%s' is not \
+-                                    a low one" % name) 
+-                                print("is_low = -1")
+-                                body = file.handler.to_str()
+-                                dirname = mkdtemp('videoencoding', 'ikaaro')
+-                                tempdir = vfs.open(dirname)
+-                                # Paste the file in the tempdir
+-                                tmpfolder = "%s" % (dirname)
+-                                #root_path = file.handler.database.path
+-                                tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+-                                tmpfile = open("%s" % tmp_uri, "w+")
+-                                tmpfile.write(body)
+-                                tmpfile.close()
+-                                # Get size
+-                                dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
+-                                width, height, ratio = dim
+-                                # In case of a video in h264 and widder than 319px
+-                                # We encode it in Flv at 640px width  and make a thumbnail
+-                                width_low = 640
+-                                print("XXX - File not encoded, but already have " +
+-                                    "an old thumb. Encode & create a \"_low_thumb\"." +
+-                                    " Keep Thumb property to False for late " +
+-                                    "update AND modify issue value to %s_low_thumb.")
+-                                encoded = VideoEncodingToFLV(file).encode_video_to_flv(
+-                                    tmpfolder, name, name, width_low)
+-                                if encoded is not None:
+-                                    vidfilename, vidmimetype, \
+-                                        vidbody, vidextension = encoded['flvfile']
+-                                    thumbfilename, thumbmimetype, \
+-                                        thumbbody, thumbextension = encoded['flvthumb']
+-
+-                                    handler = file.handler
+-                                    #print("vidfilename = %s" % vidfilename)
+-                                    #print("filename = %s" % filename)
+-                                    # Replace
+-                                    try:
+-                                        handler.load_state_from_string(vidbody)
+-                                    except Exception, e:
+-                                        handler.load_state()
+-                                        print("Failed to load the file: %s" % str(e))
+-                                    # Update "filename" property
+-                                    file.set_property("filename", filename + "." + vidextension)
+-                                    # Update metadata format
+-                                    metadata = file.metadata
+-                                    #print("metadata.format = %s" % metadata.format)
+-                                    if '/' in metadata.format:
+-                                        if vidmimetype != metadata.format:
+-                                            metadata.format = vidmimetype
+-
+-                                    # Update handler name
+-                                    handler_name = basename(handler.key)
+-                                    #print("handler_name = %s" % handler_name)
+-                                    old_name, old_extension, old_lang = FileName.decode(handler_name)
+-                                    new_name , new_extension, new_lang = FileName.decode(filename)
+-                                    # FIXME Should 'FileName.decode' return lowercase extensions?
+-                                    new_extension = vidextension.lower()
+-                                    #print("old_name = %s, old_extension = %s, old_lang = %s, new_extension = %s" % (
+-                                    #    old_name, old_extension, old_lang, new_extension))
+-                                    if old_extension is not new_extension:
+-                                        # "handler.png" -> "handler.jpg"
+-                                        folder = file.parent.handler
+-                                        filename = FileName.encode((old_name, new_extension, old_lang))
+-                                        #folder.move_handler(handler_name,
+-                                        #        vidfilename +"."+ vidextension)
+-                                        folder.move_handler(handler_name, filename)
+-                                    # Create the thumbnail PNG resources
+-                                    cls = get_resource_class(thumbmimetype)
+-                                    self.make_resource(cls, issue, thumbfilename,
+-                                        body=thumbbody, filename=thumbfilename,
+-                                        extension=thumbextension, format=thumbmimetype)
+-                                    height_low = int(round(float(width_low) / ratio))
+-                                    file.metadata.set_property('width', str(width_low))
+-                                    file.metadata.set_property('height', str(height_low))
+-                                    file.metadata.set_property('ratio', str(ratio))
+-                                    # We keep the 'thumbnail' to False
+-                                    # to make difference between old & new video files
+-                                    file.set_property("thumbnail", "False")
+-                                # Clean the temporary folder
+-                                vfs.remove(dirname)
+-                                print("\n------")
+-                            else:
+-                                print("--> is_low = xxx\nThe file '%s' is already \
+-                                    a low one\n------" % name) 
+-
+-                        if thumb == "False" and as_low:
+-                            #The video as thumb value to False, but already
+-                            #encoded in LOW. Erase the original file.
+-                            print("333 - Need to change the Thumb value to True, and erase the Big original file, and modify issue value to %s_low")
+-
+-                        if thumb == "True" and as_low and is_big:
+-                            #The thumbnail value was not attributed to the
+-                            #low" resource in first version, add it now.
+-                            print("444 - Thumb=True and as_lox=True, put the " +
+-                                "Low link in history. Set thumb to False, %s." % (filename))
+-                            lowname = "%s_low" % filename
+-                            history.update_record(
+-                                record.id, ** {'file':"%s" % lowname})
+-                            print("history.%s change from '%s' to '%s'" % (
+-                                record.id, name, lowname))
+-                            print("record.id = %s, lowname = %s" % (
+-                                record.id, lowname))
+-                            # copy metadat Big > Low
+-                            newfile = issue.get_resource(lowname)
+-                            newfile.metadata.set_property("thumbnail", "False")
+-                            # Erase Big in next upgrade
+-                            print("-----\n")
+-                        """
+-                        else :
+-                            try:
+-                                issue.del_resource("thumb_%s" % name)
+-                            except LookupError:
+-                                pass
+-                            #issue.del_resource("thumb_%s" % name)
+-                            #file.metadata.set_property('thumbnail', 'True')
+-                            #database.remove_resource(name)
+-                        """
+-
+-
+-
+-    def update_20100718(self):
+-        """If an issue contains a video file, encoded in h264 and widder than 640px,
+-        we encode a low version and create a thumbnail.
+-        """
+-        import os
+-        from tempfile import mkdtemp
+-        from issue import Tchack_Issue
+-        from ikaaro.file import Video
+-        #from ikaaro.exceptions import ConsistencyError
+-        from itools.fs import vfs
+-        from itools.fs import FileName
+-        #from itools.core import guess_extension
+-        #from itools.uri import get_uri_path
+-        from ikaaro.registry import get_resource_class
+-        from videoencoding import VideoEncodingToFLV
+-
+-        for issue in self.search_resources(cls=Tchack_Issue):
+-
+-            history = issue.get_history()
+-
+-            for record in history.get_records():
+-
+-                filename = record.file
+-                comment = record.comment
+-                is_video = False
+-                if not comment and not filename:
+-                    continue
+-                if filename:
+-                    file = issue.get_resource(filename)
+-                    is_video = isinstance(file, Video)
+-                    if not is_video:
+-                        continue
+-                    if is_video:
+-                        name = file.name
+-                        filename, ext, lang = FileName.decode(name)
+-                        dirname = mkdtemp('videoencoding', 'ikaaro')
+-                        tempdir = vfs.open(dirname)
+-                        # Paste the file in the tempdir
+-                        tmpfolder = "%s" % (dirname)
+-                        #root_path = file.handler.database.path
+-                        tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+-                        tmpfile = open("%s" % tmp_uri, "w+")
+-                        tmpfile.write(file.handler.to_str())
+-                        tmpfile.close()
+-                        # Get size
+-                        dim = VideoEncodingToFLV(file).get_size_and_ratio(tmp_uri)
+-                        width, height, ratio = dim
+-                        # Codec
+-                        venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+-                        # In case of a video in h264 and larger than 319px
+-                        # We encode it in Flv and make a thumbnail
+-                        width_low = 640
+-                        if int(width) > width_low and venc == "h264":
+-                            #print("The video is in H264 video codec and wider
+-                            #      than 640px, create a low version")
+-                            # video is already in temp dir, so encode it
+-                            encoded = VideoEncodingToFLV(file).encode_video_to_flv(
+-                                tmpfolder, name, name, width_low)
+-                            file.metadata.set_property('width', width)
+-                            file.metadata.set_property('height', height)
+-                            file.metadata.set_property('ratio', str(ratio))
+-                            file.metadata.set_property('thumbnail', "True")
+-                            if encoded is not None:
+-                                vidfilename, vidmimetype, \
+-                                    vidbody, vidextension = encoded['flvfile']
+-                                thumbfilename, thumbmimetype, \
+-                                    thumbbody,thumbextension = encoded['flvthumb']
+-                                # Create the video resources
+-                                cls = get_resource_class(vidmimetype)
+-                                issue.make_resource(cls, issue, vidfilename,
+-                                    body=vidbody, filename=vidfilename,
+-                                    extension=vidextension, format=vidmimetype)
+-                                height_low = int(round(float(width_low) / ratio))
+-                                vid = issue.get_resource(vidfilename)
+-                                vid.metadata.set_property('width',
+-                                                          str(width_low))
+-                                vid.metadata.set_property('height',
+-                                                          str(height_low))
+-                                # Create the thumbnail PNG resources
+-                                cls = get_resource_class(thumbmimetype)
+-                                issue.make_resource(cls, issue, thumbfilename,
+-                                    body=thumbbody, filename=thumbfilename,
+-                                    extension=thumbextension, format=thumbmimetype)
+-
+-                            # Clean the temporary folder
+-                            vfs.remove(dirname)
+-                            #print("Done: %s 's low version is created" % name)
+-                        else:
+-                            file.metadata.set_property('thumbnail', "False")
+-
+-
+-###########################################################################
+-# Register
+-###########################################################################
++    # Views
++    new_instance = Tracker_NewInstance()
++    search = Tracker_Search()
++    view = Tracker_View()
++    add_issue = Tracker_AddIssue()
++    remember_search = Tracker_RememberSearch()
++    forget_search = Tracker_ForgetSearch()
++    go_to_issue = Tracker_GoToIssue()
++    edit = Tracker_Edit()
++    export_to_text = Tracker_ExportToText()
++    export_to_csv_form = Tracker_ExportToCSVForm()
++    export_to_csv = Tracker_ExportToCSV()
++    change_several_bugs = Tracker_ChangeSeveralBugs()
+ 
+-register_resource_class(Tchack_Tracker)
++
++    #######################################################################
++    # User Interface
++    #######################################################################
++    def update_20100429(self):
++        self.del_resource('calendar', soft=True)
+diff -u ./tracker_views.py ../ikaaro/tracker/tracker_views.py
+--- ./tracker_views.py	2011-02-17 17:58:57.910696275 +0100
++++ ../ikaaro/tracker/tracker_views.py	2011-02-20 18:42:14.165188278 +0100
+@@ -5,7 +5,6 @@
+ # Copyright (C) 2007-2008 Hervé Cauwelier <herve@itaapy.com>
+ # Copyright (C) 2007-2008 Juan David Ibáñez Palomar <jdavid@itaapy.com>
+ # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
+-# Copyright (C) 2009 Armel Fortun <armel@maar.fr>
+ #
+ # This program is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+@@ -20,164 +19,982 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-# Import from the Standard Library
+-from time import strftime
+-from tempfile import mkdtemp
+-#from subprocess import call
+-from zipfile import ZipFile
+-
+ # Import from itools
+-from itools.core import guess_extension
++from itools.core import merge_dicts, thingy_lazy_property
++from itools.csv import CSVFile, Property
++from itools.datatypes import Boolean, Integer, String, Unicode
+ from itools.gettext import MSG
+-from itools.fs import vfs
+-from itools.uri import encode_query #, get_uri_name
+-#from itools.fs import FileName
+-from itools.web import STLView
+-from itools.xml import XMLParser
+-#from itools.handlers import File as FileHandler
++from itools.handlers.utils import transmap
++from itools.stl import stl
++from itools.uri import encode_query, Reference
++from itools.web import BaseView, BaseForm, STLForm, FormError, INFO, ERROR
++from itools.web.views import process_form
+ 
+ # Import from ikaaro
+-#from ikaaro.views import ContextMenu
+-from ikaaro.views import CompositeView
+-from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
+-from ikaaro.tracker.tracker_views import TrackerViewMenu
+-from ikaaro.file import Image, Video
++from ikaaro.access import Roles_Datatype
++from ikaaro.autoform import HiddenWidget, SelectWidget, TextWidget
++from ikaaro.buttons import BrowseButton
++from ikaaro import messages
++from ikaaro.views import BrowseForm, SearchForm as BaseSearchForm, ContextMenu
++from ikaaro.views_new import NewInstance
++from ikaaro.registry import get_resource_class
++from ikaaro.resource_views import DBResource_Edit
++
++# Import from ikaaro.tracker
++from issue import Issue
++from datatypes import get_issue_fields, TrackerList, ProductInfoList
++from datatypes import Tracker_UsersList
++from stored import StoredSearch
++
++
++columns = [
++    ('id', MSG(u'Id')),
++    ('title', MSG(u'Title')),
++    ('product', MSG(u'Product')),
++    ('module', MSG(u'Module')),
++    ('version', MSG(u'Version')),
++    ('type', MSG(u'Type')),
++    ('state', MSG(u'State')),
++    ('priority', MSG(u'Priority')),
++    ('assigned_to', MSG(u'Assigned To')),
++    ('mtime', MSG(u'Modified'))]
++
++
++
++###########################################################################
++# Menus
++###########################################################################
++class GoToIssueMenu(ContextMenu):
++
++    title = MSG(u'Go To Issue')
++    template = '/ui/tracker/menu_goto.xml'
++
+ 
++    def path_to_tracker(self):
++        return '..' if isinstance(self.resource, Issue) else '.'
+ 
+ 
+-class Tchacker_ViewMenu(TrackerViewMenu):
++
++class StoreSearchMenu(ContextMenu):
++    """Form to store a search.
++    """
++    title = MSG(u'Remember this search')
++    template = '/ui/tracker/menu_remember.xml'
++
++    def get_query_schema(self):
++        resource = self.resource
++        stored_search_class = resource.stored_search_class
++        return merge_dicts(stored_search_class.class_handler.schema,
++                           search_name=String,
++                           search_title=Unicode)
++
++
++    @thingy_lazy_property
++    def search_name(self):
++        return self.context.get_query_value('search_name')
++
++
++    @thingy_lazy_property
++    def search(self):
++        search_name = self.search_name
++        if search_name:
++            return self.resource.get_resource(search_name, soft=True)
++        return None
++
++
++    def search_title(self):
++        search = self.search
++        return search.get_title() if search else None
++
++
++    def search_fields(self):
++        search = self.search
++        if search:
++            get = search.get_values
++            stored_search_class = search
++        else:
++            # Warning, a menu is not the default view!
++            query = process_form(self.context.get_query_value,
++                                 self.get_query_schema())
++            get = query.get
++
++            resource = self.resource
++            stored_search_class = resource.stored_search_class
++
++        # Fill the fields
++        fields = []
++        for name, type in stored_search_class.class_handler.schema.iteritems():
++            value = get(name)
++            if isinstance(value, list):
++                for x in value:
++                    fields.append({'name': name, 'value': type.encode(x)})
++            elif value is not None:
++                fields.append({'name': name, 'value': type.encode(value)})
++
++        # Ok
++        return fields
++
++
++
++class StoredSearchesMenu(ContextMenu):
++    """Provides links to every stored search.
++    """
++
++    title = MSG(u'Stored Searches')
++
++    def get_items(self):
++        context = self.context
++        resource = self.resource
++        root = context.root
++
++        # If called from a child
++        if isinstance(resource, Issue):
++            resource = resource.parent
++
++        # Namespace
++        search_name = context.get_query_value('search_name')
++        base = '%s/;view' % context.get_link(resource)
++        items = []
++        ac = resource.get_access_control()
++        for item in resource.search_resources(cls=StoredSearch):
++            if not ac.is_allowed_to_view(context.user, item):
++                continue
++            # Make the title
++            get_value = item.handler.get_value
++            query = resource.get_search_query(get_value)
++            issues_nb = len(root.search(query))
++            kw = {'search_title': item.get_property('title'),
++                  'issues_nb': issues_nb}
++            title = MSG(u'{search_title} ({issues_nb})')
++            title = title.gettext(**kw)
++
++            # Namespace
++            items.append({'title': title,
++                          'href': '%s?search_name=%s' % (base, item.name),
++                          'class': 'nav-active' if (item.name == search_name)
++                                                else None})
++        items.sort(lambda x, y: cmp(x['title'], y['title']))
++
++        return items
++
++
++
++class TrackerViewMenu(ContextMenu):
+ 
+     title = MSG(u'Advanced')
+ 
+-    def get_items(self, resource, context):
++    def get_items(self):
+         # Keep the query parameters
+-        schema = context.view.get_query_schema()
+-        params = encode_query(context.query, schema)
++        schema = self.context.view.get_query_schema()
++        params = encode_query(self.context.query, schema)
+         return [
+-            {'title': MSG(u'Download "Last Att." images as one Zip'),
+-             'href': ';zip?%s' % params}
+-              ] + TrackerViewMenu.get_items(self, resource, context)
++            {'title': MSG(u'Edit this search'),
++             'href': ';search?%s' % params},
++            {'title': MSG(u'Change Several Issues'),
++             'href': ';change_several_bugs?%s' % params},
++            {'title': MSG(u'Export to Text'),
++             'href': ';export_to_text?%s' % params},
++            {'title': MSG(u'Export to CSV'),
++             'href': ';export_to_csv_form?%s' % params}]
++
++
++
++###########################################################################
++# Views
++###########################################################################
++class Tracker_NewInstance(NewInstance):
++
++    schema = merge_dicts(NewInstance.schema, product=Unicode(mandatory=True))
++    widgets = NewInstance.widgets + [
++        TextWidget('product', title=MSG(u'Give the title of one Product'))]
++
++
++    def action(self, resource, context, form):
++        # Get the container
++        container = form['container']
++        # Make the resource
++        name = form['name']
++        class_id = context.query['type']
++        cls = get_resource_class(class_id)
++        child = container.make_resource(name, cls)
++        # The metadata
++        language = container.get_edit_languages(context)[0]
++        title = Property(form['title'], lang=language)
++        child.metadata.set_property('title', title)
++        # Add the initial product
++        product = form['product']
++        table = container.get_resource('%s/product' % name).get_handler()
++        product = Property(product, language='en')
++        table.add_record({'title': product})
++        # Ok
++        goto = str(resource.get_pathto(child))
++        return context.come_back(messages.MSG_NEW_RESOURCE, goto=goto)
++
++
++
++class Tracker_Edit(DBResource_Edit):
++
++    widgets = (DBResource_Edit.widgets + [
++        SelectWidget('included_roles',
++            title=MSG(u"Authorized roles for 'Assigned to' and 'CC' fields"),
++            has_empty_option=False)])
++
+ 
++    def _get_schema(self, resource, context):
++        roles = Roles_Datatype(resource=resource, multiple=True,
++                               mandatory=True)
++        return merge_dicts(DBResource_Edit.schema, included_roles=roles)
+ 
+ 
+-class Tchacker_ViewTop(STLView):
++    def get_value(self, resource, context, name, datatype):
++        if name == 'included_roles':
++            return list(resource.get_property('included_roles'))
+ 
+-    template = '/ui/tchacker/tchacker_view_top.xml.en'
++        proxy = super(Tracker_Edit, self)
++        return proxy.get_value(resource, context, name, datatype)
+ 
+ 
+-class Tchacker_ViewBottom(Tracker_View):
++    def set_value(self, resource, context, name, form):
++        if name == 'included_roles':
++            value = form['included_roles']
++            resource.set_property('included_roles', tuple(value))
++            return False
++
++        proxy = super(Tracker_Edit, self)
++        return proxy.set_value(resource, context, name, form)
++
++
++
++class Tracker_AddIssue(STLForm):
++
++    access = 'is_allowed_to_edit'
++    title = MSG(u'Add')
++    icon = 'new.png'
++    template = '/ui/tracker/add_issue.xml'
++    styles = ['/ui/tracker/style.css']
++    scripts = ['/ui/tracker/tracker.js']
++
++
++    def get_schema(self, resource, context):
++        schema = get_issue_fields(resource)
++        schema['comment'] = Unicode(mandatory=True)
++        return schema
++
++
++    def get_value(self, resource, context, name, datatype):
++        if getattr(datatype, 'mandatory', False):
++            datatype = datatype(mandatory=False)
++        value = context.get_query_value(name, type=datatype)
++        # By default, set cc_list to the current user
++        if name == 'cc_list' and not value:
++            return [context.user.name]
++        return value
++
++
++    def get_namespace(self, resource, context):
++        namespace = STLForm.get_namespace(self, resource, context)
++        namespace['list_products'] = resource.get_list_products_namespace()
++        return namespace
++
++
++    def action(self, resource, context, form):
++        # Add
++        id = resource.get_new_id()
++        issue_cls = resource.issue_class
++        issue = resource.make_resource(id, issue_cls)
++        issue.add_comment(context, form, new=True)
++
++        # Ok
++        message = INFO(u'New issue added.')
++        goto = './%s/' % id
++        return context.come_back(message, goto=goto)
++
++
++
++class Tracker_View(BrowseForm):
+ 
+     access = 'is_allowed_to_view'
+     title = MSG(u'View')
+     icon = 'view.png'
++    styles = ['/ui/tracker/style.css']
++
+ 
+-    # XXX
+-    #table_template = '/ui/tchacker/browse_table.xml'
+-    #context.styles.append('/ui/tchacker/tracker.css')
++    schema = {
++        'ids': String(multiple=True, mandatory=True)}
++
++    tracker_schema = {
++        # Do not batch
++        'batch_size': Integer(default=0),
++        # search_fields
++        'search_name': String(),
++        'mtime': Integer(default=0),
++        'product': Integer(multiple=True),
++        'module': Integer(multiple=True),
++        'version': Integer(multiple=True),
++        'type': Integer(multiple=True),
++        'state': Integer(multiple=True),
++        'priority': Integer(multiple=True),
++        'assigned_to': String(multiple=True),
++        # Specific fields
++        'search_field': String,
++        'search_term': Unicode,
++        # BrowseForm fields
++        'sort_by': String,
++        'reverse': Boolean(default=None),
++    }
++
++    context_menus = [StoreSearchMenu(), TrackerViewMenu()]
++
++
++    def get_query_schema(self):
++        return merge_dicts(BrowseForm.get_query_schema(self),
++                           self.tracker_schema)
++
++
++    def on_query_error(self, resource, context):
++        query = encode_query(context.uri.query)
++        return context.come_back(None, goto=';search?%s' % query)
++
++
++    def get_page_title(self, resource, context):
++        query = getattr(context, 'query', {})
++        search_name = query.get('search_name')
++        if search_name:
++            search = context.resource.get_resource(search_name, soft=True)
++            if search:
++                search = search.get_title()
++                template = MSG(u'{title} - {search}')
++                title = self.title.gettext()
++                return template.gettext(title=title, search=search)
++
++        return self.title
++
++
++    def GET(self, resource, context):
++        # Check stored search
++        search_name = context.query['search_name']
++        if search_name:
++            search = resource.get_resource(search_name, soft=True)
++            if search is None:
++                msg = MSG(u'Unknown stored search "{sname}".')
++                goto = ';search'
++                return context.come_back(msg, goto=goto, sname=search_name)
++        # Ok
++        return BrowseForm.GET(self, resource, context)
++
++
++    def get_namespace(self, resource, context):
++        # Default table namespace
++        namespace = BrowseForm.get_namespace(self, resource, context)
++
++        # Keep the search_parameters, clean different actions
++        schema = self.get_query_schema()
++        namespace['search_parameters'] = encode_query(context.query, schema)
++
++        return namespace
++
++
++    def get_items(self, resource, context):
++        return resource.get_search_results(context)
++
++
++    def sort_and_batch(self, resource, context, results):
++        query = context.query
++        # Stored search, or default
++        search_name = query['search_name']
++        if search_name:
++            search = resource.get_resource(search_name).handler
++            sort_by = search.get_value('sort_by')
++            reverse = search.get_value('reverse')
++        else:
++            sort_by = 'title'
++            reverse = False
++        # Query takes precedence
++        if query['sort_by'] is not None:
++            sort_by = query['sort_by']
++        if query['reverse'] is not None:
++            reverse = query['reverse']
++
++        # Case 1: title
++        if sort_by == 'title':
++            items = results.get_documents()
++            key = lambda x: x.title.lower().translate(transmap)
++            items.sort(key=key, reverse=reverse)
++            return items
++
++        # Case 2: ordered table
++        if sort_by in ('product', 'module', 'version', 'type', 'state',
++                       'priority'):
++            # Make the key function
++            table_handler = resource.get_resource(sort_by).handler
++            sorted_ids = list(table_handler.get_record_ids_in_order())
++
++            def key(x):
++                x_value = getattr(x, sort_by)
++                try:
++                    return sorted_ids.index(x_value)
++                except ValueError:
++                    return None
++
++            # Sort
++            items = results.get_documents()
++            items.sort(key=key, reverse=reverse)
++
++            # Return the result
++            return items
++
++        # Case 3: something else
++        return results.get_documents(sort_by=sort_by, reverse=reverse)
+ 
+ 
+     def get_item_value(self, resource, context, item, column):
+-        # Last Attachement
+-        if column == 'issue_last_attachment':
+-            attach_name = item.issue_last_attachment
+-            issue = item.name
+-            if attach_name is None:
+-                return None
+-            attach = resource.get_resource('%s/%s' % (issue, attach_name))
+-            #print item.name, attach, isinstance(attach, Video)
+-            if isinstance(attach, Image) is True:
+-                img_template = '<img src="./%s/%s_LOW/;download"/>'
+-                return XMLParser(img_template % (issue, attach_name))
+-            if isinstance(attach, Video) is True:
+-                thumb = attach.metadata.get_property('thumbnail')
+-                #print("thumb = %s" % thumb)
+-                if thumb == 'True':
+-                    # The encoded file already as a name "fn_low.flv" 
+-                    img_template = '<img \
+-                        src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
+-                #TODO: Don't think it can append, as we encode every video input file
+-                else:
+-                    img_template = '<img \
+-                        src="./%s/%s_low_thumb/;thumb?width=256&amp;height=256"/>'
+-                return XMLParser(img_template % (issue, attach_name))
+-            else:
+-                return None
+-        # Last Author
+-        elif column == 'issue_last_author':
+-            user_id = item.issue_last_author
+-            user = resource.get_resource('/users/%s' % user_id, soft=True)
++        if column == 'checkbox':
++            datatype = String(multiple=True)
++            selected_issues = context.get_form_value('ids', type=datatype)
++            return item.name, item.name in selected_issues
++        if column == 'id':
++            id = item.name
++            return id, '%s/;edit' % id
++
++        value = getattr(item, column)
++        if value is None:
++            return None
++        if column == 'title':
++            return value, '%s/;edit' % item.name
++        # Assigned to
++        if column == 'assigned_to':
++            users = resource.get_resource('/users')
++            user = users.get_resource(value, soft=True)
+             if user is None:
+                 return None
+             return user.get_title()
++        # Mtime
++        if column == 'mtime':
++            return context.format_datetime(value)
++
++        # Tables
++        table = resource.get_resource(column).handler
++        table_record = table.get_record(value)
++        if table_record is None:
++            return None
++        return table.get_record_value(table_record, 'title')
++
++
++    table_actions = []
+ 
+-        return Tracker_View.get_item_value(self, resource, context, item,
+-                                           column)
+ 
+     def get_table_columns(self, resource, context):
+-        table_columns = Tracker_View.get_table_columns(self, resource, context)
+-        # Insert the last attachement row's title in the table
+-        table_columns.insert(2, ('issue_last_attachment', 'Last Attach.'))
+-        table_columns.insert(11, ('issue_last_author', 'Last Auth.'))
++        table_columns = columns[:]
++        table_columns.insert(0, ('checkbox', None))
+         return table_columns
+ 
+ 
+ 
+-class Tchacker_View(CompositeView):
++class Tracker_Search(BaseSearchForm, Tracker_View):
+ 
+     access = 'is_allowed_to_view'
+-    subviews = [Tchacker_ViewTop(),
+-                Tchacker_ViewBottom()]
++    title = MSG(u'Search')
++    icon = 'search.png'
++    styles = ['/ui/tracker/style.css']
++    scripts = ['/ui/tracker/tracker.js']
++
++
++    # Search Form
++    search_template = '/ui/tracker/search.xml'
++    search_schema = {
++        'search_name': String(),
++        'search_title': Unicode(),
++        'text': Unicode(),
++        'mtime': Integer(),
++        'product': Integer(multiple=True),
++        'module': Integer(multiple=True),
++        'version': Integer(multiple=True),
++        'type': Integer(multiple=True),
++        'state': Integer(multiple=True),
++        'priority': Integer(multiple=True),
++        'assigned_to': String(multiple=True)
++        }
+ 
+-    context_menus = [StoreSearchMenu(),
+-                     Tchacker_ViewMenu()]
+-    scripts = ['/ui/tchacker/tracker.js']
+-    styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
++    context_menus = []
++
++
++    def get_query(self, context):
++        try:
++            return BaseSearchForm.get_query(self, context)
++        except FormError:
++            schema = self.get_query_schema()
++            query = {}
++            for name in schema:
++                default = schema[name].get_default()
++                query[name] = context.uri.query.get(name, default)
++            return query
++
++
++    on_query_error = BaseSearchForm.on_query_error
++
++
++    def get_search_namespace(self, resource, context):
++        # Search Form
++        get_resource = resource.get_resource
++        query = context.query
++        search_name = query['search_name']
++        if search_name:
++            search = get_resource(search_name)
++            get_value = search.handler.get_value
++            get_values = search.get_values
++            search_title = search.get_property('title')
++        else:
++            get_value = query.get
++            get_values = query.get
++            search_name = None
++            search_title = query['search_title']
++
++        # Build the namespace
++        product = get_values('product')
++        module = get_values('module')
++        version = get_values('version')
++        type = get_values('type')
++        state = get_values('state')
++        priority = get_values('priority')
++        assigned_to = get_values('assigned_to')
++
++        # is_admin
++        ac = resource.get_access_control()
++        pathto_website = resource.get_pathto(resource.get_site_root())
++
++        return  {
++           'search_name': search_name,
++           'search_title': search_title,
++           'text': get_value('text'),
++           'mtime': get_value('mtime'),
++           'is_admin': ac.is_admin(context.user, resource),
++           'manage_assigned': '%s/;browse_users' % pathto_website,
++           'products': TrackerList(element='product',
++                                   tracker=resource).get_namespace(product),
++           'modules': ProductInfoList(element='module',
++                                      tracker=resource).get_namespace(module),
++           'versions': ProductInfoList(element='version',
++                                     tracker=resource).get_namespace(version),
++           'types': TrackerList(element='type',
++                                tracker=resource).get_namespace(type),
++           'states': TrackerList(element='state',
++                                 tracker=resource).get_namespace(state),
++           'priorities': TrackerList(element='priority',
++                                 tracker=resource).get_namespace(priority),
++           'assigned_to': Tracker_UsersList(
++                              resource=resource).get_namespace(assigned_to),
++           'list_products': resource.get_list_products_namespace()}
++
++
++    def get_namespace(self, resource, context):
++        search_template = resource.get_resource(self.search_template)
++        search_namespace = self.get_search_namespace(resource, context)
++        return {
++            'batch': None,
++            'table': None,
++            'search': stl(search_template, search_namespace)}
++
++
++
++class Tracker_RememberSearch(BaseForm):
++
++    access = 'is_allowed_to_edit'
++
++    def get_schema(self, resource, context):
++        return merge_dicts(resource.stored_search_class.class_handler.schema,
++                           search_name=String,
++                           search_title=Unicode(mandatory=True))
+ 
+-    """
+     def GET(self, resource, context):
+-        context.scripts.append('/ui/tchacker/tracker.js')
+-        context.styles.append('/ui/tchacker/tracker.css')
+-        return CompositeView.GET(self, resource, context)
+-    """
++        # Required for when the form fails the automatic checks
++        return context.come_back(message=context.message)
++
++
++    def action(self, resource, context, form):
++        search_name = form.get('search_name')
++        title = form['search_title']
++
++        # Already a search name ?
++
++        # No
++        if search_name is None:
++            # Search for a search with the same title
++            if isinstance(resource, Issue):
++                resource = resource.parent
++            searches = resource.search_resources(cls=StoredSearch)
++            for search in searches:
++                # Found !
++                if title == search.get_property('title'):
++                    search_name = search.name
++                    message = MSG(u'The search has been modified.')
++                    break
++            else:
++                # Not found => so we make a new search resource
++                search_name = resource.get_new_id('s')
++                search = resource.make_resource(search_name, StoredSearch)
++                message = MSG(u'The search has been stored.')
++        # Yes
++        else:
++            search = resource.get_resource(search_name)
++            message = MSG(u'The search title has been changed.')
++
++        # Reset the search
++        search.handler.load_state_from_string('')
++
++        # Set title
++        language = resource.get_edit_languages(context)[0]
++        search.set_property('title', title, language=language)
++
++        # Save the value
++        for name, type in search.class_handler.schema.iteritems():
++            value = form.get(name, None)
++            if value:
++                search.set_values(name, value, type)
++
++        # Go
++        return context.come_back(message, goto=';view?search_name=%s' %
++                                          search_name)
++
++
++
++class Tracker_ForgetSearch(BaseForm):
++
++    access = 'is_allowed_to_edit'
++    schema = {
++        'search_name': String(mandatory=True)}
+ 
+-class Tracker_Zip_Img(Tchacker_ViewBottom):
++
++    def action(self, resource, context, form):
++        name = form['search_name']
++        resource.del_resource(name)
++        # Ok
++        message = MSG(u'The search has been removed.')
++        return context.come_back(message, goto=';search')
++
++
++
++class Tracker_GoToIssue(BaseView):
+ 
+     access = 'is_allowed_to_view'
+-    title = MSG(u'Zip Last Images')
+ 
+     def GET(self, resource, context):
++        issue_name = context.get_form_value('issue_name')
++        if not issue_name:
++            return context.come_back(messages.MSG_NAME_MISSING)
++
++        issue = resource.get_resource(issue_name, soft=True)
++        if issue is None or not isinstance(issue, Issue):
++            return context.come_back(ERROR(u'Issue not found.'))
++
++        return context.uri.resolve2('../%s' % issue_name)
++
++
++
++class Tracker_ExportToCSVForm(Tracker_View):
++
++    template = '/ui/tracker/export_to_csv.xml'
++    external_form = True
++
++    def get_query_schema(self):
++        schema = Tracker_View.get_query_schema(self)
++        schema['ids'] = String(multiple=True, default=[])
++        return schema
++
++
++    def get_namespace(self, resource, context):
++        namespace = Tracker_View.get_namespace(self, resource, context)
++        query = context.query
++
++        # Insert query parameters as hidden input fields
++        parameters = []
++        schema = Tracker_View.get_query_schema(self)
++        for name in schema:
++            if name in namespace:
++                continue
++            value = query[name]
++            datatype = schema[name]
++            if datatype.multiple is True:
++                for value in value:
++                    value = datatype.encode(value)
++                    parameters.append({'name': name, 'value': value})
++            else:
++                default = datatype.get_default()
++                if value != default:
++                    value = datatype.encode(value)
++                    parameters.append({'name': name, 'value': value})
++        namespace['hidden_fields'] = parameters
++
++        return namespace
++
++
++
++class Tracker_ExportToCSV(BaseView):
++
++    access = 'is_allowed_to_view'
++    title = MSG(u'Export to CSV')
++    query_schema = {
++        'editor': String(default='excel'),
++        'ids': String(multiple=True),
++    }
++
++
++    def GET(self, resource, context):
++        # Get search results
++        results = resource.get_search_results(context)
++        if isinstance(results, Reference):
++            return results
++
++        # Selected issues
++        issues = results.get_documents()
++        selected_issues = context.query['ids']
++        if selected_issues:
++            issues = [ x for x in issues if x.name in selected_issues ]
++
++        if len(issues) == 0:
++            context.message = ERROR(u"No data to export.")
++            return
++
++        # Get CSV encoding and separator (OpenOffice or Excel)
++        editor = context.query['editor']
++        if editor == 'oo':
++            separator = ','
++            encoding = 'utf-8'
++        else:
++            separator = ';'
++            encoding = 'cp1252'
++
++        # Create the CSV
++        csv = CSVFile()
++        for issue in issues:
++            issue = get_issue_informations(resource, issue, context)
++            row = []
++            for name, label in columns:
++                value = issue[name]
++                if isinstance(value, unicode):
++                    value = value.encode(encoding)
++                else:
++                    value = str(value)
++                row.append(value)
++            csv.add_row(row)
++
++        # Ok
++        context.set_content_type('text/comma-separated-values')
++        context.set_content_disposition('attachment', 'export.csv')
++        return csv.to_str(separator=separator)
++
++
++
++class Tracker_ExportToText(Tracker_ExportToCSVForm):
++
++    template = '/ui/tracker/export_to_text.xml'
++
++    def get_query_schema(self):
++        schema = Tracker_ExportToCSVForm.get_query_schema(self)
++        schema['column_selection'] = String(multiple=True, default=['title'])
++        return schema
++
++
++    def get_namespace(self, resource, context):
++        namespace = Tracker_ExportToCSVForm.get_namespace(self, resource,
++                                                          context)
++        query = context.query
++
++        # Column Selector
++        selection = query['column_selection']
++        export_columns = columns[2:] + [columns[1]]
++        namespace['columns'] = [
++            {'name': name, 'title': title, 'checked': name in selection}
++            for name, title in export_columns ]
++
++        # Text
+         items = self.get_items(resource, context)
+-        issues = self.sort_and_batch(resource, context, items)
+-        # Get path of all attachment to add in zip
+-        dirname = '%s/zip' % mkdtemp('zip', 'ikaaro')
+-        zip = ZipFile(dirname, 'w')
++        items = self.sort_and_batch(resource, context, items)
++        selected_items = query['ids']
++        if selected_items:
++            items = [ x for x in items if x.name in selected_items ]
++        items = [ get_issue_informations(resource, x, context) for x in items ]
++        # Create the text
++        lines = []
++        for item in items:
++            name = item['name']
++            line = [u'#%s' % name]
++            for x in selection:
++                value = item[x]
++                if type(value) is unicode:
++                    pass
++                elif type(value) is str:
++                    value = unicode(value, 'utf-8')
++                else:
++                    value = unicode(value)
++                line.append(value)
++            line = u'\t'.join(line)
++            lines.append(line)
++        namespace['text'] = u'\n'.join(lines)
++
++        # Ok
++        return namespace
++
++
++
++class Tracker_ChangeSeveralBugs(Tracker_View):
++
++    access = 'is_allowed_to_view'
++    title = MSG(u'Change Several Issues')
++    template = '/ui/tracker/change_bugs.xml'
++    scripts = ['/ui/tracker/tracker.js']
++    schema = {
++        'comment': Unicode,
++        'ids': String(multiple=True),
++        'change_product': Integer,
++        'change_module': Integer,
++        'change_version': Integer,
++        'change_type': Integer,
++        'change_priority': Integer,
++        'change_assigned_to': String,
++        'change_state': Integer,
++    }
++
++    external_form = True
++
++    table_actions = [
++        BrowseButton(name='change_several_bugs', title=MSG(u'Edit issues'))]
++
++
++    def get_namespace(self, resource, context):
++        namespace = Tracker_View.get_namespace(self, resource, context)
++        # Edit several bugs at once
++        get_resource = resource.get_resource
++        namespace['products'] = get_resource('product').get_options()
++        namespace['modules'] = get_resource('module').get_options()
++        namespace['versions'] = get_resource('version').get_options()
++        namespace['priorities'] = get_resource('priority').get_options()
++        namespace['types'] = get_resource('type').get_options()
++        namespace['states'] = get_resource('state').get_options()
++        namespace['assigned_to'] = Tracker_UsersList(
++                                      resource=resource).get_namespace('')
++        namespace['list_products'] = resource.get_list_products_namespace()
++
++        # Ok
++        return namespace
++
++
++    def action(self, resource, context, form):
++        # Get search results
++        results = resource.get_search_results(context)
++        if isinstance(results, Reference):
++            return results
++
++        # Selected issues
++        issues = results.get_documents()
++        selected_issues = form['ids']
++        issues = [ x for x in issues if x.name in selected_issues ]
++
++        if len(issues) == 0:
++            context.message = ERROR(u"No issue selected.")
++            return
++
++        # Modify all issues selected
++        names = ['product', 'module', 'version', 'type', 'priority', 'state']
++        comment = form['comment']
++        user = context.user
++        username = user and user.name or ''
++        users_issues = {}
+         for issue in issues:
+-            attachment_name = issue.issue_last_attachment
+-            attachment = resource.get_resource('%s/%s' % (issue.name, attachment_name))
+-            attachment_uri = attachment.handler.key
+-            # Get extension
+-            mimetype = attachment.get_content_type()
+-            ext = guess_extension(mimetype)[1:]
+-            attachment_name = '%s_%s.%s' % (issue.name, issue.title, ext) 
+-            zip.write(attachment_uri, attachment_name)
+-        zip.close()
+-        # Create zip
+-        # Build zipname
+-        name = "LastAttachedImages"
+-        now = strftime("%y%d%m%H%M")
+-        #pprint("%s" % now)
+-        zipname = "%s_%s_%s.zip" % (resource.name, name, now)
++            issue = resource.get_resource(issue.name)
++            old_metadata = issue.metadata.clone()
++            # Assign-To
++            assigned_to = issue.get_property('assigned_to')
++            new_assigned_to = form['change_assigned_to']
++            if new_assigned_to == 'do-not-change':
++                issue.set_property('assigned_to', assigned_to)
++            else:
++                issue.set_property('assigned_to', new_assigned_to)
++            # Integer Fields
++            for name in names:
++                new_value = form['change_%s' % name]
++                if new_value == -1:
++                    issue.set_property(name, issue.get_property(name))
++                else:
++                    issue.set_property(name, new_value)
++            # Comment
++            p_comment = Property(comment, author=username,
++                                 date=context.timestamp)
++            modifications = issue.get_diff_with(old_metadata, context)
++            if modifications:
++                title = MSG(u'Modifications:').gettext()
++                p_comment.value += u'\n\n%s\n\n%s' % (title, modifications)
++            issue.metadata.set_property('comment', p_comment)
++
++            # Mail (create a dict with a list of issues for each user)
++            info = {'href': context.uri.resolve(issue.name),
++                    'name': issue.name,
++                    'title': issue.get_title()}
++            if new_assigned_to and new_assigned_to != 'do-not-change':
++                users_issues.setdefault(new_assigned_to, []).append(info)
++            if assigned_to and assigned_to != new_assigned_to:
++                users_issues.setdefault(assigned_to, []).append(info)
++            # Change
++            context.database.change_resource(issue)
++
++        # Send mails
++        root = context.root
++        if user is None:
++            user_title = MSG(u'ANONYMOUS').gettext()
++        else:
++            user_title = user.get_title()
++        template = MSG(
++            u'--- Comment from: {user} ---\n\n{comment}\n\n{issues}')
++        tracker_title = resource.get_property('title') or 'Tracker Issue'
++        subject = u'[%s]' % tracker_title
++        for user_id in users_issues:
++            user_issues = [
++                u'#%s - %s - %s' % (x['href'], x['name'], x['title'])
++                for x in users_issues[user_id]
++            ]
++            user_issues = '\n'.join(user_issues)
++            body = template.gettext(user=user_title, comment=comment,
++                                    issues=user_issues)
++            to_addr = root.get_user(user_id).get_property('email')
++            root.send_email(to_addr, subject, text=body)
++
++        context.message = messages.MSG_CHANGES_SAVED
+ 
+-        file = open(dirname)
+-        try:
+-            data = file.read()
+-        finally:
+-            file.close()
+-
+-        vfs.remove(dirname)
+-
+-        # Return the zip
+-        context.set_content_type('application/zip')
+-        context.set_content_disposition('attachment; filename=%s' % zipname)
+-        return data
+ 
++
++def get_issue_informations(resource, item, context):
++    """Construct a dict with issue informations.  This dict is used to
++    construct a line for a table.
++    """
++    # Build the namespace
++    infos = {
++        'name': item.name,
++        'id': item.id,
++        'title': item.title}
++
++    # Select Tables
++    get_resource = resource.get_resource
++    tables = ['product', 'module', 'version', 'type', 'state', 'priority']
++    for name in tables:
++        infos[name] = None
++        value = getattr(item, name)
++        if value is None:
++            continue
++        table = get_resource(name).handler
++        table_record = table.get_record(value)
++        if table_record is None:
++            continue
++        infos[name] = table.get_record_value(table_record, 'title')
++
++    # Assigned-To
++    assigned_to = getattr(item, 'assigned_to')
++    infos['assigned_to'] = ''
++    if assigned_to:
++        users = resource.get_resource('/users')
++        user = users.get_resource(assigned_to, soft=True)
++        if user is not None:
++            infos['assigned_to'] = user.get_title()
++
++    # Modification Time
++    infos['mtime'] = context.format_datetime(item.mtime)
++
++    return infos
+Les sous-répertoires ./ui et ../ikaaro/tracker/ui sont identiques.
+Seulement dans .: utils.py
+Seulement dans .: version.txt

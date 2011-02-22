@@ -33,7 +33,7 @@ from ikaaro.registry import get_resource_class
 
 #from resources import Tchack_Resources
 from issue import Tchack_Issue
-from tracker_views import Tchacker_View, Tracker_Zip_Img
+from tracker_views import Tchacker_View #, Tracker_Zip_Img
 
 
 
@@ -43,14 +43,14 @@ class Tchack_Tracker(Tracker):
     class_version = '20110125'
     class_title = MSG(u'Tchack Issue Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
-    class_views = Tracker.class_views + ['zip']
+    class_views = Tracker.class_views #+ ['zip']
 
     # Configuration
     issue_class = Tchack_Issue
 
     # Views
     view = Tchacker_View()
-    zip = Tracker_Zip_Img()
+    #zip = Tracker_Zip_Img()
 
     #######################################################################
     # Update

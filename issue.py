@@ -108,8 +108,8 @@ class Tchack_Issue(Issue):
         attachment=String(source='metadata', multiple=True))
     """
 
-    #print("Issue.class_schema = %s" % Issue.class_schema)
-
+    """
+    #XXX: Need to update that
     def _get_catalog_values(self):
         values = Issue._get_catalog_values(self)
         history = self.get_history()
@@ -123,6 +123,7 @@ class Tchack_Issue(Issue):
             if record.file:
                 values['issue_last_attachment'] = record.file
         return values
+    """
 
     def add_comment(self, context, form, new=False):
         # Keep a copy of the current metadata
@@ -142,7 +143,11 @@ class Tchack_Issue(Issue):
 
         # Attachment
         attachment = form['attachment']
-        name = "None"
+        
+        att_name = "" 
+        att_is_img = False
+        att_is_vid = False
+        
         if attachment is not None:
             # Upload
             filename, mimetype, body = attachment
@@ -153,11 +158,13 @@ class Tchack_Issue(Issue):
 
             mtype = mimetype.split("/")[0]
             
+            att_name = name 
+ 
             # Image
             if (mtype == "image"):
+                att_is_img = True 
                 # Add attachment
                 cls = get_resource_class(mimetype)
-                print("cls = %s" % cls)
                 #self.make_resource(name, cls, body=body, filename=filename,
                 self.make_resource(name, TchackerImage, body=body, filename=filename,
                                 extension=extension, format=mimetype)
@@ -224,6 +231,7 @@ class Tchack_Issue(Issue):
                 # video.mp4, video_low.mp4, video_low_thumb.jpg
                 # If the video is h264 and wider than 319px,
                 # so create a Low copy.
+                att_is_vid = True
                 dirname = mkdtemp('videoencoding', 'ikaaro')
                 tempdir = vfs.open(dirname)
                 # Paste the file in the tempdir
@@ -294,19 +302,26 @@ class Tchack_Issue(Issue):
             """
 
             # Link
-            attachment = name
+            attachment = att_name
             self.set_property('attachment', attachment)
-
 
         # Comment
         date = context.timestamp
         user = context.user
         author = user.name if user else None
         comment = form['comment']
-        attachment = name
-        print("attachment = %s" % attachment)
+        if not comment:
+            if att_is_img:
+                comment = "%s" % att_is_img
+            if att_is_vid:
+                comment = "%s" % att_is_vid
+            else:
+                comment = "att_is_file"
+        print("comment = %s" % comment)
+        #attachment = attname
         comment = Property(comment, date=date, author=author,
-            attachment=attachment)
+            attachment=att_name, att_is_img=att_is_img,
+            att_is_vid=att_is_vid)
         self.set_property('comment', comment)
 
         # Send a Notification Email

@@ -6,7 +6,7 @@
 
 <stl:block stl:repeat="comment comments">
   <table width="100%" border="0" cellpadding="0" cellspacing="0" id="tchacker">
-    <tr class="tracker-issue-comment-title">
+    <tr class="comment-header">
       <td><a name="c${comment/number}"/></td>
       <td>Comment <a href="#c${comment/number}">${comment/number}</a></td>
       <td>${comment/user}</td>
@@ -19,19 +19,18 @@
       </a>]&nbsp;
       </td>
     </tr>
-    <!--<tr stl:if="comment/is_image">
+    <tr stl:if="comment/att_is_img">
       <td colspan="5">
-        <a href="${comment/file}_HIG/;download" class="thickbox"><img src="${comment/file}_MED/;download" /></a>
+        <a href="${comment/attachment}_HIG/;download" class="thickbox"><img src="${comment/attachment}_MED/;download" /></a>
       </td>
-    </tr>
-    <tr stl:if="comment/is_video">
+    </tr><!--
+    <tr stl:if="comment/att_is_vid">
       <td colspan="5">
-        <a href="${comment/video}/;download"
+        <a href="${comment/attachment}/;download"
           style="display:block;width:${comment/width}px;height:${comment/height}px;"
           id="player-${comment/number}"></a>
       </td>
-    </tr>
-    -->
+    </tr>-->
     <tr stl:if="comment/attachment">
       <td colspan="5">
         <p class="attachment">Attachment: <a href="${comment/attachment}/;download"
@@ -40,7 +39,7 @@
     </tr>
     <tr>
       <td colspan="5">
-      <pre class="com" id="comment${comment/number}">XXX: ${comment/comment}</pre>
+      <pre class="com" id="comment${comment/number}">${comment/comment}</pre>
       </td>
     </tr>
   </table>

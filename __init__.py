@@ -18,6 +18,8 @@
 # Import from itools
 from itools.core import get_abspath
 from itools.core import get_version
+from itools.fs import lfs
+from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.registry import register_document_type
@@ -43,3 +45,4 @@ register_document_type(Tchack_Tracker)
 for name, cli in [("zip", "zip")]:
     if(which(cli)) is None:
         print 'You need to install "%s".' % name
+

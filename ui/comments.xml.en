@@ -37,7 +37,7 @@
             >${comment/attachment}</a></p>
       </td>
     </tr>
-    <tr>
+    <tr stl:if="comment/comment">
       <td colspan="5">
       <pre class="com" id="comment${comment/number}">${comment/comment}</pre>
       </td>

@@ -46,6 +46,7 @@ from ikaaro.file import Video, Image
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
 from ikaaro.folder import Folder
+from ikaaro.comments import indent
 
 # Import from Tchacker
 from issue_views import TchackIssue_Edit
@@ -83,30 +84,8 @@ class Tchack_Issue(Issue):
     edit = TchackIssue_Edit()
 
     class_schema = Issue.class_schema
+    #XXX: Replace the original datatype
     class_schema['comment'] = tchacker_comment_datatype
-    """
-    class_schema = merge_dicts(
-        Issue.class_schema,
-        # Metadata
-        comment=tchacker_comment_datatype)
-    """
-    """
-    class_schema = merge_dicts(
-        Folder.class_schema,
-        # Metadata
-        product=Integer(source='metadata', indexed=True, stored=True),
-        module=Integer(source='metadata', indexed=True, stored=True),
-        version=Integer(source='metadata', indexed=True, stored=True),
-        type=Integer(source='metadata', indexed=True, stored=True),
-        state=Integer(source='metadata', indexed=True, stored=True),
-        priority=Integer(source='metadata', indexed=True, stored=True),
-        assigned_to=String(source='metadata', indexed=True, stored=True),
-        cc_list=Tokens(source='metadata'),
-        comment=tchacker_comment_datatype,
-        # Other
-        id=Integer(indexed=True, stored=True),
-        attachment=String(source='metadata', multiple=True))
-    """
 
     """
     #XXX: Need to update that
@@ -165,7 +144,6 @@ class Tchack_Issue(Issue):
                 att_is_img = True 
                 # Add attachment
                 cls = get_resource_class(mimetype)
-                #self.make_resource(name, cls, body=body, filename=filename,
                 self.make_resource(name, TchackerImage, body=body, filename=filename,
                                 extension=extension, format=mimetype)
                 file = self.get_resource(name)
@@ -310,15 +288,8 @@ class Tchack_Issue(Issue):
         user = context.user
         author = user.name if user else None
         comment = form['comment']
-        if not comment:
-            if att_is_img:
-                comment = "%s" % att_is_img
-            if att_is_vid:
-                comment = "%s" % att_is_vid
-            else:
-                comment = "att_is_file"
-        print("comment = %s" % comment)
-        #attachment = attname
+        if attachment is not None:
+            comment = "comment_is_empty_but_has_attachment"
         comment = Property(comment, date=date, author=author,
             attachment=att_name, att_is_img=att_is_img,
             att_is_vid=att_is_vid)

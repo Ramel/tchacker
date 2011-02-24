@@ -29,9 +29,13 @@ tchacker_comment_datatype = Unicode(source='metadata', multiple=True,
                             'att_is_vid': Boolean})
 
 
-def attachment(att):
-    if (att == "att_is_file") | (att == "att_is_img") | (att == "att_is_vid"):
-        value = None
+def has_comment(att):
+    """Hack, if comment is empty, but has an attachment
+    we force the value of comment to False, so it doesn't be shown
+    by STL.
+    """
+    if (att == "comment_is_empty_but_has_attachment"):
+        value = False
     else:
         value = indent(att)
     return value
@@ -46,17 +50,14 @@ class TchackerCommentsView(CommentsView):
         root = context.root
 
         comments = resource.metadata.get_property('comment') or []
-        #print("comments 1 = %s" % comments)
         comments = [
             {'number': i,
              'user': root.get_user_title(x.get_parameter('author')),
              'datetime': context.format_datetime(x.get_parameter('date')),
-             'comment': attachment(x.value),
-             #'comment': indent(x.value),
+             'comment': has_comment(x.value),
              'attachment': x.get_parameter('attachment'),
              'att_is_img': x.get_parameter('att_is_img'),
              'att_is_vid': x.get_parameter('att_is_vid')}
             for i, x in enumerate(comments) ]
         comments.reverse()
-        #print("comments 2 = %s" % comments)
         return {'comments': comments} 

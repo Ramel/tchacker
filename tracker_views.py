@@ -49,14 +49,14 @@ class Tchacker_ViewMenu(TrackerViewMenu):
 
     title = MSG(u'Advanced')
 
-    def get_items(self):
+    def get_items(self, resource, context):
         # Keep the query parameters
         schema = self.context.view.get_query_schema()
         params = encode_query(self.context.query, schema)
         return [
             {'title': MSG(u'Download "Last Att." images as one Zip'),
              'href': ';zip?%s' % params}
-              ] + TrackerViewMenu.get_items(self)
+              ] + TrackerViewMenu.get_items(resource, context)
 
 
 
@@ -69,7 +69,8 @@ class Tchacker_View(Tracker_View):
     styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
 
     context_menus = [StoreSearchMenu(),
-                     Tchacker_ViewMenu()]
+                     #Tchacker_ViewMenu()]
+                     TrackerViewMenu()]
     # XXX
     #table_template = '/ui/tchacker/browse_table.xml'
     #context.styles.append('/ui/tchacker/tracker.css')
@@ -77,8 +78,8 @@ class Tchacker_View(Tracker_View):
 
     def get_item_value(self, resource, context, item, column):
         # Last Attachement
-        if column == 'issue_last_attachment':
-            attach_name = item.issue_last_attachment
+        if column == 'last_attachment':
+            attach_name = item.last_attachment
             issue = item.name
             if attach_name is None:
                 return None
@@ -102,21 +103,20 @@ class Tchacker_View(Tracker_View):
             else:
                 return None
         # Last Author
-        elif column == 'issue_last_author':
-            user_id = item.issue_last_author
+        if column == 'last_author':
+            user_id = item.last_author
             user = resource.get_resource('/users/%s' % user_id, soft=True)
             if user is None:
                 return None
             return user.get_title()
-
         return Tracker_View.get_item_value(self, resource, context, item,
                                            column)
 
     def get_table_columns(self, resource, context):
         table_columns = Tracker_View.get_table_columns(self, resource, context)
         # Insert the last attachement row's title in the table
-        table_columns.insert(2, ('issue_last_attachment', 'Last Attach.'))
-        table_columns.insert(11, ('issue_last_author', 'Last Auth.'))
+        table_columns.insert(2, ('last_attachment', 'Last Attach.'))
+        table_columns.insert(11, ('last_author', 'Last Auth.'))
         return table_columns
 
 

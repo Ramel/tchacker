@@ -83,7 +83,9 @@ class Tchack_Issue(Issue):
     # Views
     edit = TchackIssue_Edit()
 
-    class_schema = Issue.class_schema
+    class_schema = merge_dicts(
+        Issue.class_schema,
+        last_attachment=String(source='metadata', indexed=False, stored=True))
     #XXX: Replace the original datatype
     class_schema['comment'] = tchacker_comment_datatype
 
@@ -103,6 +105,32 @@ class Tchack_Issue(Issue):
                 values['issue_last_attachment'] = record.file
         return values
     """
+    
+    def get_catalog_values(self):
+        document = Folder.get_catalog_values(self)
+        document['id'] = int(self.name)
+        print("document['id'] = %s" % document['id'])
+        #print(dir(document))
+        #print(document.__class__)
+        history = self.get_history()
+        # Get the last record
+        #record = history.get_record(-1)
+        """
+        for metadata in history:
+            last_author = metadata.get_property('last_author').value
+            #comments = metadata.get_property('comment') or []
+            #for c in comments:
+            #    last_attachment = c.get_parameter('attachment')
+        """
+        #print("last_author = %s" % last_author)
+        #print("last_attachment = %s" % last_attachment)
+         
+        #print("record = %s" % record)
+        # Override default (FIXME should set default to 'nobody' instead?)
+        document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
+        #document['last_attachment'] = last_attachment or None 
+        return document
+
 
     def add_comment(self, context, form, new=False):
         # Keep a copy of the current metadata
@@ -290,6 +318,9 @@ class Tchack_Issue(Issue):
         comment = form['comment']
         if attachment is not None:
             comment = "comment_is_empty_but_has_attachment"
+            self.set_property('last_attachment', att_name)
+        #else:
+        #    self.set_property('last_attachment', "None")
         comment = Property(comment, date=date, author=author,
             attachment=att_name, att_is_img=att_is_img,
             att_is_vid=att_is_vid)
@@ -357,5 +388,5 @@ class Tchack_Issue(Issue):
 # The class
 register_resource_class(Tchack_Issue)
 register_resource_class(TchackerImage)
-register_field('issue_last_attachment', String(is_stored=True))
-register_field('issue_last_author', String(is_stored=True))
+#register_field('last_attachment', String(is_stored=True))
+#register_field('last_author', String(is_stored=True))

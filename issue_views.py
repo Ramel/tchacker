@@ -68,7 +68,6 @@ class TchackIssue_Edit(Issue_Edit):
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
         
-        print("namespace['comments'] = %s" % namespace['comments']) 
         """ 
         # Attachments
         links = []

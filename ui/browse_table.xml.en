@@ -6,7 +6,7 @@
 
 <form action="" method="post" name="browse-list" id="form-table"
   stl:omit-tag="not actions">
-<p><a href="#" class="show">Show</a> - <a href="#" class="hide">Hide</a> - <a href="#" class="toggle">Toggle</a></p>
+<p><a href="#" class="show">Show</a>/<a href="#" class="hide">Hide</a> extra colums.</p>
 <table id="browse-list" class="${css} issues">
   <thead stl:if="columns">
     <tr>
@@ -17,7 +17,7 @@
             onclick="select_checkboxes('form-table', this.checked);" />
       </th>
       <!-- not is_checkbox -->
-      <th stl:if="not column/is_checkbox" class="${column/name}">
+      <th stl:if="not column/is_checkbox" class="${column/css}">
         ${column/title}
         <stl:block stl:if="column/sortable">
           <br/>
@@ -37,11 +37,11 @@
   <tbody>
     <tr stl:repeat="row rows" class="${repeat/row/even}">
       <stl:block stl:repeat="column row/columns">
-      <td class="${column/name}">
+      <td>
         <input stl:if="column/is_checkbox" type="checkbox" name="ids"
           value="${column/value}" checked="${column/checked}" class="checkbox" />
         <img stl:if="column/is_icon" src="${column/src}" border="0" />
-        <img stl:if="column/is_thumb" src="${column/src}" border="0" />
+        <!--<img stl:if="column/is_thumb" src="${column/src}" border="0" />-->
         <a stl:if="column/is_link" stl:omit-tag="not column/href"
           href="${column/href}">${column/value}</a>
       </td>
@@ -51,7 +51,7 @@
 </table>
 <p stl:if="actions">
   <stl:block stl:repeat="action actions">
-    <input type="submit" name=";${action/name}" value="${action/value}"
+    <input type="submit" name=";{action/name}" value="${action/value}"
       class="${action/class}" onclick="${action/onclick}" />
   </stl:block>
 </p>

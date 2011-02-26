@@ -72,7 +72,7 @@ class Tchacker_View(Tracker_View):
                      #Tchacker_ViewMenu()]
                      TrackerViewMenu()]
     # XXX
-    #table_template = '/ui/tchacker/browse_table.xml'
+    table_template = '/ui/tchacker/browse_table.xml'
     #context.styles.append('/ui/tchacker/tracker.css')
 
 
@@ -111,6 +111,7 @@ class Tchacker_View(Tracker_View):
             return user.get_title()
         return Tracker_View.get_item_value(self, resource, context, item,
                                            column)
+
 
     def get_table_columns(self, resource, context):
         table_columns = Tracker_View.get_table_columns(self, resource, context)

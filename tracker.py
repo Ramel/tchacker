@@ -34,6 +34,7 @@ from ikaaro.registry import get_resource_class
 #from resources import Tchack_Resources
 from issue import Tchack_Issue
 from tracker_views import Tchacker_View #, Tracker_Zip_Img
+from tracker_views import Tchacker_Search
 
 
 
@@ -50,6 +51,7 @@ class Tchack_Tracker(Tracker):
 
     # Views
     view = Tchacker_View()
+    #search = Tchacker_Search()
     #zip = Tracker_Zip_Img()
 
     #######################################################################

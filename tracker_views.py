@@ -25,6 +25,7 @@ from time import strftime
 from tempfile import mkdtemp
 #from subprocess import call
 from zipfile import ZipFile
+from os.path import basename
 
 # Import from itools
 from itools.core import guess_extension
@@ -35,14 +36,16 @@ from itools.uri import encode_query #, get_uri_name
 from itools.web import STLView
 from itools.xml import XMLParser
 #from itools.handlers import File as FileHandler
+from itools.core import merge_dicts
+from itools.fs import FileName
 
 # Import from ikaaro
 #from ikaaro.views import ContextMenu
 from ikaaro.views import CompositeView
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
-from ikaaro.tracker.tracker_views import TrackerViewMenu
+from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.file import Image, Video
-
+from ikaaro.tracker.tables import Tracker_TableResource
 
 
 class Tchacker_ViewMenu(TrackerViewMenu):
@@ -116,9 +119,41 @@ class Tchacker_View(Tracker_View):
     def get_table_columns(self, resource, context):
         table_columns = Tracker_View.get_table_columns(self, resource, context)
         # Insert the last attachement row's title in the table
-        table_columns.insert(2, ('last_attachment', 'Last Attach.'))
-        table_columns.insert(11, ('last_author', 'Last Auth.'))
+        table_columns.insert(2, ('last_attachment', u'Last Attach.'))
+        table_columns.insert(11, ('last_author', u'Last Auth.'))
         return table_columns
+
+
+
+class Tchacker_Search(Tracker_Search):
+    search_template = '/ui/tchacker/search.xml'
+    
+    def get_namespace(self, resource, context):
+        get_resource = resource.get_resource
+        products = get_resource('product')
+        title = products.get_property('title') 
+        namespace = Tracker_Search.get_namespace(self, resource, context)
+        namespace['title'] = title
+        print namespace
+        columns = self.get_table_columns(resource, context)
+        print columns
+        titles = []
+        for name, label in columns:
+            """
+            try get_resource(name):
+                print name
+            """
+            #print("name = %s" % name)
+            if label is not None:
+                try:
+                    get_resource(name)
+                    #language = self.get_content_language(context)
+                    title = get_resource(name).get_property('title') #, language=language)
+                except LookupError:
+                    continue
+                if title != "":
+                    print("%s.get_property('title') = %s" % (name, title))
+        return namespace
 
 
 """

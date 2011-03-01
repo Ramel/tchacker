@@ -50,6 +50,7 @@ class TchackerCommentsView(CommentsView):
         root = context.root
 
         comments = resource.metadata.get_property('comment') or []
+        #print comments
         comments = [
             {'number': i,
              'user': root.get_user_title(x.get_parameter('author')),

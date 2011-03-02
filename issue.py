@@ -91,13 +91,12 @@ class Tchack_Issue(Issue):
 
     class_schema = merge_dicts(
         Issue.class_schema,
-        last_attachment=String(source='metadata', indexed=False, stored=True)) #,
-        #comments_len=Integer())
+        amount=Integer(source='metadata', indexed=False, stored=True),
+        last_attachment=String(source='metadata', indexed=False, stored=True))
 
     #XXX: Replace the original datatype
     class_schema['comment'] = tchacker_comment_datatype
 
-    print class_schema
     """
     #XXX: Need to update that
     def _get_catalog_values(self):
@@ -116,12 +115,11 @@ class Tchack_Issue(Issue):
     """
 
     def get_catalog_values(self):
-        document = Folder.get_catalog_values(self)
-        document['id'] = int(self.name)
-        print("document['id'] = %s" % document['id'])
+        document = Issue.get_catalog_values(self)
+        #document['id'] = int(self.name)
         #print(dir(document))
         #print(document.__class__)
-        history = self.get_history()
+        #history = self.get_history()
         # Get the last record
         #record = history.get_record(-1)
         """
@@ -136,8 +134,10 @@ class Tchack_Issue(Issue):
 
         #print("record = %s" % record)
         # Override default (FIXME should set default to 'nobody' instead?)
-        document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
+        #document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
+        document['amount'] = self.get_property('amount') or 0
         #document['last_attachment'] = last_attachment or None 
+        print("document = %s" % document)
         return document
 
 
@@ -159,8 +159,11 @@ class Tchack_Issue(Issue):
 
         # Attachment
         attachment = form['attachment']
-        #print("Commnents len = %s" % form['comments_len'])
-        print("form = %s" % form)
+        if not new:
+            amount = form['amount']
+            amount = int(amount)+1
+        else:
+            amount = 1
         att_name = "" 
         att_is_img = False
         att_is_vid = False
@@ -281,29 +284,29 @@ class Tchack_Issue(Issue):
                         self.make_resource(vidfilename, TchackerVideo,
                             body=vidbody, filename=vidfilename,
                             extension=vidextension, format=vidmimetype)
-                        
+
                         height_low = int(round(float(width_low) / ratio))
-                        
+
                         vid = self.get_resource(vidfilename)
                         metadata = vid.metadata
-                        
+
                         width_low = Property(width_low)
                         metadata.set_property('width', width_low)
-                        
+
                         height_low = Property(height_low)
                         metadata.set_property('height', height_low)
-                        
+
                         ratio = Property(ratio)
                         metadata.set_property('ratio', ratio)
-                        
+
                         thumbnail = Property(True)
                         metadata.set_property('has_thumb', thumbnail)
-                        
+
                         # Create the thumbnail PNG resources
                         self.make_resource(thumbfilename, Image,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
-                    
+
                 # Clean the temporary folder
                 vfs.remove(dirname)
             """
@@ -326,7 +329,7 @@ class Tchack_Issue(Issue):
             """
 
             # Link
-            attachment = att_name
+            attachment = Property(att_name, position=position)
             self.set_property('attachment', attachment)
 
         # Comment
@@ -340,9 +343,10 @@ class Tchack_Issue(Issue):
         #else:
         #    self.set_property('last_attachment', "None")
         comment = Property(comment, date=date, author=author,
-            attachment=att_name, att_is_img=att_is_img,
-            att_is_vid=att_is_vid)
+            attachment=att_name)
         self.set_property('comment', comment)
+        amount = Property(amount)
+        self.set_property('amount', amount)
 
         # Send a Notification Email
         # Notify / From

@@ -15,7 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from itools
-from itools.datatypes import Unicode, String, DateTime, Boolean
+from itools.datatypes import Unicode, String, DateTime
+from itools.datatypes import Boolean, Integer
 
 # Import from ikaaro
 from ikaaro.comments import CommentsView, indent
@@ -25,8 +26,7 @@ tchacker_comment_datatype = Unicode(source='metadata', multiple=True,
                             parameters_schema={'date': DateTime,
                             'author': String,
                             'attachment': String,
-                            'att_is_img': Boolean,
-                            'att_is_vid': Boolean})
+                            'amount': Integer})
 
 
 def has_comment(att):
@@ -56,14 +56,13 @@ class TchackerCommentsView(CommentsView):
              'user': root.get_user_title(x.get_parameter('author')),
              'datetime': context.format_datetime(x.get_parameter('date')),
              'comment': has_comment(x.value),
-             'attachment': x.get_parameter('attachment'),
-             'att_is_img': x.get_parameter('att_is_img'),
-             'att_is_vid': x.get_parameter('att_is_vid')}
+             'attachment': x.get_parameter('attachment')}
             for i, x in enumerate(comments) ]
-        print i
         comments.reverse()
         return {'comments': comments}
 
-    def get_comments_len(self, resource):
-        comments = resource.metadata.get_property('comment') or []
-        return len(comments)
+    def get_comments_amount(self, resource):
+        amount = resource.metadata.get_property('amount') or 0
+        #comments = resource.metadata.get_property('comment') or []
+        #return len(comments)
+        return amount

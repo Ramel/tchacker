@@ -19,11 +19,11 @@
       </a>]&nbsp;
       </td>
     </tr>
-    <tr stl:if="comment/att_is_img">
+    <!--<tr stl:if="comment/att_is_img">
       <td colspan="5">
         <a href="${comment/attachment}_HIG/;download" class="thickbox"><img src="${comment/attachment}_MED/;download" /></a>
       </td>
-    </tr><!--
+    </tr>--><!--
     <tr stl:if="comment/att_is_vid">
       <td colspan="5">
         <a href="${comment/attachment}/;download"

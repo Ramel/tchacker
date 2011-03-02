@@ -95,7 +95,7 @@ ${comments}
       <tr>
         <td colspan="2">
           <a href="#" class="showall">Show/Hide options</a>
-          <input type="hidden" value="${comments_len}" id="comments_len" name="comments_len" />
+          <input type="hidden" value="${amount}" id="amount" name="amount" />
         </td>
       </tr>
       <tr>

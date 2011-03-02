@@ -67,17 +67,18 @@ class TchackIssue_Edit(Issue_Edit):
         
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
-        
-        print namespace['comments'][0]
-        
+        namespace['comments_len'] = TchackerCommentsView().get_comments_len(resource)
+        print namespace['comments_len']
+        """
         for comment in namespace['comments']:
             print comment
             if comment['att_is_vid']:
                 attachment = resource.get_resource(comment['attachment'])
                 metadata = attachment.metadata
+        :w
                 width = metadata.get_property('width')
-                print width
-        
+                #print width
+        """
         """ 
         # Attachments
         links = []

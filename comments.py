@@ -60,5 +60,10 @@ class TchackerCommentsView(CommentsView):
              'att_is_img': x.get_parameter('att_is_img'),
              'att_is_vid': x.get_parameter('att_is_vid')}
             for i, x in enumerate(comments) ]
+        print i
         comments.reverse()
-        return {'comments': comments} 
+        return {'comments': comments}
+
+    def get_comments_len(self, resource):
+        comments = resource.metadata.get_property('comment') or []
+        return len(comments)

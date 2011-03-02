@@ -91,11 +91,13 @@ class Tchack_Issue(Issue):
 
     class_schema = merge_dicts(
         Issue.class_schema,
-        last_attachment=String(source='metadata', indexed=False, stored=True))
+        last_attachment=String(source='metadata', indexed=False, stored=True)) #,
+        #comments_len=Integer())
 
     #XXX: Replace the original datatype
     class_schema['comment'] = tchacker_comment_datatype
 
+    print class_schema
     """
     #XXX: Need to update that
     def _get_catalog_values(self):
@@ -157,7 +159,8 @@ class Tchack_Issue(Issue):
 
         # Attachment
         attachment = form['attachment']
-
+        #print("Commnents len = %s" % form['comments_len'])
+        print("form = %s" % form)
         att_name = "" 
         att_is_img = False
         att_is_vid = False

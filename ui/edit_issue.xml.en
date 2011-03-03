@@ -29,60 +29,6 @@
 </p>
 
 <br/>
-<!--
-<stl:block stl:repeat="comment comments">
-  <table width="100%" border="0" cellpadding="0" cellspacing="0" id="tchacker">
-    <tr class="tracker-issue-comment-title">
-      <td><a name="c${comment/number}"/></td>
-      <td>Comment <a href="#c${comment/number}">${comment/number}</a></td>
-      <td>${comment/user}</td>
-      <td align="right">${comment/datetime}</td>
-      <td align="right">
-      &nbsp;[
-      <a href="#new_comment"
-        onclick="javascript:reply('${comment/number}');">
-        Reply
-      </a>]&nbsp;
-      </td>
-    </tr>
-    <tr stl:if="comment/is_image">
-      <td colspan="5">
-        <a href="${comment/file}_HIG/;download" class="thickbox"><img src="${comment/file}_MED/;download" /></a>
-      </td>
-    </tr>
-    <tr stl:if="comment/is_video">
-      <td colspan="5">
-        <a href="${comment/video}/;download"
-          style="display:block;width:${comment/width}px;height:${comment/height}px;"
-          id="player-${comment/number}"></a>
-      </td>
-    </tr>
-    <tr stl:if="comment/file">
-      <td colspan="5">
-        <p class="attachment">Attachment: <a href="${comment/file}/;download"
-            >${comment/file}</a></p>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="5">
-      <pre class="com" id="comment${comment/number}">${comment/comment}</pre>
-      </td>
-    </tr>
-  </table>
-  <br/>
-  <script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.2.2.swf", {
-     clip: {
-       autoPlay: false,
-       autoBuffering: false
-     },
-     // canvas background, the video thumbnail.
-     canvas: {
-       backgroundImage: 'url(${comment/video}${comment/old}_thumb/;download)'
-     }
-  }); 
-  </script>
-</stl:block>
--->
 
 ${comments}
 
@@ -95,7 +41,7 @@ ${comments}
       <tr>
         <td colspan="2">
           <a href="#" class="showall">Show/Hide options</a>
-          <input type="hidden" value="${amount}" id="amount" name="amount" />
+          <input type="hidden" value="${amount/value}" id="amount" name="amount" />
         </td>
       </tr>
       <tr>

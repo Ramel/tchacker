@@ -68,7 +68,7 @@ class TchackIssue_Edit(Issue_Edit):
         
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
-        #namespace['amount'] = TchackerCommentsView().get_comments_amount(resource)
+        namespace['amount'] = TchackerCommentsView().get_comments_amount(resource)
         #print("in issue_views:get_namespace:%s" % namespace['comments_amount'])
         """
         for comment in namespace['comments']:

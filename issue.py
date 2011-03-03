@@ -24,7 +24,7 @@
 # Import from the Standard Library
 from datetime import datetime
 from tempfile import mkdtemp
-from os import sep 
+from os import sep
 
 # Import from itools
 from itools.datatypes import String
@@ -94,50 +94,23 @@ class Tchack_Issue(Issue):
         amount=Integer(source='metadata', indexed=False, stored=True),
         last_attachment=String(source='metadata', indexed=False, stored=True))
 
-    #XXX: Replace the original datatype
+    #XXX: Replace the original datatypes
     class_schema['comment'] = tchacker_comment_datatype
+    # Add a relation to comment in the attachment schema
+    class_schema['attachment'] = Unicode(source='metadata', multiple=True,
+                                    parameters_schema={
+                                    'attachement': String,
+                                    'related': Integer})
 
-    """
-    #XXX: Need to update that
-    def _get_catalog_values(self):
-        values = Issue._get_catalog_values(self)
-        history = self.get_history()
-        # Get the last record
-        record = history.get_record(-1)
-        if record:
-            values['issue_last_author'] = history.get_record_value(record, 'username')
-        # Get last attachment
-        values['issue_last_attachment'] = None
-        for record in self.get_history_records():
-            if record.file:
-                values['issue_last_attachment'] = record.file
-        return values
-    """
 
     def get_catalog_values(self):
         document = Issue.get_catalog_values(self)
         #document['id'] = int(self.name)
         #print(dir(document))
-        #print(document.__class__)
-        #history = self.get_history()
-        # Get the last record
-        #record = history.get_record(-1)
-        """
-        for metadata in history:
-            last_author = metadata.get_property('last_author').value
-            #comments = metadata.get_property('comment') or []
-            #for c in comments:
-            #    last_attachment = c.get_parameter('attachment')
-        """
-        #print("last_author = %s" % last_author)
-        #print("last_attachment = %s" % last_attachment)
-
-        #print("record = %s" % record)
-        # Override default (FIXME should set default to 'nobody' instead?)
         #document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
-        document['amount'] = self.get_property('amount') or 0
-        #document['last_attachment'] = last_attachment or None 
-        print("document = %s" % document)
+        #document['amount'] = self.get_property('amount') or 0
+        #document['last_attachment'] = last_attachment or None
+        #print("document = %s" % document)
         return document
 
 
@@ -157,14 +130,19 @@ class Tchack_Issue(Issue):
         cc_list = form['cc_list']
         self.set_property('cc_list', tuple(cc_list))
 
+        comment = form['comment']
         # Attachment
         attachment = form['attachment']
+        amount = 1
+        print("new = %s" % new)
         if not new:
-            amount = form['amount']
-            amount = int(amount)+1
-        else:
-            amount = 1
-        att_name = "" 
+            if ((not(comment) and attachment) or (comment and not(attachment))):
+                amount = form['amount']
+                amount = int(amount)+1
+            else:
+                amount = form['amount']
+        print("amount = %s" % amount)
+        att_name = ""
         att_is_img = False
         att_is_vid = False
 
@@ -178,11 +156,11 @@ class Tchack_Issue(Issue):
 
             mtype = mimetype.split("/")[0]
 
-            att_name = name 
+            att_name = name
 
             # Image
             if (mtype == "image"):
-                att_is_img = True 
+                att_is_img = True
                 # Add attachment
                 cls = get_resource_class(mimetype)
                 self.make_resource(name, TchackerImage, body=body, filename=filename,
@@ -329,14 +307,13 @@ class Tchack_Issue(Issue):
             """
 
             # Link
-            attachment = Property(att_name, position=position)
+            attachment = Property(att_name, related=amount)
             self.set_property('attachment', attachment)
 
         # Comment
         date = context.timestamp
         user = context.user
         author = user.name if user else None
-        comment = form['comment']
         if attachment is not None:
             comment = "comment_is_empty_but_has_attachment"
             self.set_property('last_attachment', att_name)
@@ -362,7 +339,7 @@ class Tchack_Issue(Issue):
         if user.name in to_addrs:
             to_addrs.remove(user.name)
         # Notify / Subject
-        tracker_title = self.parent.get_property('title') or 'Tracker Issue'
+        tracker_title = self.parent.get_property('title') or u'Tracker Issue'
         subject = '[%s #%s] %s' % (tracker_title, self.name, title)
         # Notify / Body
         if isinstance(context.resource, self.__class__):
@@ -388,6 +365,7 @@ class Tchack_Issue(Issue):
         if modifications:
             body += modifications
             body += '\n\n'
+            print("modifications = %s" % modifications)
         if comment:
             title = MSG(u'Comment').gettext()
             separator = len(title) * u'-'

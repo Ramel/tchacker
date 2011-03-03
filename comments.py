@@ -50,19 +50,26 @@ class TchackerCommentsView(CommentsView):
         root = context.root
 
         comments = resource.metadata.get_property('comment') or []
-        #print comments
+        attachments = resource.metadata.get_property('attachment') or []
+        amount = resource.metadata.get_property('amount').value
+        print("amount = %s" % amount)
+        att = [False]*amount
+        for x in attachments:
+            i = x.get_parameter('related')-1
+            att[i] = x.value
+        #att.reverse()
         comments = [
             {'number': i,
              'user': root.get_user_title(x.get_parameter('author')),
              'datetime': context.format_datetime(x.get_parameter('date')),
              'comment': has_comment(x.value),
-             'attachment': x.get_parameter('attachment')}
+             #'attachment': x.get_parameter('attachment')
+             'attachment': att[i] or ''
+             }
             for i, x in enumerate(comments) ]
         comments.reverse()
         return {'comments': comments}
 
     def get_comments_amount(self, resource):
         amount = resource.metadata.get_property('amount') or 0
-        #comments = resource.metadata.get_property('comment') or []
-        #return len(comments)
         return amount

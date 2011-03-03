@@ -68,6 +68,7 @@ class TchackerImage(Image):
         thumbnail=Boolean(source='metadata', stored=True))
 
 
+
 class TchackerVideo(Video):
 
     class_schema = merge_dicts(
@@ -77,6 +78,7 @@ class TchackerVideo(Video):
         width=Integer(source='metadata', stored=True),
         height=Integer(source='metadata', stored=True),
         ratio=Decimal(source='metadata', stored=True))
+
 
 
 class Tchack_Issue(Issue):

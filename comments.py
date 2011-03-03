@@ -22,6 +22,8 @@ from itools.datatypes import Boolean, Integer
 # Import from ikaaro
 from ikaaro.comments import CommentsView, indent
 
+from issue import TchackerImage
+
 
 tchacker_comment_datatype = Unicode(source='metadata', multiple=True,
                             parameters_schema={'date': DateTime,
@@ -56,20 +58,37 @@ class TchackerCommentsView(CommentsView):
         #print("comments = %s" % len(comments))
         #print("amount = %s" % amount)
         joined = [False]*len(comments)
+        joined = [{ 'link': False,
+                    'is_image': False,
+                    'is_video': False,
+                    'thumbnail': False}] * len(comments)
+
         for att in attachments:
             pos = att.get_parameter('related')-1
-            joined[pos] = att.value
+            joined[pos] = {
+                    'link': att.value,
+                    'thumbnail':
+                        resource.get_resource(
+                            str(att.value)
+                            ).get_property('thumbnail'),
+                    #'is_image': isinstance(
+                    #    resource.get_resource(str(att.value)), TchackerVideo)
+                    }
+
         print("joined = %s" % joined)
+
         links = [
             {'link': x.value,
-             'thumbnail': 
-                resource.get_resource(x.value, soft=True).get_property('thumbnail')
-             #  x.get_parameter('thumbnail') 
+             'thumbnail':
+                resource.get_resource(str(x.value)).get_property('thumbnail'),
+             'rel': x.get_parameter('related'),
+             'is_image': resource.get_resource(str(x.value)).__class__ #is_image
+             #   resource.get_resource('%s' % str(x.value)).get_property('thumbnail')
              #'width': width or False,
              #'height' height or False
             }
             for i, x in enumerate(attachments) ]
-        print("links = %s" % links)
+        #print("links = %s" % links)
         # Get resource metadata values: is_video, is_image
         comments = [
             {'number': i,
@@ -77,12 +96,13 @@ class TchackerCommentsView(CommentsView):
              'datetime': context.format_datetime(x.get_parameter('date')),
              'comment': has_comment(x.value),
              #'attachment': x.get_parameter('attachment')
-             'attachment': {
-                 'link': joined[i] or False,
-                 'is_video': False
-                 }
+             'attachment': joined[i]
+                 #{
+                 #'link': joined[i] or False,
+                 #}
              }
             for i, x in enumerate(comments) ]
+        print comments
         comments.reverse()
         return {'comments': comments}
 

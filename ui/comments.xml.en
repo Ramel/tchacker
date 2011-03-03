@@ -19,11 +19,11 @@
       </a>]&nbsp;
       </td>
     </tr>
-    <!--<tr stl:if="comment/att_is_img">
+    <tr stl:if="comment/attachment/thumbnail">
       <td colspan="5">
-        <a href="${comment/attachment}_HIG/;download" class="thickbox"><img src="${comment/attachment}_MED/;download" /></a>
+          <a href="${comment/attachment/link}_HIG/;download" class="thickbox"><img src="${comment/attachment/link}_MED/;download" /></a>
       </td>
-    </tr>--><!--
+    </tr><!--
     <tr stl:if="comment/att_is_vid">
       <td colspan="5">
         <a href="${comment/attachment}/;download"
@@ -34,7 +34,7 @@
     <tr stl:if="comment/attachment/link">
       <td colspan="5">
         <p class="attachment">Attachment: <a href="${comment/attachment/link}/;download"
-            >${comment/attachment/rel}</a></p>
+            >${comment/attachment/link}</a> ${comment/attachment/thumbnail}</p>
       </td>
     </tr>
     <tr stl:if="comment/comment">
@@ -53,7 +53,7 @@
      canvas: {
        backgroundImage: 'url(${comment/video}${comment/old}_thumb/;download)'
      }
-  }); 
+  });
   </script>-->
 </stl:block>
 <!--

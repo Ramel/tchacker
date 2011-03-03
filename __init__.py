@@ -25,6 +25,8 @@ from itools.web import get_context
 from ikaaro.registry import register_document_type
 from ikaaro.skins import register_skin
 
+#from issue import TchackerImage
+#from issue import TchackerVideo
 #from issue import Tchack_Issue
 from tracker import Tchack_Tracker
 from utils import which

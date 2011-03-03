@@ -162,7 +162,7 @@ class Tchack_Issue(Issue):
             if (mtype == "image"):
                 att_is_img = True
                 # Add attachment
-                cls = get_resource_class(mimetype)
+                #cls = get_resource_class(mimetype)
                 self.make_resource(name, TchackerImage, body=body, filename=filename,
                                 extension=extension, format=mimetype)
                 file = self.get_resource(name)
@@ -190,9 +190,9 @@ class Tchack_Issue(Issue):
                     hig = 1024, 1024
 
                     # Create the thumbnail PNG resources
-                    cls = get_resource_class('image/jpeg')
+                    #cls = get_resource_class('image/jpeg')
                     thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-                    uri = tmpfolder + os.sep
+                    uri = tmpfolder + sep
                     ext = "jpeg"
                     for te in thumbext:
                         try:

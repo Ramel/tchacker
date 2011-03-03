@@ -31,10 +31,10 @@
           id="player-${comment/number}"></a>
       </td>
     </tr>-->
-    <tr stl:if="comment/attachment">
+    <tr stl:if="comment/attachment/link">
       <td colspan="5">
-        <p class="attachment">Attachment: <a href="${comment/attachment}/;download"
-            >${comment/attachment}</a></p>
+        <p class="attachment">Attachment: <a href="${comment/attachment/link}/;download"
+            >${comment/attachment/rel}</a></p>
       </td>
     </tr>
     <tr stl:if="comment/comment">

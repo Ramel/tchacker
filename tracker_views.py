@@ -127,7 +127,7 @@ class Tchacker_View(Tracker_View):
 
 class Tchacker_Search(Tracker_Search):
     search_template = '/ui/tchacker/search.xml'
-    
+
     def get_namespace(self, resource, context):
         get_resource = resource.get_resource
         products = get_resource('product')

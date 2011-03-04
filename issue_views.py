@@ -34,7 +34,6 @@ from itools.fs import FileName #, vfs
 # Import from ikaaro
 from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
-#from ikaaro.tracker.datatypes import get_issue_fields
 
 from datatypes import get_issue_fields
 from comments import TchackerCommentsView
@@ -68,7 +67,7 @@ class TchackIssue_Edit(Issue_Edit):
         
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
-        namespace['amount'] = TchackerCommentsView().get_comments_amount(resource)
+        namespace['ids'] = TchackerCommentsView().get_comments_amount(resource)
         #print("in issue_views:get_namespace:%s" % namespace['comments_amount'])
         """
         for comment in namespace['comments']:

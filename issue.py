@@ -57,27 +57,9 @@ from videoencoding import VideoEncodingToFLV
 from PIL import Image as PILImage
 
 from comments import tchacker_comment_datatype
+from resources import TchackerImage, TchackerImageThumb
+from resources import TchackerVideo
 
-
-
-class TchackerImage(Image):
-
-    class_schema = merge_dicts(
-        Image.class_schema,
-        # Metadata
-        thumbnail=Boolean(source='metadata', stored=True))
-
-
-
-class TchackerVideo(Video):
-
-    class_schema = merge_dicts(
-        Video.class_schema,
-        # Metadata
-        has_thumb=Boolean(source='metadata', stored=True),
-        width=Integer(source='metadata', stored=True),
-        height=Integer(source='metadata', stored=True),
-        ratio=Decimal(source='metadata', stored=True))
 
 
 
@@ -93,26 +75,21 @@ class Tchack_Issue(Issue):
 
     class_schema = merge_dicts(
         Issue.class_schema,
-        amount=Integer(source='metadata', indexed=False, stored=True),
-        last_attachment=String(source='metadata', indexed=False, stored=True))
+        ids=Integer(source='metadata'),
+        last_attachment=String(source='metadata'))
 
     #XXX: Replace the original datatypes
     class_schema['comment'] = tchacker_comment_datatype
     # Add a relation to comment in the attachment schema
-    class_schema['attachment'] = Unicode(source='metadata', multiple=True,
-                                    parameters_schema={
-                                    'attachement': String,
-                                    'related': Integer})
+    class_schema['attachment'] = Unicode(
+                        source='metadata', multiple=True,
+                        parameters_schema={
+                            'attachement': String,
+                            'comment': Integer})
 
 
     def get_catalog_values(self):
         document = Issue.get_catalog_values(self)
-        #document['id'] = int(self.name)
-        #print(dir(document))
-        #document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
-        #document['amount'] = self.get_property('amount') or 0
-        #document['last_attachment'] = last_attachment or None
-        #print("document = %s" % document)
         return document
 
 
@@ -135,15 +112,15 @@ class Tchack_Issue(Issue):
         comment = form['comment']
         # Attachment
         attachment = form['attachment']
-        amount = 1
-        print("new = %s" % new)
+        ids = 0
+        #print("new = %s" % new)
         if not new:
             if ((not(comment) and attachment) or (comment and not(attachment))):
-                amount = form['amount']
-                amount = int(amount)+1
+                ids = int(form['ids'])
+                ids = ids+1
             else:
-                amount = form['amount']
-        print("amount = %s" % amount)
+                ids = form['ids']
+        #print("ids = %s" % ids)
         att_name = ""
         att_is_img = False
         att_is_vid = False
@@ -213,11 +190,14 @@ class Tchack_Issue(Issue):
                             thumb_data = thumb_file.read()
                         finally:
                             thumb_file.close()
-                        self.make_resource(ima, Image,
+                        self.make_resource(ima, TchackerImageThumb,
                             body=thumb_data, filename=ima,
                             extension=ext, format='image/%s' % ext)
+                        thumbnail = Property(True)
+                        #self.get_resource(ima).metadata.set_property(
+                        #    'thumbnail', thumbnail)
                     thumbnail = Property(True)
-                    file.metadata.set_property('thumbnail', thumbnail)
+                    file.metadata.set_property('has_thumb', thumbnail)
                     # Clean the temporary folder
                     vfs.remove(dirname)
 
@@ -272,20 +252,20 @@ class Tchack_Issue(Issue):
 
                         width_low = Property(width_low)
                         metadata.set_property('width', width_low)
-
                         height_low = Property(height_low)
                         metadata.set_property('height', height_low)
-
                         ratio = Property(ratio)
                         metadata.set_property('ratio', ratio)
-
                         thumbnail = Property(True)
                         metadata.set_property('has_thumb', thumbnail)
 
                         # Create the thumbnail PNG resources
-                        self.make_resource(thumbfilename, Image,
+                        self.make_resource(thumbfilename, TchackerImageThumb,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
+                        thumbnail = Property(True)
+                        self.get_resource(thumbfilename).metadata.set_property(
+                            'thumbnail', thumbnail)
 
                 # Clean the temporary folder
                 vfs.remove(dirname)
@@ -309,7 +289,7 @@ class Tchack_Issue(Issue):
             """
 
             # Link
-            attachment = Property(att_name, related=amount)
+            attachment = Property(att_name, comment=ids)
             self.set_property('attachment', attachment)
 
         # Comment
@@ -324,8 +304,8 @@ class Tchack_Issue(Issue):
         comment = Property(comment, date=date, author=author,
             attachment=att_name)
         self.set_property('comment', comment)
-        amount = Property(amount)
-        self.set_property('amount', amount)
+        ids = Property(ids)
+        self.set_property('ids', ids)
 
         # Send a Notification Email
         # Notify / From
@@ -445,7 +425,7 @@ class Tchack_Issue(Issue):
 ###########################################################################
 # The class
 register_resource_class(Tchack_Issue)
-register_resource_class(TchackerImage)
-register_resource_class(TchackerVideo)
+#register_resource_class(TchackerImage)
+#register_resource_class(TchackerVideo)
 #register_field('last_attachment', String(is_stored=True))
 #register_field('last_author', String(is_stored=True))

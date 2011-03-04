@@ -38,4 +38,4 @@ def get_issue_fields(tracker):
             'cc_list': Tracker_UsersList(resource=tracker, multiple=True),
             'comment': Unicode,
             'attachment': FileDataType,
-            'amount': Integer}
+            'ids': Integer}

@@ -41,7 +41,7 @@ ${comments}
       <tr>
         <td colspan="2">
           <a href="#" class="showall">Show/Hide options</a>
-          <input type="hidden" value="${amount/value}" id="amount" name="amount" />
+          <input type="hidden" value="${ids/value}" id="ids" name="ids" />
         </td>
       </tr>
       <tr>

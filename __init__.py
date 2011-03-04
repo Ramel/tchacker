@@ -24,10 +24,8 @@ from itools.web import get_context
 # Import from ikaaro
 from ikaaro.registry import register_document_type
 from ikaaro.skins import register_skin
+from ikaaro.website import WebSite
 
-#from issue import TchackerImage
-#from issue import TchackerVideo
-#from issue import Tchack_Issue
 from tracker import Tchack_Tracker
 from utils import which
 
@@ -39,7 +37,7 @@ path = get_abspath('ui')
 register_skin('tchacker', path)
 
 # Register document type
-register_document_type(Tchack_Tracker)
+register_document_type(Tchack_Tracker, WebSite.class_id)
 
 ###########################################################################
 # Check required software
@@ -47,4 +45,3 @@ register_document_type(Tchack_Tracker)
 for name, cli in [("zip", "zip")]:
     if(which(cli)) is None:
         print 'You need to install "%s".' % name
-

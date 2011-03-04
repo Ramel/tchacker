@@ -31,7 +31,6 @@ from ikaaro.tracker import Tracker
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import get_resource_class
 
-#from resources import Tchack_Resources
 from issue import Tchack_Issue
 from tracker_views import Tchacker_View #, Tracker_Zip_Img
 from tracker_views import Tchacker_Search
@@ -509,5 +508,4 @@ class Tchack_Tracker(Tracker):
 ###########################################################################
 # Register
 ###########################################################################
-
 register_resource_class(Tchack_Tracker)

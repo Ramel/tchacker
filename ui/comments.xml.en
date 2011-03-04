@@ -19,22 +19,22 @@
       </a>]&nbsp;
       </td>
     </tr>
-    <tr stl:if="comment/attachment/thumbnail">
+    <tr stl:if="comment/attachment/is_image">
       <td colspan="5">
           <a href="${comment/attachment/link}_HIG/;download" class="thickbox"><img src="${comment/attachment/link}_MED/;download" /></a>
       </td>
-    </tr><!--
-    <tr stl:if="comment/att_is_vid">
+    </tr>
+    <tr stl:if="comment/attachment/is_video">
       <td colspan="5">
-        <a href="${comment/attachment}/;download"
-          style="display:block;width:${comment/width}px;height:${comment/height}px;"
+        <a href="${comment/attachment/link}/;download"
+          style="display:block;width:${comment/attachment/width}px;height:${comment/attachment/height}px;"
           id="player-${comment/number}"></a>
       </td>
-    </tr>-->
+    </tr>
     <tr stl:if="comment/attachment/link">
       <td colspan="5">
         <p class="attachment">Attachment: <a href="${comment/attachment/link}/;download"
-            >${comment/attachment/link}</a> ${comment/attachment/thumbnail}</p>
+            >${comment/attachment/link}</a></p>
       </td>
     </tr>
     <tr stl:if="comment/comment">
@@ -44,27 +44,16 @@
     </tr>
   </table>
   <br/>
-  <!--<script stl:if="comment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.2.2.swf", {
+  <script stl:if="comment/attachment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.2.2.swf", {
      clip: {
        autoPlay: false,
        autoBuffering: false
      },
      // canvas background, the video thumbnail.
      canvas: {
-       backgroundImage: 'url(${comment/video}${comment/old}_thumb/;download)'
+       backgroundImage: 'url(${comment/attachment/link}_thumb/;download)'
      }
   });
-  </script>-->
+  </script>
 </stl:block>
-<!--
-            <ul stl:if="attachments">
-              <li stl:repeat="file attachments">
-                <span stl:if="file/missing" class="missing">${file/name}</span>
-                <stl:block stl:if="not file/missing">
-                  <a href="${file/name}/;download">${file/name}</a>
-                  (${file/mtime}, ${file/author})
-                </stl:block>
-              </li>
-            </ul>
--->
 </stl:block>

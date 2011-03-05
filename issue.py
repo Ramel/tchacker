@@ -43,7 +43,7 @@ from ikaaro.tracker.issue import Issue
 from ikaaro.tracker.obsolete import History
 from ikaaro.file import Video, Image
 from ikaaro.utils import generate_name
-#from ikaaro.registry import get_resource_class
+from ikaaro.registry import get_resource_class
 from ikaaro.folder import Folder
 from ikaaro.comments import indent
 
@@ -58,8 +58,7 @@ from PIL import Image as PILImage
 
 from comments import tchacker_comment_datatype
 from resources import TchackerImage, TchackerImageThumb
-from resources import TchackerVideo
-
+#from resources import TchackerVideo
 
 
 
@@ -136,24 +135,30 @@ class Tchack_Issue(Issue):
             mtype = mimetype.split("/")[0]
 
             att_name = name
-
+            print("self.__class__ = %s" % self.__class__)
             # Image
             if (mtype == "image"):
                 att_is_img = True
                 # Add attachment
-                #cls = get_resource_class(mimetype)
-                self.make_resource(name, TchackerImage, body=body, filename=filename,
-                                extension=extension, format=mimetype)
-                file = self.get_resource(name)
+                #cls = get_resource_class('tchacker_image')
+                #print cls
+                tchackerImage = self.make_resource(name, TchackerImage,
+                                body=body, filename=filename,
+                                extension=extension)
+                print("1: %s.__class__ = %s" %
+                        (tchackerImage.name, tchackerImage.__class__))
+                has_thumb = Property(False)
+                tchackerImage.metadata.set_property('has_thumb', has_thumb)
+                
+                #file = self.get_resource(name)
 
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
                 # used instead of a ;thumb
                 if extension == "psd":
                     pass
                 else:
-                    name = file.name
-                    mimetype = file.handler.get_mimetype()
-                    body = file.handler.to_str()
+                    #name = file.name
+                    name = tchackerImage.name
 
                     dirname = mkdtemp('makethumbs', 'ikaaro')
                     tempdir = vfs.open(dirname)
@@ -190,14 +195,18 @@ class Tchack_Issue(Issue):
                             thumb_data = thumb_file.read()
                         finally:
                             thumb_file.close()
-                        self.make_resource(ima, TchackerImageThumb,
-                            body=thumb_data, filename=ima,
-                            extension=ext, format='image/%s' % ext)
-                        thumbnail = Property(True)
-                        #self.get_resource(ima).metadata.set_property(
-                        #    'thumbnail', thumbnail)
-                    thumbnail = Property(True)
-                    file.metadata.set_property('has_thumb', thumbnail)
+                        #cls = get_resource_class('tchacker_image_thumb')
+                        #print cls
+                        imageThumb = self.make_resource(ima, TchackerImageThumb,
+                                    body=thumb_data, filename=ima, extension=ext)
+                        print("%s = %s" % (imageThumb.name, imageThumb.__class__))
+                        is_thumb = Property(True)
+                        imageThumb.set_property('is_thumb', is_thumb)
+                    #file.metadata.set_property('has_thumb', thumbnail)
+                    print("2: %s.__class__ = %s" %
+                            (tchackerImage.name, tchackerImage.__class__))
+                    has_thumb = Property(True)
+                    tchackerImage.set_property('has_thumb', has_thumb)
                     # Clean the temporary folder
                     vfs.remove(dirname)
 
@@ -424,7 +433,7 @@ class Tchack_Issue(Issue):
 # Register
 ###########################################################################
 # The class
-register_resource_class(Tchack_Issue)
+#register_resource_class(Tchack_Issue)
 #register_resource_class(TchackerImage)
 #register_resource_class(TchackerVideo)
 #register_field('last_attachment', String(is_stored=True))

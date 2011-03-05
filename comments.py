@@ -61,6 +61,7 @@ class TchackerCommentsView(CommentsView):
 
         for attachment in attachments:
             to = attachment.get_parameter('comment')
+            print to
             attached[to] = {
                     'link': attachment.value,
                     'has_thumb': resource.get_resource(

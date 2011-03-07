@@ -41,7 +41,7 @@ from itools.datatypes import Boolean, Decimal, Tokens
 from ikaaro.registry import register_resource_class
 from ikaaro.tracker.issue import Issue
 from ikaaro.tracker.obsolete import History
-from ikaaro.file import Video, Image
+#from ikaaro.file import Video, Image
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
 from ikaaro.folder import Folder
@@ -57,7 +57,8 @@ from videoencoding import VideoEncodingToFLV
 from PIL import Image as PILImage
 
 from comments import tchacker_comment_datatype
-from resources import TchackerImage, TchackerImageThumb
+from monkey import Image, Video
+#from resources import TchackerImage, TchackerImageThumb
 #from resources import TchackerVideo
 
 
@@ -136,19 +137,20 @@ class Tchack_Issue(Issue):
 
             att_name = name
             print("self.__class__ = %s" % self.__class__)
+            print("filename = %s" % filename)
             # Image
             if (mtype == "image"):
                 att_is_img = True
                 # Add attachment
-                #cls = get_resource_class('tchacker_image')
+                cls = get_resource_class('tchacker_image')
                 #print cls
-                tchackerImage = self.make_resource(name, TchackerImage,
+                tchackerImage = self.make_resource(name, cls, #, Image,
                                 body=body, filename=filename,
                                 extension=extension)
                 print("1: %s.__class__ = %s" %
                         (tchackerImage.name, tchackerImage.__class__))
-                has_thumb = Property(False)
-                tchackerImage.metadata.set_property('has_thumb', has_thumb)
+                #has_thumb = Property(True)
+                #tchackerImage.metadata.set_property('has_thumb', has_thumb)
                 
                 #file = self.get_resource(name)
 
@@ -195,11 +197,13 @@ class Tchack_Issue(Issue):
                             thumb_data = thumb_file.read()
                         finally:
                             thumb_file.close()
-                        #cls = get_resource_class('tchacker_image_thumb')
+                        cls = get_resource_class('tchacker_image_thumb')
                         #print cls
-                        imageThumb = self.make_resource(ima, TchackerImageThumb,
+                        # filename = "%s.%s" % (ima, ext)
+                        imageThumb = self.make_resource(ima, cls, #, Image,
                                     body=thumb_data, filename=ima, extension=ext)
                         print("%s = %s" % (imageThumb.name, imageThumb.__class__))
+                        print("%s = %s" % (imageThumb.name, imageThumb.class_id))
                         is_thumb = Property(True)
                         imageThumb.set_property('is_thumb', is_thumb)
                     #file.metadata.set_property('has_thumb', thumbnail)

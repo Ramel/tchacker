@@ -22,7 +22,7 @@ from itools.datatypes import Boolean, Integer
 # Import from ikaaro
 from ikaaro.comments import CommentsView, indent
 
-from resources import TchackerImage, TchackerVideo
+from monkey import Image, Video
 
 
 tchacker_comment_datatype = Unicode(source='metadata', multiple=True,
@@ -61,15 +61,18 @@ class TchackerCommentsView(CommentsView):
 
         for attachment in attachments:
             to = attachment.get_parameter('comment')
-            print to
             attached[to] = {
                     'link': attachment.value,
-                    'has_thumb': resource.get_resource(
-                            str(attachment.value)).get_property('has_thumb'),
+                    'is_thumb': resource.get_resource(
+                            str(attachment.value)).get_property('is_thumb'),
                     'is_image': isinstance(resource.get_resource(
-                            str(attachment.value)), TchackerImage),
+                                    str(attachment.value)), Image)
+                                and resource.get_resource(
+                                    str(attachment.value)).get_property('has_thumb'),
                     'is_video': isinstance(resource.get_resource(
-                            str(attachment.value)), TchackerVideo)
+                                    str(attachment.value)), Video)
+                                and resource.get_resource(
+                                    str(attachment.value)).get_property('has_thumb')
                     }
         print attached
         # Get resource metadata values: is_video, is_image

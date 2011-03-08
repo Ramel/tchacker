@@ -134,19 +134,30 @@ class Tchack_Issue(Issue):
             name = generate_name(name, self.get_names())
 
             mtype = mimetype.split("/")[0]
-
+           
             att_name = name
+
             print("self.__class__ = %s" % self.__class__)
             print("filename = %s" % filename)
+            print("name = %s" % name)
             # Image
             if (mtype == "image"):
                 att_is_img = True
                 # Add attachment
-                cls = get_resource_class('tchacker_image')
+                #format = 'tchacker_image'
+                #format = 'image/jpeg'
+                #cls = get_resource_class(format)
                 #print cls
-                tchackerImage = self.make_resource(name, cls, #Image,
+                tchackerImage = self.make_resource(
+                                #name,
+                                name,
+                                #'%s.%s' % (name, extension), 
+                                #cls,
+                                Image,
                                 body=body, filename=name,
-                                extension=extension, format='tchacker_image')
+                                extension=extension,
+                                format=mimetype
+                                )
                 print("1: %s.__class__ = %s" %
                         (tchackerImage.name, tchackerImage.__class__))
                 #has_thumb = Property(True)
@@ -160,7 +171,7 @@ class Tchack_Issue(Issue):
                     pass
                 else:
                     #name = file.name
-                    name = tchackerImage.name
+                    #name, extension, language = FileName(tchackerImage)
 
                     dirname = mkdtemp('makethumbs', 'ikaaro')
                     tempdir = vfs.open(dirname)
@@ -176,10 +187,9 @@ class Tchack_Issue(Issue):
                     hig = 1024, 1024
 
                     # Create the thumbnail PNG resources
-                    #cls = get_resource_class('image/jpeg')
                     thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
                     uri = tmpfolder + sep
-                    ext = "jpeg"
+                    ext = "jpg"
                     for te in thumbext:
                         try:
                             im = PILImage.open(tmp_uri)
@@ -190,20 +200,26 @@ class Tchack_Issue(Issue):
                         # Some images are in CMYB, force RVB if needed
                         if im.mode != "RGB":
                             im = im.convert("RGB")
-                        im.save(uri + ima + "." + ext, ext, quality=85)
+                        im.save(uri + ima + "." + ext, 'jpeg', quality=85)
                         # Copy the thumb content
                         thumb_file = tempdir.open(ima + "." + ext)
                         try:
                             thumb_data = thumb_file.read()
                         finally:
                             thumb_file.close()
-                        cls = get_resource_class('tchacker_image_thumb')
-                        #print cls
-                        # filename = "%s.%s" % (ima, ext)
-                        imageThumb = self.make_resource(ima, cls, #Image,
-                                    body=thumb_data, filename=ima,
-                                    extension=ext, format='tchacker_image_thumb')
-                        print("%s = %s" % (imageThumb.name, imageThumb.__class__))
+                        #format = 'tchacker_image_thumb/jpeg'
+                        format = 'image/jpeg'
+                        cls = get_resource_class(format)
+                        imageThumb = self.make_resource(
+                                    ima,
+                                    #'%s%s' % (ima, ext), 
+                                    cls, 
+                                    #Image,
+                                    body=thumb_data,
+                                    filename=ima,
+                                    extension=ext,
+                                    format=format
+                                    )
                         print("%s = %s" % (imageThumb.name, imageThumb.__class__))
                         is_thumb = Property(True)
                         imageThumb.set_property('is_thumb', is_thumb)

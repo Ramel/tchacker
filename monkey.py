@@ -27,11 +27,11 @@ from ikaaro.file import Image, Video
 from ikaaro.registry import register_resource_class
 
 
-ImageHandler.class_mimetypes = ImageHandler.class_mimetypes + ['tchacker_image',
-'tchacker_image_thumb']
+#ImageHandler.class_mimetypes = ImageHandler.class_mimetypes + ['tchacker_image',
+#'tchacker_image_thumb']
 
 
-print("ImageHandler.class_mimetypes = %s" % ImageHandler.class_mimetypes)
+#print("ImageHandler.class_mimetypes = %s" % ImageHandler.class_mimetypes)
 
 
 Image.class_schema = freeze(merge_dicts(
@@ -40,7 +40,7 @@ Image.class_schema = freeze(merge_dicts(
         is_thumb=Boolean(source='metadata')))
 
 
-Image.class_handler = ImageHandler
+#Image.class_handler = ImageHandler
 
 
 Video.class_schema = freeze(merge_dicts(
@@ -51,7 +51,7 @@ Video.class_schema = freeze(merge_dicts(
         ratio=Decimal(source='metadata')))
 
 
-register_handler_class(ImageHandler)
+#register_handler_class(ImageHandler)
 ## TODO restore ikaaro class_id
 register_resource_class(Image, format='tchacker_image')
 register_resource_class(Image, format='tchacker_image_thumb')

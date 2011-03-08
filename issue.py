@@ -144,14 +144,14 @@ class Tchack_Issue(Issue):
                 # Add attachment
                 cls = get_resource_class('tchacker_image')
                 #print cls
-                tchackerImage = self.make_resource(name, cls, #, Image,
-                                body=body, filename=filename,
-                                extension=extension)
+                tchackerImage = self.make_resource(name, cls, #Image,
+                                body=body, filename=name,
+                                extension=extension, format='tchacker_image')
                 print("1: %s.__class__ = %s" %
                         (tchackerImage.name, tchackerImage.__class__))
                 #has_thumb = Property(True)
                 #tchackerImage.metadata.set_property('has_thumb', has_thumb)
-                
+
                 #file = self.get_resource(name)
 
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
@@ -200,10 +200,11 @@ class Tchack_Issue(Issue):
                         cls = get_resource_class('tchacker_image_thumb')
                         #print cls
                         # filename = "%s.%s" % (ima, ext)
-                        imageThumb = self.make_resource(ima, cls, #, Image,
-                                    body=thumb_data, filename=ima, extension=ext)
+                        imageThumb = self.make_resource(ima, cls, #Image,
+                                    body=thumb_data, filename=ima,
+                                    extension=ext, format='tchacker_image_thumb')
                         print("%s = %s" % (imageThumb.name, imageThumb.__class__))
-                        print("%s = %s" % (imageThumb.name, imageThumb.class_id))
+                        print("%s = %s" % (imageThumb.name, imageThumb.__class__))
                         is_thumb = Property(True)
                         imageThumb.set_property('is_thumb', is_thumb)
                     #file.metadata.set_property('has_thumb', thumbnail)

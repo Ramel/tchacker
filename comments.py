@@ -54,23 +54,19 @@ class TchackerCommentsView(CommentsView):
 
         comments = resource.metadata.get_property('comment') or []
         attachments = resource.metadata.get_property('attachment') or []
+        
         attached = [{ 'link': False,
-                    'has_thumb': False,
                     'is_image': False,
                     'is_video': False,
-                    'value': False}] * len(comments)
-        print attachments
+                    }] * len(comments)
+        
         for attachment in attachments:
             to = attachment.get_parameter('comment')
             attached[to] = {
                     'link': attachment.value,
-                    'has_thumb': resource.get_resource(
-                            str(attachment.value)).get_property('has_thumb'),
-                    'value': str(attachment.value),
-                    'is_image': 
-                                #resource.get_resource(
-                                    #str(attachment.value)).metadata.format == 'tchacker_image'
-                                isinstance(resource.get_resource(
+                    #'has_thumb': resource.get_resource(
+                    #        str(attachment.value)).get_property('has_thumb'),
+                    'is_image': isinstance(resource.get_resource(
                                     str(attachment.value)), Image)
                                 and resource.get_resource(
                                     str(attachment.value)).get_property('has_thumb'),
@@ -79,7 +75,6 @@ class TchackerCommentsView(CommentsView):
                                 and resource.get_resource(
                                     str(attachment.value)).get_property('has_thumb')
                     }
-        print attached
         # Get resource metadata values: is_video, is_image
         comments = [
             {'number': i,

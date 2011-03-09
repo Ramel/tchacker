@@ -22,30 +22,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from the Standard Library
-from datetime import datetime
+#from datetime import datetime
 from tempfile import mkdtemp
 from os import sep
 
 # Import from itools
-from itools.datatypes import String
+#from itools.datatypes import String
 from itools.gettext import MSG
 from itools.handlers import checkid
 from itools.fs import FileName, vfs
 from itools.core import merge_dicts
-from itools.database import register_field
+#from itools.database import register_field
 from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode
-from itools.datatypes import Boolean, Decimal, Tokens
+#from itools.datatypes import Boolean, Decimal, Tokens
 
 # Import from ikaaro
-from ikaaro.registry import register_resource_class
+#from ikaaro.registry import register_resource_class
 from ikaaro.tracker.issue import Issue
-from ikaaro.tracker.obsolete import History
+#from ikaaro.tracker.obsolete import History
 #from ikaaro.file import Video, Image
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
-from ikaaro.folder import Folder
-from ikaaro.comments import indent
+#from ikaaro.folder import Folder
+#from ikaaro.comments import indent
 
 # Import from Tchacker
 from issue_views import TchackIssue_Edit
@@ -76,7 +76,7 @@ class Tchack_Issue(Issue):
     class_schema = merge_dicts(
         Issue.class_schema,
         ids=Integer(source='metadata'),
-        last_attachment=String(source='metadata'))
+        last_attachment=String(source='metadata', indexed=False, stored=True))
 
     #XXX: Replace the original datatypes
     class_schema['comment'] = tchacker_comment_datatype
@@ -137,9 +137,9 @@ class Tchack_Issue(Issue):
            
             att_name = name
 
-            print("self.__class__ = %s" % self.__class__)
-            print("filename = %s" % filename)
-            print("name = %s" % name)
+            #print("self.__class__ = %s" % self.__class__)
+            #print("filename = %s" % filename)
+            #print("name = %s" % name)
             # Image
             if (mtype == "image"):
                 att_is_img = True
@@ -149,30 +149,20 @@ class Tchack_Issue(Issue):
                 #cls = get_resource_class(format)
                 #print cls
                 tchackerImage = self.make_resource(
-                                #name,
                                 name,
-                                #'%s.%s' % (name, extension), 
-                                #cls,
                                 Image,
                                 body=body, filename=name,
                                 extension=extension,
                                 format=mimetype
                                 )
-                print("1: %s.__class__ = %s" %
-                        (tchackerImage.name, tchackerImage.__class__))
-                #has_thumb = Property(True)
-                #tchackerImage.metadata.set_property('has_thumb', has_thumb)
-
-                #file = self.get_resource(name)
+                #print("1: %s.__class__ = %s" %
+                #        (tchackerImage.name, tchackerImage.__class__))
 
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
                 # used instead of a ;thumb
                 if extension == "psd":
                     pass
                 else:
-                    #name = file.name
-                    #name, extension, language = FileName(tchackerImage)
-
                     dirname = mkdtemp('makethumbs', 'ikaaro')
                     tempdir = vfs.open(dirname)
                     # Paste the file in the tempdir
@@ -188,8 +178,9 @@ class Tchack_Issue(Issue):
 
                     # Create the thumbnail PNG resources
                     thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
+                    
                     uri = tmpfolder + sep
-                    ext = "jpg"
+                    
                     for te in thumbext:
                         try:
                             im = PILImage.open(tmp_uri)
@@ -200,32 +191,29 @@ class Tchack_Issue(Issue):
                         # Some images are in CMYB, force RVB if needed
                         if im.mode != "RGB":
                             im = im.convert("RGB")
-                        im.save(uri + ima + "." + ext, 'jpeg', quality=85)
+                        im.save(uri + ima + ".jpg", 'jpeg', quality=85)
                         # Copy the thumb content
-                        thumb_file = tempdir.open(ima + "." + ext)
+                        thumb_file = tempdir.open(ima + ".jpg")
                         try:
                             thumb_data = thumb_file.read()
                         finally:
                             thumb_file.close()
-                        #format = 'tchacker_image_thumb/jpeg'
                         format = 'image/jpeg'
                         cls = get_resource_class(format)
                         imageThumb = self.make_resource(
                                     ima,
-                                    #'%s%s' % (ima, ext), 
                                     cls, 
-                                    #Image,
                                     body=thumb_data,
                                     filename=ima,
-                                    extension=ext,
+                                    extension='jpg',
                                     format=format
                                     )
-                        print("%s = %s" % (imageThumb.name, imageThumb.__class__))
+                        #print("%s = %s" % (imageThumb.name, imageThumb.__class__))
                         is_thumb = Property(True)
                         imageThumb.set_property('is_thumb', is_thumb)
                     #file.metadata.set_property('has_thumb', thumbnail)
-                    print("2: %s.__class__ = %s" %
-                            (tchackerImage.name, tchackerImage.__class__))
+                    #print("2: %s.__class__ = %s" %
+                    #        (tchackerImage.name, tchackerImage.__class__))
                     has_thumb = Property(True)
                     tchackerImage.set_property('has_thumb', has_thumb)
                     # Clean the temporary folder
@@ -453,9 +441,5 @@ class Tchack_Issue(Issue):
 ###########################################################################
 # Register
 ###########################################################################
-# The class
-#register_resource_class(Tchack_Issue)
-#register_resource_class(TchackerImage)
-#register_resource_class(TchackerVideo)
 #register_field('last_attachment', String(is_stored=True))
 #register_field('last_author', String(is_stored=True))

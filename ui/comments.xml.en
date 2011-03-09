@@ -20,9 +20,6 @@
       </td>
     </tr>
     <tr stl:if="comment/attachment/is_image">
-      <td colspan="5"><a href="${comment/attachment/link}_HIG/;download"><img src="${comment/attachment/link}_MED/;thumb?width=256&amp;height=256" /></a> - is_image</td>
-    </tr>
-    <tr stl:if="comment/attachment/is_image">
       <td colspan="5">
           <a href="${comment/attachment/link}_HIG/;download" class="thickbox"><img src="${comment/attachment/link}_MED/;download" /></a>
       </td>

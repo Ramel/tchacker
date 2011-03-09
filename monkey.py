@@ -17,21 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from itools.core import freeze, merge_dicts
-from itools.datatypes import Integer, String, Unicode
-from itools.datatypes import Boolean, Decimal, Tokens
-from itools.handlers import Image as ImageHandler
-#from itools.handlers import Image
-from itools.handlers import register_handler_class
+from itools.datatypes import Integer, Boolean, Decimal
 
 from ikaaro.file import Image, Video
-from ikaaro.registry import register_resource_class
+#from ikaaro.registry import register_resource_class
 
-
-#ImageHandler.class_mimetypes = ImageHandler.class_mimetypes + ['tchacker_image',
-#'tchacker_image_thumb']
-
-
-#print("ImageHandler.class_mimetypes = %s" % ImageHandler.class_mimetypes)
 
 
 Image.class_schema = freeze(merge_dicts(
@@ -39,8 +29,6 @@ Image.class_schema = freeze(merge_dicts(
         has_thumb=Boolean(source='metadata'),
         is_thumb=Boolean(source='metadata')))
 
-
-#Image.class_handler = ImageHandler
 
 
 Video.class_schema = freeze(merge_dicts(
@@ -51,8 +39,7 @@ Video.class_schema = freeze(merge_dicts(
         ratio=Decimal(source='metadata')))
 
 
-#register_handler_class(ImageHandler)
 ## TODO restore ikaaro class_id
-register_resource_class(Image, format='tchacker_image')
-register_resource_class(Image, format='tchacker_image_thumb')
-register_resource_class(Video, format='tchacker_video')
+#register_resource_class(Image, format='tchacker_image')
+#register_resource_class(Image, format='tchacker_image_thumb')
+#register_resource_class(Video, format='tchacker_video')

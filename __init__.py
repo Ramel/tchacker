@@ -18,8 +18,8 @@
 # Import from itools
 from itools.core import get_abspath
 from itools.core import get_version
-from itools.fs import lfs
-from itools.web import get_context
+#from itools.fs import lfs
+#from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.registry import register_document_type

@@ -72,9 +72,10 @@ class Tchack_Issue(Issue):
     class_schema['comment'] = tchacker_comment_datatype
     # Add a relation to comment in the attachment schema
     class_schema['attachment'] = Unicode(
-                        source='metadata', multiple=True,
+                        source='metadata', 
+                        multiple=True,
                         parameters_schema={
-                            'attachement': String,
+                            'attachment': String,
                             'comment': Integer})
 
 
@@ -103,17 +104,15 @@ class Tchack_Issue(Issue):
         # Attachment
         attachment = form['attachment']
         ids = 0
-        #print("new = %s" % new)
         if not new:
-            if ((not(comment) and attachment) or (comment and not(attachment))):
+            if ((not(comment) and attachment) or
+                        (comment and not(attachment)) or 
+                        (comment and attachment)):
                 ids = int(form['ids'])
                 ids = ids+1
             else:
                 ids = form['ids']
-        #print("ids = %s" % ids)
         att_name = ""
-        att_is_img = False
-        att_is_vid = False
 
         if attachment is not None:
             # Upload
@@ -127,12 +126,9 @@ class Tchack_Issue(Issue):
            
             att_name = name
 
-            #print("self.__class__ = %s" % self.__class__)
-            #print("filename = %s" % filename)
-            #print("name = %s" % name)
             # Image
             if (mtype == "image"):
-                att_is_img = True
+                #att_is_img = True
                 # Add attachment
                 tchackerImage = self.make_resource(
                                 name,
@@ -208,7 +204,6 @@ class Tchack_Issue(Issue):
                 # video.mp4, video_low.mp4, video_low_thumb.jpg
                 # If the video is h264 and wider than 319px,
                 # so create a Low copy.
-                att_is_vid = True
                 dirname = mkdtemp('videoencoding', 'ikaaro')
                 tempdir = vfs.open(dirname)
                 # Paste the file in the tempdir
@@ -265,7 +260,6 @@ class Tchack_Issue(Issue):
                         self.get_resource(thumbfilename).metadata.set_property(
                             'is_thumb', is_thumb)
                         # As the video is a low version and reencoded
-                        #att_name = "%s_low" % filename
                         att_name = vidfilename
 
                 # Clean the temporary folder
@@ -298,13 +292,14 @@ class Tchack_Issue(Issue):
         date = context.timestamp
         user = context.user
         author = user.name if user else None
-        if attachment is not None:
+        print("comment = '%s', attachment = %s" % (comment, att_name))
+        if comment == '' and attachment is not None:
             comment = "comment_is_empty_but_has_attachment"
+        if attachment is not None:
             self.set_property('last_attachment', att_name)
-        #else:
-        #    self.set_property('last_attachment', "None")
-        comment = Property(comment, date=date, author=author,
-            attachment=att_name)
+        comment = Property(comment, date=date, 
+                            author=author
+                            )
         self.set_property('comment', comment)
         ids = Property(ids)
         self.set_property('ids', ids)
@@ -420,10 +415,3 @@ class Tchack_Issue(Issue):
 
         # Remove .history
         self.handler.del_handler('.history')
-
-
-###########################################################################
-# Register
-###########################################################################
-#register_field('last_attachment', String(is_stored=True))
-#register_field('last_author', String(is_stored=True))

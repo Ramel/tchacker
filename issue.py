@@ -27,25 +27,17 @@ from tempfile import mkdtemp
 from os import sep
 
 # Import from itools
-#from itools.datatypes import String
 from itools.gettext import MSG
 from itools.handlers import checkid
 from itools.fs import FileName, vfs
 from itools.core import merge_dicts
-#from itools.database import register_field
 from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode
-#from itools.datatypes import Boolean, Decimal, Tokens
 
 # Import from ikaaro
-#from ikaaro.registry import register_resource_class
 from ikaaro.tracker.issue import Issue
-#from ikaaro.tracker.obsolete import History
-#from ikaaro.file import Video, Image
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
-#from ikaaro.folder import Folder
-#from ikaaro.comments import indent
 
 # Import from Tchacker
 from issue_views import TchackIssue_Edit
@@ -58,8 +50,6 @@ from PIL import Image as PILImage
 
 from comments import tchacker_comment_datatype
 from monkey import Image, Video
-#from resources import TchackerImage, TchackerImageThumb
-#from resources import TchackerVideo
 
 
 
@@ -144,10 +134,6 @@ class Tchack_Issue(Issue):
             if (mtype == "image"):
                 att_is_img = True
                 # Add attachment
-                #format = 'tchacker_image'
-                #format = 'image/jpeg'
-                #cls = get_resource_class(format)
-                #print cls
                 tchackerImage = self.make_resource(
                                 name,
                                 Image,
@@ -155,8 +141,6 @@ class Tchack_Issue(Issue):
                                 extension=extension,
                                 format=mimetype
                                 )
-                #print("1: %s.__class__ = %s" %
-                #        (tchackerImage.name, tchackerImage.__class__))
 
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
                 # used instead of a ;thumb
@@ -208,12 +192,8 @@ class Tchack_Issue(Issue):
                                     extension='jpg',
                                     format=format
                                     )
-                        #print("%s = %s" % (imageThumb.name, imageThumb.__class__))
                         is_thumb = Property(True)
                         imageThumb.set_property('is_thumb', is_thumb)
-                    #file.metadata.set_property('has_thumb', thumbnail)
-                    #print("2: %s.__class__ = %s" %
-                    #        (tchackerImage.name, tchackerImage.__class__))
                     has_thumb = Property(True)
                     tchackerImage.set_property('has_thumb', has_thumb)
                     # Clean the temporary folder
@@ -251,7 +231,7 @@ class Tchack_Issue(Issue):
                     #video_low = ("%s_low" % name)
                     # video is already in temp dir, so encode it
                     encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
-                        tmpfolder, name, name, width_low)
+                        tmpfolder, name, name, width_low, encode='one_chroma_faststart')
 
                     if encoded is not None:
                         vidfilename, vidmimetype, \
@@ -259,7 +239,7 @@ class Tchack_Issue(Issue):
                         thumbfilename, thumbmimetype, \
                                 thumbbody, thumbextension = encoded['flvthumb']
                         # Create the video resources
-                        self.make_resource(vidfilename, TchackerVideo,
+                        self.make_resource(vidfilename, Video,
                             body=vidbody, filename=vidfilename,
                             extension=vidextension, format=vidmimetype)
 
@@ -274,19 +254,23 @@ class Tchack_Issue(Issue):
                         metadata.set_property('height', height_low)
                         ratio = Property(ratio)
                         metadata.set_property('ratio', ratio)
-                        thumbnail = Property(True)
-                        metadata.set_property('has_thumb', thumbnail)
+                        has_thumb = Property(True)
+                        metadata.set_property('has_thumb', has_thumb)
 
                         # Create the thumbnail PNG resources
-                        self.make_resource(thumbfilename, TchackerImageThumb,
+                        self.make_resource(thumbfilename, Image,
                             body=thumbbody, filename=thumbfilename,
                             extension=thumbextension, format=thumbmimetype)
-                        thumbnail = Property(True)
+                        is_thumb = Property(True)
                         self.get_resource(thumbfilename).metadata.set_property(
-                            'thumbnail', thumbnail)
+                            'is_thumb', is_thumb)
+                        # As the video is a low version and reencoded
+                        #att_name = "%s_low" % filename
+                        att_name = vidfilename
 
                 # Clean the temporary folder
                 vfs.remove(dirname)
+
             """
                 # Create a thumbnail for a big file, instead of encoding it
                 else:

@@ -37,9 +37,3 @@ Video.class_schema = freeze(merge_dicts(
         width=Integer(source='metadata'),
         height=Integer(source='metadata'),
         ratio=Decimal(source='metadata')))
-
-
-## TODO restore ikaaro class_id
-#register_resource_class(Image, format='tchacker_image')
-#register_resource_class(Image, format='tchacker_image_thumb')
-#register_resource_class(Video, format='tchacker_video')

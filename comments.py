@@ -62,18 +62,25 @@ class TchackerCommentsView(CommentsView):
         
         for attachment in attachments:
             to = attachment.get_parameter('comment')
+            image = isinstance(resource.get_resource(
+                    str(attachment.value)), Image) or False
+            video = isinstance(resource.get_resource(
+                    str(attachment.value)), Video) or False
+            has_thumb = resource.get_resource(
+                    str(attachment.value)).get_property('has_thumb') or False
+            if video and has_thumb:
+                video = {
+                    'width' :resource.get_resource(
+                            str(attachment.value)).get_property('width'),
+                    'height' :resource.get_resource(
+                            str(attachment.value)).get_property('height'),
+                    'ratio' :resource.get_resource(
+                            str(attachment.value)).get_property('ratio')
+                }
             attached[to] = {
                     'link': attachment.value,
-                    #'has_thumb': resource.get_resource(
-                    #        str(attachment.value)).get_property('has_thumb'),
-                    'is_image': isinstance(resource.get_resource(
-                                    str(attachment.value)), Image)
-                                and resource.get_resource(
-                                    str(attachment.value)).get_property('has_thumb'),
-                    'is_video': isinstance(resource.get_resource(
-                                    str(attachment.value)), Video)
-                                and resource.get_resource(
-                                    str(attachment.value)).get_property('has_thumb')
+                    'is_image': image and has_thumb,
+                    'is_video': video
                     }
         # Get resource metadata values: is_video, is_image
         comments = [

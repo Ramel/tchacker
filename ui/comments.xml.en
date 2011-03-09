@@ -27,7 +27,7 @@
     <tr stl:if="comment/attachment/is_video">
       <td colspan="5">
         <a href="${comment/attachment/link}/;download"
-          style="display:block;width:${comment/attachment/width}px;height:${comment/attachment/height}px;"
+          style="display:block;width:${comment/attachment/is_video/width}px;height:${comment/attachment/is_video/height}px;"
           id="player-${comment/number}"></a>
       </td>
     </tr>

@@ -222,45 +222,45 @@ class Tchack_Issue(Issue):
                 # In case of a video in h264 and widder than 319px
                 # We encode it in Flv at 640px width  and make a thumbnail
                 #if int(width) > 319 and venc == "h264":
-                if int(width) > 319:
-                    #video_low = ("%s_low" % name)
-                    # video is already in temp dir, so encode it
-                    encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
-                        tmpfolder, name, name, width_low, encode='one_chroma_faststart')
+                #if int(width) > 319:
+                #video_low = ("%s_low" % name)
+                # video is already in temp dir, so encode it
+                encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
+                    tmpfolder, name, name, width_low, encode='one_chroma_faststart')
 
-                    if encoded is not None:
-                        vidfilename, vidmimetype, \
-                                vidbody, vidextension = encoded['flvfile']
-                        thumbfilename, thumbmimetype, \
-                                thumbbody, thumbextension = encoded['flvthumb']
-                        # Create the video resources
-                        self.make_resource(vidfilename, Video,
-                            body=vidbody, filename=vidfilename,
-                            extension=vidextension, format=vidmimetype)
+                if encoded is not None:
+                    vidfilename, vidmimetype, \
+                            vidbody, vidextension = encoded['flvfile']
+                    thumbfilename, thumbmimetype, \
+                            thumbbody, thumbextension = encoded['flvthumb']
+                    # Create the video resources
+                    self.make_resource(vidfilename, Video,
+                        body=vidbody, filename=vidfilename,
+                        extension=vidextension, format=vidmimetype)
 
-                        height_low = int(round(float(width_low) / ratio))
+                    height_low = int(round(float(width_low) / ratio))
 
-                        vid = self.get_resource(vidfilename)
-                        metadata = vid.metadata
+                    vid = self.get_resource(vidfilename)
+                    metadata = vid.metadata
 
-                        width_low = Property(width_low)
-                        metadata.set_property('width', width_low)
-                        height_low = Property(height_low)
-                        metadata.set_property('height', height_low)
-                        ratio = Property(ratio)
-                        metadata.set_property('ratio', ratio)
-                        has_thumb = Property(True)
-                        metadata.set_property('has_thumb', has_thumb)
+                    width_low = Property(width_low)
+                    metadata.set_property('width', width_low)
+                    height_low = Property(height_low)
+                    metadata.set_property('height', height_low)
+                    ratio = Property(ratio)
+                    metadata.set_property('ratio', ratio)
+                    has_thumb = Property(True)
+                    metadata.set_property('has_thumb', has_thumb)
 
-                        # Create the thumbnail PNG resources
-                        self.make_resource(thumbfilename, Image,
-                            body=thumbbody, filename=thumbfilename,
-                            extension=thumbextension, format=thumbmimetype)
-                        is_thumb = Property(True)
-                        self.get_resource(thumbfilename).metadata.set_property(
-                            'is_thumb', is_thumb)
-                        # As the video is a low version and reencoded
-                        att_name = vidfilename
+                    # Create the thumbnail PNG resources
+                    self.make_resource(thumbfilename, Image,
+                        body=thumbbody, filename=thumbfilename,
+                        extension=thumbextension, format=thumbmimetype)
+                    is_thumb = Property(True)
+                    self.get_resource(thumbfilename).metadata.set_property(
+                        'is_thumb', is_thumb)
+                    # As the video is a low version and reencoded
+                    att_name = vidfilename
 
                 # Clean the temporary folder
                 vfs.remove(dirname)
@@ -292,7 +292,7 @@ class Tchack_Issue(Issue):
         date = context.timestamp
         user = context.user
         author = user.name if user else None
-        print("comment = '%s', attachment = %s" % (comment, att_name))
+        #print("comment = '%s', attachment = %s" % (comment, att_name))
         if comment == '' and attachment is not None:
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:

@@ -414,9 +414,19 @@ class Tchack_Issue(Issue):
                 name, extension, language = FileName.decode(filename)
                 if extension == 'psd':
                     pass
+                thumbs = [["_LOW", False], ["_MED", False], ["_HIG", False]]
+                for thumb in thumbs:
+                    try:
+                        thumb[0] = self.get_resource('%s%s' % (file, thumb[0]))
+                        thumb[1] = True
+                    except LookupError:
+                        print("LookupError, need to create thumnails for '%s'" % file)
+                """ 
                 elif (self.get_resource('%s_LOW' % file) and
                     self.get_resource('%s_MED' % file) and
                     self.get_resource('%s_HIG' % file)):
+                """
+                elif thumb[0][1] and thumb[1][1] and thumb[2][1] and:
                     print("Update Image: %s" % attfile.name)
                     self.get_resource(file).set_property('has_thumb', True)
                     self.get_resource(file).del_property('thumbnail')

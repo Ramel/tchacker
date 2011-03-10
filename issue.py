@@ -56,7 +56,7 @@ from monkey import Image, Video
 class Tchack_Issue(Issue):
 
     class_id = 'tchack_issue'
-    class_version = '20110310'
+    class_version = '20100506'
     class_title = MSG(u'Tchack Issue')
     class_description = MSG(u'Tchack Issue')
 
@@ -364,10 +364,10 @@ class Tchack_Issue(Issue):
     #######################################################################
     # Update
     #######################################################################
-    def update_20110310(self):
+    def update_20100506(self):
         from itools.core import utc
-        from obsolete import Image
-        from ikaaro.obsolete import History
+        #from obsolete import Image
+        from ikaaro.tracker.obsolete import History
 
         metadata = self.metadata
         history = self.handler.get_handler('.history', History)
@@ -395,6 +395,7 @@ class Tchack_Issue(Issue):
         
         print len(history.records)
         ids = len(history.records)
+        metadata.set_property('ids', ids)
         print("ids = %s" % ids)
         for record in history.records:
             if record is None:
@@ -405,14 +406,43 @@ class Tchack_Issue(Issue):
             date = history.get_record_value(record, 'datetime')
             date = date.replace(tzinfo=utc)
             author = history.get_record_value(record, 'username')
-            comment = Property(comment, date=date, author=author)
-            metadata.set_property('comment', comment)
+            #comment = Property(comment, date=date, author=author)
             file = history.get_record_value(record, 'file')
+            attfile = self.get_resource(file)
+            if isinstance(attfile, Image):
+                if (self.get_resource('%s_LOW' % file) and
+                    self.get_resource('%s_MED' % file) and
+                    self.get_resource('%s_HIG' % file)):
+                    print("Update Image: %s" % attfile)
+                    self.get_resource(file).set_property('has_thumb', True)
+                    self.get_resource(file).del_property('thumbnail')
+                    self.get_resource('%s_LOW' % file).set_property('is_thumb', True)
+                    self.get_resource('%s_MED' % file).set_property('is_thumb', True)
+                    self.get_resource('%s_HIG' % file).set_property('is_thumb', True)
+            if isinstance(attfile, Video):
+                if self.get_resource('%s_thumb' % file):
+                    print("Update Video: %s" % attfile)
+                    self.get_resource(file).del_property('thumbnail')
+                    self.get_resource(file).set_property('has_thumb', True)
+                    self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
+            print("comment = '%s'" % comment)
             if file:
-                attachments.append(file)
-        if attachments:
-            metadata.set_property('attachment', attachments)
-
+                #attachments.append(file)
+                #metadata.set_property('attachment', attachments)
+                attachment = Property(file, comment=id)
+                metadata.set_property('attachment', attachment)
+                # last_attachment = file
+                metadata.set_property('last_attachment', file)
+            if comment != '':
+                comment = Property(comment, date=date, author=author)
+            else:
+                comment='comment_is_empty_but_has_attachment'
+                comment = Property(comment, date=date, author=author)
+            metadata.set_property('comment', comment)
+        
+        #if attachments:
+        #    metadata.set_property('attachment', attachments)
+        
         # CC
         reporter = history.records[0].username
         value = history.get_record_value(record, 'cc_list')

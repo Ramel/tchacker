@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
 # Import from itools
 from itools.core import get_abspath
 from itools.core import get_version
@@ -28,6 +30,11 @@ from ikaaro.website import WebSite
 
 from tracker import Tchack_Tracker
 from utils import which
+
+# Import obsolete if command is icms-update.py
+if sys.argv[0].endswith('icms-update.py'):
+    import obsolete
+    print 'Imported', obsolete.__name__
 
 # The version
 __version__ = get_version()

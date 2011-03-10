@@ -19,7 +19,7 @@ from itools.core import freeze, merge_dicts
 from itools.datatypes import String, Integer, Boolean, Decimal
 
 from ikaaro.file import Image, Video
-
+from ikaaro.registry import register_resource_class
 
 
 Image.class_schema = freeze(merge_dicts(
@@ -27,4 +27,10 @@ Image.class_schema = freeze(merge_dicts(
         thumbnail=String(source='metadata'),
         ))
 
+Video.class_schema = freeze(merge_dicts(
+        Video.class_schema,
+        thumbnail=String(source='metadata'),
+        ))
+
 register_resource_class(Image)
+register_resource_class(Video)

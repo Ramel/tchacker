@@ -17,7 +17,7 @@
 
 # Import from itools
 from itools.datatypes import Unicode, String, DateTime
-from itools.datatypes import Integer
+from itools.datatypes import Boolean, Integer
 
 # Import from ikaaro
 from ikaaro.comments import CommentsView, indent
@@ -25,11 +25,13 @@ from ikaaro.comments import CommentsView, indent
 from monkey import Image, Video
 
 
+
 tchacker_comment_datatype = Unicode(source='metadata', multiple=True,
                             parameters_schema={'date': DateTime,
                             'author': String,
                             'attachment': String,
                             'amount': Integer})
+
 
 
 def has_comment(att):

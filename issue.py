@@ -123,7 +123,7 @@ class Tchack_Issue(Issue):
             name = generate_name(name, self.get_names())
 
             mtype = mimetype.split("/")[0]
-           
+
             att_name = name
 
             # Image
@@ -158,9 +158,9 @@ class Tchack_Issue(Issue):
 
                     # Create the thumbnail PNG resources
                     thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-                    
+
                     uri = tmpfolder + sep
-                    
+
                     for te in thumbext:
                         try:
                             im = PILImage.open(tmp_uri)
@@ -366,7 +366,6 @@ class Tchack_Issue(Issue):
     #######################################################################
     def update_20100506(self):
         from itools.core import utc
-        #from obsolete import Image
         from ikaaro.tracker.obsolete import History
 
         metadata = self.metadata
@@ -392,7 +391,7 @@ class Tchack_Issue(Issue):
 
         # Comments / Files
         attachments = []
-        
+
         print len(history.records)
         ids = len(history.records)
         metadata.set_property('ids', ids)
@@ -410,10 +409,15 @@ class Tchack_Issue(Issue):
             file = history.get_record_value(record, 'file')
             attfile = self.get_resource(file)
             if isinstance(attfile, Image):
-                if (self.get_resource('%s_LOW' % file) and
+                # Get extension
+                filename = attfile.get_property('filename')
+                name, extension, language = FileName.decode(filename)
+                if extension == 'psd':
+                    pass
+                elif (self.get_resource('%s_LOW' % file) and
                     self.get_resource('%s_MED' % file) and
                     self.get_resource('%s_HIG' % file)):
-                    print("Update Image: %s" % attfile)
+                    print("Update Image: %s" % attfile.name)
                     self.get_resource(file).set_property('has_thumb', True)
                     self.get_resource(file).del_property('thumbnail')
                     self.get_resource('%s_LOW' % file).set_property('is_thumb', True)
@@ -421,11 +425,11 @@ class Tchack_Issue(Issue):
                     self.get_resource('%s_HIG' % file).set_property('is_thumb', True)
             if isinstance(attfile, Video):
                 if self.get_resource('%s_thumb' % file):
-                    print("Update Video: %s" % attfile)
+                    print("Update Video: %s" % attfile.name)
                     self.get_resource(file).del_property('thumbnail')
                     self.get_resource(file).set_property('has_thumb', True)
                     self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
-            print("comment = '%s'" % comment)
+            #print("comment = '%s'" % comment)
             if file:
                 #attachments.append(file)
                 #metadata.set_property('attachment', attachments)
@@ -439,10 +443,10 @@ class Tchack_Issue(Issue):
                 comment='comment_is_empty_but_has_attachment'
                 comment = Property(comment, date=date, author=author)
             metadata.set_property('comment', comment)
-        
+
         #if attachments:
         #    metadata.set_property('attachment', attachments)
-        
+
         # CC
         reporter = history.records[0].username
         value = history.get_record_value(record, 'cc_list')

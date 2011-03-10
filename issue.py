@@ -56,7 +56,7 @@ from monkey import Image, Video
 class Tchack_Issue(Issue):
 
     class_id = 'tchack_issue'
-    class_version = '20071216'
+    class_version = '20110310'
     class_title = MSG(u'Tchack Issue')
     class_description = MSG(u'Tchack Issue')
 
@@ -364,9 +364,10 @@ class Tchack_Issue(Issue):
     #######################################################################
     # Update
     #######################################################################
-    def update_20110301(self):
+    def update_20110310(self):
         from itools.core import utc
-        from obsolete import History
+        from obsolete import Image
+        from ikaaro.obsolete import History
 
         metadata = self.metadata
         history = self.handler.get_handler('.history', History)
@@ -381,6 +382,7 @@ class Tchack_Issue(Issue):
         names = 'product', 'module', 'version', 'type', 'state', 'priority'
         for name in names:
             value = history.get_record_value(record, name)
+            print("value = %s" % value)
             if value is not None:
                 metadata.set_property(name, value)
         # Assigned
@@ -390,10 +392,15 @@ class Tchack_Issue(Issue):
 
         # Comments / Files
         attachments = []
+        
+        print len(history.records)
+        ids = len(history.records)
+        print("ids = %s" % ids)
         for record in history.records:
             if record is None:
                 # deleted record
                 continue
+            id = history.get_record_value(record, 'id')
             comment = history.get_record_value(record, 'comment')
             date = history.get_record_value(record, 'datetime')
             date = date.replace(tzinfo=utc)

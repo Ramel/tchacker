@@ -408,6 +408,10 @@ class Tchack_Issue(Issue):
             #comment = Property(comment, date=date, author=author)
             file = history.get_record_value(record, 'file')
             attfile = self.get_resource(file)
+            
+            ##############
+            # Images
+            ##############
             if isinstance(attfile, Image):
                 # Get extension
                 filename = attfile.get_property('filename')
@@ -424,10 +428,9 @@ class Tchack_Issue(Issue):
                         except LookupError:
                             print("LookupError, need to create thumnails for '%s'" % file)
                             thumb[1] = False
-                    if ((not thumbs[0][1]) and 
-                        (not thumbs[1][1]) and 
-                        (not thumbs[2][1])):
-
+                    
+                    if ((not thumbs[0][1]) and (not thumbs[1][1]) and 
+                                            (not thumbs[2][1])):
                         dirname = mkdtemp('makethumbs', 'ikaaro')
                         tempdir = vfs.open(dirname)
                         # Paste the file in the tempdir
@@ -492,15 +495,41 @@ class Tchack_Issue(Issue):
                         print("Update existing Image: %s" % attfile.name)
                         attfile.set_property('has_thumb', True)
                         attfile.del_property('thumbnail')
-                        self.get_resource('%s_LOW' % file).set_property('is_thumb', True)
-                        self.get_resource('%s_MED' % file).set_property('is_thumb', True)
-                        self.get_resource('%s_HIG' % file).set_property('is_thumb', True)
+                        self.get_resource('%s_LOW' % file).set_property(
+                                                                'is_thumb', True)
+                        self.get_resource('%s_MED' % file).set_property(
+                                                                'is_thumb', True)
+                        self.get_resource('%s_HIG' % file).set_property(
+                                                                'is_thumb', True)
+            
+            ##############
+            # Video
+            ##############
             if isinstance(attfile, Video):
-                if self.get_resource('%s_thumb' % file):
-                    print("Update Video: %s" % attfile.name)
-                    self.get_resource(file).del_property('thumbnail')
-                    self.get_resource(file).set_property('has_thumb', True)
+                thumb = False
+                low_thumb = False
+                try :
+                    self.get_resource('%s_thumb' % file)
+                    thumb = True
+                except LookupError:
+                    thumb = False
+                try :
+                    self.get_resource('%s_low_thumb' % file)
+                    low_thumb = True
+                except LookupError:
+                    low_thumb = False
+ 
+                print("Update Video: %s" % attfile.name)
+                self.get_resource(file).del_property('thumbnail')
+                self.get_resource(file).set_property('has_thumb', True)
+                if thumb:
                     self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
+                if low_thumb:
+                    th = self.get_resource('%s_low_thumb' % file)
+                    th.move_resource('%s_low_thumb' % file, '%s_thumb' % file)
+                    self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
+                    print("Need to rename the _low_thumb in _thumb")
+
             #print("comment = '%s'" % comment)
             if file:
                 #attachments.append(file)

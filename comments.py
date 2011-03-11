@@ -18,6 +18,7 @@
 # Import from itools
 from itools.datatypes import Unicode, String, DateTime
 from itools.datatypes import Boolean, Integer
+from itools.fs import FileName
 
 # Import from ikaaro
 from ikaaro.comments import CommentsView, indent
@@ -60,29 +61,32 @@ class TchackerCommentsView(CommentsView):
         attached = [{ 'link': False,
                     'is_image': False,
                     'is_video': False,
+                    'format': False,
                     }] * len(comments)
         
         for attachment in attachments:
             to = attachment.get_parameter('comment')
-            image = isinstance(resource.get_resource(
-                    str(attachment.value)), Image) or False
-            video = isinstance(resource.get_resource(
-                    str(attachment.value)), Video) or False
-            has_thumb = resource.get_resource(
-                    str(attachment.value)).get_property('has_thumb') or False
+            file = resource.get_resource(str(attachment.value))
+            
+            has_thumb = False
+            image = isinstance(file, Image) or False
+            video = isinstance(file, Video) or False
+            format = file.metadata.format
+            
+            if image or video:
+                has_thumb = file.get_property('has_thumb') or False
             if video and has_thumb:
                 video = {
-                    'width' :resource.get_resource(
-                            str(attachment.value)).get_property('width'),
-                    'height' :resource.get_resource(
-                            str(attachment.value)).get_property('height'),
-                    'ratio' :resource.get_resource(
-                            str(attachment.value)).get_property('ratio')
-                }
+                    'width': file.get_property('width'),
+                    'height': file.get_property('height'),
+                    'ratio': file.get_property('ratio')
+                    }
             attached[to] = {
-                    'link': attachment.value,
-                    'is_image': image and has_thumb,
-                    'is_video': video
+                    'link': file.name,
+                    #attachment.value,
+                    'is_image': image or False,
+                    'is_video': video or False,
+                    'format': format
                     }
         # Get resource metadata values: is_video, is_image
         comments = [

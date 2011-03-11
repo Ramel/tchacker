@@ -33,7 +33,7 @@
     </tr>
     <tr stl:if="comment/attachment/link">
       <td colspan="5">
-        <p class="attachment">Attachment: <a href="${comment/attachment/link}/;download"
+        <p class="attachment">Attachment (${comment/attachment/format}): <a href="${comment/attachment/link}/;download"
             >${comment/attachment/link}</a></p>
       </td>
     </tr>

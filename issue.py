@@ -412,81 +412,89 @@ class Tchack_Issue(Issue):
                 # Get extension
                 filename = attfile.get_property('filename')
                 name, extension, language = FileName.decode(filename)
+                print("Filename = %s, extension = %s" % (name, extension))
                 if extension == 'psd':
                     pass
-                thumbs = [["_LOW", False], ["_MED", False], ["_HIG", False]]
-                for thumb in thumbs:
-                    try:
-                        thumb[0] = self.get_resource('%s%s' % (file, thumb[0]))
-                        thumb[1] = True
-                    except LookupError:
-                        print("LookupError, need to create thumnails for '%s'" % file)
-                        thumb[1] = False
-                elif (not thumb[0][1] and not thumb[1][1] and not thumb[2][1]):
-                    dirname = mkdtemp('makethumbs', 'ikaaro')
-                    tempdir = vfs.open(dirname)
-                    # Paste the file in the tempdir
-                    tmpfolder = "%s" % (dirname)
-                    tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
-                    tmpfile = open("%s" % tmp_uri, "w+")
-                    tmpfile.write(body)
-                    tmpfile.close()
-
-                    low = 256, 256
-                    med = 800, 800
-                    hig = 1024, 1024
-
-                    # Create the thumbnail PNG resources
-                    thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-
-                    uri = tmpfolder + sep
-
-                    for te in thumbext:
+                else:
+                    thumbs = [["_LOW", False], ["_MED", False], ["_HIG", False]]
+                    for thumb in thumbs:
                         try:
-                            im = PILImage.open(tmp_uri)
-                        except IOError:
-                            print("IOError = %s" % tmp_uri)
-                        im.thumbnail(te[1], PILImage.ANTIALIAS)
-                        ima = name + te[0]
-                        # Some images are in CMYB, force RVB if needed
-                        if im.mode != "RGB":
-                            im = im.convert("RGB")
-                        im.save(uri + ima + ".jpg", 'jpeg', quality=85)
-                        # Copy the thumb content
-                        thumb_file = tempdir.open(ima + ".jpg")
-                        try:
-                            thumb_data = thumb_file.read()
-                        finally:
-                            thumb_file.close()
-                        format = 'image/jpeg'
-                        cls = get_resource_class(format)
-                        imageThumb = self.make_resource(
-                                    ima,
-                                    cls, 
-                                    body=thumb_data,
-                                    filename=ima,
-                                    extension='jpg',
-                                    format=format
-                                    )
-                        is_thumb = Property(True)
-                        imageThumb.set_property('is_thumb', is_thumb)
-                    has_thumb = Property(True)
-                    file.set_property('has_thumb', has_thumb)
-                    # Clean the temporary folder
-                    vfs.remove(dirname)
-                
-                """ 
-                elif (self.get_resource('%s_LOW' % file) and
-                    self.get_resource('%s_MED' % file) and
-                    self.get_resource('%s_HIG' % file)):
-                """
-                elif (thumb[0][1] and thumb[1][1] and thumb[2][1]):
-                    print("Update Image: %s" % attfile.name)
-                    self.get_resource(file).set_property('has_thumb', True)
-                    self.get_resource(file).del_property('thumbnail')
-                    self.get_resource('%s_LOW' % file).set_property('is_thumb', True)
-                    self.get_resource('%s_MED' % file).set_property('is_thumb', True)
-                    self.get_resource('%s_HIG' % file).set_property('is_thumb', True)
+                            thumb[0] = self.get_resource('%s%s' % (file, thumb[0]))
+                            thumb[1] = True
+                        except LookupError:
+                            print("LookupError, need to create thumnails for '%s'" % file)
+                            thumb[1] = False
+                    if ((not thumbs[0][1]) and 
+                        (not thumbs[1][1]) and 
+                        (not thumbs[2][1])):
+
+                        dirname = mkdtemp('makethumbs', 'ikaaro')
+                        tempdir = vfs.open(dirname)
+                        # Paste the file in the tempdir
+                        tmpfolder = "%s" % (dirname)
+                        tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
+                        tmpfile = open("%s" % tmp_uri, "w+")
+                        tmpfile.write(attfile.handler.to_str())
+                        tmpfile.close()
+
+                        low = 256, 256
+                        med = 800, 800
+                        hig = 1024, 1024
+
+                        # Create the thumbnail PNG resources
+                        thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
+
+                        uri = tmpfolder + sep
+
+                        for te in thumbext:
+                            #im = PILImage.open(tmp_uri)
+                            try:
+                                im = PILImage.open(tmp_uri)
+                            except IOError:
+                                print("IOError at PILImage.open(%s)" % tmp_uri)
+                            im.thumbnail(te[1], PILImage.ANTIALIAS)
+                            # Need to put the name in lowercase
+                            ima = name.lower() + te[0]
+                            # Some images are in CMYB, force RVB if needed
+                            if im.mode != "RGB":
+                                im = im.convert("RGB")
+                            im.save(uri + ima + ".jpg", 'jpeg', quality=85)
+                            # Copy the thumb content
+                            thumb_file = tempdir.open(ima + ".jpg")
+                            try:
+                                thumb_data = thumb_file.read()
+                            finally:
+                                thumb_file.close()
+                            format = 'image/jpeg'
+                            cls = get_resource_class(format)
+                            print("Creating %s" % ima)
+                            imageThumb = self.make_resource(
+                                        ima,
+                                        cls, 
+                                        body=thumb_data,
+                                        filename=ima,
+                                        extension='jpg',
+                                        format=format
+                                        )
+                            is_thumb = Property(True)
+                            imageThumb.set_property('is_thumb', is_thumb)
+
+                        has_thumb = Property(True)
+                        attfile.set_property('has_thumb', has_thumb)
+
+                        thumbs[0][1] = True
+                        thumbs[1][1] = True
+                        thumbs[2][1] = True
+                        # Clean the temporary folder
+                        vfs.remove(dirname)
+                    else:
+                        # (thumbs[0][1] and thumbs[1][1] and thumbs[2][1])
+                        print("Update existing Image: %s" % attfile.name)
+                        attfile.set_property('has_thumb', True)
+                        attfile.del_property('thumbnail')
+                        self.get_resource('%s_LOW' % file).set_property('is_thumb', True)
+                        self.get_resource('%s_MED' % file).set_property('is_thumb', True)
+                        self.get_resource('%s_HIG' % file).set_property('is_thumb', True)
             if isinstance(attfile, Video):
                 if self.get_resource('%s_thumb' % file):
                     print("Update Video: %s" % attfile.name)
@@ -499,8 +507,9 @@ class Tchack_Issue(Issue):
                 #metadata.set_property('attachment', attachments)
                 attachment = Property(file, comment=id)
                 metadata.set_property('attachment', attachment)
-                # last_attachment = file
-                metadata.set_property('last_attachment', file)
+                if isinstance(attfile, Image) or isinstance(attfile, Video):
+                    # last_attachment = file
+                    metadata.set_property('last_attachment', file)
             if comment != '':
                 comment = Property(comment, date=date, author=author)
             else:

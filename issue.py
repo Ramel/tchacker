@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from the Standard Library
-#from datetime import datetime
+from os.path import basename
 from tempfile import mkdtemp
 from os import sep
 
@@ -72,7 +72,7 @@ class Tchack_Issue(Issue):
     class_schema['comment'] = tchacker_comment_datatype
     # Add a relation to comment in the attachment schema
     class_schema['attachment'] = Unicode(
-                        source='metadata', 
+                        source='metadata',
                         multiple=True,
                         parameters_schema={
                             'attachment': String,
@@ -106,7 +106,7 @@ class Tchack_Issue(Issue):
         ids = 0
         if not new:
             if ((not(comment) and attachment) or
-                        (comment and not(attachment)) or 
+                        (comment and not(attachment)) or
                         (comment and attachment)):
                 ids = int(form['ids'])
                 ids = ids+1
@@ -182,7 +182,7 @@ class Tchack_Issue(Issue):
                         cls = get_resource_class(format)
                         imageThumb = self.make_resource(
                                     ima,
-                                    cls, 
+                                    cls,
                                     body=thumb_data,
                                     filename=ima,
                                     extension='jpg',
@@ -297,7 +297,7 @@ class Tchack_Issue(Issue):
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:
             self.set_property('last_attachment', att_name)
-        comment = Property(comment, date=date, 
+        comment = Property(comment, date=date,
                             author=author
                             )
         self.set_property('comment', comment)
@@ -408,7 +408,7 @@ class Tchack_Issue(Issue):
             #comment = Property(comment, date=date, author=author)
             file = history.get_record_value(record, 'file')
             attfile = self.get_resource(file)
-            
+
             ##############
             # Images
             ##############
@@ -428,8 +428,8 @@ class Tchack_Issue(Issue):
                         except LookupError:
                             print("LookupError, need to create thumnails for '%s'" % file)
                             thumb[1] = False
-                    
-                    if ((not thumbs[0][1]) and (not thumbs[1][1]) and 
+
+                    if ((not thumbs[0][1]) and (not thumbs[1][1]) and
                                             (not thumbs[2][1])):
                         dirname = mkdtemp('makethumbs', 'ikaaro')
                         tempdir = vfs.open(dirname)
@@ -473,7 +473,7 @@ class Tchack_Issue(Issue):
                             print("Creating %s" % ima)
                             imageThumb = self.make_resource(
                                         ima,
-                                        cls, 
+                                        cls,
                                         body=thumb_data,
                                         filename=ima,
                                         extension='jpg',
@@ -501,7 +501,7 @@ class Tchack_Issue(Issue):
                                                                 'is_thumb', True)
                         self.get_resource('%s_HIG' % file).set_property(
                                                                 'is_thumb', True)
-            
+
             ##############
             # Video
             ##############
@@ -518,16 +518,30 @@ class Tchack_Issue(Issue):
                     low_thumb = True
                 except LookupError:
                     low_thumb = False
- 
+
                 print("Update Video: %s" % attfile.name)
                 self.get_resource(file).del_property('thumbnail')
                 self.get_resource(file).set_property('has_thumb', True)
                 if thumb:
                     self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
                 if low_thumb:
-                    old = self.get_resource('%s_low_thumb' % file)
+                    resource = self.get_resource('%s_low_thumb' % file, soft=True)
+                    handler = resource.get_handler()
+                    folder = self.handler
+                    filename = resource.get_property('filename')
+                    print("filename = %s" % filename)
+                    #item = self.get_handler('%s_low_thumb' % file)
+                    #.get_handler()
+                    handler_name = basename(handler.key)
+                    resource.set_property("filename",
+                            filename.replace('_low', ''))
+                    # new name = handlername - low
+                    print("handler_name = %s" % handler_name)
                     print("Need to rename the _low_thumb in _thumb")
-                    self.move_resource('%s_low_thumb' % file, './%s_thumb' % file)
+                    folder.move_handler(handler_name,
+                            handler_name.replace('_low', ''))
+                    #item.rename_handlers('%s_thumb' % file)
+                    #old.copy_handler('%s_low_thumb' % file, '%s_thumb' % file)
                     #self.move_handler('%s_low_thumb' % file, '%s_thumb' % file)
                     #old.rename_handlers('%s_thumb' % file)
                     #self.get_resource('%s_thumb' % file).set_property('is_thumb', True)

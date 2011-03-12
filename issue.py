@@ -525,10 +525,12 @@ class Tchack_Issue(Issue):
                 if thumb:
                     self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
                 if low_thumb:
-                    th = self.get_resource('%s_low_thumb' % file)
-                    th.move_resource('%s_low_thumb' % file, '%s_thumb' % file)
-                    self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
+                    old = self.get_resource('%s_low_thumb' % file)
                     print("Need to rename the _low_thumb in _thumb")
+                    self.move_resource('%s_low_thumb' % file, './%s_thumb' % file)
+                    #self.move_handler('%s_low_thumb' % file, '%s_thumb' % file)
+                    #old.rename_handlers('%s_thumb' % file)
+                    #self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
 
             #print("comment = '%s'" % comment)
             if file:

@@ -529,24 +529,32 @@ class Tchack_Issue(Issue):
                     handler = resource.get_handler()
                     folder = self.handler
                     filename = resource.get_property('filename')
-                    print("filename = %s" % filename)
-                    #item = self.get_handler('%s_low_thumb' % file)
-                    #.get_handler()
+                    #print("filename = %s" % filename)
                     handler_name = basename(handler.key)
                     resource.set_property("filename",
                             filename.replace('_low', ''))
-                    # new name = handlername - low
-                    print("handler_name = %s" % handler_name)
+                    #print("handler_name = %s" % handler_name)
                     print("Need to rename the _low_thumb in _thumb")
-                    folder.move_handler(handler_name,
+                    # Copy the handler, we delete it after
+                    folder.copy_handler(handler_name,
                             handler_name.replace('_low', ''))
-                    #item.rename_handlers('%s_thumb' % file)
-                    #old.copy_handler('%s_low_thumb' % file, '%s_thumb' % file)
-                    #self.move_handler('%s_low_thumb' % file, '%s_thumb' % file)
-                    #old.rename_handlers('%s_thumb' % file)
-                    #self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
+                    folder.copy_handler('%s.metadata' % filename,
+                            '%s.metadata' % filename.replace('_low', ''))
+                    # Delete old 'thumb_x' file
+                    try:
+                        self.get_resource('thumb_%s' % file)
+                        self.del_resource('thumb_%s' % file)
+                    except LookupError:
+                        print("The file 'thumb_%s' doesn't exist" % file)
 
-            #print("comment = '%s'" % comment)
+                    # Now delete the old 'x_low_thumb' file copied before
+                    try:
+                        filename = '%s_low_thumb' % file
+                        if self.get_resource(filename):
+                            print("Delete old '%s.metadata'" % filename)
+                            self.del_resource(filename)
+                    except LookupError:
+                        print("File '%s.metadata' doesn't exist!" % filename)
             if file:
                 #attachments.append(file)
                 #metadata.set_property('attachment', attachments)

@@ -381,7 +381,7 @@ class Tchack_Issue(Issue):
         names = 'product', 'module', 'version', 'type', 'state', 'priority'
         for name in names:
             value = history.get_record_value(record, name)
-            print("value = %s" % value)
+            #print("value = %s" % value)
             if value is not None:
                 metadata.set_property(name, value)
         # Assigned
@@ -392,10 +392,10 @@ class Tchack_Issue(Issue):
         # Comments / Files
         attachments = []
 
-        print len(history.records)
+        #print len(history.records)
         ids = len(history.records)
         metadata.set_property('ids', ids)
-        print("ids = %s" % ids)
+        #print("ids = %s" % ids)
         for record in history.records:
             if record is None:
                 # deleted record
@@ -416,7 +416,7 @@ class Tchack_Issue(Issue):
                 # Get extension
                 filename = attfile.get_property('filename')
                 name, extension, language = FileName.decode(filename)
-                print("Filename = %s, extension = %s" % (name, extension))
+                #print("Filename = %s, extension = %s" % (name, extension))
                 if extension == 'psd':
                     pass
                 else:
@@ -555,23 +555,25 @@ class Tchack_Issue(Issue):
                             self.del_resource(filename)
                     except LookupError:
                         print("File '%s.metadata' doesn't exist!" % filename)
+                    # Update the filename for last_attachment
+                    print("file = %s" % file)
+                    file = file.replace('_low', '')
+
             if file:
-                #attachments.append(file)
-                #metadata.set_property('attachment', attachments)
                 attachment = Property(file, comment=id)
                 metadata.set_property('attachment', attachment)
                 if isinstance(attfile, Image) or isinstance(attfile, Video):
-                    # last_attachment = file
-                    metadata.set_property('last_attachment', file)
+                    last_attachment = file.replace('_low', '')
+                    metadata.set_property('last_attachment', last_attachment)
+            # Add comment only if it was a comment
+            # or an empty comment AND a file.
             if comment != '':
                 comment = Property(comment, date=date, author=author)
-            else:
+                metadata.set_property('comment', comment)
+            elif comment == '' and file:
                 comment='comment_is_empty_but_has_attachment'
                 comment = Property(comment, date=date, author=author)
-            metadata.set_property('comment', comment)
-
-        #if attachments:
-        #    metadata.set_property('attachment', attachments)
+                metadata.set_property('comment', comment)
 
         # CC
         reporter = history.records[0].username

@@ -88,20 +88,22 @@ class Tchacker_View(Tracker_View):
                 return None
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
             #print item.name, attach, isinstance(attach, Video)
-            if isinstance(attach, Image) is True:
+            if isinstance(attach, Image):
                 img_template = '<img src="./%s/%s_LOW/;download"/>'
                 return XMLParser(img_template % (issue, attach_name))
-            if isinstance(attach, Video) is True:
-                thumb = attach.metadata.get_property('thumbnail')
+            if isinstance(attach, Video):
+                thumb = attach.metadata.get_property('has_thumb')
                 #print("thumb = %s" % thumb)
-                if thumb == 'True':
+                if thumb:
                     # The encoded file already as a name "fn_low.flv" 
                     img_template = '<img \
                         src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
                 #TODO: Don't think it can append, as we encode every video input file
+                """
                 else:
                     img_template = '<img \
                         src="./%s/%s_low_thumb/;thumb?width=256&amp;height=256"/>'
+                """
                 return XMLParser(img_template % (issue, attach_name))
             else:
                 return None

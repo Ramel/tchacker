@@ -57,8 +57,8 @@ class Tchack_Issue(Issue):
 
     class_id = 'tchack_issue'
     class_version = '20100506'
-    class_title = MSG(u'Tchack Issue')
-    class_description = MSG(u'Tchack Issue')
+    class_title = MSG(u'Tchacker Issue')
+    class_description = MSG(u'Tchacker Issue')
 
     # Views
     edit = TchackIssue_Edit()

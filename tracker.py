@@ -41,7 +41,7 @@ class Tchack_Tracker(Tracker):
 
     class_id = 'tchack_tracker'
     class_version = '20110125'
-    class_title = MSG(u'Tchack Issue Tracker')
+    class_title = MSG(u'Tchack Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_views = Tracker.class_views #+ ['zip']
 

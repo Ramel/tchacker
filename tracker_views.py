@@ -84,6 +84,7 @@ class Tchacker_View(Tracker_View):
         if column == 'last_attachment':
             attach_name = item.last_attachment
             issue = item.name
+            print("attach_name = %s" % attach_name)
             if attach_name is None:
                 return None
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
@@ -93,17 +94,15 @@ class Tchacker_View(Tracker_View):
                 return XMLParser(img_template % (issue, attach_name))
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
-                #print("thumb = %s" % thumb)
+                print("thumb = %s" % thumb)
                 if thumb:
                     # The encoded file already as a name "fn_low.flv" 
                     img_template = '<img \
                         src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
                 #TODO: Don't think it can append, as we encode every video input file
-                """
                 else:
                     img_template = '<img \
-                        src="./%s/%s_low_thumb/;thumb?width=256&amp;height=256"/>'
-                """
+                        src="./%s/%s/;thumb?width=256&amp;height=256"/>'
                 return XMLParser(img_template % (issue, attach_name))
             else:
                 return None
@@ -136,9 +135,9 @@ class Tchacker_Search(Tracker_Search):
         title = products.get_property('title') 
         namespace = Tracker_Search.get_namespace(self, resource, context)
         namespace['title'] = title
-        print namespace
+        #print namespace
         columns = self.get_table_columns(resource, context)
-        print columns
+        #print columns
         titles = []
         for name, label in columns:
             """
@@ -153,8 +152,8 @@ class Tchacker_Search(Tracker_Search):
                     title = get_resource(name).get_property('title') #, language=language)
                 except LookupError:
                     continue
-                if title != "":
-                    print("%s.get_property('title') = %s" % (name, title))
+                #if title != "":
+                #   "print("%s.get_property('title') = %s" % (name, title))
         return namespace
 
 

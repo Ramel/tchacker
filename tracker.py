@@ -322,7 +322,8 @@ class Tchack_Tracker(Tracker):
                                     tmpfolder, name, name, width_low)
                                 if encoded is not None:
                                     vidfilename, vidmimetype, \
-                                        vidbody, vidextension = encoded['flvfile']
+                                        vidbody, vidextension, \
+                                        width, height = encoded['flvfile']
                                     thumbfilename, thumbmimetype, \
                                         thumbbody, thumbextension = encoded['flvthumb']
 
@@ -365,9 +366,9 @@ class Tchack_Tracker(Tracker):
                                     self.make_resource(cls, issue, thumbfilename,
                                         body=thumbbody, filename=thumbfilename,
                                         extension=thumbextension, format=thumbmimetype)
-                                    height_low = int(round(float(width_low) / ratio))
-                                    file.metadata.set_property('width', str(width_low))
-                                    file.metadata.set_property('height', str(height_low))
+                                    # The size is returned by videoencoding
+                                    file.metadata.set_property('width', str(width))
+                                    file.metadata.set_property('height', str(height))
                                     file.metadata.set_property('ratio', str(ratio))
                                     # We keep the 'thumbnail' to False
                                     # to make difference between old & new video files
@@ -478,7 +479,8 @@ class Tchack_Tracker(Tracker):
                             file.metadata.set_property('thumbnail', "True")
                             if encoded is not None:
                                 vidfilename, vidmimetype, \
-                                    vidbody, vidextension = encoded['flvfile']
+                                    vidbody, vidextension, \
+                                    width, height = encoded['flvfile']
                                 thumbfilename, thumbmimetype, \
                                     thumbbody,thumbextension = encoded['flvthumb']
                                 # Create the video resources
@@ -486,12 +488,12 @@ class Tchack_Tracker(Tracker):
                                 issue.make_resource(cls, issue, vidfilename,
                                     body=vidbody, filename=vidfilename,
                                     extension=vidextension, format=vidmimetype)
-                                height_low = int(round(float(width_low) / ratio))
+                                #height_low = int(round(float(width_low) / ratio))
                                 vid = issue.get_resource(vidfilename)
                                 vid.metadata.set_property('width',
-                                                          str(width_low))
+                                                          str(width))
                                 vid.metadata.set_property('height',
-                                                          str(height_low))
+                                                          str(height))
                                 # Create the thumbnail PNG resources
                                 cls = get_resource_class(thumbmimetype)
                                 issue.make_resource(cls, issue, thumbfilename,

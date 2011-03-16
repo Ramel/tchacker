@@ -230,7 +230,8 @@ class Tchack_Issue(Issue):
 
                 if encoded is not None:
                     vidfilename, vidmimetype, \
-                            vidbody, vidextension = encoded['flvfile']
+                            vidbody, vidextension, \
+                            width, height = encoded['flvfile']
                     thumbfilename, thumbmimetype, \
                             thumbbody, thumbextension = encoded['flvthumb']
                     # Create the video resources
@@ -238,15 +239,17 @@ class Tchack_Issue(Issue):
                         body=vidbody, filename=vidfilename,
                         extension=vidextension, format=vidmimetype)
 
-                    height_low = int(round(float(width_low) / ratio))
+                    #height_low = int(round(float(width_low) / ratio))
 
                     vid = self.get_resource(vidfilename)
                     metadata = vid.metadata
 
-                    width_low = Property(width_low)
+                    # Get sizes from encoded['flvfile'] instead of *_low
+                    # width_low = width now, sure!
+                    width_low = Property(width)
                     metadata.set_property('width', width_low)
-                    height_low = Property(height_low)
-                    metadata.set_property('height', height_low)
+                    height_low = Property(height)
+                    metadata.set_property('height', height)_low
                     ratio = Property(ratio)
                     metadata.set_property('ratio', ratio)
                     has_thumb = Property(True)

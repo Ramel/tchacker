@@ -229,8 +229,7 @@ class Tchack_Issue(Issue):
                     tmpfolder, name, name, width_low, encode='one_chroma_faststart')
 
                 if encoded is not None:
-                    vidfilename, vidmimetype, \
-                            vidbody, vidextension, \
+                    vidfilename, vidmimetype, vidbody, vidextension, \
                             width, height = encoded['flvfile']
                     thumbfilename, thumbmimetype, \
                             thumbbody, thumbextension = encoded['flvthumb']
@@ -249,7 +248,7 @@ class Tchack_Issue(Issue):
                     width_low = Property(width)
                     metadata.set_property('width', width_low)
                     height_low = Property(height)
-                    metadata.set_property('height', height)_low
+                    metadata.set_property('height', height_low)
                     ratio = Property(ratio)
                     metadata.set_property('ratio', ratio)
                     has_thumb = Property(True)
@@ -400,15 +399,13 @@ class Tchack_Issue(Issue):
         # Comments / Files
         attachments = []
 
-        #print len(history.records)
-        ids = len(history.records)
-        metadata.set_property('ids', ids)
-        #print("ids = %s" % ids)
+        
+        id = -1
         for record in history.records:
             if record is None:
                 # deleted record
                 continue
-            id = history.get_record_value(record, 'id')
+            #id = history.get_record_value(record, 'id')
             comment = history.get_record_value(record, 'comment')
             date = history.get_record_value(record, 'datetime')
             date = date.replace(tzinfo=utc)
@@ -566,7 +563,23 @@ class Tchack_Issue(Issue):
                     # Update the filename for last_attachment
                     #print("file = %s" % file)
                     #file = file.replace('_low', '')
-
+            #id = 0
+            # Add comment only if it was a comment
+            # or an empty comment AND a file.
+            if comment:
+                id = id + 1
+                comment = Property(comment, date=date, author=author)
+            """
+            if comment == '' and not file:
+                comment = 'Empty'
+                comment = Property(comment, date=date, author=author)
+            """
+            if comment == '' and file:
+                id = id + 1
+                comment = 'comment_is_empty_but_has_attachment'
+                comment = Property(comment, date=date, author=author)
+            print("comment = %s, id = %s" % (comment, id))
+            metadata.set_property('comment', comment)
             if file:
                 attachment = Property(file, comment=id)
                 metadata.set_property('attachment', attachment)
@@ -576,17 +589,11 @@ class Tchack_Issue(Issue):
                     else:
                         last_attachment = file
                     metadata.set_property('last_attachment', last_attachment)
-            # Add comment only if it was a comment
-            # or an empty comment AND a file.
-            if comment:
-                comment = Property(comment, date=date, author=author)
-            if comment == '' and not file:
-                comment = 'Empty'
-                comment = Property(comment, date=date, author=author)
-            if comment == '' and file:
-                comment = 'comment_is_empty_but_has_attachment'
-                comment = Property(comment, date=date, author=author)
-            metadata.set_property('comment', comment)
+        
+        #print len(history.records)
+        #ids = len(history.records)
+        metadata.set_property('ids', id)
+        #print("ids = %s" % ids)
 
         # CC
         reporter = history.records[0].username

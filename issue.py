@@ -294,7 +294,6 @@ class Tchack_Issue(Issue):
         date = context.timestamp
         user = context.user
         author = user.name if user else None
-        #print("comment = '%s', attachment = %s" % (comment, att_name))
         if comment == '' and attachment is not None:
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:
@@ -383,34 +382,27 @@ class Tchack_Issue(Issue):
         names = 'product', 'module', 'version', 'type', 'state', 'priority'
         for name in names:
             value = history.get_record_value(record, name)
-            #print("value = %s" % value)
             if value is not None:
                 metadata.set_property(name, value)
         # Assigned
         value = history.get_record_value(record, 'assigned_to')
-        #metadata.set_property('assigned_to', value)
         if value:
             metadata.set_property('assigned_to', value)
-            print("value if= %s" % value)
         else:
             author = history.get_record_value(record, 'username')
-            print("value else= %s" % author)
             metadata.set_property('assigned_to', author)
+
         # Comments / Files
         attachments = []
-
-        
         id = -1
         for record in history.records:
             if record is None:
                 # deleted record
                 continue
-            #id = history.get_record_value(record, 'id')
             comment = history.get_record_value(record, 'comment')
             date = history.get_record_value(record, 'datetime')
             date = date.replace(tzinfo=utc)
             author = history.get_record_value(record, 'username')
-            #comment = Property(comment, date=date, author=author)
             file = history.get_record_value(record, 'file')
             attfile = self.get_resource(file)
 
@@ -421,7 +413,6 @@ class Tchack_Issue(Issue):
                 # Get extension
                 filename = attfile.get_property('filename')
                 name, extension, language = FileName.decode(filename)
-                #print("Filename = %s, extension = %s" % (name, extension))
                 if extension == 'psd':
                     pass
                 else:
@@ -455,7 +446,6 @@ class Tchack_Issue(Issue):
                         uri = tmpfolder + sep
 
                         for te in thumbext:
-                            #im = PILImage.open(tmp_uri)
                             try:
                                 im = PILImage.open(tmp_uri)
                             except IOError:
@@ -496,7 +486,6 @@ class Tchack_Issue(Issue):
                         # Clean the temporary folder
                         vfs.remove(dirname)
                     else:
-                        # (thumbs[0][1] and thumbs[1][1] and thumbs[2][1])
                         print("Update existing Image: %s" % attfile.name)
                         attfile.set_property('has_thumb', True)
                         attfile.del_property('thumbnail')
@@ -534,11 +523,9 @@ class Tchack_Issue(Issue):
                     handler = resource.get_handler()
                     folder = self.handler
                     filename = resource.get_property('filename')
-                    #print("filename = %s" % filename)
                     handler_name = basename(handler.key)
                     resource.set_property("filename",
                             filename.replace('_low', ''))
-                    #print("handler_name = %s" % handler_name)
                     print("Need to rename the _low_thumb in _thumb")
                     # Copy the handler, we delete it after
                     folder.copy_handler(handler_name,
@@ -560,25 +547,16 @@ class Tchack_Issue(Issue):
                             self.del_resource(filename)
                     except LookupError:
                         print("File '%s.metadata' doesn't exist!" % filename)
-                    # Update the filename for last_attachment
-                    #print("file = %s" % file)
-                    #file = file.replace('_low', '')
-            #id = 0
+
             # Add comment only if it was a comment
-            # or an empty comment AND a file.
+            # or a comment AND a file.
             if comment:
                 id = id + 1
                 comment = Property(comment, date=date, author=author)
-            """
-            if comment == '' and not file:
-                comment = 'Empty'
-                comment = Property(comment, date=date, author=author)
-            """
             if comment == '' and file:
                 id = id + 1
                 comment = 'comment_is_empty_but_has_attachment'
                 comment = Property(comment, date=date, author=author)
-            print("comment = %s, id = %s" % (comment, id))
             metadata.set_property('comment', comment)
             if file:
                 attachment = Property(file, comment=id)
@@ -589,11 +567,11 @@ class Tchack_Issue(Issue):
                     else:
                         last_attachment = file
                     metadata.set_property('last_attachment', last_attachment)
-        
-        #print len(history.records)
-        #ids = len(history.records)
+
+        # Set the total of ids in the issue, count only comments with text or
+        # image/video, doesn't need to increment 'ids' if the modification
+        # is everything else. 
         metadata.set_property('ids', id)
-        #print("ids = %s" % ids)
 
         # CC
         reporter = history.records[0].username

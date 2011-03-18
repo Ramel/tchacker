@@ -101,6 +101,7 @@ class Tchack_Issue(Issue):
         self.set_property('cc_list', tuple(cc_list))
 
         comment = form['comment']
+
         # Attachment
         attachment = form['attachment']
         ids = 0
@@ -108,10 +109,11 @@ class Tchack_Issue(Issue):
             if ((not(comment) and attachment) or
                         (comment and not(attachment)) or
                         (comment and attachment)):
-                ids = int(form['ids'])
+                ids = int(self.get_property('ids'))
                 ids = ids+1
             else:
-                ids = form['ids']
+                ids = int(self.get_property('ids'))
+        
         att_name = ""
 
         if attachment is not None:
@@ -128,7 +130,6 @@ class Tchack_Issue(Issue):
 
             # Image
             if (mtype == "image"):
-                #att_is_img = True
                 # Add attachment
                 tchackerImage = self.make_resource(
                                 name,
@@ -137,7 +138,6 @@ class Tchack_Issue(Issue):
                                 extension=extension,
                                 format=mimetype
                                 )
-
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
                 # used instead of a ;thumb
                 if extension == "psd":

@@ -64,9 +64,9 @@ class TchackIssue_Edit(Issue_Edit):
 
         # Local variables
         root = context.root
-        
+
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
-        namespace['ids'] = TchackerCommentsView().get_comments_amount(resource)
-        
+        #namespace['ids'] = TchackerCommentsView().get_comments_amount(resource)
+
         return namespace

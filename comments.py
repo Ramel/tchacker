@@ -102,7 +102,3 @@ class TchackerCommentsView(CommentsView):
 
         comments.reverse()
         return {'comments': comments}
-
-    def get_comments_amount(self, resource):
-        amount = resource.metadata.get_property('ids') or 0
-        return amount

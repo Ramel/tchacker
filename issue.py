@@ -123,8 +123,8 @@ class Tchack_Issue(Issue):
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
             name = generate_name(name, self.get_names())
-            print("filename = %s" % filename)
-            print("name = %s" % name)
+            #print("filename = %s" % filename)
+            #print("name = %s" % name)
             mtype = mimetype.split("/")[0]
 
             att_name = name
@@ -347,7 +347,6 @@ class Tchack_Issue(Issue):
         if modifications:
             body += modifications
             body += '\n\n'
-            print("modifications = %s" % modifications)
         if comment:
             title = MSG(u'Comment').gettext()
             separator = len(title) * u'-'

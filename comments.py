@@ -66,7 +66,7 @@ class TchackerCommentsView(CommentsView):
                     }] * len(comments)
 
         for attachment in attachments:
-            to = attachment.get_parameter('comment')
+            j = attachment.get_parameter('comment')
             file = resource.get_resource(str(attachment.value))
 
             has_thumb = False
@@ -83,7 +83,7 @@ class TchackerCommentsView(CommentsView):
                     'height': file.get_property('height'),
                     'ratio': file.get_property('ratio')
                     }
-            attached[to] = {
+            attached[j] = {
                     'link': file.name,
                     'is_image': image or False,
                     'is_video': video or False,

@@ -67,6 +67,5 @@ class TchackIssue_Edit(Issue_Edit):
 
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
-        #namespace['ids'] = TchackerCommentsView().get_comments_amount(resource)
 
         return namespace

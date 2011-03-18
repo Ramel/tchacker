@@ -123,7 +123,8 @@ class Tchack_Issue(Issue):
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
             name = generate_name(name, self.get_names())
-
+            print("filename = %s" % filename)
+            print("name = %s" % name)
             mtype = mimetype.split("/")[0]
 
             att_name = name
@@ -132,9 +133,9 @@ class Tchack_Issue(Issue):
             if (mtype == "image"):
                 # Add attachment
                 tchackerImage = self.make_resource(
-                                name,
-                                Image,
-                                body=body, filename=name,
+                                name, Image,
+                                body=body,
+                                filename=filename,
                                 extension=extension,
                                 format=mimetype
                                 )
@@ -173,7 +174,9 @@ class Tchack_Issue(Issue):
                             im = im.convert("RGB")
                         im.save(uri + ima + ".jpg", 'jpeg', quality=85)
                         # Copy the thumb content
-                        thumb_file = tempdir.open(ima + ".jpg")
+                        thumb_filename = ima + ".jpg"
+                        # Copy the thumb content
+                        thumb_file = tempdir.open(thumb_filename)
                         try:
                             thumb_data = thumb_file.read()
                         finally:
@@ -181,10 +184,9 @@ class Tchack_Issue(Issue):
                         format = 'image/jpeg'
                         cls = get_resource_class(format)
                         imageThumb = self.make_resource(
-                                    ima,
-                                    cls,
+                                    ima, cls,
                                     body=thumb_data,
-                                    filename=ima,
+                                    filename=thumb_filename,
                                     extension='jpg',
                                     format=format
                                     )
@@ -394,7 +396,10 @@ class Tchack_Issue(Issue):
 
         # Comments / Files
         attachments = []
+        # We start at zero, so set id to:
         id = -1
+        issue_comments = len(history.records)
+
         for record in history.records:
             if record is None:
                 # deleted record
@@ -470,7 +475,7 @@ class Tchack_Issue(Issue):
                                         ima,
                                         cls,
                                         body=thumb_data,
-                                        filename=ima,
+                                        filename=ima+'.jpg',
                                         extension='jpg',
                                         format=format
                                         )
@@ -486,7 +491,7 @@ class Tchack_Issue(Issue):
                         # Clean the temporary folder
                         vfs.remove(dirname)
                     else:
-                        print("Update existing Image: %s" % attfile.name)
+                        print("Update existing Image's Properties: %s" % attfile.name)
                         attfile.set_property('has_thumb', True)
                         attfile.del_property('thumbnail')
                         self.get_resource('%s_LOW' % file).set_property(
@@ -557,6 +562,11 @@ class Tchack_Issue(Issue):
                 id = id + 1
                 comment = 'comment_is_empty_but_has_attachment'
                 comment = Property(comment, date=date, author=author)
+            if not comment and issue_comments == 1:
+                id = id + 1
+                comment = 'empty'
+                comment = Property(comment, date=date, author=author)
+
             metadata.set_property('comment', comment)
             if file:
                 attachment = Property(file, comment=id)

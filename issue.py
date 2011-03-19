@@ -38,6 +38,7 @@ from itools.datatypes import Integer, String, Unicode
 from ikaaro.tracker.issue import Issue
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
+from ikaaro.tracker.issue_views import IssueTrackerMenu
 
 # Import from Tchacker
 from issue_views import TchackIssue_Edit
@@ -361,6 +362,13 @@ class Tchack_Issue(Issue):
                 continue
             to_addr = user.get_property('email')
             root.send_email(to_addr, subject, text=body)
+
+
+    #######################################################################
+    # User Interface
+    #######################################################################
+    def get_context_menus(self):
+        return [IssueTrackerMenu()] + self.parent.get_context_menus() 
 
 
     #######################################################################

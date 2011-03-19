@@ -71,9 +71,11 @@ class Tchacker_View(Tracker_View):
     scripts = ['/ui/tchacker/tracker.js']
     styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
 
-    context_menus = [StoreSearchMenu(),
-                     #Tchacker_ViewMenu()]
-                     TrackerViewMenu()]
+    context_menus = [
+                    TrackerViewMenu(),
+                    StoreSearchMenu(),
+                    #Tchacker_ViewMenu()]
+                    ]
     # XXX
     table_template = '/ui/tchacker/browse_table.xml'
     #context.styles.append('/ui/tchacker/tracker.css')

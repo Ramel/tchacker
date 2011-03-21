@@ -20,9 +20,25 @@ from itools.core import freeze, merge_dicts
 from itools.datatypes import Integer, Boolean, Decimal
 
 from ikaaro.file import Image, Video
-#from ikaaro.registry import register_resource_class
+from ikaaro.registry import register_resource_class
+from ikaaro.registry import resources_registry
 
-
+"""
+class Image(ImageFile):
+    
+    class_schema = ImageFile.class_schema
+    
+    @property
+    def is_content(self):
+        print("Image")
+        try:
+            self.metadata.is_thumb
+            return False
+        except ValueError:
+            return super(Image, self).is_content
+    
+    print(property(is_content))
+"""
 
 Image.class_schema = freeze(merge_dicts(
         Image.class_schema,
@@ -37,3 +53,17 @@ Video.class_schema = freeze(merge_dicts(
         width=Integer(source='metadata'),
         height=Integer(source='metadata'),
         ratio=Decimal(source='metadata')))
+
+
+
+# Remove "is_thumb" from indexation
+def is_image_content(self):
+    try:
+        if self.metadata.get_property("is_thumb"):
+            return False
+    except AttributeError:
+        pass
+    return super(Image, self).is_content
+
+
+Image.is_content = property(is_image_content)

@@ -32,12 +32,13 @@ from itools.gettext import MSG
 from itools.fs import FileName #, vfs
 
 # Import from ikaaro
-from ikaaro.file import Image, Video
+#from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
 
 from datatypes import get_issue_fields
 from comments import TchackerCommentsView
 
+from monkey import Image, Video
 
 class TchackIssue_Edit(Issue_Edit):
 

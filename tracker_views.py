@@ -44,8 +44,10 @@ from itools.fs import FileName
 from ikaaro.views import CompositeView
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
-from ikaaro.file import Image, Video
+#from ikaaro.file import Image, Video
 from ikaaro.tracker.tables import Tracker_TableResource
+
+from monkey import Image, Video
 
 
 class Tchacker_ViewMenu(TrackerViewMenu):

@@ -21,24 +21,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Import from the Standard Library
-#from datetime import date, datetime, time
-#from re import compile
-#from textwrap import TextWrapper
-#from tempfile import mkdtemp
-
 # Import from itools
 from itools.gettext import MSG
-from itools.fs import FileName #, vfs
 
 # Import from ikaaro
-#from ikaaro.file import Image, Video
 from ikaaro.tracker.issue_views import Issue_Edit
 
+# Import from tchacker
 from datatypes import get_issue_fields
 from comments import TchackerCommentsView
 
-from monkey import Image, Video
 
 class TchackIssue_Edit(Issue_Edit):
 

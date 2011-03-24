@@ -114,7 +114,7 @@ class Tchack_Issue(Issue):
                 ids = ids+1
             else:
                 ids = int(self.get_property('ids'))
-        
+
         att_name = ""
 
         if attachment is not None:
@@ -124,10 +124,8 @@ class Tchack_Issue(Issue):
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
             name = generate_name(name, self.get_names())
-            #print("filename = %s" % filename)
-            #print("name = %s" % name)
-            mtype = mimetype.split("/")[0]
 
+            mtype = mimetype.split("/")[0]
             att_name = name
 
             # Image
@@ -270,24 +268,11 @@ class Tchack_Issue(Issue):
                 # Clean the temporary folder
                 vfs.remove(dirname)
 
-            """
-                # Create a thumbnail for a big file, instead of encoding it
-                else:
-                    mkthumb = VideoEncodingToFLV(file).make_thumbnail(
-                        tmpfolder, name, width_low)
-                    if mkthumb is not None:
-                        thumbfilename, thumbmimetype, \
-                                thumbbody, thumbextension = mkthumb
-                        # Create the thumbnail PNG resources
-                        cls = get_resource_class(thumbmimetype)
-                        self.make_resource(cls, self, thumbfilename,
-                            body=thumbbody, filename=thumbfilename,
-                            extension=thumbextension, format=thumbmimetype)
-                    file.metadata.set_property('width', width)
-                    file.metadata.set_property('height', height)
-                    file.metadata.set_property('ratio', str(ratio))
-                    file.metadata.set_property('thumbnail', "False")
-            """
+            # Default case
+            else:
+                cls = get_resource_class(mimetype)
+                self.make_resource(name, cls, body=body, filename=filename,
+                extension=extension, format=mimetype)
 
             # Link
             attachment = Property(att_name, comment=ids)
@@ -401,8 +386,6 @@ class Tchack_Issue(Issue):
             author = history.get_record_value(record, 'username')
             metadata.set_property('assigned_to', author)
 
-        # Comments / Files
-        attachments = []
         # We start at zero, so set id to:
         id = -1
         issue_comments = len(history.records)

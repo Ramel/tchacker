@@ -18,7 +18,6 @@
 from itools.datatypes import Unicode, Integer
 
 # Import from ikaaro
-from ikaaro.cc import UsersList
 from ikaaro.datatypes import FileDataType
 from ikaaro.tracker.datatypes import TrackerList, Tracker_UsersList
 from ikaaro.tracker.datatypes import ProductInfoList

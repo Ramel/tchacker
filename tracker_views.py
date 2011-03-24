@@ -20,32 +20,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Import from the Standard Library
-from time import strftime
-from tempfile import mkdtemp
-#from subprocess import call
-from zipfile import ZipFile
-from os.path import basename
-
 # Import from itools
-from itools.core import guess_extension
 from itools.gettext import MSG
-from itools.fs import vfs
-from itools.uri import encode_query #, get_uri_name
-#from itools.fs import FileName
-from itools.web import STLView
+from itools.uri import encode_query
 from itools.xml import XMLParser
-#from itools.handlers import File as FileHandler
-from itools.core import merge_dicts
-from itools.fs import FileName
 
 # Import from ikaaro
-#from ikaaro.views import ContextMenu
-from ikaaro.views import CompositeView
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
-#from ikaaro.file import Image, Video
-from ikaaro.tracker.tables import Tracker_TableResource
 
 from monkey import Image, Video
 
@@ -139,25 +121,14 @@ class Tchacker_Search(Tracker_Search):
         title = products.get_property('title') 
         namespace = Tracker_Search.get_namespace(self, resource, context)
         namespace['title'] = title
-        #print namespace
         columns = self.get_table_columns(resource, context)
-        #print columns
-        titles = []
         for name, label in columns:
-            """
-            try get_resource(name):
-                print name
-            """
-            #print("name = %s" % name)
             if label is not None:
                 try:
                     get_resource(name)
-                    #language = self.get_content_language(context)
-                    title = get_resource(name).get_property('title') #, language=language)
+                    title = get_resource(name).get_property('title')
                 except LookupError:
-                    continue
-                #if title != "":
-                #   "print("%s.get_property('title') = %s" % (name, title))
+                    pass
         return namespace
 
 

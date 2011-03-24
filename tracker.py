@@ -33,7 +33,6 @@ from ikaaro.registry import get_resource_class
 
 from issue import Tchack_Issue
 from tracker_views import Tchacker_View #, Tracker_Zip_Img
-from tracker_views import Tchacker_Search
 
 
 
@@ -155,12 +154,8 @@ class Tchack_Tracker(Tracker):
         and erase the original file.
         """
         import os
-        from tempfile import mkdtemp
         from issue import Tchack_Issue
         from ikaaro.file import Video
-        from itools.fs import vfs
-        from ikaaro.registry import get_resource_class
-        from videoencoding import VideoEncodingToFLV
         from ikaaro.exceptions import ConsistencyError
 
         for issue in self.search_resources(cls=Tchack_Issue):
@@ -181,19 +176,12 @@ class Tchack_Tracker(Tracker):
                         continue
                     if is_video:
                         name = file.name
-                        #mimetype = file.handler.get_mimetype()
-                        #body = file.handler.to_str()
                         thumb = file.metadata.get_property('thumbnail')
                         filename = file.metadata.get_property('filename')
 
-                        #print("project = %s, issue = %s, name = %s, thumb = %s" %
-                        #    (issue.parent.parent.name, issue.name, name, thumb))
-
                         handler = file.handler.key
                         video = basename(handler)
-                        #print("video = %s" % video)
                         videoname, videoext = os.path.splitext(video)
-                        #print("videoname = %s, videoext = %s" % (videoname, videoext))
 
                         as_low = issue.get_handler().has_handler(
                             "%s_low.flv" % videoname)
@@ -206,18 +194,12 @@ class Tchack_Tracker(Tracker):
                         is_big = issue.get_handler().has_handler(
                             "%s" % video)
 
-                        #print("as_low = %s" % (as_low))
-                        #print("is_low = %s" % (is_low))
-                        #print("is_big = %s" % (is_big))
-
                         old_thumb = "thumb_%s" % name
                         as_old_thumb = issue.get_handler().has_handler(
                             "%s" % old_thumb)
 
                         if thumb == "False" and as_low and is_big:
                             print("Remove Big original file : %s" % name)
-                            #handler = file.handler.key
-                            #videoname = os.path.basename(handler)
                             issue.del_resource(
                                 name, soft='False')
                         if thumb == "False" and is_low:
@@ -252,7 +234,6 @@ class Tchack_Tracker(Tracker):
         from itools.fs import vfs
         from ikaaro.registry import get_resource_class
         from videoencoding import VideoEncodingToFLV
-        from itools.web import get_context
 
 
         for issue in self.search_resources(cls=Tchack_Issue):
@@ -271,7 +252,6 @@ class Tchack_Tracker(Tracker):
                     is_video = isinstance(file, Video)
                     mimetype = file.handler.get_mimetype()
                     print("file = %s, filename = %s, mimetype = %s" % (file, filename, mimetype))
-                    mtype = mimetype.split("/")[0]
 
                     if not is_video:
                         continue
@@ -284,7 +264,7 @@ class Tchack_Tracker(Tracker):
                         videoname = basename(handler)
 
                         thumb = file.metadata.get_property('thumbnail')
-                        joinfilename = file.metadata.get_property('filename')
+                        #joinfilename = file.metadata.get_property('filename')
 
                         as_low = issue.get_handler().has_handler(
                             "%s_low.flv" % name)
@@ -402,16 +382,6 @@ class Tchack_Tracker(Tracker):
                             newfile.metadata.set_property("thumbnail", "False")
                             # Erase Big in next upgrade
                             print("-----\n")
-                        """
-                        else :
-                            try:
-                                issue.del_resource("thumb_%s" % name)
-                            except LookupError:
-                                pass
-                            #issue.del_resource("thumb_%s" % name)
-                            #file.metadata.set_property('thumbnail', 'True')
-                            #database.remove_resource(name)
-                        """
 
 
 

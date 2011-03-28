@@ -223,8 +223,7 @@ text-align: right;
 				</div>
 				<div id="attachment-progressIndicator"></div>
 				<div id="progressIndicator">
-					<div class="floatLeft" id="progressBar">
-					</div>
+					<div class="floatLeft" id="progressBar"></div>
 					<div class="floatRight" id="progressNumber">&nbsp;</div>
 					<!--<div class="clear"></div>-->
 					<div>
@@ -244,62 +243,56 @@ text-align: right;
   </fieldset>
 </form>
 <script type="text/javascript">
+	//document.getElementById('id') == $('id').html();
 	var bytesUploaded = 0;
 	var bytesTotal = 0;
 	var previousBytesLoaded = 0;
 	var intervalTimer = 0;	
-
-	(function($) {  
-		$.fn.getFormData = function() {  
-			var data = [];  
-			this.find(':input').not(':submit').each(function() {  
-				var $inputName = $(this).attr('name');  
-				var $inputVal = $(this).val();  
-				var formValue = $inputName + '=' + $inputVal;  
-				data.push(formValue);  
-			});  
-			return data.join('<![CDATA[&]]>');  
-	 };  
-	})(jQuery);  
+	var attachment = false;
 
 	function attachmentSelected() {
-		var att = document.getElementById('attachment').files[0];
+		//var att = document.getElementById('attachment').files[0];
+		var att = $("#attachment").get(0).files[0];
 		if (att) {
 			var attSize = 0;
+			attachment = att.name;
 			if (att.size > 1024 * 1024) {
 				attSize = (Math.round(att.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
 			}
 			else {
 				attSize = (Math.round(att.size * 100 / 1024) / 100).toString() + 'KB';
 			}
-			document.getElementById('attName').innerHTML = 'Name: ' + att.name;
-			document.getElementById('attSize').innerHTML = 'Size: ' + attSize;
-			document.getElementById('attType').innerHTML = 'Type: ' + att.type;
+			$("#attName").append('Name: ' + att.name);
+			$("#attSize").append('Size: ' + attSize);
+			$("#attType").append('Type: ' + att.type);
+			//document.getElementById('attType').innerHTML = 'Type: ' + att.type;
 		}
 	}
 	
 	$("#attachment").click(function() {
 		$(".button-ok").attr('onclick', "uploadAttachment()");
 	});
-	/*
-	function getFormData(form) {
-		var data1 = "";
-		var form = document.getElementById(form);
-		var elements = form.elements;
-		for(var i=0; form.length > i; i++) {
-			data1 += elements[i].name + "=" +escape(elements[i].value);
-			if(form.length > (i+1))	{
-				data1+="<![CDATA[&]]>";
-			}
-		}
-		return data1;
-	}
- 	*/
+	
 	function uploadAttachment() {
 		previousBytesLoaded = 0;
 		var xhr = new XMLHttpRequest();
-		var formElement = document.getElementById('tracker');
-		formData = new FormData(formElement);
+		//var formElement = document.getElementById('tracker');
+		////var formElement = $('#tracker').get(0);
+		//var formData = new FormData(formElement);
+		//var formData = document.getElementById('tracker').getFormData();
+		var editserialize = $('FORM#tracker').serialize();
+		editserialize = decodeURIComponent(editserialize.replace(/\+/g, " "));
+		if (attachment != false) {
+			editserialize += editserialize+"<![CDATA[&]]>file="+attachment;
+		}
+		//alert(editserialize);
+   	var vars = editserialize.split("<![CDATA[&]]>");
+    var formData = new FormData();
+		for (var i = 0; i <![CDATA[<]]> vars.length; i++) {
+        var pair = vars[i].split("=");
+				//alert("key = " + pair[0] + "; value = " + pair[1]);
+				formData.append(pair[0], pair[1]);
+    }
 		/* event listners */
 		xhr.upload.addEventListener("progress", uploadProgress, false);
 		xhr.addEventListener("load", uploadComplete, false);
@@ -308,11 +301,13 @@ text-align: right;
 		/* Be sure to change the url below to the url of your upload server side script */
 		xhr.open("POST", ";edit");
 		xhr.send(formData);
+		/*
 		if (xhr.status == 200) {
 			output.innerHTML += "Uploaded!<![CDATA[<br />]]>";
 		} else {
 			output.innerHTML += "Error " + xhr.status + " occurred uploading your file.<![CDATA[<br />]]>";
 		}
+		*/
 		intervalTimer = setInterval(updateTransferSpeed, 500);
 	}
 
@@ -341,7 +336,6 @@ text-align: right;
 		var m = Math.floor(seconds % 3600 / 60);
 		var s = Math.floor(seconds % 3600 % 60);
 		return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 <![CDATA[&&]]> m <![CDATA[<]]> 10 ? "0" : "") + m + ":" : "0:") + (s <![CDATA[<]]> 10 ? "0" : "") + s);
-		//return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 <![CDATA[&&]]> 10 > m ? "0" : "") + m + ":" : "0:") + (10 > s ? "0" : "") + s);
 	}
 
 	function uploadProgress(evt) {

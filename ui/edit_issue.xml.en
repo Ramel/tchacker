@@ -85,7 +85,8 @@ text-align: right;
 }
 </style>
 
-<form action=";edit" method="post" enctype="multipart/form-data" id="tracker">
+<form action=";edit" method="post" enctype="multipart/form-data" id="tracker"
+	onsubmit="beginUpload()">
   <fieldset>
     <legend>Edit Issue</legend>
     <div class="bord">
@@ -214,173 +215,147 @@ text-align: right;
 	    	<legend>Attachments</legend>
 				<div class="bord">
 					<label class="label" for="attachment">New attachment:</label>
-					<input type="file" name="attachment" id="attachment" onchange="attachmentSelected()" size="36" />
+					<input type="file" name="attachment" id="attachment" size="36" />
 				</div>
-				<div class="one bord">
-					<p id="attName"></p>
-					<p id="attSize"></p>
-					<p id="attType"></p>
+				<div id="upload" class="one bord">
+					<div id="infos">
+						<p id="attName" />
+						<p id="attSize" />
+						<p id="attType" />
+					</div>
+					<div id="progress">
+						<div class="box">
+							<span><div id="progressbar" /></span><span id="percent" />
+						</div>
+						<div class="box">
+							<div id="speedtime"><div id="speed" /><div id="time" /></div>
+							<div id="current" />
+						</div>
+					</div>
 				</div>
-				<div id="attachment-progressIndicator"></div>
-				<div id="progressIndicator">
-					<div class="floatLeft" id="progressBar"></div>
-					<div class="floatRight" id="progressNumber">&nbsp;</div>
-					<!--<div class="clear"></div>-->
-					<div>
-						<div style="width: 80px;" class="floatLeft" id="transferSpeedInfo">&nbsp;</div>
-						<div style="margin-left: 10px;" class="floatLeft" id="timeRemainingInfo">&nbsp;</div>
-						<div style="text-align: right;" class="floatRight" id="transferBytesInfo">&nbsp;</div>
-						<div class="clear"></div>
-					</div>    
-					<div id="uploadResponse"></div>
-				</div>	
 	  	</fieldset>
     </div>
-		<!--<input type="button" value="Upload" class="button-ok"></input>-->
 		<p>
       <button type="submit" class="button-ok">Edit</button>
     </p>
   </fieldset>
 </form>
+
 <script type="text/javascript">
-	//document.getElementById('id') == $('id').html();
-	var bytesUploaded = 0;
-	var bytesTotal = 0;
-	var previousBytesLoaded = 0;
-	var intervalTimer = 0;	
-	var attachment = false;
+    
+		$("#attachment").focus(function () {
+			attachmentSelected($(this));
+    });
 
-	function attachmentSelected() {
-		//var att = document.getElementById('attachment').files[0];
-		var att = $("#attachment").get(0).files[0];
-		if (att) {
-			var attSize = 0;
-			attachment = att.name;
-			if (att.size > 1024 * 1024) {
-				attSize = (Math.round(att.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-			}
-			else {
-				attSize = (Math.round(att.size * 100 / 1024) / 100).toString() + 'KB';
-			}
-			$("#attName").append('Name: ' + att.name);
-			$("#attSize").append('Size: ' + attSize);
-			$("#attType").append('Type: ' + att.type);
-			//document.getElementById('attType').innerHTML = 'Type: ' + att.type;
-		}
-	}
-	
-	$("#attachment").click(function() {
-		$(".button-ok").attr('onclick', "uploadAttachment()");
-	});
-	
-	function uploadAttachment() {
-		previousBytesLoaded = 0;
-		var xhr = new XMLHttpRequest();
-		//var formElement = document.getElementById('tracker');
-		////var formElement = $('#tracker').get(0);
-		//var formData = new FormData(formElement);
-		//var formData = document.getElementById('tracker').getFormData();
-		var editserialize = $('FORM#tracker').serialize();
-		editserialize = decodeURIComponent(editserialize.replace(/\+/g, " "));
-		if (attachment != false) {
-			editserialize += editserialize+"<![CDATA[&]]>file="+attachment;
-		}
-		//alert(editserialize);
-   	var vars = editserialize.split("<![CDATA[&]]>");
-    var formData = new FormData();
-		for (var i = 0; i <![CDATA[<]]> vars.length; i++) {
-        var pair = vars[i].split("=");
-				//alert("key = " + pair[0] + "; value = " + pair[1]);
-				formData.append(pair[0], pair[1]);
+		var upload_id = "${upload_id}";
+    var started = 0;
+		var attSize = 0;
+		var uploaded = 0;
+		var previouslyUploaded = 0;
+		var interval = 500;
+
+    function beginUpload()
+    {
+        $("#progressbar").progressbar();
+
+        var intervalId = setInterval(
+          function()
+          {
+            $.getJSON("/;upload_stats?upload_id=" + upload_id,
+              function(data)
+              {
+                if (data == null || (started == 1 <![CDATA[&&]]> data.percent == '0.0'))
+                {
+                  clearInterval(intervalId);
+                  $("#progressbar").progressbar("destroy");
+                  $("#percent, #speed, #current, #time").empty();
+									uploaded = 0;
+									previouslyUploaded = 0;
+                  return;
+                }
+								started = 1;
+                var percent = Math.floor(data.percent);
+								updateCurrentSize(data.percent);
+								$("#progressbar").progressbar("option", "value", percent);
+                $("#percent").html(percent + "%");
+              });
+          },
+          interval);
     }
-		/* event listners */
-		xhr.upload.addEventListener("progress", uploadProgress, false);
-		xhr.addEventListener("load", uploadComplete, false);
-		xhr.addEventListener("error", uploadFailed, false);
-		xhr.addEventListener("abort", uploadCanceled, false);
-		/* Be sure to change the url below to the url of your upload server side script */
-		xhr.open("POST", ";edit");
-		xhr.send(formData);
-		/*
-		if (xhr.status == 200) {
-			output.innerHTML += "Uploaded!<![CDATA[<br />]]>";
-		} else {
-			output.innerHTML += "Error " + xhr.status + " occurred uploading your file.<![CDATA[<br />]]>";
+
+		function updateCurrentSize(percent)
+		{
+			uploaded = parseFloat(percent) * parseFloat(attSize) / 100;
+			var currentlyUploaded = uploaded;
+			var sizeDiff = currentlyUploaded - previouslyUploaded;
+			if (sizeDiff == 0) return;
+			previouslyUploaded = currentlyUploaded;
+			sizeDiff = sizeDiff * 1000 / interval;
+			var bytesRemaining = attSize - previouslyUploaded;
+			var secondsRemaining = bytesRemaining / sizeDiff;
+
+      $("#speed").html(sizeToText(sizeDiff, '/s'));
+      $("#current").html(sizeToText(uploaded, ''));
+      $("#time").html(secondsToText(secondsRemaining));
+
 		}
-		*/
-		intervalTimer = setInterval(updateTransferSpeed, 500);
-	}
 
-	function updateTransferSpeed() {
-		var currentBytes = bytesUploaded;
-		var bytesDiff = currentBytes - previousBytesLoaded;
-		if (bytesDiff == 0) return;
-		previousBytesLoaded = currentBytes;
-		bytesDiff = bytesDiff * 2;
-		var bytesRemaining = bytesTotal - previousBytesLoaded;
-		var secondsRemaining = bytesRemaining / bytesDiff;
-
-		var speed = "";
-		if (bytesDiff > 1024 * 1024)
-			speed = (Math.round(bytesDiff * 100/(1024*1024))/100).toString() + 'MBps';
-		else if (bytesDiff > 1024)
-			speed =  (Math.round(bytesDiff * 100/1024)/100).toString() + 'KBps';
-		else
-			speed = bytesDiff.toString() + 'Bps';
-		document.getElementById('transferSpeedInfo').innerHTML = speed;
-		document.getElementById('timeRemainingInfo').innerHTML = '| ' + secondsToString(secondsRemaining);        
-	}
-
-	function secondsToString(seconds) {        
-		var h = Math.floor(seconds / 3600);
-		var m = Math.floor(seconds % 3600 / 60);
-		var s = Math.floor(seconds % 3600 % 60);
-		return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 <![CDATA[&&]]> m <![CDATA[<]]> 10 ? "0" : "") + m + ":" : "0:") + (s <![CDATA[<]]> 10 ? "0" : "") + s);
-	}
-
-	function uploadProgress(evt) {
-		if (evt.lengthComputable) {
-			bytesUploaded = evt.loaded;
-			bytesTotal = evt.total;
-			var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-			var bytesTransfered = '';
-			if (bytesUploaded > 1024*1024)
-				bytesTransfered = (Math.round(bytesUploaded * 100/(1024*1024))/100).toString() + 'MB';
-			else if (bytesUploaded > 1024)
-				bytesTransfered = (Math.round(bytesUploaded * 100/1024)/100).toString() + 'KB';
-			else
-				bytesTransfered = (Math.round(bytesUploaded * 100)/100).toString() + 'Bytes';
-
-			document.getElementById('progressNumber').innerHTML = percentComplete.toString() + '%';
-			document.getElementById('progressBar').style.width = (percentComplete * 3.55).toString() + 'px';
-			document.getElementById('transferBytesInfo').innerHTML = bytesTransfered;
-			if (percentComplete == 100) {
-				document.getElementById('progressInfo').style.display = 'none';
-				var uploadResponse = document.getElementById('uploadResponse');
-				uploadResponse.innerHTML = '<![CDATA[<span style="font-size: 18pt; font-weight: bold;">Please wait...</span>]]>';
-				uploadResponse.style.display = 'block';
+		function sizeToText(size, text)
+		{
+			if (size > 1024 * 1024) {
+				return (Math.round(size * 100/(1024*1024))/100).toString() + ' Mo' + text;
+			} else if (size > 1024) {
+				return (Math.round(size * 100/1024)/100).toString() + ' Ko' + text;
+			} else {
+				return size.toString() + ' octets' + text;
 			}
 		}
-		else {
-			document.getElementById('progressBar').innerHTML = 'unable to compute';
-		}  
-	}
 
-	function uploadComplete(evt) {
-		clearInterval(intervalTimer);
-		var uploadResponse = document.getElementById('uploadResponse');
-		uploadResponse.innerHTML = evt.target.responseText;
-		uploadResponse.style.display = 'block';
-	}  
+		function secondsToText(seconds)
+		{        
+			var h = Math.floor(seconds / 3600);
+			var m = Math.floor(seconds % 3600 / 60);
+			var s = Math.floor(seconds % 3600 % 60);
+			return ((h > 0 ? h + ":" : "") +
+				(m > 0 ? (h > 0 <![CDATA[&&]]> m <![CDATA[<]]> 10 ? "0" : "") + m + ":" : "0:") +
+				(s <![CDATA[<]]> 10 ? "0" : "") + s);
+		}
 
-	function uploadFailed(evt) {
-		clearInterval(intervalTimer);
-		alert("An error occurred while uploading the file.");  
-	}  
+		function filenameHasExtension(filename)
+		{
+			return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
+		}
 
-	function uploadCanceled(evt) {
-		clearInterval(intervalTimer);
-		alert("The upload has been canceled by the user or the browser dropped the connection.");  
-	}  
+		function attachmentSelected(file)
+		{
+			var attachment = file.get(0).files[0];
+			if (attachment) {
+				//var attSize = 0;
+				attName = attachment.name;
+				attSize = attachment.size;
+				attType = attachment.type;
+				if (attSize > 1024 * 1024) {
+					attSizeTxt = (Math.round(attSize * 100 / (1024 * 1024)) / 100).toString() + ' Mo';
+				}
+				else {
+					attSizeTxt = (Math.round(attSize * 100 / 1024) / 100).toString() + ' Ko';
+				}
+				// If the user choose a file without an extension.
+				if (filenameHasExtension(attName) == undefined) {
+					$("#attName").html(
+						'Name: <![CDATA[<span class="field-is-missing">The given filename have no extension! Please add one before going further!</span>]]>');
+				} else {
+					$("#attName").html('Name: ' + attName);
+				}
+				$("#attSize").html('Size: ' + attSizeTxt);
+				if(attType == '') {
+					$("#attType").html('Type: Unknown');
+				} else {
+					$("#attType").html('Type: ' + attType);
+				}
+			}
+		}
+
 </script>
+
 </stl:block>

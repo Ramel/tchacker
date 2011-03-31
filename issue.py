@@ -84,6 +84,15 @@ class Tchack_Issue(Issue):
         document = Issue.get_catalog_values(self)
         return document
 
+    
+    def get_attachments(self):
+        attachments = self.metadata.get_property('attachment')
+        if not attachments:
+            return set()
+
+        base = self.get_canonical_path()
+        return set([ str(x.value) for x in attachments ])
+
 
     def add_comment(self, context, form, new=False):
         # Keep a copy of the current metadata

@@ -75,9 +75,40 @@ class Tchacker_View(Tracker_View):
                 return None
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
             #print item.name, attach, isinstance(attach, Video)
+            attachments = resource.get_resource(issue).get_attachments()
+            #image = resource.get_resource('./%s/%s_LOW.metadata' % (issue, attach_name))
+            #print("attachments = %s" % attachments)
+            #print("len(attachments) = %s" % len(attachments))
+            print(context.uri.resolve(issue))
             if isinstance(attach, Image):
-                img_template = '<img src="./%s/%s_LOW/;download"/>'
-                return XMLParser(img_template % (issue, attach_name))
+                image = resource.get_resource('%s/%s_LOW' % (issue, attach_name))
+                width, height = image.handler.get_size()
+                rollover = ""
+                rollimages = ""
+                quantity = len(attachments)
+                if quantity > 2:
+                    width = width / quantity
+                    i = 0
+                    for attachment in attachments:
+                        i += 1
+                        print("a = %s" % attachment)
+                        rollover += '<div class="roll" style="width:%spx;height:%spx;float:left" />' % (width, height)
+                        rollimages += '<img style="display:none;float:left" src="./%s/%s_LOW/;download" />' % (
+                            issue, attachment)
+                img_template = '<span>Click a div!</span>\
+                    <div style="position:relative">\
+                        <div class="rollover" style="position:absolute;top:0;left:0">%s</div>\
+                        <div class="rollimages" style="position:absolute;top:0;left:0">%s</div>\
+                        <img src="./%s/%s_LOW/;download"/>\
+                    </div>\
+                    <script>\n\
+                    $("DIV.roll").click(function () {\n\
+                        // this is the dom element clicked\n\
+                        var index = $("DIV").index(this);\n\
+                        $(this).parentsUntil("SPAN").text("That was div index #" + index);\n\
+                    });\n\
+                    </script>'
+                return XMLParser(img_template % (rollover, rollimages, issue, attach_name))
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
                 #print("thumb = %s" % thumb)

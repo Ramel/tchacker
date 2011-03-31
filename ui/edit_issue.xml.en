@@ -247,7 +247,7 @@ text-align: right;
 			attachmentSelected($(this));
     });
 
-		var upload_id = "${upload_id}";
+		var upload_id = "{upload_id}";
     var started = 0;
 		var attSize = 0;
 		var uploaded = 0;

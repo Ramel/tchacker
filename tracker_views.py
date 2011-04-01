@@ -86,29 +86,48 @@ class Tchacker_View(Tracker_View):
                 rollover = ""
                 rollimages = ""
                 quantity = len(attachments)
-                if quantity > 2:
+                if quantity >= 2:
                     width = width / quantity
                     i = 0
                     for attachment in attachments:
                         i += 1
                         print("a = %s" % attachment)
-                        rollover += '<div class="roll" style="width:%spx;height:%spx;float:left" />' % (width, height)
-                        rollimages += '<img style="display:none;float:left" src="./%s/%s_LOW/;download" />' % (
+                        rollover += '<div class="roll" style="width:%spx;height:%spx;float:left;" />' % (width, height)
+                        rollimages += '<img style="display:none;float:left;vertical-align:middle" src="./%s/%s_LOW/;download" />' % (
                             issue, attachment)
-                img_template = '<span>Click a div!</span>\
-                    <div style="position:relative">\
-                        <div class="rollover" style="position:absolute;top:0;left:0">%s</div>\
-                        <div class="rollimages" style="position:absolute;top:0;left:0">%s</div>\
+                img_template = '<div id="num-%s" class="issue" style="position:relative">\
+                        <!--<span>Click a div!</span>-->\
+                        <div class="rollover" style="position:absolute;top:0px;left:0px">%s</div>\
+                        <div class="rollimages" style="height:%spx;position:absolute;top:0px;left:0px;vertical-align:middle">%s</div>\
                         <img src="./%s/%s_LOW/;download"/>\
                     </div>\
                     <script>\n\
-                    $("DIV.roll").click(function () {\n\
+                    $("DIV.roll").hover(function () {\n\
+                        var issue = $(this).parent().parent().attr("id");\n\
+                        var index = $("#" + issue + " .roll").index(this);\n\
+                        //$(this).stop();\n\
+                        //$(this).parent().parent().children("SPAN").text("That was div index #" + index);\n\
+                        //$(this).parent().parent().children(".rollimages").children()\n\
+                        //    .get(index).css("display", "block");\n\
+                        $("#" + issue + " .rollimages IMG:nth-child(" + (index+1) +")")\n\
+                        //.fadeIn().fadeToggle("slow", "linear");\n\
+                        //    .fadeIn);\n\
+                            .stop().css("display", "block");\n\
+                    }, function () {\n\
                         // this is the dom element clicked\n\
-                        var index = $("DIV").index(this);\n\
-                        $(this).parentsUntil("SPAN").text("That was div index #" + index);\n\
+                        var issue = $(this).parent().parent().attr("id");\n\
+                        var index = $("#" + issue + " .roll").index(this);\n\
+                        //$(this).stop();\n\
+                        //$(this).parent().parent().children("SPAN").text("That was div index #" + index);\n\
+                        //$(this).parent().parent().children(".rollimages").children()\n\
+                        //    .get(index).css("display", "block");\n\
+                        $("#" + issue + " .rollimages IMG:nth-child(" + (index+1) +")")\n\
+                        //.fadeToggle("slow", "linear");\n\
+                        //    .fadeOut();\n\
+                            .stop().css("display", "none");\n\
                     });\n\
                     </script>'
-                return XMLParser(img_template % (rollover, rollimages, issue, attach_name))
+                return XMLParser(img_template % (issue, rollover, height, rollimages, issue, attach_name))
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
                 #print("thumb = %s" % thumb)

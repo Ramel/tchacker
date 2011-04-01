@@ -70,16 +70,10 @@ class Tchacker_View(Tracker_View):
         if column == 'last_attachment':
             attach_name = item.last_attachment
             issue = item.name
-            #print("attach_name = %s" % attach_name)
             if attach_name is None:
                 return None
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
-            #print item.name, attach, isinstance(attach, Video)
             attachments = resource.get_resource(issue).get_attachments()
-            #image = resource.get_resource('./%s/%s_LOW.metadata' % (issue, attach_name))
-            #print("attachments = %s" % attachments)
-            #print("len(attachments) = %s" % len(attachments))
-            print(context.uri.resolve(issue))
             if isinstance(attach, Image):
                 image = resource.get_resource('%s/%s_LOW' % (issue, attach_name))
                 width, height = image.handler.get_size()
@@ -87,54 +81,63 @@ class Tchacker_View(Tracker_View):
                 rollimages = ""
                 quantity = len(attachments)
                 if quantity >= 2:
-                    width = width / quantity
+                    part = width / quantity
                     i = 0
                     for attachment in attachments:
                         i += 1
-                        print("a = %s" % attachment)
-                        rollover += '<div class="roll" style="width:%spx;height:%spx;float:left;" />' % (width, height)
-                        rollimages += '<img style="display:none;float:left;vertical-align:middle" src="./%s/%s_LOW/;download" />' % (
-                            issue, attachment)
-                img_template = '<div id="num-%s" class="issue" style="position:relative">\
-                        <!--<span>Click a div!</span>-->\
-                        <div class="rollover" style="position:absolute;top:0px;left:0px">%s</div>\
-                        <div class="rollimages" style="height:%spx;position:absolute;top:0px;left:0px;vertical-align:middle">%s</div>\
-                        <img src="./%s/%s_LOW/;download"/>\
+                        rollover += '<div class="roll" style="width:%spx;height:%spx;float:left" />' % (part, height)
+                        rollimages += '<div class="roll"\
+                            style="display:none;width:256px;height:%spx;text-align:center;line-height:%spx;float:left;position:absolute;clip:rect(0px,%spx,%spx,0px);"><img \
+                            style="vertical-align:middle;border:none;" \
+                            src="./%s/%s_LOW/;download" /></div>' % (
+                            height, height, width, height, issue, attachment)
+                img_template = '<div id="num-%s" class="issue" style="position:relative;line-height:%spx;z-index:50">\
+                        <div class="rollover" style="position:absolute;top:0px;left:0px;z-index:100">%s</div>\
+                        <div class="rollimages" \
+                            style="height:%spx;width:256px;line-height:%spx;position:absolute;\
+                            top:0px;left:0px;z-index:75;">%s</div><img \
+                            class="low" style="vertical-align:middle" src="./%s/%s_LOW/;download"/>\
                     </div>\
                     <script>\n\
                     $("DIV.roll").hover(function () {\n\
                         var issue = $(this).parent().parent().attr("id");\n\
                         var index = $("#" + issue + " .roll").index(this);\n\
-                        //$(this).stop();\n\
-                        //$(this).parent().parent().children("SPAN").text("That was div index #" + index);\n\
-                        //$(this).parent().parent().children(".rollimages").children()\n\
-                        //    .get(index).css("display", "block");\n\
-                        $("#" + issue + " .rollimages IMG:nth-child(" + (index+1) +")")\n\
+                        $("#" + issue + " IMG.low").css("visibility", "hidden");\n\
+                        $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
                         //.fadeIn().fadeToggle("slow", "linear");\n\
                         //    .fadeIn);\n\
-                            .stop().css("display", "block");\n\
+                            .stop().css("display", "block").parent().css("background-color", "#E0E0F0");\n\
                     }, function () {\n\
-                        // this is the dom element clicked\n\
                         var issue = $(this).parent().parent().attr("id");\n\
                         var index = $("#" + issue + " .roll").index(this);\n\
-                        //$(this).stop();\n\
-                        //$(this).parent().parent().children("SPAN").text("That was div index #" + index);\n\
-                        //$(this).parent().parent().children(".rollimages").children()\n\
-                        //    .get(index).css("display", "block");\n\
-                        $("#" + issue + " .rollimages IMG:nth-child(" + (index+1) +")")\n\
+                        $("#" + issue + " IMG.low").css("visibility", "visible");\n\
+                        $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
                         //.fadeToggle("slow", "linear");\n\
                         //    .fadeOut();\n\
-                            .stop().css("display", "none");\n\
+                            .stop().css("display", "none").parent().css("background-color", "transparent");\n\
                     });\n\
                     </script>'
-                return XMLParser(img_template % (issue, rollover, height, rollimages, issue, attach_name))
+                return XMLParser(img_template % (issue, height, rollover, height, height, rollimages, issue, attach_name))
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
-                #print("thumb = %s" % thumb)
                 if thumb:
+                    image = resource.get_resource('%s/%s_thumb' % (issue, attach_name))
+                    width, height = image.handler.get_size()
                     # The encoded file already as a name "fn_low.flv" 
-                    img_template = '<img \
-                        src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
+                    img_template = '<div style="position:relative">\
+                        <div style="position:absolute;bottom:10px;right:10px">\
+                            <img src="/ui/tchacker/redhat-sound_video.png" />\
+                        </div>\
+                        <img src="./%s/%s_thumb/;download" width="256" height="{height}" />\
+                        </div>'.format(height=(256 * height/ width))
+                    """
+                    img_template = '<div style="position:relative">\
+                        <div style="position:absolute;bottom:0;right:0">\
+                            <img src="/ui/tchacker/redhat-sound_video.png" />\
+                        </div>\
+                        <img src="./%s/%s_thumb/;thumb?width=256&amp;height=256" />\
+                        </div>'
+                    """
                 #TODO: Don't think it can append, as we encode every video input file
                 else:
                     img_template = '<img \

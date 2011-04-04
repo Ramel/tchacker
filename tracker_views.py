@@ -24,10 +24,13 @@
 from itools.gettext import MSG
 from itools.uri import encode_query
 from itools.xml import XMLParser
+from itools.datatypes import Unicode
 
 # Import from ikaaro
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
+from ikaaro.tracker.tracker_views import Tracker_AddIssue
+from ikaaro.tracker.datatypes import get_issue_fields
 
 from monkey import Image, Video
 
@@ -153,6 +156,37 @@ class Tchacker_Search(Tracker_Search):
         return namespace
 
 
+
+class Tchacker_AddIssue(Tracker_AddIssue):
+
+    access = 'is_allowed_to_edit'
+    title = MSG(u'Add')
+    icon = 'new.png'
+    template = '/ui/tracker/add_issue.xml'
+    styles = ['/ui/tracker/style.css']
+    scripts = ['/ui/tracker/tracker.js']
+
+
+    def get_schema(self, resource, context):
+        schema = get_issue_fields(resource)
+        schema['comment'] = Unicode()
+        return schema
+
+    def get_namespace(self, resource, context):
+        namespace = Tracker_AddIssue.get_namespace(self, resource, context)
+        return namespace
+
+    def action(self, resource, context, form):
+        # Add
+        id = resource.get_new_id()
+        issue_cls = resource.issue_class
+        issue = resource.make_resource(id, issue_cls)
+        issue.add_comment(context, form, new=True)
+
+        # Ok
+        message = INFO(u'New issue added.')
+        goto = './%s/' % id
+        return context.come_back(message, goto=goto)
 """
 class Tracker_Zip_Img(Tchacker_ViewBottom):
 

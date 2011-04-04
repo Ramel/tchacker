@@ -123,6 +123,12 @@ class Tchack_Issue(Issue):
                 ids = ids+1
             else:
                 ids = int(self.get_property('ids'))
+        print("new = %s" % new)
+        """
+        else:
+            if not(comment) and attachment:
+                comment = "comment_is_empty_but_has_attachment"
+        """
 
         att_name = ""
 

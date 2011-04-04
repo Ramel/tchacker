@@ -33,6 +33,7 @@ from ikaaro.registry import get_resource_class
 
 from issue import Tchack_Issue
 from tracker_views import Tchacker_View #, Tracker_Zip_Img
+from tracker_views import Tchacker_AddIssue
 
 
 
@@ -49,6 +50,7 @@ class Tchack_Tracker(Tracker):
 
     # Views
     view = Tchacker_View()
+    add_issue = Tchacker_AddIssue()
     #search = Tchacker_Search()
     #zip = Tracker_Zip_Img()
 

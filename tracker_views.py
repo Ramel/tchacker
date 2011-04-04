@@ -89,50 +89,11 @@ class Tchacker_View(Tracker_View):
                         rollimages += '<div class="roll" style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);"><img \
                             src="./%s/%s_LOW/;download" /></div>' % (
                             height, height, width, height, issue, attachment)
-                style = '<style type="text/css">\n\
-                DIV.issue-roll &#123;\
-                    position: relative; z-index:50; &#125;\
-                .issue-roll .rollover &#123;\
-                    position:absolute;top:0px;left:0px;z-index:100; &#125;\
-                .issue-roll .rollimages &#123;\
-                    width:256px;position:absolute;\
-                    top:0px;left:0px;z-index:75; &#125;\
-                .issue-roll .rollimages .roll IMG &#123;\
-                    border: none; &#125;\
-                .issue-roll .rollover .roll &#123;\
-                    float:left; &#125;\
-                .issue-roll .rollimages .roll &#123;\
-                    display:none; width:256px; text-align:center; float:left; position:absolute; &#125;\
-                </style>'
-                #.format(issue=issue, width=width, height=height, middle=(height/2))
-                #.issue-roll .rollimages &#123;\
-                #    height:{height}px;line-height:{height}px; &#125;\
-                #.issue-roll .rollimages .roll IMG &#123;\
-                #    vertical-align:{middle}; &#125;\
-                img_template = '%s<div id="num-%s" class="issue-roll">\
+                img_template = '<div id="num-%s" class="issue-roll">\
                     <div class="rollover">%s</div>\
                     <div class="rollimages">%s</div><img class="low" src="./%s/%s_LOW/;download"/>\
-                </div>\
-                <script>\n\
-                var height = $(".rollover .roll").height();\n\
-                var middle = (height / 2);\n\
-                $(".issue-roll .rollimages").css("height", height).css("line-height", middle);\n\
-                $(".issue-roll .rollimages .roll").css("vertical-align", middle);\n\
-                $(".rollover .roll").hover(function () {\n\
-                    var issue = $(this).parent().parent().attr("id");\n\
-                    var index = $("#" + issue + " .roll").index(this);\n\
-                    $("#" + issue + " IMG.low").css("visibility", "hidden");\n\
-                    $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
-                        .stop().css("display", "block").parent().css("background-color", "#E0E0F0");\n\
-                }, function () {\n\
-                    var issue = $(this).parent().parent().attr("id");\n\
-                    var index = $("#" + issue + " .roll").index(this);\n\
-                    $("#" + issue + " IMG.low").css("visibility", "visible");\n\
-                    $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
-                        .stop().css("display", "none").parent().css("background-color", "transparent");\n\
-                });\n\
-                </script>'
-                return XMLParser(img_template % (style, issue, rollover, rollimages, issue, attach_name))
+                </div>'
+                return XMLParser(img_template % (issue, rollover, rollimages, issue, attach_name))
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
                 if thumb:
@@ -145,14 +106,6 @@ class Tchacker_View(Tracker_View):
                         </div>\
                         <img src="./%s/%s_thumb/;download" width="256" height="{height}" />\
                         </div>'.format(height=(256 * height/ width))
-                    """
-                    img_template = '<div style="position:relative">\
-                        <div style="position:absolute;bottom:0;right:0">\
-                            <img src="/ui/tchacker/redhat-sound_video.png" />\
-                        </div>\
-                        <img src="./%s/%s_thumb/;thumb?width=256&amp;height=256" />\
-                        </div>'
-                    """
                 #TODO: Don't think it can append, as we encode every video input file
                 else:
                     img_template = '<img \

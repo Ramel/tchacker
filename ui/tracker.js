@@ -34,5 +34,25 @@ $(document).ready(function () {
     $('A.hide').css("text-decoration","underline");
     return false;
   });
+  
+	/*
+ 	 * For last_images in "tracker_views"'s table 
+ 	 */ 
+ 	var issue;
+	var index;
+	$(".rollover .roll").hover(
+		function (issue, index) {
+			issue = $(this).parent().parent().attr("id");
+			index = $("#" + issue + " .roll").index(this);
+			$("#" + issue + " IMG.low").css("visibility", "hidden");
+			$("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")
+				.stop().css("display", "block").parent().css("background-color", "#E0E0F0");
+		},
+		function (issue, index) {
+			issue = $(this).parent().parent().attr("id");
+			index = $("#" + issue + " .roll").index(this);
+			$("#" + issue + " IMG.low").css("visibility", "visible");
+			$("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")
+				.stop().css("display", "none").parent().css("background-color", "transparent");
+	});
 });
-

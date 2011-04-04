@@ -85,39 +85,54 @@ class Tchacker_View(Tracker_View):
                     i = 0
                     for attachment in attachments:
                         i += 1
-                        rollover += '<div class="roll" style="width:%spx;height:%spx;float:left" />' % (part, height)
-                        rollimages += '<div class="roll"\
-                            style="display:none;width:256px;height:%spx;text-align:center;line-height:%spx;float:left;position:absolute;clip:rect(0px,%spx,%spx,0px);"><img \
-                            style="vertical-align:middle;border:none;" \
+                        rollover += '<div class="roll" style="width:%spx;height:%spx;" />' % (part, height)
+                        rollimages += '<div class="roll" style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);"><img \
                             src="./%s/%s_LOW/;download" /></div>' % (
                             height, height, width, height, issue, attachment)
-                img_template = '<div id="num-%s" class="issue" style="position:relative;line-height:%spx;z-index:50">\
-                        <div class="rollover" style="position:absolute;top:0px;left:0px;z-index:100">%s</div>\
-                        <div class="rollimages" \
-                            style="height:%spx;width:256px;line-height:%spx;position:absolute;\
-                            top:0px;left:0px;z-index:75;">%s</div><img \
-                            class="low" style="vertical-align:middle" src="./%s/%s_LOW/;download"/>\
-                    </div>\
-                    <script>\n\
-                    $("DIV.roll").hover(function () {\n\
-                        var issue = $(this).parent().parent().attr("id");\n\
-                        var index = $("#" + issue + " .roll").index(this);\n\
-                        $("#" + issue + " IMG.low").css("visibility", "hidden");\n\
-                        $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
-                        //.fadeIn().fadeToggle("slow", "linear");\n\
-                        //    .fadeIn);\n\
-                            .stop().css("display", "block").parent().css("background-color", "#E0E0F0");\n\
-                    }, function () {\n\
-                        var issue = $(this).parent().parent().attr("id");\n\
-                        var index = $("#" + issue + " .roll").index(this);\n\
-                        $("#" + issue + " IMG.low").css("visibility", "visible");\n\
-                        $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
-                        //.fadeToggle("slow", "linear");\n\
-                        //    .fadeOut();\n\
-                            .stop().css("display", "none").parent().css("background-color", "transparent");\n\
-                    });\n\
-                    </script>'
-                return XMLParser(img_template % (issue, height, rollover, height, height, rollimages, issue, attach_name))
+                style = '<style type="text/css">\n\
+                DIV.issue-roll &#123;\
+                    position: relative; z-index:50; &#125;\
+                .issue-roll .rollover &#123;\
+                    position:absolute;top:0px;left:0px;z-index:100; &#125;\
+                .issue-roll .rollimages &#123;\
+                    width:256px;position:absolute;\
+                    top:0px;left:0px;z-index:75; &#125;\
+                .issue-roll .rollimages .roll IMG &#123;\
+                    border: none; &#125;\
+                .issue-roll .rollover .roll &#123;\
+                    float:left; &#125;\
+                .issue-roll .rollimages .roll &#123;\
+                    display:none; width:256px; text-align:center; float:left; position:absolute; &#125;\
+                </style>'
+                #.format(issue=issue, width=width, height=height, middle=(height/2))
+                #.issue-roll .rollimages &#123;\
+                #    height:{height}px;line-height:{height}px; &#125;\
+                #.issue-roll .rollimages .roll IMG &#123;\
+                #    vertical-align:{middle}; &#125;\
+                img_template = '%s<div id="num-%s" class="issue-roll">\
+                    <div class="rollover">%s</div>\
+                    <div class="rollimages">%s</div><img class="low" src="./%s/%s_LOW/;download"/>\
+                </div>\
+                <script>\n\
+                var height = $(".rollover .roll").height();\n\
+                var middle = (height / 2);\n\
+                $(".issue-roll .rollimages").css("height", height).css("line-height", middle);\n\
+                $(".issue-roll .rollimages .roll").css("vertical-align", middle);\n\
+                $(".rollover .roll").hover(function () {\n\
+                    var issue = $(this).parent().parent().attr("id");\n\
+                    var index = $("#" + issue + " .roll").index(this);\n\
+                    $("#" + issue + " IMG.low").css("visibility", "hidden");\n\
+                    $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
+                        .stop().css("display", "block").parent().css("background-color", "#E0E0F0");\n\
+                }, function () {\n\
+                    var issue = $(this).parent().parent().attr("id");\n\
+                    var index = $("#" + issue + " .roll").index(this);\n\
+                    $("#" + issue + " IMG.low").css("visibility", "visible");\n\
+                    $("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")\n\
+                        .stop().css("display", "none").parent().css("background-color", "transparent");\n\
+                });\n\
+                </script>'
+                return XMLParser(img_template % (style, issue, rollover, rollimages, issue, attach_name))
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
                 if thumb:

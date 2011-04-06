@@ -34,10 +34,10 @@ $(document).ready(function () {
     $('A.hide').css("text-decoration","underline");
     return false;
   });
-  
+
 	/*
- 	 * For last_images in "tracker_views"'s table 
- 	 */ 
+	 * For last_images in "tracker_views"'s table
+	 */
  	var issue;
 	var index;
 	$(".rollover .roll").hover(

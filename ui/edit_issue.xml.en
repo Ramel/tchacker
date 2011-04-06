@@ -37,7 +37,7 @@ ${comments}
   width: null;
 }
 FORM#tracker {
-	padding: 25px;
+	padding: 25px 0px;
   width: 100%;
 }
 FORM#tracker DIV {

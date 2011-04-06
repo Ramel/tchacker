@@ -25,12 +25,14 @@ from itools.gettext import MSG
 from itools.uri import encode_query
 from itools.xml import XMLParser
 from itools.datatypes import Unicode
+from itools.web import INFO
 
 # Import from ikaaro
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.tracker.tracker_views import Tracker_AddIssue
 from ikaaro.tracker.datatypes import get_issue_fields
+from ikaaro.datatypes import FileDataType
 
 from monkey import Image, Video
 
@@ -102,7 +104,7 @@ class Tchacker_View(Tracker_View):
                 if thumb:
                     image = resource.get_resource('%s/%s_thumb' % (issue, attach_name))
                     width, height = image.handler.get_size()
-                    # The encoded file already as a name "fn_low.flv" 
+                    # The encoded file already as a name "fn_low.flv"
                     img_template = '<div style="position:relative">\
                         <div style="position:absolute;bottom:10px;right:10px">\
                             <img src="/ui/tchacker/redhat-sound_video.png" />\
@@ -142,7 +144,7 @@ class Tchacker_Search(Tracker_Search):
     def get_namespace(self, resource, context):
         get_resource = resource.get_resource
         products = get_resource('product')
-        title = products.get_property('title') 
+        title = products.get_property('title')
         namespace = Tracker_Search.get_namespace(self, resource, context)
         namespace['title'] = title
         columns = self.get_table_columns(resource, context)
@@ -154,7 +156,6 @@ class Tchacker_Search(Tracker_Search):
                 except LookupError:
                     pass
         return namespace
-
 
 
 class Tchacker_AddIssue(Tracker_AddIssue):
@@ -169,14 +170,42 @@ class Tchacker_AddIssue(Tracker_AddIssue):
 
     def get_schema(self, resource, context):
         schema = get_issue_fields(resource)
-        schema['comment'] = Unicode()
+        comment = context.get_form_value('comment')
+        attachment = context.get_form_value('attachment')
+        #print("get_schema:comment = %s" % comment)
+        if comment is None and attachment is True:
+            schema['comment'] = Unicode(mandatory=False)
+            #print("comment=None; attachment=True")
+        if (comment is None or comment == '') and attachment is None:
+            schema['comment'] = Unicode(mandatory=True)
+            #print("comment=None; attachment=None")
+        #schema['comment'] = Unicode(mandatory=True)
         return schema
+
+    def get_value(self, resource, context, name, datatype):
+        if getattr(datatype, 'mandatory', False):
+            datatype = datatype(mandatory=False)
+        value = context.get_query_value(name, type=datatype)
+        # By default, set cc_list to the current user
+        if name == 'cc_list' and not value:
+            return [context.user.name]
+        return value
 
     def get_namespace(self, resource, context):
         namespace = Tracker_AddIssue.get_namespace(self, resource, context)
+        if(namespace['comment']['error'] is not None):
+            namespace['comment']['error'] = MSG(
+                u'This field is required (or can be emtpy if an attachment is joined)')
         return namespace
 
     def action(self, resource, context, form):
+        comment = form['comment']
+        attachment = form['attachment']
+        #print("Action:comment = %s" % (comment))
+        if comment == '' and attachment is not None:
+            #print("Action: comment == '' and attachment is not None")
+            form['comment'] = "comment_is_empty_but_has_attachment"
+
         # Add
         id = resource.get_new_id()
         issue_cls = resource.issue_class
@@ -187,6 +216,7 @@ class Tchacker_AddIssue(Tracker_AddIssue):
         message = INFO(u'New issue added.')
         goto = './%s/' % id
         return context.come_back(message, goto=goto)
+
 """
 class Tracker_Zip_Img(Tchacker_ViewBottom):
 
@@ -206,7 +236,7 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
             # Get extension
             mimetype = attachment.get_content_type()
             ext = guess_extension(mimetype)[1:]
-            attachment_name = '%s_%s.%s' % (issue.name, issue.title, ext) 
+            attachment_name = '%s_%s.%s' % (issue.name, issue.title, ext)
             zip.write(attachment_uri, attachment_name)
         zip.close()
         # Create zip

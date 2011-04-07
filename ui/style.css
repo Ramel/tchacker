@@ -71,7 +71,9 @@ DIV.issue-roll {
 	z-index:75;
 }
 .issue-roll .rollimages .roll IMG {
-	border: none;
+	margin: 0px;
+        padding: 0px;
+        border: none;
 	vertical-align: middle;
 }
 .issue-roll .rollover .roll {

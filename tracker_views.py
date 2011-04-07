@@ -79,11 +79,60 @@ class Tchacker_View(Tracker_View):
                 return None
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
             attachments = resource.get_resource(issue).get_attachments()
-            #is_image = isinstance(attach, Image) 
-            specialcase = False
-            if attach.metadata.format == "image/x-photoshop":
-                specialcase = True
-            if isinstance(attach, Image) and not specialcase:
+            # last_attachment should not exist if it was a PSD
+            #print("len(attachments(%s)) = %s" % (issue, len(attachments)))
+            quantity = len(attachments)
+            #thumb = attach.metadata.get_property('has_thumb')
+            #print("quantity = %s, thumb = %s" % (quantity, thumb)) 
+            if (quantity >= 2):
+                rollover = ""
+                rollimages = ""
+                i = 0
+                for filename in attachments:
+                    i += 1
+                    print(filename)
+                    file = resource.get_resource('%s/%s' % (issue, filename))
+                    print(file.__class__)
+                    has_thumb = file.get_property('has_thumb')
+                    print("%s -> has_thumb = %s" % (filename, has_thumb))
+                    if has_thumb:
+                        thumb_ext = ""
+                        url = ';download'
+                        if isinstance(file, Image):
+                            thumb_ext = "_LOW"
+                        if isinstance(file, Video):
+                            thumb_ext = "_thumb"
+                            url = ';thumb?width=256&amp;height=256'
+                        image = resource.get_resource('%s/%s%s' % (issue, filename, thumb_ext))
+                        width, height = image.handler.get_size()
+                        part = width / quantity
+                        rollover += '<div class="roll" style="width:%spx;height:%spx;" />' % (part, height)
+                        rollimages += '<div class="roll" \
+                            style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);"><img \
+                            src="./%s/%s%s/%s" /></div>' % (
+                            height, height, width, height, issue, filename,
+                            thumb_ext, url)
+                    else:
+                        rollover += '<div class="roll" />'
+                        rollimages += '<div class="roll" />'
+                img_template = '<div id="num-%s" class="issue-roll">\
+                        <div class="rollover">%s</div>\
+                        <div class="rollimages">%s</div><img class="low" src="./%s/%s_LOW/;download"/>\
+                    </div>'
+                return XMLParser(img_template % (issue, rollover, rollimages, issue, attach_name))
+            if (quantity == 1):
+                img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
+                return XMLParser(img_template % (issue, attach_name))
+            else:
+                return None
+            #####
+            """
+            as_low = True
+            try:
+                resource.get_resource('%s/%s_LOW' % (issue, attach_name))
+            except LookupError:
+                as_low = False
+            if isinstance(attach, Image) and as_low:
                 image = resource.get_resource('%s/%s_LOW' % (issue, attach_name))
                 width, height = image.handler.get_size()
                 rollover = ""
@@ -122,6 +171,7 @@ class Tchacker_View(Tracker_View):
                 return XMLParser(img_template % (issue, attach_name))
             else:
                 return None
+            """
         # Last Author
         if column == 'last_author':
             user_id = item.last_author

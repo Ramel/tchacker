@@ -40,7 +40,15 @@ FORM#tracker {
 	padding: 25px 0px;
   width: 100%;
 }
-FORM#tracker DIV {
+FORM#tracker .bord,
+FORM#tracker .content,
+{
+  float: left;
+}
+#tracker .light {
+	display:none;
+}
+FORM#tracker .one DIV {
   float: left;
 }
 FORM#tracker .label {
@@ -79,6 +87,9 @@ FORM#tracker FIELDSET.attachment .label {
   margin: 4px ;
   padding: 0px;
 }
+FORM#tracker #upload {
+	clear: both;
+}
 P.attachment {
 width: 100%;	
 text-align: right;
@@ -92,7 +103,7 @@ text-align: right;
     <div class="bord">
     	<a href="#" class="showall">Show/Hide options</a>
     </div>
-    <div>
+    <div class="one">
 			<div class="two bord">
 				<div id="title" class="light">
 					<div class="label">

@@ -79,7 +79,11 @@ class Tchacker_View(Tracker_View):
                 return None
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
             attachments = resource.get_resource(issue).get_attachments()
-            if isinstance(attach, Image):
+            #is_image = isinstance(attach, Image) 
+            specialcase = False
+            if attach.metadata.format == "image/x-photoshop":
+                specialcase = True
+            if isinstance(attach, Image) and not specialcase:
                 image = resource.get_resource('%s/%s_LOW' % (issue, attach_name))
                 width, height = image.handler.get_size()
                 rollover = ""

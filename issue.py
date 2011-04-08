@@ -84,7 +84,7 @@ class Tchack_Issue(Issue):
         document = Issue.get_catalog_values(self)
         return document
 
-    
+
     def get_attachments(self):
         attachments = self.metadata.get_property('attachment')
         if not attachments:
@@ -92,7 +92,7 @@ class Tchack_Issue(Issue):
 
         base = self.get_canonical_path()
         return set([ str(x.value) for x in attachments ])
-    
+
 
     def get_attachments_ordered(self):
         attachments = self.metadata.get_property('attachment')
@@ -377,7 +377,8 @@ class Tchack_Issue(Issue):
     # Update
     #######################################################################
     def update_20100506(self):
-        from itools.core import utc
+        from itools.core import fixed_offset
+        utc = fixed_offset(0)
         from ikaaro.tracker.obsolete import History
 
         metadata = self.metadata

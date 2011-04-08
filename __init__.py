@@ -33,7 +33,7 @@ from utils import which
 
 # Import obsolete if command is icms-update.py
 if sys.argv[0].endswith('icms-update.py'):
-    import obsolete
+    from ikaaro import obsolete
     print 'Imported', obsolete.__name__
 
 # The version

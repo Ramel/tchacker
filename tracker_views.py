@@ -191,7 +191,7 @@ class Tchacker_View(Tracker_View):
                                         last_img_template=last_img_template))
             else:
                 return None
-        
+
         # Last Author
         if column == 'last_author':
             user_id = item.last_author
@@ -199,7 +199,7 @@ class Tchacker_View(Tracker_View):
             if user is None:
                 return None
             return user.get_title()
-        
+
         return Tracker_View.get_item_value(self, resource, context, item, column)
 
 

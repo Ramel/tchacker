@@ -40,7 +40,7 @@ from tracker_views import Tchacker_AddIssue
 class Tchack_Tracker(Tracker):
 
     class_id = 'tchack_tracker'
-    class_version = '20110125'
+    class_version = '20110408'
     class_title = MSG(u'Tchack Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_views = Tracker.class_views #+ ['zip']
@@ -57,6 +57,69 @@ class Tchack_Tracker(Tracker):
     #######################################################################
     # Update
     #######################################################################
+
+    def update_20110408(self):
+        import os
+        from tempfile import mkdtemp
+        from itools.fs import vfs
+        from ikaaro.file import Video
+        from ikaaro.file import Image
+        from issue import Tchack_Issue
+        from videoencoding import VideoEncodingToFLV
+
+        for issue in self.search_resources(cls=Tchack_Issue):
+
+            attachments = issue.get_attachments()
+
+            if attachments:
+                for attachment in attachments:
+                    file = issue.get_resource(attachment)
+                    is_video = isinstance(file, Video)
+                    if not is_video:
+                        continue
+                    if is_video:
+                        has_thumb = False
+                        try:
+                            issue.get_resource("%s_thumb" % attachment)
+                            has_thumb = True
+                        except LookupError:
+                            print("There is no thumbnail")
+                            has_thumb = False
+
+                    if not has_thumb:
+                        # Create a thumbnail
+                        thumbnail = issue.get_resource(attachment)
+                        body = thumbnail.handler.to_str()
+                        dirname = mkdtemp('thumb', 'ikaaro')
+                        tempdir = vfs.open(dirname)
+                        # Paste the file in the tempdir
+                        tmpfolder = "%s" % (dirname)
+                        #root_path = file.handler.database.path
+                        name = thumbnail.name
+                        tmp_uri = ("%s%s%s" % (tmpfolder, os.sep, name))
+                        tmpfile = open("%s" % tmp_uri, "w+")
+                        tmpfile.write(body)
+                        tmpfile.close()
+                        """
+                        make_thumbnail_only(self, tmpfolder, inputfile, name, width):
+                        """
+                        # Get size
+                        dim = VideoEncodingToFLV(thumbnail).get_size_and_ratio(tmp_uri)
+                        width, height, ratio = dim
+                        output = VideoEncodingToFLV(thumbnail).make_thumbnail_only(tmpfolder, name, name, width)
+                        if output is not None:
+                            thumbfilename, thumbmimetype,\
+                            thumbbody, thumbextension = output['flvthumb']
+                            cls = get_resource_class(thumbmimetype)
+                            issue.make_resource(thumbfilename, Image,
+                                body=thumbbody, filename=thumbfilename,
+                                extension=thumbextension, format=thumbmimetype)
+                            #file.set_property("thumbnail", "True")
+                            print("Issue:%s, Thumbnail: '%s' is created!" % (
+                                                            issue.name, thumbfilename))
+                        # Clean the temporary folder
+                        vfs.remove(dirname)
+
 
     def update_20110125(self):
         """Create thumbnails for all images present in the Tchacker"

@@ -44,14 +44,14 @@ $(document).ready(function () {
 		function (issue, index) {
 			issue = $(this).parent().parent().attr("id");
 			index = $("#" + issue + " .roll").index(this);
-			$("#" + issue + " IMG.low").css("visibility", "hidden");
+			$("#" + issue + " .thumbnail").css("visibility", "hidden");
 			$("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")
 				.stop().css("display", "block").parent().css("background-color", "#E0E0F0");
 		},
 		function (issue, index) {
 			issue = $(this).parent().parent().attr("id");
 			index = $("#" + issue + " .roll").index(this);
-			$("#" + issue + " IMG.low").css("visibility", "visible");
+			$("#" + issue + " .thumbnail").css("visibility", "visible");
 			$("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")
 				.stop().css("display", "none").parent().css("background-color", "transparent");
 	});

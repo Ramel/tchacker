@@ -88,10 +88,18 @@ class Tchack_Issue(Issue):
     def get_attachments(self):
         attachments = self.metadata.get_property('attachment')
         if not attachments:
-            return set()
+            return None
 
         base = self.get_canonical_path()
         return set([ str(x.value) for x in attachments ])
+    
+
+    def get_attachments_ordered(self):
+        attachments = self.metadata.get_property('attachment')
+        if not attachments:
+            return []
+        #return dict([ (x.get_parameter('comment'), str(x.value)) for x in attachments])
+        return [ str(x.value) for x in attachments]
 
 
     def add_comment(self, context, form, new=False):

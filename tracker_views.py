@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from operator import itemgetter, attrgetter
+
 # Import from itools
 from itools.gettext import MSG
 from itools.uri import encode_query
@@ -71,17 +73,18 @@ class Tchacker_View(Tracker_View):
 
 
     def get_item_value(self, resource, context, item, column):
-        # Last Attachement
+        # Last Attachment
         if column == 'last_attachment':
             attach_name = item.last_attachment
             issue = item.name
             if attach_name is None:
                 return None
             last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
-            attachments = resource.get_resource(issue).get_attachments()
+            attachments = resource.get_resource(issue).get_attachments_ordered()
             thumbnails = []
             max_width = 0
             max_height = 0
+            #print("%s: attachments = %s" % (issue, attachments))
             for filename in attachments:
                 attachment = resource.get_resource('%s/%s' % (issue, filename))
                 #print("attachment = %s" % attachment)
@@ -117,183 +120,78 @@ class Tchacker_View(Tracker_View):
                                     'height': height,
                                     'image': image,
                                     'video': video})
-            thumbnails.reverse()
-            #print files
+            #thumbnails.reverse()
+            #print("%s: thumbnails = %s" % (issue, thumbnails))
             quantity = len(thumbnails)
-            if (quantity >= 2):
+            if (quantity >= 1):
                 rollover = ""
                 rollimages = ""
-                i = 0
                 part = max_width / quantity
-                for thumb in thumbnails:
-                    print("%s: %s" % (issue, thumb))
-                    if thumb['image']:
-                        print("image")
-                    rollover += '<div class="roll" \
-                            style="width:%spx;height:%spx;" />' % (
-                            part, max_height)
-                    if thumb['image']:
-                        rollimages += '<div class="roll" \
-                            style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);"><img \
-                            src="./%s/%s/%s" /></div>' % (
-                            max_height, max_height, max_width, max_height,
-                            issue, thumb['name'], thumb['link'])
-                    if thumb['video']:
-                        rollimages += '<div class="roll" \
-                            style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);">\
-                            <img src="./%s/%s/%s" />\
-                            </div>' % (
-                            max_height, max_height, max_width, max_height,
-                            issue, thumb['name'], thumb['link'])
-                    #TODO: if last_thumnail is a video, add also the ico to it
-                    thumb_name = thumb['name']
-                    link = thumb['link']
-                    """
-                    img_template = '<div style="position:relative">\
-                        <div style="position:absolute;bottom:10px;right:10px">\
-                            <img src="/ui/tchacker/redhat-sound_video.png" />\
+                #print thumbnails[-1]
+                if (quantity >= 2):
+                    for thumb in thumbnails[:-1]:
+                        #print("%s: %s" % (issue, thumb))
+                        rollover += '<div class="roll" \
+                                style="width:%spx;height:%spx;" />' % (
+                                part, max_height)
+                        if thumb['image']:
+                            rollimages += '<div class="roll" \
+                                style="height:{height}px;line-height:{height}px;"><img \
+                                src="./{issue}/{name}/{link}" /></div>'.format(
+                                    height=max_height,
+                                    issue=issue,
+                                    name=thumb['name'],
+                                    link=thumb['link'])
+                        if thumb['video']:
+                            rollimages += '<div class="roll" \
+                                style="height:{height}px;line-height:{height}px;">\
+                                <div style="position:relative"><div \
+                                style="position:absolute;right:10px;line-height:{height}px">\
+                                    <img style="vertical-align:-{vertical}px" src="/ui/tchacker/redhat-sound_video.png" />\
+                                </div>\
+                                <img style="vertical-align:middle" src="./{issue}/{name}/{link}" />\
+                                </div>\
+                                </div>'.format(
+                                    height=max_height,
+                                    vertical=thumb['height'] / 2 - 12,
+                                    issue=issue,
+                                    name=thumb['name'],
+                                    link=thumb['link'])
+                        thumb_name = thumb['name']
+                        link = thumb['link']
+                if thumbnails[-1]['image']:
+                    last_img_template = '<img class="thumbnail" style="vertical-align:middle" \
+                        src="./{issue}/{thumb_name}/{link}"/>'.format(
+                                        issue=issue,
+                                        thumb_name=thumbnails[-1]['name'],
+                                        link=thumbnails[-1]['link'])
+                if thumbnails[-1]['video']:
+                    last_img_template = '<div style="position:relative" \
+                        class="thumbnail"><div \
+                            style="position:absolute;right:10px;line-height:{height}px">\
+                            <img style="vertical-align:-{vertical}px" src="/ui/tchacker/redhat-sound_video.png" />\
                         </div>\
-                        <img src="./%s/%s_thumb/;download" width="256" height="{height}" />\
-                        </div>'.format(height=(256 * height/ width))
-                    """
+                        <img style="vertical-align:middle" src="./{issue}/{thumb_name}/{link}" />\
+                        </div>'.format(
+                                issue=issue,
+                                thumb_name=thumbnails[-1]['name'],
+                                link=thumbnails[-1]['link'],
+                                height=max_height,
+                                vertical=thumbnails[-1]['height'] / 2 - 12)
                 img_template = '<div id="num-{issue}" class="issue-roll" \
                             style="line-height:{max_height}px">\
                         <div class="rollover">{rollover}</div><div \
-                        class="rollimages">{rollimages}</div><img \
-                        class="low" style="vertical-align:middle" \
-                        src="./{issue}/{thumb_name}/{link}"/>\
+                        class="rollimages">{rollimages}</div>{last_img_template}\
                     </div>'
-                return XMLParser(
-                        img_template.format(issue=issue,
-                                                rollover=rollover,
-                                                rollimages=rollimages,
-                                                thumb_name=thumb_name,
-                                                link=link,
-                                                max_height=max_height))
-                """
-                    i += 1
-
-                        if isinstance(file, Image):
-                            thumb_ext = "_LOW"
-                        if isinstance(file, Video):
-                            thumb_ext = "_thumb"
-                            url = ';thumb?width=256&amp;height=256'
-                        image = resource.get_resource('%s/%s%s' % (issue, filename, thumb_ext))
-                        width, height = image.handler.get_size()
-                        part = width / quantity
-                        rollover += '<div class="roll" style="width:%spx;height:%spx;" />' % (part, height)
-                        rollimages += '<div class="roll" \
-                            style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);"><img \
-                            src="./%s/%s%s/%s" /></div>' % (
-                            height, height, width, height, issue, filename,
-                            thumb_ext, url)
-                    else:
-                        rollover += '<div class="roll" />'
-                        rollimages += '<div class="roll" />'
-                img_template = '<div id="num-%s" class="issue-roll">\
-                        <div class="rollover">%s</div>\
-                        <div class="rollimages">%s</div><img class="low" src="./%s/%s_LOW/;download"/>\
-                    </div>'
-                return XMLParser(img_template % (issue, rollover, rollimages, issue, attach_name))
-                """
+                return XMLParser(img_template.format(
+                                        issue=issue,
+                                        max_height=max_height,
+                                        rollover=rollover,
+                                        rollimages=rollimages,
+                                        last_img_template=last_img_template))
             else:
                 return None
-            """
-            # last_attachment should not exist if it was a PSD
-            #print("len(attachments(%s)) = %s" % (issue, len(attachments)))
-            quantity = len(attachments)
-            #thumb = attach.metadata.get_property('has_thumb')
-            #print("quantity = %s, thumb = %s" % (quantity, thumb))
-            if (quantity >= 2):
-                rollover = ""
-                rollimages = ""
-                i = 0
-                for filename in attachments:
-                    i += 1
-                    print(filename)
-                    file = resource.get_resource('%s/%s' % (issue, filename))
-                    print(file.__class__)
-                    has_thumb = file.get_property('has_thumb')
-                    print("%s -> has_thumb = %s" % (filename, has_thumb))
-                    if has_thumb:
-                        thumb_ext = ""
-                        url = ';download'
-
-                        if isinstance(file, Image):
-                            thumb_ext = "_LOW"
-                        if isinstance(file, Video):
-                            thumb_ext = "_thumb"
-                            url = ';thumb?width=256&amp;height=256'
-                        image = resource.get_resource('%s/%s%s' % (issue, filename, thumb_ext))
-                        width, height = image.handler.get_size()
-                        part = width / quantity
-                        rollover += '<div class="roll" style="width:%spx;height:%spx;" />' % (part, height)
-                        rollimages += '<div class="roll" \
-                            style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);"><img \
-                            src="./%s/%s%s/%s" /></div>' % (
-                            height, height, width, height, issue, filename,
-                            thumb_ext, url)
-                    else:
-                        rollover += '<div class="roll" />'
-                        rollimages += '<div class="roll" />'
-                img_template = '<div id="num-%s" class="issue-roll">\
-                        <div class="rollover">%s</div>\
-                        <div class="rollimages">%s</div><img class="low" src="./%s/%s_LOW/;download"/>\
-                    </div>'
-                return XMLParser(img_template % (issue, rollover, rollimages, issue, attach_name))
-            if (quantity == 1):
-                img_template = '<img src="./%s/%s/;thumb?width=256&amp;height=256"/>'
-                return XMLParser(img_template % (issue, attach_name))
-            else:
-                return None
-            #####
-            """
-            """
-            as_low = True
-            try:
-                resource.get_resource('%s/%s_LOW' % (issue, attach_name))
-            except LookupError:
-                as_low = False
-            if isinstance(attach, Image) and as_low:
-                image = resource.get_resource('%s/%s_LOW' % (issue, attach_name))
-                width, height = image.handler.get_size()
-                rollover = ""
-                rollimages = ""
-                quantity = len(attachments)
-                if quantity >= 2:
-                    part = width / quantity
-                    i = 0
-                    for attachment in attachments:
-                        i += 1
-                        rollover += '<div class="roll" style="width:%spx;height:%spx;" />' % (part, height)
-                        rollimages += '<div class="roll" style="height:%spx;line-height:%spx;clip:rect(0px,%spx,%spx,0px);"><img \
-                            src="./%s/%s_LOW/;download" /></div>' % (
-                            height, height, width, height, issue, attachment)
-                img_template = '<div id="num-%s" class="issue-roll">\
-                    <div class="rollover">%s</div>\
-                    <div class="rollimages">%s</div><img class="low" src="./%s/%s_LOW/;download"/>\
-                </div>'
-                return XMLParser(img_template % (issue, rollover, rollimages, issue, attach_name))
-            if isinstance(attach, Video):
-                thumb = attach.metadata.get_property('has_thumb')
-                if thumb:
-                    image = resource.get_resource('%s/%s_thumb' % (issue, attach_name))
-                    width, height = image.handler.get_size()
-                    # The encoded file already as a name "fn_low.flv"
-                    img_template = '<div style="position:relative">\
-                        <div style="position:absolute;bottom:10px;right:10px">\
-                            <img src="/ui/tchacker/redhat-sound_video.png" />\
-                        </div>\
-                        <img src="./%s/%s_thumb/;download" width="256" height="{height}" />\
-                        </div>'.format(height=(256 * height/ width))
-                #TODO: Don't think it can append, as we encode every video input file
-                else:
-                    img_template = '<img \
-                        src="./%s/%s/;thumb?width=256&amp;height=256"/>'
-                return XMLParser(img_template % (issue, attach_name))
-            else:
-                return None
-            """
+        
         # Last Author
         if column == 'last_author':
             user_id = item.last_author
@@ -301,8 +199,8 @@ class Tchacker_View(Tracker_View):
             if user is None:
                 return None
             return user.get_title()
-        return Tracker_View.get_item_value(self, resource, context, item,
-                                           column)
+        
+        return Tracker_View.get_item_value(self, resource, context, item, column)
 
 
     def get_table_columns(self, resource, context):

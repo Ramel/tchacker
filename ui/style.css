@@ -54,6 +54,7 @@ TABLE.issues TH.thead-assigned-to {
 
 /* Table history Image rollover */
 DIV.issue-roll {
+	text-align:center;
 	position: relative;
 	z-index:50;
 }

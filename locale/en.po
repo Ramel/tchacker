@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tchacker 0.1\n"
-"POT-Creation-Date: 2011-04-06 21:04+CET\n"
+"POT-Creation-Date: 2011-04-09 11:04+CET\n"
 "PO-Revision-Date: 2009-04-22 13:58+2\n"
 "Last-Translator: Armel FORTUN <armel@maar.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,11 +21,11 @@ msgctxt "form"
 msgid "${batch} ${table}"
 msgstr ""
 
-#: ../issue.py:347
+#: ../issue.py:355
 msgid "-"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:199
+#: ../ui/edit_issue.xml.en:210
 msgctxt "option"
 msgid "---"
 msgstr ""
@@ -40,17 +40,17 @@ msgctxt "link"
 msgid "<g id='1'>Show</g>/<g id='2'>Hide</g> extra colums."
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:126
+#: ../ui/edit_issue.xml.en:137
 msgctxt "span"
 msgid "<g id='11'>*</g>  <g id='12'>${product/error}</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:138
+#: ../ui/edit_issue.xml.en:149
 msgctxt "span"
 msgid "<g id='14'>*</g>  <g id='15'>${type/error}</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:161
+#: ../ui/edit_issue.xml.en:172
 msgctxt "span"
 msgid "<g id='19'>*</g>  <g id='20'>${state/error}</g>"
 msgstr ""
@@ -68,16 +68,16 @@ msgid ""
 "\") </g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:100
+#: ../ui/edit_issue.xml.en:111
 msgctxt "span"
 msgid "<g id='5'>*</g>  <g id='6'>${title/error}</g>"
 msgstr ""
 
-#: ../issue.py:308
+#: ../issue.py:316
 msgid "ANONYMOUS"
 msgstr ""
 
-#: ../tracker_views.py:164
+#: ../tracker_views.py:238
 msgid "Add"
 msgstr ""
 
@@ -91,7 +91,7 @@ msgctxt "legend"
 msgid "Add Issue"
 msgstr ""
 
-#: ../tracker_views.py:42
+#: ../tracker_views.py:44
 msgid "Advanced"
 msgstr ""
 
@@ -101,7 +101,7 @@ msgid "Assign To:"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:93 ../ui/add_issue.xml.en:92
-#: ../ui/edit_issue.xml.en:110
+#: ../ui/edit_issue.xml.en:121
 msgctxt "label"
 msgid "Assign To:"
 msgstr ""
@@ -126,7 +126,7 @@ msgctxt "paragraph"
 msgid "Attachment (${comment/attachment/format}):"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:215
+#: ../ui/edit_issue.xml.en:226
 msgctxt "legend"
 msgid "Attachments"
 msgstr ""
@@ -136,7 +136,7 @@ msgctxt "emphasis"
 msgid "CC:"
 msgstr ""
 
-#: ../ui/add_issue.xml.en:100 ../ui/edit_issue.xml.en:194
+#: ../ui/add_issue.xml.en:100 ../ui/edit_issue.xml.en:205
 msgctxt "label"
 msgid "CC:"
 msgstr ""
@@ -151,7 +151,7 @@ msgctxt "title attribute"
 msgid "Click to select/unselect all rows"
 msgstr ""
 
-#: ../issue.py:346
+#: ../issue.py:354
 msgid "Comment"
 msgstr ""
 
@@ -170,7 +170,7 @@ msgctxt "label"
 msgid "Comment:"
 msgstr ""
 
-#: ../issue.py:327
+#: ../issue.py:335
 msgid ""
 "DO NOT REPLY TO THIS EMAIL. To comment on this issue, please visit:\n"
 "{issue_uri}"
@@ -189,11 +189,11 @@ msgctxt "option"
 msgid "Do not change"
 msgstr ""
 
-#: ../tracker_views.py:49
+#: ../tracker_views.py:51
 msgid "Download \"Last Att.\" images as one Zip"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:239
+#: ../ui/edit_issue.xml.en:250
 msgctxt "button"
 msgid "Edit"
 msgstr ""
@@ -202,7 +202,7 @@ msgstr ""
 msgid "Edit Issue"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:91
+#: ../ui/edit_issue.xml.en:102
 msgctxt "legend"
 msgid "Edit Issue"
 msgstr ""
@@ -242,11 +242,11 @@ msgctxt "heading"
 msgid "Issue #${number}"
 msgstr ""
 
-#: ../tracker_views.py:135
+#: ../tracker_views.py:209
 msgid "Last Attach."
 msgstr ""
 
-#: ../tracker_views.py:136
+#: ../tracker_views.py:210
 msgid "Last Auth."
 msgstr ""
 
@@ -261,7 +261,7 @@ msgid "Module:"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:46 ../ui/add_issue.xml.en:48
-#: ../ui/edit_issue.xml.en:149
+#: ../ui/edit_issue.xml.en:160
 msgctxt "label"
 msgid "Module:"
 msgstr ""
@@ -271,21 +271,21 @@ msgctxt "label"
 msgid "Module:<g id='12'> (<g id='13'>Edit</g>)</g>"
 msgstr ""
 
-#: ../issue.py:337
+#: ../issue.py:345
 msgid "New Attachment: {filename}"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:208
+#: ../ui/edit_issue.xml.en:219
 msgctxt "label"
 msgid "New Comment:"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:217
+#: ../ui/edit_issue.xml.en:228
 msgctxt "label"
 msgid "New attachment:"
 msgstr ""
 
-#: ../tracker_views.py:216
+#: ../tracker_views.py:290
 msgid "New issue added."
 msgstr ""
 
@@ -305,7 +305,7 @@ msgid "Priority:"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:82 ../ui/add_issue.xml.en:82
-#: ../ui/edit_issue.xml.en:183
+#: ../ui/edit_issue.xml.en:194
 msgctxt "label"
 msgid "Priority:"
 msgstr ""
@@ -320,7 +320,7 @@ msgctxt "label"
 msgid "Product (mandatory):"
 msgstr ""
 
-#: ../ui/change_bugs.xml.en:38 ../ui/edit_issue.xml.en:125
+#: ../ui/change_bugs.xml.en:38 ../ui/edit_issue.xml.en:136
 msgctxt "label"
 msgid "Product:"
 msgstr ""
@@ -345,7 +345,7 @@ msgctxt "legend"
 msgid "Search"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:93
+#: ../ui/edit_issue.xml.en:104
 msgctxt "link"
 msgid "Show/Hide options"
 msgstr ""
@@ -360,7 +360,7 @@ msgctxt "label"
 msgid "Status (mandatory):"
 msgstr ""
 
-#: ../ui/change_bugs.xml.en:74 ../ui/edit_issue.xml.en:160
+#: ../ui/change_bugs.xml.en:74 ../ui/edit_issue.xml.en:171
 msgctxt "label"
 msgid "Status:"
 msgstr ""
@@ -387,17 +387,17 @@ msgctxt "label"
 msgid "Text (search within the title and all comments)"
 msgstr ""
 
-#: ../issue.py:332
+#: ../issue.py:340
 msgid "The user {title} did some changes."
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:100 ../ui/edit_issue.xml.en:126
-#: ../ui/edit_issue.xml.en:138 ../ui/edit_issue.xml.en:161
+#: ../ui/edit_issue.xml.en:111 ../ui/edit_issue.xml.en:137
+#: ../ui/edit_issue.xml.en:149 ../ui/edit_issue.xml.en:172
 msgctxt "title attribute"
 msgid "This field is required"
 msgstr ""
 
-#: ../tracker_views.py:198
+#: ../tracker_views.py:272
 msgid "This field is required (or can be emtpy if an attachment is joined)"
 msgstr ""
 
@@ -411,7 +411,7 @@ msgctxt "emphasis"
 msgid "Title:"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:99
+#: ../ui/edit_issue.xml.en:110
 msgctxt "label"
 msgid "Title:"
 msgstr ""
@@ -420,7 +420,7 @@ msgstr ""
 msgid "To manage images, videos, bugs and tasks"
 msgstr ""
 
-#: ../issue.py:319
+#: ../issue.py:327
 msgid "Tracker Issue"
 msgstr ""
 
@@ -434,7 +434,7 @@ msgctxt "emphasis"
 msgid "Type:"
 msgstr ""
 
-#: ../ui/change_bugs.xml.en:66 ../ui/edit_issue.xml.en:137
+#: ../ui/change_bugs.xml.en:66 ../ui/edit_issue.xml.en:148
 msgctxt "label"
 msgid "Type:"
 msgstr ""
@@ -455,7 +455,7 @@ msgid "Version:"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:55 ../ui/add_issue.xml.en:56
-#: ../ui/edit_issue.xml.en:172
+#: ../ui/edit_issue.xml.en:183
 msgctxt "label"
 msgid "Version:"
 msgstr ""
@@ -465,7 +465,7 @@ msgctxt "label"
 msgid "Version:<g id='16'> (<g id='17'>Edit</g>)</g>"
 msgstr ""
 
-#: ../tracker_views.py:58
+#: ../tracker_views.py:60
 msgid "View"
 msgstr ""
 
@@ -479,7 +479,7 @@ msgctxt "legend"
 msgid "select the columns to export"
 msgstr ""
 
-#: ../issue.py:348
+#: ../issue.py:356
 msgid ""
 "{title}\n"
 "{separator}\n"

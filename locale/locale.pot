@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-04-06 21:04+CET\n"
+"POT-Creation-Date: 2011-04-09 11:04+CET\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,31 +15,31 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../issue.py:347
+#: ../issue.py:355
 msgid "-"
 msgstr ""
 
-#: ../issue.py:308
+#: ../issue.py:316
 msgid "ANONYMOUS"
 msgstr ""
 
-#: ../tracker_views.py:164
+#: ../tracker_views.py:238
 msgid "Add"
 msgstr ""
 
-#: ../tracker_views.py:42
+#: ../tracker_views.py:44
 msgid "Advanced"
 msgstr ""
 
-#: ../issue.py:346
+#: ../issue.py:354
 msgid "Comment"
 msgstr ""
 
-#: ../issue.py:327
+#: ../issue.py:335
 msgid "DO NOT REPLY TO THIS EMAIL. To comment on this issue, please visit:\n{issue_uri}"
 msgstr ""
 
-#: ../tracker_views.py:49
+#: ../tracker_views.py:51
 msgid "Download \"Last Att.\" images as one Zip"
 msgstr ""
 
@@ -47,19 +47,19 @@ msgstr ""
 msgid "Edit Issue"
 msgstr ""
 
-#: ../tracker_views.py:135
+#: ../tracker_views.py:209
 msgid "Last Attach."
 msgstr ""
 
-#: ../tracker_views.py:136
+#: ../tracker_views.py:210
 msgid "Last Auth."
 msgstr ""
 
-#: ../issue.py:337
+#: ../issue.py:345
 msgid "New Attachment: {filename}"
 msgstr ""
 
-#: ../tracker_views.py:216
+#: ../tracker_views.py:290
 msgid "New issue added."
 msgstr ""
 
@@ -76,11 +76,11 @@ msgstr ""
 msgid "Tchacker Issue"
 msgstr ""
 
-#: ../issue.py:332
+#: ../issue.py:340
 msgid "The user {title} did some changes."
 msgstr ""
 
-#: ../tracker_views.py:198
+#: ../tracker_views.py:272
 msgid "This field is required (or can be emtpy if an attachment is joined)"
 msgstr ""
 
@@ -88,15 +88,15 @@ msgstr ""
 msgid "To manage images, videos, bugs and tasks"
 msgstr ""
 
-#: ../issue.py:319
+#: ../issue.py:327
 msgid "Tracker Issue"
 msgstr ""
 
-#: ../tracker_views.py:58
+#: ../tracker_views.py:60
 msgid "View"
 msgstr ""
 
-#: ../issue.py:348
+#: ../issue.py:356
 msgid "{title}\n{separator}\n\n{comment}\n"
 msgstr ""
 
@@ -105,7 +105,7 @@ msgctxt "button"
 msgid "Add"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:239
+#: ../ui/edit_issue.xml.en:250
 msgctxt "button"
 msgid "Edit"
 msgstr ""
@@ -224,7 +224,7 @@ msgstr ""
 
 #: ../ui/change_bugs.xml.en:93
 #: ../ui/add_issue.xml.en:92
-#: ../ui/edit_issue.xml.en:110
+#: ../ui/edit_issue.xml.en:121
 msgctxt "label"
 msgid "Assign To:"
 msgstr ""
@@ -240,7 +240,7 @@ msgid "Attachement:"
 msgstr ""
 
 #: ../ui/add_issue.xml.en:100
-#: ../ui/edit_issue.xml.en:194
+#: ../ui/edit_issue.xml.en:205
 msgctxt "label"
 msgid "CC:"
 msgstr ""
@@ -262,7 +262,7 @@ msgstr ""
 
 #: ../ui/change_bugs.xml.en:46
 #: ../ui/add_issue.xml.en:48
-#: ../ui/edit_issue.xml.en:149
+#: ../ui/edit_issue.xml.en:160
 msgctxt "label"
 msgid "Module:"
 msgstr ""
@@ -272,19 +272,19 @@ msgctxt "label"
 msgid "Module:<g id='12'> (<g id='13'>Edit</g>)</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:208
+#: ../ui/edit_issue.xml.en:219
 msgctxt "label"
 msgid "New Comment:"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:217
+#: ../ui/edit_issue.xml.en:228
 msgctxt "label"
 msgid "New attachment:"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:82
 #: ../ui/add_issue.xml.en:82
-#: ../ui/edit_issue.xml.en:183
+#: ../ui/edit_issue.xml.en:194
 msgctxt "label"
 msgid "Priority:"
 msgstr ""
@@ -300,7 +300,7 @@ msgid "Product (mandatory):"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:38
-#: ../ui/edit_issue.xml.en:125
+#: ../ui/edit_issue.xml.en:136
 msgctxt "label"
 msgid "Product:"
 msgstr ""
@@ -316,7 +316,7 @@ msgid "Status (mandatory):"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:74
-#: ../ui/edit_issue.xml.en:160
+#: ../ui/edit_issue.xml.en:171
 msgctxt "label"
 msgid "Status:"
 msgstr ""
@@ -336,7 +336,7 @@ msgctxt "label"
 msgid "Title (mandatory):"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:99
+#: ../ui/edit_issue.xml.en:110
 msgctxt "label"
 msgid "Title:"
 msgstr ""
@@ -347,7 +347,7 @@ msgid "Type (mandatory):"
 msgstr ""
 
 #: ../ui/change_bugs.xml.en:66
-#: ../ui/edit_issue.xml.en:137
+#: ../ui/edit_issue.xml.en:148
 msgctxt "label"
 msgid "Type:"
 msgstr ""
@@ -359,7 +359,7 @@ msgstr ""
 
 #: ../ui/change_bugs.xml.en:55
 #: ../ui/add_issue.xml.en:56
-#: ../ui/edit_issue.xml.en:172
+#: ../ui/edit_issue.xml.en:183
 msgctxt "label"
 msgid "Version:"
 msgstr ""
@@ -379,7 +379,7 @@ msgctxt "legend"
 msgid "Add Issue"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:215
+#: ../ui/edit_issue.xml.en:226
 msgctxt "legend"
 msgid "Attachments"
 msgstr ""
@@ -389,7 +389,7 @@ msgctxt "legend"
 msgid "Change Several Issues"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:91
+#: ../ui/edit_issue.xml.en:102
 msgctxt "legend"
 msgid "Edit Issue"
 msgstr ""
@@ -420,12 +420,12 @@ msgctxt "link"
 msgid "<g id='1'>Show</g>/<g id='2'>Hide</g> extra colums."
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:93
+#: ../ui/edit_issue.xml.en:104
 msgctxt "link"
 msgid "Show/Hide options"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:199
+#: ../ui/edit_issue.xml.en:210
 msgctxt "option"
 msgid "---"
 msgstr ""
@@ -451,22 +451,22 @@ msgctxt "paragraph"
 msgid "Reported by <g id='1'>${reported_by}</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:126
+#: ../ui/edit_issue.xml.en:137
 msgctxt "span"
 msgid "<g id='11'>*</g>  <g id='12'>${product/error}</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:138
+#: ../ui/edit_issue.xml.en:149
 msgctxt "span"
 msgid "<g id='14'>*</g>  <g id='15'>${type/error}</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:161
+#: ../ui/edit_issue.xml.en:172
 msgctxt "span"
 msgid "<g id='19'>*</g>  <g id='20'>${state/error}</g>"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:100
+#: ../ui/edit_issue.xml.en:111
 msgctxt "span"
 msgid "<g id='5'>*</g>  <g id='6'>${title/error}</g>"
 msgstr ""
@@ -491,10 +491,10 @@ msgctxt "title attribute"
 msgid "Click to select/unselect all rows"
 msgstr ""
 
-#: ../ui/edit_issue.xml.en:100
-#: ../ui/edit_issue.xml.en:126
-#: ../ui/edit_issue.xml.en:138
-#: ../ui/edit_issue.xml.en:161
+#: ../ui/edit_issue.xml.en:111
+#: ../ui/edit_issue.xml.en:137
+#: ../ui/edit_issue.xml.en:149
+#: ../ui/edit_issue.xml.en:172
 msgctxt "title attribute"
 msgid "This field is required"
 msgstr ""

@@ -235,11 +235,11 @@ class Tchacker_Search(Tracker_Search):
 class Tchacker_AddIssue(Tracker_AddIssue):
 
     access = 'is_allowed_to_edit'
-    title = MSG(u'Add')
-    icon = 'new.png'
-    template = '/ui/tracker/add_issue.xml'
-    styles = ['/ui/tracker/style.css']
-    scripts = ['/ui/tracker/tracker.js']
+    #title = MSG(u'Add')
+    #icon = 'new.png'
+    #template = '/ui/tracker/add_issue.xml'
+    #styles = ['/ui/tracker/style.css']
+    #scripts = ['/ui/tracker/tracker.js']
 
 
     def get_schema(self, resource, context):

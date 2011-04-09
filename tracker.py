@@ -341,7 +341,7 @@ class Tchack_Tracker(Tracker):
                             # Not low encoded
                             if is_low == -1:
                                 print("--> is_low = -1\nThe file '%s' is not \
-                                    a low one" % name) 
+                                    a low one" % name)
                                 print("is_low = -1")
                                 body = file.handler.to_str()
                                 dirname = mkdtemp('videoencoding', 'ikaaro')
@@ -423,7 +423,7 @@ class Tchack_Tracker(Tracker):
                                 print("\n------")
                             else:
                                 print("--> is_low = xxx\nThe file '%s' is already \
-                                    a low one\n------" % name) 
+                                    a low one\n------" % name)
 
                         if thumb == "False" and as_low:
                             #The video as thumb value to False, but already

@@ -370,7 +370,7 @@ class Tchack_Issue(Issue):
     # User Interface
     #######################################################################
     def get_context_menus(self):
-        return [IssueTrackerMenu()] + self.parent.get_context_menus() 
+        return [IssueTrackerMenu()] + self.parent.get_context_menus()
 
 
     #######################################################################
@@ -588,7 +588,7 @@ class Tchack_Issue(Issue):
 
         # Set the total of ids in the issue, count only comments with text or
         # image/video, doesn't need to increment 'ids' if the modification
-        # is everything else. 
+        # is everything else.
         metadata.set_property('ids', id)
 
         # CC

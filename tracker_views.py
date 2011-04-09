@@ -206,8 +206,8 @@ class Tchacker_View(Tracker_View):
     def get_table_columns(self, resource, context):
         table_columns = Tracker_View.get_table_columns(self, resource, context)
         # Insert the last attachement row's title in the table
-        table_columns.insert(2, ('last_attachment', u'Last Attach.'))
-        table_columns.insert(11, ('last_author', u'Last Auth.'))
+        table_columns.insert(2, ('last_attachment', MSG(u'Last Attach.')))
+        table_columns.insert(11, ('last_author', MSG(u'Last Auth.')))
         return table_columns
 
 

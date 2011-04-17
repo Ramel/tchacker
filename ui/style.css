@@ -38,7 +38,9 @@
 #content A.hide {
   text-decoration: none;
 }
-
+/*TABLE.issues TH.id, TABLE.issues TD.id,
+TABLE.issues TH.thead-id,*/
+/*
 TABLE.issues TH.version, TABLE.issues TD.version,
 TABLE.issues TH.product, TABLE.issues TD.product,
 TABLE.issues TH.assigned-to, TABLE.issues TD.assigned-to,
@@ -47,7 +49,7 @@ TABLE.issues TH.thead-product,
 TABLE.issues TH.thead-assigned-to {
   display:none;
 }
-
+*/
 #footer {
   width:100%;
 }

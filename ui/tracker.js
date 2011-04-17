@@ -1,5 +1,6 @@
 $(document).ready(function () {
-  $('TABLE#browse-list THEAD TR TH:nth-child(4), TABLE#browse-list TBODY TR TD:nth-child(4), TABLE#browse-list THEAD TR TH:nth-child(6), TABLE#browse-list TBODY TR TD:nth-child(6), TABLE#browse-list THEAD TR TH:nth-child(10), TABLE#browse-list TBODY TR TD:nth-child(10)').hide(); //css("display","none");
+  // Keep on One line :
+  $('TABLE#browse-list THEAD TR TH:nth-child(1), TABLE#browse-list TBODY TR TD:nth-child(1), TABLE#browse-list THEAD TR TH:nth-child(4), TABLE#browse-list TBODY TR TD:nth-child(4), TABLE#browse-list THEAD TR TH:nth-child(6), TABLE#browse-list TBODY TR TD:nth-child(6), TABLE#browse-list THEAD TR TH:nth-child(10), TABLE#browse-list TBODY TR TD:nth-child(10)').hide();
   /* show.hide some TDs */
   $("A.showall").click(function() {
     $("FORM#tracker .light").toggle();
@@ -7,6 +8,9 @@ $(document).ready(function () {
   });
   /* show.hide.toggle some table columns in tracker_views.py */
   $('A.hide').click(function() {
+    // Id
+    $('TABLE#browse-list THEAD TR TH:nth-child(1)').hide();
+    $('TABLE#browse-list TBODY TR TD:nth-child(1)').hide();
     // Product
     $('TABLE#browse-list THEAD TR TH:nth-child(4)').hide();
     $('TABLE#browse-list TBODY TR TD:nth-child(4)').hide();
@@ -21,6 +25,9 @@ $(document).ready(function () {
     return false;
   });
   $('A.show').click(function() {
+    // Id
+    $('TABLE#browse-list THEAD TR TH:nth-child(1)').show();
+    $('TABLE#browse-list TBODY TR TD:nth-child(1)').show();
     // Product
     $('TABLE#browse-list THEAD TR TH:nth-child(4)').show();
     $('TABLE#browse-list TBODY TR TD:nth-child(4)').show();

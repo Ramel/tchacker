@@ -32,8 +32,8 @@ from ikaaro.registry import register_resource_class
 from ikaaro.registry import get_resource_class
 
 from issue import Tchack_Issue
-from tracker_views import Tchacker_View #, Tracker_Zip_Img
-from tracker_views import Tchacker_AddIssue
+from tracker_views import Tchack_Tracker_View #, Tracker_Zip_Img
+from tracker_views import Tchack_Tracker_AddIssue
 
 
 
@@ -49,8 +49,8 @@ class Tchack_Tracker(Tracker):
     issue_class = Tchack_Issue
 
     # Views
-    view = Tchacker_View()
-    add_issue = Tchacker_AddIssue()
+    view = Tchack_Tracker_View()
+    add_issue = Tchack_Tracker_AddIssue()
     #search = Tchacker_Search()
     #zip = Tracker_Zip_Img()
 
@@ -110,7 +110,7 @@ class Tchack_Tracker(Tracker):
                         if output is not None:
                             thumbfilename, thumbmimetype,\
                             thumbbody, thumbextension = output['flvthumb']
-                            cls = get_resource_class(thumbmimetype)
+                            #cls = get_resource_class(thumbmimetype)
                             issue.make_resource(thumbfilename, Image,
                                 body=thumbbody, filename=thumbfilename,
                                 extension=thumbextension, format=thumbmimetype)

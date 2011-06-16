@@ -23,25 +23,43 @@
 
 # Import from itools
 from itools.gettext import MSG
+from itools.core import freeze
 
 # Import from ikaaro
-from ikaaro.tracker.issue_views import Issue_Edit
+from ikaaro.tracker.issue_views import Issue_Edit_AutoForm
+from ikaaro.tracker.issue_views import Issue_Edit_ProxyView
+from ikaaro.tracker.issue_views import ProductsSelectWidget
+#from ikaaro.views import CompositeView, CompositeForm
+from ikaaro.autoform import TextWidget, SelectWidget
+from ikaaro.autoform import ProgressBarWidget, FileWidget, MultilineWidget
 
 # Import from tchacker
 from datatypes import get_issue_fields
-from comments import TchackerCommentsView
+from comments import Tchack_CommentsView
 
 
-class TchackIssue_Edit(Issue_Edit):
 
-    access = 'is_allowed_to_edit'
-    title = MSG(u'Edit Issue')
-    icon = 'edit.png'
-    template = '/ui/tchacker/edit_issue.xml'
-    styles = ['ui/tracker/style.css',
+class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
+
+    styles = ['/ui/tracker/style.css',
               '/ui/tchacker/style.css', '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
                '/ui/flowplayer/flowplayer-3.2.2.min.js']
+    
+    widgets = freeze([
+        TextWidget('title', title=MSG(u'Title:')),
+        SelectWidget('assigned_to', title=MSG(u'Assigned To:')),
+        ProductsSelectWidget('product', title=MSG(u'Product:')),
+        SelectWidget('type', title=MSG(u'Type:')),
+        SelectWidget('cc_list', title=MSG(u'CC:')),
+        SelectWidget('module', title=MSG(u'Module:')),
+        SelectWidget('version', title=MSG(u'Version:')),
+        SelectWidget('state', title=MSG(u'State:')),
+        SelectWidget('priority', title=MSG(u'Priority:')),
+        MultilineWidget('comment', title=MSG(u'New Comment:')),
+        FileWidget('attachment', title=MSG(u'Attachment:')),
+        ProgressBarWidget()
+        ])
 
     def get_schema(self, resource, context):
         tracker = resource.parent
@@ -51,14 +69,26 @@ class TchackIssue_Edit(Issue_Edit):
         if name in ('comment'):
             return datatype.get_default()
         return resource.get_property(name)
+    
+    def get_namespace(self, resource, context):
+        namespace = Issue_Edit_AutoForm.get_namespace(self, resource, context)
+        # Comments
+        namespace['comments'] = Tchack_CommentsView().GET(resource, context)
+        return namespace
+    
+
+
+class Tchack_Issue_Edit_ProxyView(Issue_Edit_ProxyView):
+
+    access = 'is_allowed_to_edit'
+    title = MSG(u'Edit Issue')
+    subviews = [
+            Tchack_Issue_Edit_AutoForm(),
+            Tchack_CommentsView()
+            ]
 
     def get_namespace(self, resource, context):
-        namespace = Issue_Edit.get_namespace(self, resource, context)
-
-        # Local variables
-        root = context.root
-
-        # Comments
-        namespace['comments'] = TchackerCommentsView().GET(resource, context)
-
-        return namespace
+        views = []
+        views.append(Tchack_CommentsView().GET(resource, context))
+        views.append(Tchack_Issue_Edit_AutoForm().GET(resource, context))
+        return {'views': views}

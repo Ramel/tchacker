@@ -20,8 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from operator import itemgetter, attrgetter
-
 # Import from itools
 from itools.gettext import MSG
 from itools.uri import encode_query
@@ -34,12 +32,11 @@ from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.tracker.tracker_views import Tracker_AddIssue
 from ikaaro.tracker.datatypes import get_issue_fields
-from ikaaro.datatypes import FileDataType
 
 from monkey import Image, Video
 
 
-class Tchacker_ViewMenu(TrackerViewMenu):
+class Tchack_TrackerViewMenu(TrackerViewMenu):
 
     title = MSG(u'Advanced')
 
@@ -54,7 +51,7 @@ class Tchacker_ViewMenu(TrackerViewMenu):
 
 
 
-class Tchacker_View(Tracker_View):
+class Tchack_Tracker_View(Tracker_View):
 
     access = 'is_allowed_to_view'
     title = MSG(u'View')
@@ -79,7 +76,7 @@ class Tchacker_View(Tracker_View):
             issue = item.name
             if attach_name is None:
                 return None
-            last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
+            #last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
             attachments = resource.get_resource(issue).get_attachments_ordered()
             thumbnails = []
             max_width = 0
@@ -157,7 +154,7 @@ class Tchacker_View(Tracker_View):
                                     issue=issue,
                                     name=thumb['name'],
                                     link=thumb['link'])
-                        thumb_name = thumb['name']
+                        #thumb_name = thumb['name']
                         link = thumb['link']
                 if thumbnails[-1]['image']:
                     last_img_template = '<img class="thumbnail" style="vertical-align:middle" \
@@ -232,15 +229,9 @@ class Tchacker_Search(Tracker_Search):
         return namespace
 
 
-class Tchacker_AddIssue(Tracker_AddIssue):
+class Tchack_Tracker_AddIssue(Tracker_AddIssue):
 
     access = 'is_allowed_to_edit'
-    #title = MSG(u'Add')
-    #icon = 'new.png'
-    #template = '/ui/tracker/add_issue.xml'
-    #styles = ['/ui/tracker/style.css']
-    #scripts = ['/ui/tracker/tracker.js']
-
 
     def get_schema(self, resource, context):
         schema = get_issue_fields(resource)
@@ -267,19 +258,19 @@ class Tchacker_AddIssue(Tracker_AddIssue):
 
     def get_namespace(self, resource, context):
         namespace = Tracker_AddIssue.get_namespace(self, resource, context)
-        if(namespace['comment']['error'] is not None):
-            namespace['comment']['error'] = MSG(
-                u'This field is required (or can be emtpy if an attachment is joined)')
+        widgets = namespace['widgets']
+        for name in widgets:
+            if name['name'] == 'comment':
+                if name['error'] is not None:
+                    name['error'] = MSG(u"""This field is required (or can be left 
+                        emtpy if an attachment is joined)""")
         return namespace
 
     def action(self, resource, context, form):
         comment = form['comment']
         attachment = form['attachment']
-        #print("Action:comment = %s" % (comment))
         if comment == '' and attachment is not None:
-            #print("Action: comment == '' and attachment is not None")
             form['comment'] = "comment_is_empty_but_has_attachment"
-
         # Add
         id = resource.get_new_id()
         issue_cls = resource.issue_class
@@ -290,6 +281,7 @@ class Tchacker_AddIssue(Tracker_AddIssue):
         message = INFO(u'New issue added.')
         goto = './%s/' % id
         return context.come_back(message, goto=goto)
+
 
 """
 class Tracker_Zip_Img(Tchacker_ViewBottom):

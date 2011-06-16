@@ -47,7 +47,7 @@ def has_comment(att):
 
 
 
-class TchackerCommentsView(CommentsView):
+class Tchack_CommentsView(CommentsView):
 
     template = '/ui/tchacker/comments.xml'
 

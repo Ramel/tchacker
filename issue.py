@@ -40,18 +40,16 @@ from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
 from ikaaro.tracker.issue_views import IssueTrackerMenu
 
-# Import from Tchacker
-from issue_views import TchackIssue_Edit
-
 # Import from videoencoding
 from videoencoding import VideoEncodingToFLV
 
 # Import from PIL
 from PIL import Image as PILImage
 
+# Import from Tchacker
 from comments import tchacker_comment_datatype
 from monkey import Image, Video
-
+from issue_views import Tchack_Issue_Edit_ProxyView
 
 
 class Tchack_Issue(Issue):
@@ -62,7 +60,7 @@ class Tchack_Issue(Issue):
     class_description = MSG(u'Tchacker Issue')
 
     # Views
-    edit = TchackIssue_Edit()
+    edit = Tchack_Issue_Edit_ProxyView()
 
     class_schema = merge_dicts(
         Issue.class_schema,
@@ -89,8 +87,7 @@ class Tchack_Issue(Issue):
         attachments = self.metadata.get_property('attachment')
         if not attachments:
             return None
-
-        base = self.get_canonical_path()
+        #base = self.get_canonical_path()
         return set([ str(x.value) for x in attachments ])
 
 

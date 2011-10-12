@@ -32,11 +32,11 @@ from ikaaro.tracker.issue_views import ProductsSelectWidget
 #from ikaaro.views import CompositeView, CompositeForm
 from ikaaro.autoform import TextWidget, SelectWidget
 from ikaaro.autoform import ProgressBarWidget, FileWidget, MultilineWidget
+from ikaaro.forms import XHTMLBody
 
 # Import from tchacker
 from datatypes import get_issue_fields
 from comments import Tchack_CommentsView
-
 
 
 class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
@@ -45,9 +45,11 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
               '/ui/tchacker/style.css', '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
                '/ui/flowplayer/flowplayer-3.2.2.min.js']
-    
+
+    description = XHTMLBody.decode('<a href="#" class="showall">Show/Hide options</a>')
+
     widgets = freeze([
-        TextWidget('title', title=MSG(u'Title:')),
+        TextWidget('title', title=MSG(u'Title:'), css="light"),
         SelectWidget('assigned_to', title=MSG(u'Assigned To:')),
         ProductsSelectWidget('product', title=MSG(u'Product:')),
         SelectWidget('type', title=MSG(u'Type:')),
@@ -69,13 +71,13 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
         if name in ('comment'):
             return datatype.get_default()
         return resource.get_property(name)
-    
+
     def get_namespace(self, resource, context):
         namespace = Issue_Edit_AutoForm.get_namespace(self, resource, context)
         # Comments
         namespace['comments'] = Tchack_CommentsView().GET(resource, context)
         return namespace
-    
+
 
 
 class Tchack_Issue_Edit_ProxyView(Issue_Edit_ProxyView):

@@ -262,7 +262,7 @@ class Tchack_Tracker_AddIssue(Tracker_AddIssue):
         for name in widgets:
             if name['name'] == 'comment':
                 if name['error'] is not None:
-                    name['error'] = MSG(u"""This field is required (or can be left 
+                    name['error'] = MSG(u"""This field is required (or can be left
                         emtpy if an attachment is joined)""")
         return namespace
 

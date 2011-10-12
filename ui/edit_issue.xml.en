@@ -167,7 +167,7 @@ text-align: right;
                         selected="${item/selected}">${item/value}</option>
                 </select>
             </div>
-            <div class="three light bord">
+            <div class="three bord">
                 <div class="label">
                     <label for="state">Status:</label>
                     <span class="field-is-missing" title="This field is required">*</span>

@@ -99,6 +99,40 @@ class Tchack_Issue(Issue):
         return [ str(x.value) for x in attachments]
 
 
+    def get_comments_ordered(self):
+        comments = self.metadata.get_property('comment')
+        if not comments:
+            return []
+        return [ str(x.value) for x in comments ]
+
+
+    def get_last_attachment(self):
+        last_attachment = self.metadata.get_property('last_attachment')
+        if not last_attachment:
+            return None
+        return str(last_attachment.value)
+
+
+    def get_last_attachment_id(self):
+        attachments = self.metadata.get_property('attachment')
+        if not attachments:
+            return None
+        last = attachments[-1].get_parameter('comment')
+        return int(last)
+
+
+    def get_last_comments_from_id(self, last):
+        if last is None:
+            return None
+        comments = self.metadata.get_property('comment')
+        # Get all of thr comments, from the last attachement
+        last_comments = [ x.value for x in comments[last:] ]
+        # Remove the empty comments
+        last_comments = filter(
+            lambda a: a != 'comment_is_empty_but_has_attachment', last_comments)
+        return last_comments
+
+
     def add_comment(self, context, form, new=False):
         # Keep a copy of the current metadata
         old_metadata = self.metadata.clone()

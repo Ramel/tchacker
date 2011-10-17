@@ -5,7 +5,7 @@
 # Copyright (C) 2007-2008 Hervé Cauwelier <herve@itaapy.com>
 # Copyright (C) 2007-2008 Juan David Ibáñez Palomar <jdavid@itaapy.com>
 # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
-# Copyright (C) 2009 Armel Fortun <armel@maar.fr>
+# Copyright (C) 2009 Armel FORTUN <armel@tchack.comr>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,15 +22,18 @@
 
 # Import from itools
 from itools.gettext import MSG
-from itools.uri import encode_query
+from itools.csv import CSVFile
+from itools.uri import encode_query, Reference
 from itools.xml import XMLParser
 from itools.datatypes import Unicode
 from itools.web import INFO
+from itools.datatypes import String
 
 # Import from ikaaro
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
-from ikaaro.tracker.tracker_views import Tracker_AddIssue
+from ikaaro.tracker.tracker_views import Tracker_AddIssue, Tracker_ExportToCSV
+from ikaaro.tracker.tracker_views import columns
 from ikaaro.tracker.datatypes import get_issue_fields
 
 from monkey import Image, Video
@@ -74,6 +77,17 @@ class Tchack_Tracker_View(Tracker_View):
         if column == 'last_attachment':
             attach_name = item.last_attachment
             issue = item.name
+            """
+            comments =  resource.get_resource(issue).get_comments_ordered()
+            print("%s" % comments)
+            la =  resource.get_resource(issue).get_last_attachment()
+            print("%s" % la)
+            """
+            glaid =  resource.get_resource(issue).get_last_attachment_id()
+            print("%s" % glaid)
+            last_comments = resource.get_resource(issue).get_last_comments_from_id(glaid)
+            for lc in last_comments:
+                print("%s" % lc)
             if attach_name is None:
                 return None
             #last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
@@ -209,6 +223,7 @@ class Tchack_Tracker_View(Tracker_View):
 
 
 
+"""
 class Tchacker_Search(Tracker_Search):
     search_template = '/ui/tchacker/search.xml'
 
@@ -227,6 +242,8 @@ class Tchacker_Search(Tracker_Search):
                 except LookupError:
                     pass
         return namespace
+"""
+
 
 
 class Tchack_Tracker_AddIssue(Tracker_AddIssue):
@@ -325,3 +342,151 @@ class Tracker_Zip_Img(Tchacker_ViewBottom):
         context.set_content_disposition('attachment; filename=%s' % zipname)
         return data
 """
+
+
+
+class Tchack_Tracker_ExportToCSVForm(Tchack_Tracker_View):
+
+    template = '/ui/tchacker/export_to_csv.xml'
+    external_form = True
+
+    def get_query_schema(self):
+        schema = Tchack_Tracker_View.get_query_schema(self)
+        schema['ids'] = String(multiple=True, default=[])
+        return schema
+
+
+    def get_namespace(self, resource, context):
+        namespace = Tchack_Tracker_View.get_namespace(self, resource, context)
+        query = context.query
+
+        # Insert query parameters as hidden input fields
+        parameters = []
+        schema = Tchack_Tracker_View.get_query_schema(self)
+        for name in schema:
+            if name in namespace:
+                continue
+            value = query[name]
+            datatype = schema[name]
+            if datatype.multiple is True:
+                for value in value:
+                    value = datatype.encode(value)
+                    parameters.append({'name': name, 'value': value})
+            else:
+                default = datatype.get_default()
+                if value != default:
+                    value = datatype.encode(value)
+                    parameters.append({'name': name, 'value': value})
+        namespace['hidden_fields'] = parameters
+
+        return namespace
+
+
+
+class Tchack_Tracker_ExportToCSV(Tracker_ExportToCSV):
+
+    access = 'is_allowed_to_view'
+    title = MSG(u'Export to CSV')
+    query_schema = {
+        'editor': String(default='excel'),
+        'ids': String(multiple=True),
+    }
+
+
+    def GET(self, resource, context):
+        # Get search results
+        results = resource.get_search_results(context)
+        if isinstance(results, Reference):
+            return results
+
+        # Selected issues
+        issues = results.get_documents()
+        selected_issues = context.query['ids']
+        if selected_issues:
+            issues = [ x for x in issues if x.name in selected_issues ]
+
+        if len(issues) == 0:
+            context.message = ERROR(u"No data to export.")
+            return
+
+        # Get CSV encoding and separator (OpenOffice or Excel)
+        editor = context.query['editor']
+        if editor == 'oo':
+            separator = ','
+            encoding = 'utf-8'
+        else:
+            separator = ';'
+            encoding = 'cp1252'
+
+        # Create the CSV
+        csv = CSVFile()
+        for issue in issues:
+            issue = get_issue_informations(resource, issue, context)
+            row = []
+            # Insert the last attachement row's title in the table
+            columns.insert(2, ('last_attachment', MSG(u'Last Attach.')))
+            columns.insert(11, ('last_author', MSG(u'Last Auth.')))
+            for name, label in columns:
+                value = issue[name]
+                if isinstance(value, unicode):
+                    value = value.encode(encoding)
+                else:
+                    value = str(value)
+                row.append(value)
+            csv.add_row(row)
+
+        # Ok
+        context.set_content_type('text/comma-separated-values')
+        context.set_content_disposition('attachment', 'export.csv')
+        return csv.to_str(separator=separator)
+
+
+
+def get_issue_informations(resource, item, context):
+    """Construct a dict with issue informations.  This dict is used to
+    construct a line for a table.
+    """
+    # Build the namespace
+    infos = {
+        'name': item.name,
+        'id': item.id,
+        'title': item.title}
+
+    # Select Tables
+    get_resource = resource.get_resource
+    print("get_resource = %s" % get_resource)
+    tables = ['product', 'module', 'version', 'type', 'state', 'priority']
+    for name in tables:
+        infos[name] = None
+        value = getattr(item, name)
+        if value is None:
+            continue
+        table = get_resource(name).handler
+        table_record = table.get_record(value)
+        if table_record is None:
+            continue
+        infos[name] = table.get_record_value(table_record, 'title')
+
+    # Assigned-To
+    assigned_to = getattr(item, 'assigned_to')
+    infos['assigned_to'] = ''
+    if assigned_to:
+        users = resource.get_resource('/users')
+        user = users.get_resource(assigned_to, soft=True)
+        if user is not None:
+            infos['assigned_to'] = user.get_title()
+    # Last-Attachement
+    last_attachment = getattr(item, 'last_attachment')
+    infos['last_attachment'] = ''
+    if last_attachment:
+        users = resource.get_resource('/users')
+        user = users.get_resource(last_attachment, soft=True)
+        if user is not None:
+            infos['last_attachment'] = user.get_title()
+    #infos['last_attachment'] = last_attachment
+
+    # Modification Time
+    infos['mtime'] = context.format_datetime(item.mtime)
+
+    return infos
+

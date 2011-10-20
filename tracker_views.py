@@ -82,12 +82,12 @@ class Tchack_Tracker_View(Tracker_View):
             print("%s" % comments)
             la =  resource.get_resource(issue).get_last_attachment()
             print("%s" % la)
-            """
             glaid =  resource.get_resource(issue).get_last_attachment_id()
             print("%s" % glaid)
             last_comments = resource.get_resource(issue).get_last_comments_from_id(glaid)
             for lc in last_comments:
                 print("%s" % lc)
+            """
             if attach_name is None:
                 return None
             #last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
@@ -218,6 +218,83 @@ class Tchack_Tracker_View(Tracker_View):
         table_columns = Tracker_View.get_table_columns(self, resource, context)
         # Insert the last attachement row's title in the table
         table_columns.insert(2, ('last_attachment', MSG(u'Last Attach.')))
+        table_columns.insert(11, ('last_author', MSG(u'Last Auth.')))
+        return table_columns
+
+
+
+class Tchack_LastComments_Listing(Tracker_View):
+
+    access = 'is_allowed_to_view'
+    title = MSG(u'View')
+    icon = 'view.png'
+    scripts = ['/ui/tchacker/tracker.js']
+    styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
+
+    context_menus = [
+                    TrackerViewMenu(),
+                    StoreSearchMenu(),
+                    ]
+    # XXX
+    table_template = '/ui/tchacker/browse_table.xml'
+
+
+    def get_item_value(self, resource, context, item, column):
+        # Last Attachment
+        if column == 'last_attachment':
+            attach_name = item.last_attachment
+            issue = item.name
+            #print("attach_name = %s" % attach_name)
+            if attach_name is None:
+                return None
+            attach = resource.get_resource('%s/%s' % (issue, attach_name))
+            #print item.name, attach, isinstance(attach, Video)
+            if isinstance(attach, Image):
+                img_template = '<img src="./%s/%s_LOW/;download"/>'
+                return XMLParser(img_template % (issue, attach_name))
+            if isinstance(attach, Video):
+                thumb = attach.metadata.get_property('has_thumb')
+                #print("thumb = %s" % thumb)
+                if thumb:
+                    # The encoded file already as a name "fn_low.flv" 
+                    img_template = '<img \
+                        src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
+                #TODO: Don't think it can append, as we encode every video input file
+                else:
+                    img_template = '<img \
+                        src="./%s/%s/;thumb?width=256&amp;height=256"/>'
+                return XMLParser(img_template % (issue, attach_name))
+            else:
+                return None
+
+        # Last Author
+        if column == 'last_author':
+            user_id = item.last_author
+            user = resource.get_resource('/users/%s' % user_id, soft=True)
+            if user is None:
+                return None
+            return user.get_title()
+        
+        # Last comments
+        if column == 'last_comments':
+            comments =  resource.get_resource(issue).get_comments_ordered()
+            print("%s" % comments)
+            la =  resource.get_resource(issue).get_last_attachment()
+            print("%s" % la)
+            glaid =  resource.get_resource(issue).get_last_attachment_id()
+            print("%s" % glaid)
+            last_comments = resource.get_resource(issue).get_last_comments_from_id(glaid)
+            for lc in last_comments:
+                print("%s" % lc)
+
+        return Tracker_View.get_item_value(self, resource, context, item, column)
+
+
+    def get_table_columns(self, resource, context):
+        table_columns = Tracker_View.get_table_columns(self, resource, context)
+        # Insert the last attachement row's title in the table
+        table_columns.insert(2, ('last_attachment', MSG(u'Last Attach.')))
+        table_columns.insert(3, ('last_comments', MSG(u'Last Comments')))
         table_columns.insert(11, ('last_author', MSG(u'Last Auth.')))
         return table_columns
 
@@ -477,12 +554,15 @@ def get_issue_informations(resource, item, context):
             infos['assigned_to'] = user.get_title()
     # Last-Attachement
     last_attachment = getattr(item, 'last_attachment')
-    infos['last_attachment'] = ''
-    if last_attachment:
+    infos['last_attachment'] = last_attachment
+    # Last-Author
+    last_author = getattr(item, 'last_author')
+    infos['last_author'] = ''
+    if last_author:
         users = resource.get_resource('/users')
-        user = users.get_resource(last_attachment, soft=True)
+        user = users.get_resource(last_author, soft=True)
         if user is not None:
-            infos['last_attachment'] = user.get_title()
+            infos['last_author'] = user.get_title()
     #infos['last_attachment'] = last_attachment
 
     # Modification Time

@@ -53,8 +53,9 @@ class Tchack_Tracker(Tracker):
     # Views
     view = Tchack_Tracker_View()
     add_issue = Tchack_Tracker_AddIssue()
-    export_to_csv_form = Tchack_Tracker_ExportToCSVForm()
-    export_to_csv = Tchack_Tracker_ExportToCSV()
+    
+    #export_to_csv_form = Tchack_Tracker_ExportToCSVForm()
+    #export_to_csv = Tchack_Tracker_ExportToCSV()
 
     #search = Tchacker_Search()
     #zip = Tracker_Zip_Img()

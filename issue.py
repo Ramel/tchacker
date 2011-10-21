@@ -103,7 +103,9 @@ class Tchack_Issue(Issue):
         comments = self.metadata.get_property('comment')
         if not comments:
             return []
-        return [ str(x.value) for x in comments ]
+        # WIP: with or without STR?
+        #return [ str(x.value) for x in comments ]
+        return [ x.value for x in comments ]
 
 
     def get_last_attachment(self):

@@ -223,7 +223,7 @@ class Tchack_Tracker_View(Tracker_View):
 
 
 
-class Tchack_LastComments_Listing(Tracker_View):
+class Tchack_LastComments_View(Tracker_View):
 
     access = 'is_allowed_to_view'
     title = MSG(u'View')
@@ -240,21 +240,19 @@ class Tchack_LastComments_Listing(Tracker_View):
 
 
     def get_item_value(self, resource, context, item, column):
+        
+        issue = item.name
         # Last Attachment
         if column == 'last_attachment':
             attach_name = item.last_attachment
-            issue = item.name
-            #print("attach_name = %s" % attach_name)
             if attach_name is None:
                 return None
             attach = resource.get_resource('%s/%s' % (issue, attach_name))
-            #print item.name, attach, isinstance(attach, Video)
             if isinstance(attach, Image):
                 img_template = '<img src="./%s/%s_LOW/;download"/>'
                 return XMLParser(img_template % (issue, attach_name))
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
-                #print("thumb = %s" % thumb)
                 if thumb:
                     # The encoded file already as a name "fn_low.flv" 
                     img_template = '<img \
@@ -266,7 +264,8 @@ class Tchack_LastComments_Listing(Tracker_View):
                 return XMLParser(img_template % (issue, attach_name))
             else:
                 return None
-
+        
+        """
         # Last Author
         if column == 'last_author':
             user_id = item.last_author
@@ -274,28 +273,30 @@ class Tchack_LastComments_Listing(Tracker_View):
             if user is None:
                 return None
             return user.get_title()
-        
+        """
+
         # Last comments
         if column == 'last_comments':
-            comments =  resource.get_resource(issue).get_comments_ordered()
-            print("%s" % comments)
-            la =  resource.get_resource(issue).get_last_attachment()
-            print("%s" % la)
-            glaid =  resource.get_resource(issue).get_last_attachment_id()
-            print("%s" % glaid)
-            last_comments = resource.get_resource(issue).get_last_comments_from_id(glaid)
-            for lc in last_comments:
-                print("%s" % lc)
-
-        return Tracker_View.get_item_value(self, resource, context, item, column)
+            #comments =  resource.get_resource(issue).get_comments_ordered()
+            #print("%s" % comments)
+            #la =  resource.get_resource(issue).get_last_attachment()
+            #print("%s" % la)
+            last_comments_id =  resource.get_resource(issue).get_last_attachment_id()
+            #print("%s" % glaid)
+            last_comments = resource.get_resource(
+                                    issue).get_last_comments_from_id(last_comments_id)
+            last_comments = ''.join(['<p>%s</p>' % k for k in last_comments])
+            return XMLParser(last_comments.encode("utf-8"))
 
 
     def get_table_columns(self, resource, context):
         table_columns = Tracker_View.get_table_columns(self, resource, context)
+        del table_columns[2:11] 
+        #table_columns.pop(3) 
         # Insert the last attachement row's title in the table
         table_columns.insert(2, ('last_attachment', MSG(u'Last Attach.')))
         table_columns.insert(3, ('last_comments', MSG(u'Last Comments')))
-        table_columns.insert(11, ('last_author', MSG(u'Last Auth.')))
+        #table_columns.insert(11, ('last_author', MSG(u'Last Auth.')))
         return table_columns
 
 

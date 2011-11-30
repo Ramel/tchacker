@@ -57,7 +57,6 @@ class TchackerCommentsView(CommentsView):
         comments = resource.metadata.get_property('comment') or []
         attachments = resource.metadata.get_property('attachment') or []
 
-
         attached = [{ 'link': False,
                     'is_image': False,
                     'is_video': False,
@@ -71,7 +70,7 @@ class TchackerCommentsView(CommentsView):
             has_thumb = False
             image = isinstance(file, Image) or False
             video = isinstance(file, Video) or False
-            format = file.metadata.format
+            fileformat = file.metadata.format or False
 
             if image or video:
                 has_thumb = file.get_property('has_thumb') or False
@@ -86,7 +85,7 @@ class TchackerCommentsView(CommentsView):
                     'link': file.name,
                     'is_image': image or False,
                     'is_video': video or False,
-                    'format': format
+                    'format': fileformat or False
                     }
 
         # Get resource metadata values: is_video, is_image

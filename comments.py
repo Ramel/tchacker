@@ -81,14 +81,16 @@ class TchackerCommentsView(CommentsView):
                     'height': file.get_property('height'),
                     'ratio': file.get_property('ratio')
                     }
+            
             attached[j] = {
                     'link': file.name,
                     'is_image': image or False,
                     'is_video': video or False,
-                    'format': fileformat or False
+                    'format': fileformat
                     }
 
         # Get resource metadata values: is_video, is_image
+        # TODO: Perhaps we need to run this if comments is not empty
         comments = [
             {'number': i,
              'user': root.get_user_title(x.get_parameter('author')),

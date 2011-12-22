@@ -81,7 +81,7 @@ class TchackerCommentsView(CommentsView):
                     'height': file.get_property('height'),
                     'ratio': file.get_property('ratio')
                     }
-            
+
             attached[j] = {
                     'link': file.name,
                     'is_image': image or False,

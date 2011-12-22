@@ -292,7 +292,8 @@ class Tchack_Issue(Issue):
                 extension=extension, format=mimetype)
 
             # Link
-            attachment = Property(att_name, comment=ids)
+            # The "ids" in comments is ids-1
+            attachment = Property(att_name, comment=ids-1)
             self.set_property('attachment', attachment)
 
         # Comment

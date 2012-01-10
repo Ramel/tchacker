@@ -92,7 +92,7 @@ class TchackerCommentsView(CommentsView):
         # Get resource metadata values: is_video, is_image
         # TODO: Perhaps we need to run this if comments is not empty
         comments = [
-            {'number': i,
+            {'number': i + 1,
              'user': root.get_user_title(x.get_parameter('author')),
              'datetime': context.format_datetime(x.get_parameter('date')),
              'comment': has_comment(x.value),

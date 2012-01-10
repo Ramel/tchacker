@@ -127,8 +127,7 @@ class Tchack_Issue(Issue):
             if ((not(comment) and attachment) or
                         (comment and not(attachment)) or
                         (comment and attachment)):
-                ids = int(self.get_property('ids'))
-                ids = ids+1
+                ids = int(self.get_property('ids')) + 1
             else:
                 ids = int(self.get_property('ids'))
 
@@ -308,7 +307,10 @@ class Tchack_Issue(Issue):
                             author=author
                             )
         self.set_property('comment', comment)
-        ids = Property(ids)
+        #ids = int(self.get_property('ids'))
+        #ids = Property(ids)
+        #print ids
+        #ids = self.get_property(ids)
         self.set_property('ids', ids)
 
         # Send a Notification Email

@@ -300,7 +300,7 @@ class Tchack_Issue(Issue):
 
             # Link
             # The "ids" in comments is ids-1
-            attachment = Property(att_name, comment=ids-1)
+            attachment = Property(att_name, comment=ids)
             self.set_property('attachment', attachment)
 
         # Comment

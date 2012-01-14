@@ -122,7 +122,7 @@ class Tchack_Issue(Issue):
 
         # Attachment
         attachment = form['attachment']
-        ids = 0
+        ids = 1
         if not new:
             if ((not(comment) and attachment) or
                         (comment and not(attachment)) or

@@ -40,7 +40,7 @@ from tracker_views import Tchacker_AddIssue
 class Tchack_Tracker(Tracker):
 
     class_id = 'tchack_tracker'
-    class_version = '20110408'
+    class_version = '20120202'
     class_title = MSG(u'Tchack Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_views = Tracker.class_views #+ ['zip']
@@ -57,6 +57,28 @@ class Tchack_Tracker(Tracker):
     #######################################################################
     # Update
     #######################################################################
+
+    def update_20120202(self):
+        """Upgrade the Issues to have an ids equal to the numbers of comments
+        instead of numbers minus one. Update the Issues olders than june 2011.
+        """
+        from issue import Tchack_Issue
+        
+        for issue in self.search_resources(cls=Tchack_Issue):
+
+            attachments = issue.get_attachments()
+            mtime = issue.metadata.get_property('mtime')
+            year = int(mtime.value.year)
+            month = int(mtime.value.month)
+            ids = int(issue.metadata.get_property('ids').value)
+            #product = int(issue.metadata.get_property('product').value)
+            if (year < 2011 and month < 6):
+                print("issue = %s, attachments = %s, mtime = %s, ids = %s" %
+                        (issue.name, len(attachments), str(mtime.value), ids))
+                if (ids + 1) == len(attachments):
+                    print("Issue '%s' need to be upgraded!" % issue.name)
+                    issue.metadata.set_property('ids', ids + 1)
+
 
     def update_20110408(self):
         import os

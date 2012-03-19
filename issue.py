@@ -85,6 +85,14 @@ class Tchack_Issue(Issue):
         return document
 
 
+    def get_comments(self):
+        comments = self.metadata.get_property('comment')
+        if not comments:
+            return None
+        base = self.get_canonical_path()
+        return [ ("%s" % x.value) for x in comments ]
+
+
     def get_attachments(self):
         attachments = self.metadata.get_property('attachment')
         if not attachments:

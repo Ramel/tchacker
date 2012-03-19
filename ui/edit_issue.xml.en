@@ -19,8 +19,9 @@
     }
 </script>
 
-<p stl:if="reported_by">
-  Reported by <em>${reported_by}</em>
+<p>
+  <span stl:if="which_module">${which_module} - </span>
+  <span stl:if="reported_by">Reported by <em>${reported_by}</em></span>
 </p>
 
 <br/>

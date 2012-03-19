@@ -66,6 +66,7 @@ class Tchack_Tracker(Tracker):
         
         for issue in self.search_resources(cls=Tchack_Issue):
 
+            comments = issue.get_comments()
             attachments = issue.get_attachments()
             mtime = issue.metadata.get_property('mtime')
             year = int(mtime.value.year)
@@ -73,12 +74,17 @@ class Tchack_Tracker(Tracker):
             ids = int(issue.metadata.get_property('ids').value)
             #product = int(issue.metadata.get_property('product').value)
             if (year < 2011 and month < 6):
-                print("issue = %s, attachments = %s, mtime = %s, ids = %s" %
-                        (issue.name, len(attachments), str(mtime.value), ids))
+                print("issue = %s, comments = %s, attachments = %s, mtime = %s, ids = %s" %
+                        (issue.name, len(comments), len(attachments), str(mtime.value), ids))
+                if ids != (len(comments)) :
+                    if ids == (len(comments)-1):
+                        print("Issue '%s' need to be upgraded!" % issue.name)
+                        issue.metadata.set_property('ids', ids + 1)
+                """
                 if (ids + 1) == len(attachments):
                     print("Issue '%s' need to be upgraded!" % issue.name)
                     issue.metadata.set_property('ids', ids + 1)
-
+                """
 
     def update_20110408(self):
         import os

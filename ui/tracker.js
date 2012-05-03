@@ -62,4 +62,21 @@ $(document).ready(function () {
 			$("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")
 				.stop().css("display", "none").parent().css("background-color", "transparent");
 	});
+
+  /*
+   * For LuluVroumette
+   */
+  $("SELECT#state").change(function() {
+    if (document.URL.match("luluvroumette") != null) {
+      var state = $("SELECT#state option:selected").attr("value");  // selected state
+      var str = $("TEXTAREA#comment").val();                        // actual comment
+      var pattn = /ftp(.*).7z/gim;                                  // Is there an ftp pasted text?
+      var is7z = str.match(pattn);
+      var isFtp = str.match("ftp://tchack@tchack.com@192.175.0.1/lulu-vroumette-s2/From-Tchack/");
+      if (state == 4 && is7z != null && isFtp != null) {
+        var ftp = str.replace("ftp://tchack@tchack.com@192.175.0.1/lulu-vroumette-s2/", "");
+        $("TEXTAREA#comment").val("Modélisation et texture livrées, disponible sur le Ftp :\n\nftp://ftp2.tchack.com/" + ftp);
+      }
+    }
+  }).change();
 });

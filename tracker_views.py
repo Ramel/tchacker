@@ -60,7 +60,8 @@ class Tchacker_View(Tracker_View):
     title = MSG(u'View')
     icon = 'view.png'
     scripts = ['/ui/tchacker/tracker.js']
-    styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
+    #styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
+    styles = ['/ui/tchacker/style.css']
 
     context_menus = [
                     TrackerViewMenu(),

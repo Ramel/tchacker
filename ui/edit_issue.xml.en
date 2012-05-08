@@ -19,78 +19,14 @@
     }
 </script>
 
-<p>
+<h2 class="tchacker">
   <span stl:if="which_module">${which_module} - </span>
   <span stl:if="reported_by">Reported by <em>${reported_by}</em></span>
-</p>
+</h2>
 
 <br/>
 
 ${comments}
-
-<style type="text/css">
-.tracker-select {
-  width: null;
-}
-FORM#tracker {
-        padding: 25px 0px;
-  width: 100%;
-}
-FORM#tracker .bord,
-FORM#tracker .content,
-{
-  float: left;
-}
-#tracker .light {
-        display:none;
-}
-FORM#tracker .one DIV {
-  float: left;
-}
-FORM#tracker .label {
-  width: 100%;
-  float: left;
-}
-FORM#tracker .two {
-  width: 64%;
-}
-FORM#tracker .bord {
-  margin: 0px 0px 0px 3px;
-  padding: 0px;
-}
-FORM#tracker INPUT,
-FORM#tracker SELECT {
-  margin: 2px 0px;
-  padding: 0px;
-  width: 95%;
-}
-FORM#tracker .label {
-  margin: 4px 0px 0px 0px;
-  padding: 0px;
-}
-FORM#tracker .two-right {
-  width: 31%;
-}
-FORM#tracker .one .two .three {
-  width: 48%;
-}
-FORM#tracker FIELDSET.attachment {
-  margin: 4px 0px;
-  padding: 0px;
-}
-FORM#tracker FIELDSET.attachment INPUT,
-FORM#tracker FIELDSET.attachment .label {
-  margin: 4px ;
-  padding: 0px;
-}
-FORM#tracker #upload {
-        clear: both;
-}
-P.attachment {
-width: 100%;
-text-align: right;
-}
-</style>
 
 <form action=";edit" method="post" enctype="multipart/form-data" id="tracker"
         onsubmit="beginUpload()">

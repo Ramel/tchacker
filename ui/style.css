@@ -24,13 +24,6 @@
   display:none;
 }
 
-/*
-#tchacker PRE.com {
-  margin-top:10px;
-  padding-top:10px;
-}
-*/
-
 #tchacker P.attachment {
   text-align: right;
 }
@@ -38,18 +31,7 @@
 #content A.hide {
   text-decoration: none;
 }
-/*TABLE.issues TH.id, TABLE.issues TD.id,
-TABLE.issues TH.thead-id,*/
-/*
-TABLE.issues TH.version, TABLE.issues TD.version,
-TABLE.issues TH.product, TABLE.issues TD.product,
-TABLE.issues TH.assigned-to, TABLE.issues TD.assigned-to,
-TABLE.issues TH.thead-version,
-TABLE.issues TH.thead-product,
-TABLE.issues TH.thead-assigned-to {
-  display:none;
-}
-*/
+
 #footer {
   width:100%;
 }
@@ -88,4 +70,69 @@ DIV.issue-roll {
 	text-align:center;
 	float:left;
 	position:absolute;
+}
+/* From ui/edit_issue.xml */
+.tracker-select {
+  width: null;
+}
+FORM#tracker {
+        padding: 25px 0px;
+  width: 100%;
+}
+FORM#tracker .bord,
+FORM#tracker .content,
+{
+  float: left;
+}
+#tracker .light {
+        display:none;
+}
+FORM#tracker .one DIV {
+  float: left;
+}
+FORM#tracker .label {
+  width: 100%;
+  float: left;
+}
+FORM#tracker .two {
+  width: 64%;
+}
+FORM#tracker .bord {
+  margin: 0px 0px 0px 3px;
+  padding: 0px;
+}
+FORM#tracker INPUT,
+FORM#tracker SELECT {
+  margin: 2px 0px;
+  padding: 0px;
+  width: 95%;
+}
+FORM#tracker .label {
+  margin: 4px 0px 0px 0px;
+  padding: 0px;
+}
+FORM#tracker .two-right {
+  width: 31%;
+}
+FORM#tracker .one .two .three {
+  width: 48%;
+}
+FORM#tracker FIELDSET.attachment {
+  margin: 4px 0px;
+  padding: 0px;
+}
+FORM#tracker FIELDSET.attachment INPUT,
+FORM#tracker FIELDSET.attachment .label {
+  margin: 4px ;
+  padding: 0px;
+}
+FORM#tracker #upload {
+  clear: both;
+}
+P.attachment {
+  width: 100%;
+  text-align: right;
+}
+H2.tchacker {
+  font-weight: normal;
 }

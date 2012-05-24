@@ -60,7 +60,6 @@ class Tchacker_View(Tracker_View):
     title = MSG(u'View')
     icon = 'view.png'
     scripts = ['/ui/tchacker/tracker.js']
-    #styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
     styles = ['/ui/tchacker/style.css']
 
     context_menus = [
@@ -236,11 +235,7 @@ class Tchacker_Search(Tracker_Search):
 class Tchacker_AddIssue(Tracker_AddIssue):
 
     access = 'is_allowed_to_edit'
-    #title = MSG(u'Add')
-    #icon = 'new.png'
-    #template = '/ui/tracker/add_issue.xml'
-    #styles = ['/ui/tracker/style.css']
-    #scripts = ['/ui/tracker/tracker.js']
+    scripts = ['/ui/tchacker/tracker.js']
 
 
     def get_schema(self, resource, context):

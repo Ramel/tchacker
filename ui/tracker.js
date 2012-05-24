@@ -67,7 +67,7 @@ $(document).ready(function () {
    * For LuluVroumette
    */
   $("SELECT#state").change(function() {
-    if (document.URL.match("luluvroumette") != null) {
+    if (document.URL.match(";edit") != null && document.URL.match("luluvroumette") != null) {
       var state = $("SELECT#state option:selected").attr("value");  // selected state
       var str = $("TEXTAREA#comment").val();                        // actual comment
       var pattn = /ftp(.*).7z/gim;                                  // Is there an ftp pasted text?
@@ -79,4 +79,10 @@ $(document).ready(function () {
       }
     }
   }).change();
+  // For add_issue View, add LV-P- 
+  if (document.URL.match(";add_issue") != null && document.URL.match("luluvroumette") != null) {
+    if ($("INPUT#title").val() == "") {
+      $("INPUT#title").val("LV-P-");
+    }
+  }
 });

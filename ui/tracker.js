@@ -83,7 +83,7 @@ $(document).ready(function () {
     if (document.URL.match(";add_issue") != null && document.URL.match("luluvroumette") != null) {
       var type = $("SELECT#type option:selected").attr("value");    // selected type
       var str = $("INPUT#title").val();
-      var pattn = /^LV([_\- ]*)P([_\- ]*)/gi;                        // 
+      var pattn = /^LV([_\- ]*)P([_\- ]*)/gi;                        //
       var good = str.match(pattn);
       if (type == 2 || type == 12 || type == 13 || type == 15) {
         if (good != null) {
@@ -102,10 +102,25 @@ $(document).ready(function () {
     var search = $("DIV.context-menu UL LI.nav-active A").text();
     var pattn = new RegExp("^EP[0-9]{3}");
     var isEpisode = pattn.exec(search); // EP000
-    alert(search);
+    //alert(search);
+    var quantityProps = 0;
+    var validated = 0;
     if (isEpisode != null) {
-      alert("isEpisode = " + isEpisode);    
+      var rowCount = ($("TABLE#browse-list TR").length) - 1;
+      quantityProps = rowCount;
+      //alert("rowCount = " + rowCount);
+      for(i = 1; i <= rowCount; i++) {
+        var td = $("TABLE#browse-list TR:eq(" + i + ") TD:eq(7)").text();
+        //alert("TD:eq(7) = '" + td + "'");
+        if (td.match("À supprimer") != null) {
+          quantityProps = quantityProps - 1;
+        }
+        if (td.match("Livré à TTK") != null) {
+          validated = validated + 1;
+        }
+      }
+      //alert("isEpisode = " + isEpisode + ", TR = " + rowCount + ",\n quantityProps = " + quantityProps + ", validated = " + validated);
+      $("DIV.context-menu UL LI.nav-active A").append(" Livrés : " + validated + "/" + quantityProps);
     }
   }
-  //}).change();
 });

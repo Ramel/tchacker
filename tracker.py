@@ -30,10 +30,12 @@ from itools.fs import FileName
 from ikaaro.tracker import Tracker
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import get_resource_class
+from ikaaro.tracker.tracker_views import GoToIssueMenu
 
 from issue import Tchack_Issue
 from tracker_views import Tchacker_View #, Tracker_Zip_Img
 from tracker_views import Tchacker_AddIssue
+from tracker_views import Tchacker_StoredSearchesMenu
 
 
 
@@ -48,6 +50,8 @@ class Tchack_Tracker(Tracker):
     # Configuration
     issue_class = Tchack_Issue
 
+    context_menus = [GoToIssueMenu(), Tchacker_StoredSearchesMenu()]
+    
     # Views
     view = Tchacker_View()
     add_issue = Tchacker_AddIssue()

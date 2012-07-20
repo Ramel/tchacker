@@ -103,24 +103,27 @@ $(document).ready(function () {
     var pattn = new RegExp("^EP[0-9]{3}");
     var isEpisode = pattn.exec(search); // EP000
     //alert(search);
-    var quantityProps = 0;
     var validated = 0;
+    var threedtextures = 0;
     if (isEpisode != null) {
       var rowCount = ($("TABLE#browse-list TR").length) - 1;
-      quantityProps = rowCount;
       //alert("rowCount = " + rowCount);
       for(i = 1; i <= rowCount; i++) {
-        var td = $("TABLE#browse-list TR:eq(" + i + ") TD:eq(7)").text();
+        // Count the 3D ones in Type column
+        var td6 = $("TABLE#browse-list TR:eq(" + i + ") TD:eq(6)").text();
         //alert("TD:eq(7) = '" + td + "'");
-        if (td.match("À supprimer") != null) {
-          quantityProps = quantityProps - 1;
-        }
-        if (td.match("Livré à TTK") != null) {
-          validated = validated + 1;
+        if (td6.match("3 - Props 3D Texture") != null) {
+          threedtextures = threedtextures + 1;
+          // Check the State column
+          var td = $("TABLE#browse-list TR:eq(" + i + ") TD:eq(7)").text();
+          //alert("TD:eq(7) = '" + td + "'");
+          if (td.match("Livré à TTK") != null) {
+            validated = validated + 1;
+          }
         }
       }
       //alert("isEpisode = " + isEpisode + ", TR = " + rowCount + ",\n quantityProps = " + quantityProps + ", validated = " + validated);
-      $("DIV.context-menu UL LI.nav-active A").append(" Livrés : " + validated + "/" + quantityProps);
+      $("DIV.context-menu UL LI.nav-active A").append(" Livrés : " + validated + "/" + threedtextures);
     }
   }
 });

@@ -124,6 +124,9 @@ $(document).ready(function () {
             validated = validated + 1;
           }
         }
+        if (td6.match("2 - Props 3D Réut.") != null) {                                                        
+          threedtextures = threedtextures + 1;
+        } 
       }
       //alert("isEpisode = " + isEpisode + ", TR = " + rowCount + ",\n quantityProps = " + quantityProps + ", validated = " + validated);
       $("DIV.context-menu UL LI.nav-active A").append(" Livrés : " + validated + "/" + threedtextures);

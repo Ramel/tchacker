@@ -117,6 +117,9 @@ $(document).ready(function () {
           // Check the State column
           var td = $("TABLE#browse-list TR:eq(" + i + ") TD:eq(7)").text();
           //alert("TD:eq(7) = '" + td + "'");
+          if (td.match("À supprimer") != null) {
+            threedtextures = threedtextures - 1;
+          }
           if (td.match("Livré à TTK") != null) {
             validated = validated + 1;
           }

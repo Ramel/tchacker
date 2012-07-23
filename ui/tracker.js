@@ -96,27 +96,21 @@ $(document).ready(function () {
       }
     }
   }).change();
-  //$("LI.nav-active A").change(function() {
-  //alert(document.URL.match(";view\\?search_name"));
   if (document.URL.match(";view\\?[a-zA-Z0-9%+!&=]*search_name") != null && document.URL.match("luluvroumette") != null) {
     var search = $("DIV.context-menu UL LI.nav-active A").text();
     var pattn = new RegExp("^EP[0-9]{3}");
     var isEpisode = pattn.exec(search); // EP000
-    //alert(search);
     var validated = 0;
     var threedtextures = 0;
     if (isEpisode != null) {
       var rowCount = ($("TABLE#browse-list TR").length) - 1;
-      //alert("rowCount = " + rowCount);
       for(i = 1; i <= rowCount; i++) {
         // Count the 3D ones in Type column
         var td6 = $("TABLE#browse-list TR:eq(" + i + ") TD:eq(6)").text();
-        //alert("TD:eq(7) = '" + td + "'");
         if (td6.match("3 - Props 3D Texture") != null) {
           threedtextures = threedtextures + 1;
           // Check the State column
           var td = $("TABLE#browse-list TR:eq(" + i + ") TD:eq(7)").text();
-          //alert("TD:eq(7) = '" + td + "'");
           if (td.match("À supprimer") != null) {
             threedtextures = threedtextures - 1;
           }
@@ -128,7 +122,6 @@ $(document).ready(function () {
           threedtextures = threedtextures + 1;
         } 
       }
-      //alert("isEpisode = " + isEpisode + ", TR = " + rowCount + ",\n quantityProps = " + quantityProps + ", validated = " + validated);
       $("DIV.context-menu UL LI.nav-active A").append(" Livrés : " + validated + "/" + threedtextures);
     }
   }

@@ -1,3 +1,21 @@
+/* BOF 0.62 */
+.tracker-select {
+  width: 97%;
+}
+
+.tracker-product {
+  color: #CC0000;
+  font-style: italic;
+}
+
+.tracker-resource {
+  color: #0A4A0A;
+}
+
+.missing {
+  text-decoration: line-through;
+}
+/* EOF */
 .tracker-issue-comment-title {
   background-color: #ddddff;
   font-weight: bold;

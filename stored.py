@@ -25,7 +25,7 @@ from itools.gettext import MSG
 from itools.handlers import ConfigFile
 
 # Import from ikaaro
-from ikaaro.registry import register_resource_class
+#from ikaaro.registry import register_resource_class
 from ikaaro.text import Text
 
 
@@ -47,12 +47,20 @@ class StoredSearchFile(ConfigFile):
         }
 
 
-class Tchack_StoredSearch(Text):
+class StoredSearch(Text):
 
-    class_id = 'tchack_stored_search'
+    class_id = 'stored_search'
     class_version = '20071215'
-    class_title = MSG(u'Tchack Stored Search')
+    class_title = MSG(u'Stored Search')
     class_handler = StoredSearchFile
+    class_views = ['view', 'links', 'backlinks', 'commit_log']
+
+    # Disable edit view
+    edit = None
+    external_edit = None
+
+    # Hide in browse_content
+    is_content = False
 
 
     def get_values(self, name, type=None):
@@ -68,4 +76,4 @@ class Tchack_StoredSearch(Text):
 
 
 # Register
-register_resource_class(Tchack_StoredSearch)
+#register_resource_class(Tchack_StoredSearch)

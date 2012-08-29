@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 # Copyright (C) 2007-2008 Juan David Ibáñez Palomar <jdavid@itaapy.com>
 # Copyright (C) 2008 Nicolas Deram <nicolas@itaapy.com>
+# Copyright (C) 2012 Armel FORTUN <armel@tchack.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,15 +21,13 @@ import sys
 # Import from itools
 from itools.core import get_abspath
 from itools.core import get_version
-#from itools.fs import lfs
-#from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.registry import register_document_type
 from ikaaro.skins import register_skin
 from ikaaro.website import WebSite
 
-from tracker import Tchack_Tracker
+from tchacker import Tchacker
 from utils import which
 
 # Import obsolete if command is icms-update.py
@@ -44,7 +43,7 @@ path = get_abspath('ui')
 register_skin('tchacker', path)
 
 # Register document type
-register_document_type(Tchack_Tracker, WebSite.class_id)
+register_document_type(Tchacker, WebSite.class_id)
 
 ###########################################################################
 # Check required software

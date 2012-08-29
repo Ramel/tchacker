@@ -6,7 +6,7 @@
 # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
 # Copyright (C) 2007-2008 Sylvain Taverne <sylvain@itaapy.com>
 # Copyright (C) 2008 Gautier Hayoun <gautier.hayoun@itaapy.com>
-# Copyright (C) 2009 Armel FORTUN <armel@maar.fr>
+# Copyright (C) 2009 Armel FORTUN <armel@tchack.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,21 +27,21 @@ from tempfile import mkdtemp
 from os import sep
 
 # Import from itools
-from itools.gettext import MSG
-from itools.handlers import checkid
-from itools.fs import FileName, vfs
 from itools.core import merge_dicts
 from itools.csv import Property
-from itools.datatypes import Integer, String, Unicode
+from itools.datatypes import Integer, String, Unicode, Tokens, URI
+from itools.fs import FileName, vfs
+from itools.gettext import MSG
+from itools.handlers import checkid
+from itools.web import get_context
 
 # Import from ikaaro
-from ikaaro.tracker.issue import Issue
-from ikaaro.utils import generate_name
+from ikaaro.comments import CommentsAware
+from ikaaro.folder import Folder
+from ikaaro.metadata import Metadata
+from ikaaro.obsolete.metadata import OldMetadata
 from ikaaro.registry import get_resource_class
-from ikaaro.tracker.issue_views import IssueTrackerMenu
-
-# Import from Tchacker
-from issue_views import TchackIssue_Edit
+from ikaaro.utils import generate_name
 
 # Import from videoencoding
 from videoencoding import VideoEncodingToFLV
@@ -49,23 +49,40 @@ from videoencoding import VideoEncodingToFLV
 # Import from PIL
 from PIL import Image as PILImage
 
+# Import from Tchacker
+from issue_views import IssueTchackerMenu, Issue_History
+from issue_views import Issue_DownloadAttachments, Issue_Edit
 from comments import tchacker_comment_datatype
 from monkey import Image, Video
 
 
+class Issue(CommentsAware, Folder):
 
-class Tchack_Issue(Issue):
-
-    class_id = 'tchack_issue'
+    class_id = 'issue'
     class_version = '20100506'
-    class_title = MSG(u'Tchacker Issue')
-    class_description = MSG(u'Tchacker Issue')
+    class_title = MSG(u'Issue')
+    class_description = MSG(u'Issue')
+    class_views = ['edit', 'edit_resources', 'browse_content', 'history']
 
     # Views
-    edit = TchackIssue_Edit()
+    edit = Issue_Edit()
 
     class_schema = merge_dicts(
-        Issue.class_schema,
+        Folder.class_schema,
+        CommentsAware.class_schema,
+        # Metadata
+        product=Integer(source='metadata', indexed=True, stored=True),
+        module=Integer(source='metadata', indexed=True, stored=True),
+        version=Integer(source='metadata', indexed=True, stored=True),
+        type=Integer(source='metadata', indexed=True, stored=True),
+        state=Integer(source='metadata', indexed=True, stored=True),
+        priority=Integer(source='metadata', indexed=True, stored=True),
+        assigned_to=String(source='metadata', indexed=True, stored=True),
+        cc_list=Tokens(source='metadata'),
+        # Other
+        id=Integer(indexed=True, stored=True),
+        attachment=URI(source='metadata', multiple=True),
+        # Tchacker
         ids=Integer(source='metadata'),
         last_attachment=String(source='metadata', indexed=False, stored=True))
 
@@ -81,10 +98,40 @@ class Tchack_Issue(Issue):
 
 
     def get_catalog_values(self):
-        document = Issue.get_catalog_values(self)
+        document = Folder.get_catalog_values(self)
+        document['id'] = int(self.name)
+        # Override default (FIXME should set default to 'nobody' instead?)
+        document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
         return document
 
 
+    def get_document_types(self):
+        return []
+
+
+    #######################################################################
+    # API
+    #######################################################################
+    def get_title(self, language=None):
+        return u'#%s %s' % (self.name, self.get_property('title'))
+
+
+    def get_history(self):
+        context = get_context()
+        database = context.database
+        filename = '%s.metadata' % self.get_abspath()
+        filename = filename[1:]
+
+        get_blob = database.get_blob_by_revision_and_path
+
+        for commit in database.worktree.git_log(filename, reverse=True):
+            sha = commit['sha']
+            try:
+                yield get_blob(sha, filename, Metadata)
+            except SyntaxError:
+                yield get_blob(sha, filename, OldMetadata)
+
+    # Tchacker
     def get_comments(self):
         comments = self.metadata.get_property('comment')
         if not comments:
@@ -131,7 +178,7 @@ class Tchack_Issue(Issue):
         # Attachment
         attachment = form['attachment']
         #print("ids = %s" % self.get_property('ids'))
-        #ids = int(self.get_property('ids')) 
+        #ids = int(self.get_property('ids'))
         ids = 1
         if not new:
             #print("ids = %s" % self.get_property('ids'))
@@ -335,8 +382,8 @@ class Tchack_Issue(Issue):
         if user.name in to_addrs:
             to_addrs.remove(user.name)
         # Notify / Subject
-        tracker_title = self.parent.get_property('title') or u'Tracker Issue'
-        subject = '[%s #%s] %s' % (tracker_title, self.name, title)
+        tchacker_title = self.parent.get_property('title') or u'Tchacker Issue'
+        subject = '[%s #%s] %s' % (tchacker_title, self.name, title)
         # Notify / Body
         if isinstance(context.resource, self.__class__):
             uri = context.uri.resolve(';edit')
@@ -377,11 +424,123 @@ class Tchack_Issue(Issue):
             root.send_email(to_addr, subject, text=body)
 
 
+    def get_diff_with(self, old_metadata, context, new=False, language=None):
+        """Return a text with the diff between the given Metadata and new
+        issue state.
+        """
+        root = context.root
+        modifications = []
+        if new:
+            # New issue
+            template = MSG(u'{field}: {old_value}{new_value}')
+            empty = u''
+        else:
+            # Edit issue
+            template = MSG(u'{field}: {old_value} to {new_value}')
+            empty = MSG(u'[empty]').gettext(language=language)
+        # Modification of title
+        last_prop = old_metadata.get_property('title')
+        last_title = last_prop.value if last_prop else empty
+        new_title = self.get_property('title') or empty
+        if last_title != new_title:
+            field = MSG(u'Title').gettext(language=language)
+            text = template.gettext(field=field, old_value=last_title,
+                                    new_value=new_title, language=language)
+            modifications.append(text)
+        # List modifications
+        fields = [
+            ('product', MSG(u'Product')),
+            ('module', MSG(u'Module')),
+            ('version', MSG(u'Version')),
+            ('type', MSG(u'Type')),
+            ('priority', MSG(u'Priority')),
+            ('state', MSG(u'State'))]
+        for name, field in fields:
+            field = field.gettext(language=language)
+            last_prop = old_metadata.get_property(name)
+            last_value = last_prop.value if last_prop else None
+            new_value = self.get_property(name)
+            # Detect if modifications
+            if last_value == new_value:
+                continue
+            new_title = last_title = empty
+            csv = self.parent.get_resource(name).handler
+            if last_value or last_value == 0:
+                rec = csv.get_record(last_value)
+                if rec is None:
+                    last_title = MSG(u'undefined').gettext(language=language)
+                else:
+                    last_title = csv.get_record_value(rec, 'title', language)
+                    if not last_title:
+                        last_title = csv.get_record_value(rec, 'title')
+            if new_value or new_value == 0:
+                rec = csv.get_record(new_value)
+                new_title = csv.get_record_value(rec, 'title', language)
+                if not new_title:
+                    new_title = csv.get_record_value(rec, 'title')
+            text = template.gettext(field=field, old_value=last_title,
+                                    new_value=new_title, language=language)
+            modifications.append(text)
+
+        # Modifications of assigned_to
+        new_user = self.get_property('assigned_to') or ''
+        last_prop = old_metadata.get_property('assigned_to')
+        last_user = last_prop.value if last_prop else None
+        if last_user != new_user:
+            if last_user:
+                last_user = root.get_user(last_user).get_property('email')
+            if new_user:
+                new_user = root.get_user(new_user).get_property('email')
+            field = MSG(u'Assigned To').gettext(language=language)
+            text = template.gettext(field=field, old_value=last_user or empty,
+                                    new_value=new_user or empty,
+                                    language=language)
+            modifications.append(text)
+
+        # Modifications of cc_list
+        last_prop = old_metadata.get_property('cc_list')
+        last_cc = list(last_prop.value) if last_prop else ()
+        new_cc = self.get_property('cc_list')
+        new_cc = list(new_cc) if new_cc else []
+        if last_cc != new_cc:
+            last_values = []
+            for cc in last_cc:
+                value = root.get_user(cc).get_property('email')
+                last_values.append(value)
+            new_values = []
+            for cc in new_cc:
+                value = root.get_user(cc).get_property('email')
+                new_values.append(value)
+            field = MSG(u'CC').gettext(language=language)
+            last_values = ', '.join(last_values) or empty
+            new_values = ', '.join(new_values) or empty
+            text = template.gettext(field=field, old_value=last_values,
+                                    new_value=new_values, language=language)
+            modifications.append(text)
+
+        return u'\n'.join(modifications)
+
+
+    def get_reported_by(self):
+        comments = self.metadata.get_property('comment')
+        return comments[0].get_parameter('author')
+
+
+    def to_text(self):
+        comments = self.get_property('comment')
+        return u'\n'.join(comments)
+
+
     #######################################################################
     # User Interface
     #######################################################################
     def get_context_menus(self):
-        return [IssueTrackerMenu()] + self.parent.get_context_menus()
+        return self.parent.get_context_menus() + [IssueTchackerMenu()]
+
+
+    download_attachments = Issue_DownloadAttachments()
+    edit = Issue_Edit()
+    history = Issue_History()
 
 
     #######################################################################
@@ -390,7 +549,7 @@ class Tchack_Issue(Issue):
     def update_20100506(self):
         from itools.core import fixed_offset
         utc = fixed_offset(0)
-        from ikaaro.tracker.obsolete import History
+        from ikaaro.tchacker.obsolete import History
 
         metadata = self.metadata
         history = self.handler.get_handler('.history', History)

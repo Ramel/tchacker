@@ -194,7 +194,6 @@ class StoredSearchesMenu(ContextMenu):
                           'class': 'nav-active' if (item.name == search_name)
                                                 else class_title})
         items.sort(lambda x, y: cmp(x['title'], y['title']))
-        print("items = %s" % items)
 
         return items
 
@@ -325,7 +324,6 @@ class Tchacker_AddIssue(STLForm):
         if(namespace['comment']['error'] is not None):
             namespace['comment']['error'] = MSG(
                 u'This field is required (or can be emtpy if an attachment is joined)')
-        print("namespace = %s" % namespace)
         return namespace
 
 
@@ -522,12 +520,9 @@ class Tchacker_View(BrowseForm):
             thumbnails = []
             max_width = 0
             max_height = 0
-            #print("%s: attachments = %s" % (issue, attachments))
             for filename in attachments:
                 attachment = resource.get_resource('%s/%s' % (issue, filename))
-                #print("attachment = %s" % attachment)
                 has_thumb = attachment.metadata.get_property('has_thumb') or False
-                #print("%s -> has_thumb = %s" % (filename, has_thumb))
                 if has_thumb:
                     image = False
                     video = False
@@ -559,16 +554,13 @@ class Tchacker_View(BrowseForm):
                                     'image': image,
                                     'video': video})
             #thumbnails.reverse()
-            #print("%s: thumbnails = %s" % (issue, thumbnails))
             quantity = len(thumbnails)
             if (quantity >= 1):
                 rollover = ""
                 rollimages = ""
                 part = max_width / quantity
-                #print thumbnails[-1]
                 if (quantity >= 2):
                     for thumb in thumbnails[:-1]:
-                        #print("%s: %s" % (issue, thumb))
                         rollover += '<div class="roll" \
                                 style="width:%spx;height:%spx;" />' % (
                                 part, max_height)
@@ -786,7 +778,6 @@ class Tchacker_Search(BaseSearchForm, Tchacker_View):
                     title = get_resource(name).get_property('title')
                 except LookupError:
                     pass
-        print("get_namespace = %s" % namespace)
         return namespace
     
 

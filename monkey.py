@@ -17,24 +17,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from itools.core import freeze, merge_dicts
-from itools.datatypes import Integer, Boolean, Decimal
 
+from ikaaro.comments import Comment
+from ikaaro.fields import Boolean_Field
+from ikaaro.fields import Integer_Field, Decimal_Field
+from ikaaro.fields import URI_Field
 from ikaaro.file import Image, Video
 
 
-Image.class_schema = freeze(merge_dicts(
-        Image.class_schema,
-        has_thumb=Boolean(source='metadata'),
-        is_thumb=Boolean(source='metadata')))
+class Tchacker_Image(Image):
+    class_id = Image.class_id
+    has_thumb = Boolean_Field
+    is_thumb = Boolean_Field
 
 
+class Tchacker_Video(Video):
+    class_id = Video.class_id
+    has_thumb = Boolean_Field
+    width = Integer_Field
+    height = Integer_Field
+    ratio = Decimal_Field
 
-Video.class_schema = freeze(merge_dicts(
-        Video.class_schema,
-        has_thumb=Boolean(source='metadata'),
-        width=Integer(source='metadata'),
-        height=Integer(source='metadata'),
-        ratio=Decimal(source='metadata')))
+
+class Tchacker_Comment(Comment):
+    class_id = Comment.class_id
+    attachement = URI_Field
 
 
 # Remove "is_thumb" from indexation

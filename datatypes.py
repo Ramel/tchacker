@@ -15,23 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from itools
-from itools.core import thingy_property
+from itools.core import proto_property
 from itools.datatypes import Enumerate, Unicode
 from itools.datatypes import Unicode, Integer
 from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.datatypes import FileDataType
-from ikaaro.cc import UsersList
-
-
-
-class Tchacker_UsersList(UsersList):
-
-    @thingy_property
-    def included_roles(self):
-        return self.resource.get_property('included_roles')
-
+from ikaaro.cc import Followers_Datatype
 
 
 class TchackerList(Enumerate):
@@ -123,8 +114,8 @@ def get_issue_fields(tchacker):
             'type': TchackerList(element='type', tchacker=tchacker, mandatory=True),
             'state': TchackerList(element='state', tchacker=tchacker, mandatory=True),
             'priority': TchackerList(element='priority', tchacker=tchacker),
-            'assigned_to': Tchacker_UsersList(resource=tchacker),
-            'cc_list': Tchacker_UsersList(resource=tchacker, multiple=True),
+            'assigned_to': Followers_Datatype(resource=tchacker),
+            'cc_list': Followers_Datatype(resource=tchacker, multiple=True),
             'comment': Unicode,
             'attachment': FileDataType,
             'ids': Integer}

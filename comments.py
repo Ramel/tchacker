@@ -29,8 +29,7 @@ from monkey import Image, Video
 tchacker_comment_datatype = Unicode(source='metadata', multiple=True,
                             parameters_schema={'date': DateTime,
                             'author': String,
-                            'attachment': String,
-                            'amount': Integer})
+                            'attachment': String})
 
 
 

@@ -25,7 +25,7 @@
 from itools.csv import Property
 from itools.datatypes import Unicode, XMLContent
 from itools.gettext import MSG
-from itools.web import BaseView, STLForm, STLView
+from itools.web import BaseView, STLView
 from itools.xml import XMLParser
 
 # Import from ikaaro
@@ -83,7 +83,7 @@ class Issue_DownloadAttachments(BaseView):
 
 
 
-class Issue_Edit(STLForm):
+class Issue_Edit(STLView):
 
     access = 'is_allowed_to_edit'
     title = MSG(u'Edit Issue')
@@ -106,7 +106,7 @@ class Issue_Edit(STLForm):
 
 
     def get_namespace(self, resource, context):
-        namespace = STLForm.get_namespace(self, resource, context)
+        namespace = STLView.get_namespace(self, resource, context)
 
         tracker = resource.parent
         namespace['list_products'] = tracker.get_list_products_namespace()

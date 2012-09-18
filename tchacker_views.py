@@ -23,25 +23,24 @@
 from operator import itemgetter, attrgetter
 
 # Import from itools
-from itools.core import merge_dicts, thingy_lazy_property
+from itools.core import merge_dicts, proto_lazy_property
 from itools.csv import CSVFile, Property
 from itools.datatypes import Boolean, Integer, String, Unicode
 from itools.gettext import MSG
 from itools.handlers.utils import transmap
 from itools.stl import stl
 from itools.uri import encode_query, Reference
-from itools.web import BaseView, BaseForm, STLForm, FormError, INFO, ERROR
+from itools.web import BaseView, STLView, FormError, INFO, ERROR
 from itools.web.views import process_form
 #from itools.uri import encode_query
 #from itools.xml import XMLParser
 
 # Import from ikaaro
 from ikaaro.datatypes import FileDataType
-from ikaaro.access import Roles_Datatype
 from ikaaro.autoform import SelectWidget, TextWidget
 from ikaaro.buttons import BrowseButton
 from ikaaro import messages
-from ikaaro.views import BrowseForm, SearchForm as BaseSearchForm, ContextMenu
+from ikaaro.views import BrowseForm, ContextMenu
 from ikaaro.views_new import NewInstance
 from ikaaro.registry import get_resource_class
 from ikaaro.resource_views import DBResource_Edit
@@ -254,40 +253,7 @@ class Tchacker_NewInstance(NewInstance):
 
 
 
-class Tchacker_Edit(DBResource_Edit):
-
-    widgets = (DBResource_Edit.widgets + [
-        SelectWidget('included_roles',
-            title=MSG(u"Authorized roles for 'Assigned to' and 'CC' fields"),
-            has_empty_option=False)])
-
-
-    def _get_schema(self, resource, context):
-        roles = Roles_Datatype(resource=resource, multiple=True,
-                               mandatory=True)
-        return merge_dicts(DBResource_Edit.schema, included_roles=roles)
-
-
-    def get_value(self, resource, context, name, datatype):
-        if name == 'included_roles':
-            return list(resource.get_property('included_roles'))
-
-        proxy = super(Tchacker_Edit, self)
-        return proxy.get_value(resource, context, name, datatype)
-
-
-    def set_value(self, resource, context, name, form):
-        if name == 'included_roles':
-            value = form['included_roles']
-            resource.set_property('included_roles', tuple(value))
-            return False
-
-        proxy = super(Tchacker_Edit, self)
-        return proxy.set_value(resource, context, name, form)
-
-
-
-class Tchacker_AddIssue(STLForm):
+class Tchacker_AddIssue(STLView):
 
     access = 'is_allowed_to_edit'
     title = MSG(u'Add')
@@ -319,7 +285,7 @@ class Tchacker_AddIssue(STLForm):
 
 
     def get_namespace(self, resource, context):
-        namespace = STLForm.get_namespace(self, resource, context)
+        namespace = STLView.get_namespace(self, resource, context)
         namespace['list_products'] = resource.get_list_products_namespace()
         if(namespace['comment']['error'] is not None):
             namespace['comment']['error'] = MSG(
@@ -651,7 +617,7 @@ class Tchacker_View(BrowseForm):
 
 
 
-class Tchacker_Search(BaseSearchForm, Tchacker_View):
+class Tchacker_Search(BrowseForm, Tchacker_View):
     
     access = 'is_allowed_to_view'
     title = MSG(u'Search')
@@ -681,7 +647,7 @@ class Tchacker_Search(BaseSearchForm, Tchacker_View):
 
     def get_query(self, context):
         try:
-            return BaseSearchForm.get_query(self, context)
+            return BrowseForm.get_query(self, context)
         except FormError:
             schema = self.get_query_schema()
             query = {}
@@ -691,7 +657,7 @@ class Tchacker_Search(BaseSearchForm, Tchacker_View):
             return query
 
 
-    on_query_error = BaseSearchForm.on_query_error
+    on_query_error = BrowseForm.on_query_error
 
     
     def get_search_namespace(self, resource, context):
@@ -782,7 +748,7 @@ class Tchacker_Search(BaseSearchForm, Tchacker_View):
     
 
 
-class Tchacker_RememberSearch(BaseForm):
+class Tchacker_RememberSearch(BaseView):
 
     access = 'is_allowed_to_edit'
 
@@ -845,7 +811,7 @@ class Tchacker_RememberSearch(BaseForm):
 
 
 
-class Tchacker_ForgetSearch(BaseForm):
+class Tchacker_ForgetSearch(BaseView):
 
     access = 'is_allowed_to_edit'
     schema = {

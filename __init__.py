@@ -25,7 +25,7 @@ from itools.core import get_version
 # Import from ikaaro
 from ikaaro.registry import register_document_type
 from ikaaro.skins import register_skin
-from ikaaro.website import WebSite
+from ikaaro.root import Root
 
 from tchacker import Tchacker
 from utils import which
@@ -43,7 +43,7 @@ path = get_abspath('ui')
 register_skin('tchacker', path)
 
 # Register document type
-register_document_type(Tchacker, WebSite.class_id)
+register_document_type(Tchacker, Root.class_id)
 
 ###########################################################################
 # Check required software

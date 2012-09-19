@@ -160,8 +160,8 @@ class Issue_Edit(STLView):
                 namespace['which_module'] = module['value']
 
         return namespace
-    
-    
+
+
     def action(self, resource, context, form):
         # Edit
         resource.add_comment(context, form)

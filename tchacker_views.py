@@ -342,11 +342,11 @@ class Tchacker_View(BrowseForm):
     }
 
     context_menus = [TchackerViewMenu(), StoreSearchMenu()]
-    
+
     # XXX
     table_template = '/ui/tchacker/browse_table.xml'
 
-    
+
     def get_query_schema(self):
         return merge_dicts(BrowseForm.get_query_schema(self),
                            self.tchacker_schema)
@@ -602,8 +602,8 @@ class Tchacker_View(BrowseForm):
 
 
     table_actions = []
-    
-    
+
+
     def get_table_columns(self, resource, context):
         table_columns = columns[:]
         table_columns.insert(0, ('checkbox', None))
@@ -615,7 +615,7 @@ class Tchacker_View(BrowseForm):
 
 
 class Tchacker_Search(Tchacker_View):
-    
+
     access = 'is_allowed_to_view'
     title = MSG(u'Search')
     icon = 'search.png'
@@ -656,7 +656,7 @@ class Tchacker_Search(Tchacker_View):
 
     on_query_error = BrowseForm.on_query_error
 
-    
+
     def get_search_namespace(self, resource, context):
         # Search Form
         get_resource = resource.get_resource
@@ -709,7 +709,7 @@ class Tchacker_Search(Tchacker_View):
                               resource=resource).get_namespace(assigned_to),
            'list_products': resource.get_list_products_namespace()}
 
-    
+
     """
     # XXX tchacker 0.62
     def get_namespace(self, resource, context):
@@ -742,7 +742,7 @@ class Tchacker_Search(Tchacker_View):
                 except LookupError:
                     pass
         return namespace
-    
+
 
 
 class Tchacker_RememberSearch(BaseView):

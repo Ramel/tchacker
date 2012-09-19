@@ -7,9 +7,9 @@ Requirements
 
 Software      Version  Used by            Home
 ----------    -------  ----------------   --------------------------------------
-itools        0.62.1  Ikaaro              https://www.github.com/hforge/itools
-ikaaro        0.62    Tchacker            https://www.github.com/hforge/ikaaro
-videoencoding master  Tchacker            https://www.github/Ramel/videoencoding
+itools        0.75    Ikaaro              https://www.github.com/hforge/itools
+ikaaro        0.75    Tchacker            https://www.github.com/hforge/ikaaro
+videoencoding 0.75    Tchacker            https://www.github/Ramel/videoencoding
 thickbox      master  Tchacker            https://www.github/Ramel/thickbox
 
 Check the Videoencoding module requirements.

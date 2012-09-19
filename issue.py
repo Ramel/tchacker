@@ -22,13 +22,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from the Standard Library
-from os.path import basename
+#from os.path import basename
 from tempfile import mkdtemp
 from os import sep
 
 # Import from itools
-from itools.core import merge_dicts
 from itools.csv import Property
+from itools.datatypes import Unicode
 #from itools.datatypes import Integer, String, Unicode, Tokens, URI
 from itools.fs import FileName, vfs
 from itools.gettext import MSG
@@ -53,7 +53,6 @@ from PIL import Image as PILImage
 # Import from Tchacker
 from issue_views import IssueTchackerMenu, Issue_History
 from issue_views import Issue_DownloadAttachments, Issue_Edit
-from comments import tchacker_comment_datatype
 from monkey import Image, Video
 
 
@@ -121,7 +120,7 @@ class Issue(CommentsAware, Folder):
         comments = self.metadata.get_property('comment')
         if not comments:
             return None
-        base = self.get_canonical_path()
+        #base = self.get_canonical_path()
         return [ ("%s" % x.value) for x in comments ]
 
 
@@ -130,7 +129,7 @@ class Issue(CommentsAware, Folder):
         if not attachments:
             return None
 
-        base = self.get_canonical_path()
+        #base = self.get_canonical_path()
         return set([ str(x.value) for x in attachments ])
 
 

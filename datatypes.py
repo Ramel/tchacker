@@ -15,9 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from itools
-from itools.core import proto_property
+#from itools.core import proto_property
 from itools.datatypes import Enumerate, Unicode
-from itools.datatypes import Unicode, Integer
+from itools.datatypes import Integer
 from itools.web import get_context
 
 # Import from ikaaro

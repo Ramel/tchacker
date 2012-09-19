@@ -22,19 +22,17 @@
 
 # Import from the Standard Library
 from datetime import datetime, timedelta
-from os.path import basename
 
 # Import from itools
-from itools.core import merge_dicts
 from itools.csv import Property
-from itools.datatypes import Integer, String, Tokens, Unicode
+from itools.datatypes import Integer, String, Unicode #, Tokens
 from itools.gettext import MSG
 from itools.database import RangeQuery, AndQuery, OrQuery, PhraseQuery
 
 # Import from ikaaro
 from ikaaro.folder import Folder
 from ikaaro.utils import get_base_path_query
-from ikaaro.database import Database
+#from ikaaro.database import Database
 
 from issue import Issue
 from tchacker_views import Tchacker_View #, Tchacker_Zip_Img
@@ -42,7 +40,8 @@ from tchacker_views import GoToIssueMenu, StoredSearchesMenu
 from tchacker_views import Tchacker_AddIssue, Tchacker_GoToIssue
 from tchacker_views import Tchacker_ExportToCSVForm, Tchacker_ExportToCSV
 from tchacker_views import Tchacker_ExportToText, Tchacker_ChangeSeveralBugs
-from tchacker_views import Tchacker_NewInstance, Tchacker_Search, Tchacker_View
+#from tchacker_views import Tchacker_NewInstance
+from tchacker_views import Tchacker_Search
 from tchacker_views import Tchacker_RememberSearch, Tchacker_ForgetSearch
 from tables import Tchacker_TableResource, Tchacker_TableHandler
 from stored import StoredSearch, StoredSearchFile

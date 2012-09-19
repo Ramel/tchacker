@@ -17,7 +17,6 @@
 
 # Import from itools
 from itools.datatypes import Unicode, String, DateTime
-from itools.datatypes import Integer
 
 # Import from ikaaro
 from ikaaro.comments import CommentsView, indent

@@ -29,9 +29,10 @@ from itools.database import PhraseQuery, AndQuery
 # Import from ikaaro
 from ikaaro.autoform import title_widget, CheckboxWidget, SelectWidget
 from ikaaro.autoform import ReadOnlyWidget
-from ikaaro.datatypes import Multilingual
-from ikaaro.table import OrderedTable, OrderedTableFile
-from ikaaro.table_views import OrderedTable_View, Table_EditRecord
+#from ikaaro.datatypes import Multilingual
+from ikaaro.fields import Field #Multilingual
+from ikaaro.obsolete.table import OrderedTable, OrderedTableFile
+from ikaaro.obsolete.table_views import OrderedTable_View, Table_EditRecord
 
 
 
@@ -189,7 +190,7 @@ class SelectTable_EditRecord(Table_EditRecord):
 ###########################################################################
 class Tchacker_TableHandler(OrderedTableFile):
 
-    record_properties = {'title': Multilingual(mandatory=True)}
+    record_properties = {'title': Field(mandatory=True)}
 
 
 

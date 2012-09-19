@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from itools.core import freeze, merge_dicts
-
 from ikaaro.comments import Comment
 from ikaaro.fields import Boolean_Field
 from ikaaro.fields import Integer_Field, Decimal_Field

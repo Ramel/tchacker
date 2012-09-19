@@ -29,7 +29,6 @@ from itools.web import BaseView, STLView
 from itools.xml import XMLParser
 
 # Import from ikaaro
-from ikaaro.comments import CommentsView
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
 

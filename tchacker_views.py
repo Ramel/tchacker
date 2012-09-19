@@ -20,8 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from operator import itemgetter, attrgetter
-
 # Import from itools
 from itools.core import merge_dicts, proto_lazy_property
 from itools.csv import CSVFile, Property
@@ -33,21 +31,20 @@ from itools.uri import encode_query, Reference
 from itools.web import BaseView, STLView, FormError, INFO, ERROR
 from itools.web.views import process_form
 #from itools.uri import encode_query
-#from itools.xml import XMLParser
+from itools.xml import XMLParser
 
 # Import from ikaaro
-from ikaaro.datatypes import FileDataType
-from ikaaro.autoform import SelectWidget, TextWidget
+from ikaaro.autoform import TextWidget
 from ikaaro.buttons import BrowseButton
 from ikaaro import messages
 from ikaaro.views import BrowseForm, ContextMenu
-from ikaaro.views_new import NewInstance
-from ikaaro.registry import get_resource_class
-from ikaaro.resource_views import DBResource_Edit
+#from ikaaro.views_new import NewInstance
+#from ikaaro.database import Database
+from ikaaro.cc import Followers_Datatype
 
 from issue import Issue
 from datatypes import get_issue_fields, TchackerList, ProductInfoList
-from datatypes import Tchacker_UsersList
+#from datatypes import Tchacker_UsersList
 from stored import StoredSearch
 from monkey import Image, Video
 
@@ -94,12 +91,12 @@ class StoreSearchMenu(ContextMenu):
                            search_title=Unicode)
 
 
-    @thingy_lazy_property
+    @proto_lazy_property
     def search_name(self):
         return self.context.get_query_value('search_name')
 
 
-    @thingy_lazy_property
+    @proto_lazy_property
     def search(self):
         search_name = self.search_name
         if search_name:
@@ -223,34 +220,34 @@ class TchackerViewMenu(ContextMenu):
 ###########################################################################
 # Views
 ###########################################################################
-class Tchacker_NewInstance(NewInstance):
-
-    schema = merge_dicts(NewInstance.schema, product=Unicode(mandatory=True))
-    widgets = NewInstance.widgets + [
-        TextWidget('product', title=MSG(u'Give the title of one Product'))]
-
-
-    def action(self, resource, context, form):
-        # Get the container
-        container = form['container']
-        # Make the resource
-        name = form['name']
-        class_id = context.query['type']
-        cls = get_resource_class(class_id)
-        child = container.make_resource(name, cls)
-        # The metadata
-        language = container.get_edit_languages(context)[0]
-        title = Property(form['title'], lang=language)
-        child.metadata.set_property('title', title)
-        # Add the initial product
-        product = form['product']
-        table = container.get_resource('%s/product' % name).get_handler()
-        product = Property(product, language='en')
-        table.add_record({'title': product})
-        # Ok
-        goto = str(resource.get_pathto(child))
-        return context.come_back(messages.MSG_NEW_RESOURCE, goto=goto)
-
+#class Tchacker_NewInstance(NewInstance):
+#
+#    schema = merge_dicts(NewInstance.schema, product=Unicode(mandatory=True))
+#    widgets = NewInstance.widgets + [
+#        TextWidget('product', title=MSG(u'Give the title of one Product'))]
+#
+#
+#    def action(self, resource, context, form):
+#        # Get the container
+#        container = form['container']
+#        # Make the resource
+#        name = form['name']
+#        class_id = context.query['type']
+#        cls = Database.get_resource_class(class_id)
+#        child = container.make_resource(name, cls)
+#        # The metadata
+#        language = container.get_edit_languages(context)[0]
+#        title = Property(form['title'], lang=language)
+#        child.metadata.set_property('title', title)
+#        # Add the initial product
+#        product = form['product']
+#        table = container.get_resource('%s/product' % name).get_handler()
+#        product = Property(product, language='en')
+#        table.add_record({'title': product})
+#        # Ok
+#        goto = str(resource.get_pathto(child))
+#        return context.come_back(messages.MSG_NEW_RESOURCE, goto=goto)
+#
 
 
 class Tchacker_AddIssue(STLView):
@@ -481,7 +478,7 @@ class Tchacker_View(BrowseForm):
             issue = item.name
             if attach_name is None:
                 return None
-            last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
+            #last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
             attachments = resource.get_resource(issue).get_attachments_ordered()
             thumbnails = []
             max_width = 0
@@ -553,7 +550,7 @@ class Tchacker_View(BrowseForm):
                                     issue=issue,
                                     name=thumb['name'],
                                     link=thumb['link'])
-                        thumb_name = thumb['name']
+                        #thumb_name = thumb['name']
                         link = thumb['link']
                 if thumbnails[-1]['image']:
                     last_img_template = '<img class="thumbnail" style="vertical-align:middle" \
@@ -617,7 +614,7 @@ class Tchacker_View(BrowseForm):
 
 
 
-class Tchacker_Search(BrowseForm, Tchacker_View):
+class Tchacker_Search(Tchacker_View):
     
     access = 'is_allowed_to_view'
     title = MSG(u'Search')
@@ -708,7 +705,7 @@ class Tchacker_Search(BrowseForm, Tchacker_View):
                                  tchacker=resource).get_namespace(state),
            'priorities': TchackerList(element='priority',
                                  tchacker=resource).get_namespace(priority),
-           'assigned_to': Tchacker_UsersList(
+           'assigned_to': Followers_Datatype(
                               resource=resource).get_namespace(assigned_to),
            'list_products': resource.get_list_products_namespace()}
 
@@ -1024,7 +1021,7 @@ class Tchacker_ChangeSeveralBugs(Tchacker_View):
         namespace['priorities'] = get_resource('priority').get_options()
         namespace['types'] = get_resource('type').get_options()
         namespace['states'] = get_resource('state').get_options()
-        namespace['assigned_to'] = Tchacker_UsersList(
+        namespace['assigned_to'] = Followers_Datatype(
                                       resource=resource).get_namespace('')
         namespace['list_products'] = resource.get_list_products_namespace()
 

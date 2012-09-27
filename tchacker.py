@@ -32,21 +32,22 @@ from itools.database import RangeQuery, AndQuery, OrQuery, PhraseQuery
 # Import from ikaaro
 from ikaaro.folder import Folder
 from ikaaro.utils import get_base_path_query
-#from ikaaro.database import Database
+from ikaaro.autoadd import AutoAdd
 
 from issue import Issue
+from tchacker_views import Tchacker_NewInstance
 from tchacker_views import Tchacker_View #, Tchacker_Zip_Img
 from tchacker_views import GoToIssueMenu, StoredSearchesMenu
 from tchacker_views import Tchacker_AddIssue, Tchacker_GoToIssue
 from tchacker_views import Tchacker_ExportToCSVForm, Tchacker_ExportToCSV
 from tchacker_views import Tchacker_ExportToText, Tchacker_ChangeSeveralBugs
-#from tchacker_views import Tchacker_NewInstance
-from tchacker_views import Tchacker_Search
 from tchacker_views import Tchacker_RememberSearch, Tchacker_ForgetSearch
-from tables import Tchacker_TableResource, Tchacker_TableHandler
+from tchacker_views import Tchacker_Search
+from tables import Tchacker_TableResource
+from tables import Tchacker_Item
 from stored import StoredSearch, StoredSearchFile
-from tables import ModulesResource, ModulesHandler
-from tables import VersionsResource, VersionsHandler
+from tables import ModulesResource, Modules_Item
+from tables import VersionsResource
 
 
 resolution = timedelta.resolution
@@ -85,22 +86,14 @@ class Tchacker(Folder):
     def init_resource(self, **kw):
         Folder.init_resource(self, **kw)
         # Products / Types / Priorities / States
-        folder = self.handler
         for table_name, values in default_tables:
-            self.make_resource(table_name, Tchacker_TableResource)
-            table = Tchacker_TableHandler()
+            table = self.make_resource(table_name, Tchacker_TableResource)
             for title in values:
-                title = Property(title, language='en')
-                table.add_record({'title': title})
-            folder.set_handler(table_name, table)
+                table.make_resource(None, Tchacker_Item, title={'en': title})
         # Modules
         self.make_resource('module', ModulesResource)
-        table = ModulesHandler()
-        folder.set_handler('module', table)
         # Versions
         self.make_resource('version', VersionsResource)
-        table = VersionsHandler()
-        folder.set_handler('version', table)
         # Pre-defined stored searches
         open = StoredSearchFile(state='0')
         not_assigned = StoredSearchFile(assigned_to='nobody')
@@ -109,8 +102,8 @@ class Tchacker(Folder):
         for search, title in [(open, u'Open Issues'),
                               (not_assigned, u'Not Assigned'),
                               (high_priority, u'High Priority')]:
-            self.make_resource('s%s' % i, StoredSearch, title={'en': title})
-            folder.set_handler('s%s' % i, search)
+            ss = self.make_resource('s%s' % i, StoredSearch, title={'en': title})
+            ss.set_value('data', search)
             i += 1
 
 
@@ -142,30 +135,30 @@ class Tchacker(Folder):
 
 
     def get_issues_query_terms(self):
-        return [get_base_path_query(self.get_canonical_path()),
+        return [get_base_path_query(self.abspath),
                 PhraseQuery('format', self.issue_class.class_id)]
 
 
     def get_list_products_namespace(self):
         # Build javascript list of products/modules/versions
-        products = self.get_resource('product').handler
+        products = self.get_resource('product')
 
         list_products = [{'id': '-1', 'modules': [], 'versions': []}]
-        for product_record in products.get_records_in_order():
-            product = {'id': product_record.id}
+        for item in products.get_resources_in_order():
+            product = {'id': item.name}
             for element in ['module', 'version']:
-                elements = self.get_resource(element).handler
+                elements = self.get_resource(element)
 
                 content = []
-                for record in elements.get_records_in_order():
-                    product_id = elements.get_record_value(record, 'product')
+                for record in elements.get_resources_in_order():
+                    product_id = record.get_value('product')
                     if product_id is None:
                         continue
-                    product_id = int(product_id)
-                    if product_id == product_record.id:
+                    if product_id == item.name:
                         content.append( {
-                         'id': record.id,
-                         'value': elements.get_record_value(record, 'title')})
+                         'id': product_id,
+                         #'value': elements.get_record_value(record, 'title')})
+                         'value': elements.get_resource(product_id).get_title()})
                 product[element + 's'] = content
             list_products.append(product)
 
@@ -241,15 +234,15 @@ class Tchacker(Folder):
     context_menus = [GoToIssueMenu(), StoredSearchesMenu()]
 
     # Views
-    new_instance = Tchacker_NewInstance()
-    search = Tchacker_Search()
-    view = Tchacker_View()
-    add_issue = Tchacker_AddIssue()
-    remember_search = Tchacker_RememberSearch()
-    forget_search = Tchacker_ForgetSearch()
-    go_to_issue = Tchacker_GoToIssue()
-    export_to_text = Tchacker_ExportToText()
-    export_to_csv_form = Tchacker_ExportToCSVForm()
-    export_to_csv = Tchacker_ExportToCSV()
-    change_several_bugs = Tchacker_ChangeSeveralBugs()
+    new_instance = Tchacker_NewInstance
+    search = Tchacker_Search
+    view = Tchacker_View
+    add_issue = Tchacker_AddIssue
+    remember_search = Tchacker_RememberSearch
+    forget_search = Tchacker_ForgetSearch
+    go_to_issue = Tchacker_GoToIssue
+    export_to_text = Tchacker_ExportToText
+    export_to_csv_form = Tchacker_ExportToCSVForm
+    export_to_csv = Tchacker_ExportToCSV
+    change_several_bugs = Tchacker_ChangeSeveralBugs
 

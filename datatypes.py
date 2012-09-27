@@ -42,10 +42,9 @@ class TchackerList(Enumerate):
 
 
     def get_options(cls):
-        elements = cls.tchacker.get_resource(cls.element).handler
-        return [{'name': record.id,
-                 'value': elements.get_record_value(record, 'title')}
-                for record in elements.get_records_in_order()]
+        elements = cls.tchacker.get_resource(cls.element)
+        return [{'name': x.name, 'value': x.get_value('title')}
+                for x in elements.get_resources_in_order()]
 
 
 
@@ -67,22 +66,20 @@ class ProductInfoList(Enumerate):
 
     def get_options(cls):
         tchacker = cls.tchacker
-        products = tchacker.get_resource('product').handler
-        elements = tchacker.get_resource(cls.element).handler
+        products = tchacker.get_resource('product')
+        elements = tchacker.get_resource(cls.element)
 
         options = []
-        for record in elements.get_records_in_order():
-            title = elements.get_record_value(record, 'title')
-            product_id = elements.get_record_value(record, 'product')
+        for record in elements.get_resources_in_order():
+            title = record.get_value('title')
+            product_id = record.get_value('product')
 
             # Product title
             if product_id is None:
                 continue
-            product_id = int(product_id)
-            product_record = products.get_record(product_id)
-            product_title = products.get_record_value(product_record, 'title')
+            product_title = products.get_resource(product_id).get_title()
 
-            options.append({'name': record.id,
+            options.append({'name': product_id,
                             'value': '%s - %s' % (product_title, title)})
         return options
 

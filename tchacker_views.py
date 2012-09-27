@@ -30,22 +30,25 @@ from itools.stl import stl
 from itools.uri import encode_query, Reference
 from itools.web import BaseView, STLView, FormError, INFO, ERROR
 from itools.web.views import process_form
+from itools.handlers import checkid
 #from itools.uri import encode_query
 from itools.xml import XMLParser
 
 # Import from ikaaro
+from ikaaro.autoadd import AutoAdd
 from ikaaro.autoform import TextWidget
 from ikaaro.buttons import BrowseButton
 from ikaaro import messages
 from ikaaro.views import BrowseForm, ContextMenu
-#from ikaaro.views_new import NewInstance
 #from ikaaro.database import Database
 from ikaaro.cc import Followers_Datatype
+from ikaaro.fields import Text_Field
 
 from issue import Issue
 from datatypes import get_issue_fields, TchackerList, ProductInfoList
 #from datatypes import Tchacker_UsersList
 from stored import StoredSearch
+from tables import Tchacker_Item
 from monkey import Image, Video
 
 
@@ -143,8 +146,7 @@ class StoreSearchMenu(ContextMenu):
         if search_name is not None:
             resource = context.resource
             search = resource.get_resource(search_name, soft=True)
-            ac = resource.get_access_control()
-            if search and ac.is_allowed_to_edit(context.user, search):
+            if search and root.is_allowed_to_edit(context.user, search):
                 return True
         return False
 
@@ -169,15 +171,14 @@ class StoredSearchesMenu(ContextMenu):
         search_name = context.get_query_value('search_name')
         base = '%s/;view' % context.get_link(resource)
         items = []
-        ac = resource.get_access_control()
         for item in resource.search_resources(cls=StoredSearch):
-            if not ac.is_allowed_to_view(context.user, item):
+            if not root.is_allowed_to_view(context.user, item):
                 continue
             # Make the title
-            get_value = item.handler.get_value
+            get_value = item.get_value('data').get_value
             query = resource.get_search_query(get_value)
-            issues_nb = len(root.search(query))
-            kw = {'search_title': item.get_property('title'),
+            issues_nb = len(context.search(query))
+            kw = {'search_title': item.get_value('title'),
                   'issues_nb': issues_nb}
             title = MSG(u'{search_title} ({issues_nb})')
             title = title.gettext(**kw)
@@ -220,34 +221,25 @@ class TchackerViewMenu(ContextMenu):
 ###########################################################################
 # Views
 ###########################################################################
-#class Tchacker_NewInstance(NewInstance):
-#
-#    schema = merge_dicts(NewInstance.schema, product=Unicode(mandatory=True))
-#    widgets = NewInstance.widgets + [
-#        TextWidget('product', title=MSG(u'Give the title of one Product'))]
-#
-#
-#    def action(self, resource, context, form):
-#        # Get the container
-#        container = form['container']
-#        # Make the resource
-#        name = form['name']
-#        class_id = context.query['type']
-#        cls = Database.get_resource_class(class_id)
-#        child = container.make_resource(name, cls)
-#        # The metadata
-#        language = container.get_edit_languages(context)[0]
-#        title = Property(form['title'], lang=language)
-#        child.metadata.set_property('title', title)
-#        # Add the initial product
-#        product = form['product']
-#        table = container.get_resource('%s/product' % name).get_handler()
-#        product = Property(product, language='en')
-#        table.add_record({'title': product})
-#        # Ok
-#        goto = str(resource.get_pathto(child))
-#        return context.come_back(messages.MSG_NEW_RESOURCE, goto=goto)
-#
+class Tchacker_NewInstance(AutoAdd):
+
+    fields = ['title', 'location', 'product']
+
+    product = Text_Field(required=True,
+                        title=MSG(u'Give the title of one Product'))
+
+
+    def make_new_resource(self, resource, context, form):
+        proxy = super(Tchacker_NewInstance, self)
+        tchacker = proxy.make_new_resource(resource, context, form)
+
+        products = tchacker.get_resource('product')
+        title = form['product']
+        name = checkid(title.values()[0])
+        products.make_resource(name, Tchacker_Item, title=title)
+
+        return tchacker
+
 
 
 class Tchacker_AddIssue(STLView):
@@ -348,8 +340,8 @@ class Tchacker_View(BrowseForm):
 
 
     def get_query_schema(self):
-        return merge_dicts(BrowseForm.get_query_schema(self),
-                           self.tchacker_schema)
+        proxy = super(Tchacker_View, self)
+        return merge_dicts(proxy.get_query_schema(), self.tchacker_schema)
 
 
     def on_query_error(self, resource, context):
@@ -381,7 +373,8 @@ class Tchacker_View(BrowseForm):
                 goto = ';search'
                 return context.come_back(msg, goto=goto, sname=search_name)
         # Ok
-        return BrowseForm.GET(self, resource, context)
+        proxy = super(Tchacker_View, self)
+        return proxy.GET(resource, context)
 
 
     def get_namespace(self, resource, context):
@@ -644,7 +637,7 @@ class Tchacker_Search(Tchacker_View):
 
     def get_query(self, context):
         try:
-            return BrowseForm.get_query(self, context)
+            return super(Tchacker_Search, self).get_query(context)
         except FormError:
             schema = self.get_query_schema()
             query = {}
@@ -666,7 +659,7 @@ class Tchacker_Search(Tchacker_View):
             search = get_resource(search_name)
             get_value = search.handler.get_value
             get_values = search.get_values
-            search_title = search.get_property('title')
+            search_title = search.get_value('title')
         else:
             get_value = query.get
             get_values = query.get
@@ -683,16 +676,13 @@ class Tchacker_Search(Tchacker_View):
         assigned_to = get_values('assigned_to')
 
         # is_admin
-        ac = resource.get_access_control()
-        pathto_website = resource.get_pathto(resource.get_site_root())
-
         return  {
            'search_name': search_name,
            'search_title': search_title,
            'text': get_value('text'),
            'mtime': get_value('mtime'),
-           'is_admin': ac.is_admin(context.user, resource),
-           'manage_assigned': '%s/;browse_users' % pathto_website,
+           'is_admin': context.root.is_admin(context.user, resource),
+           'manage_assigned': '/users/;browse_users',
            'products': TchackerList(element='product',
                                    tchacker=resource).get_namespace(product),
            'modules': ProductInfoList(element='module',
@@ -722,11 +712,11 @@ class Tchacker_Search(Tchacker_View):
     """
     # XXX
     def get_namespace(self, resource, context):
-        search_template = resource.get_resource(self.search_template)
+        search_template = context.get_template(self.search_template)
         search_namespace = self.get_search_namespace(resource, context)
         get_resource = resource.get_resource
         products = get_resource('product')
-        title = products.get_property('title')
+        title = products.get_value('title')
         #namespace = .get_namespace(resource, context)
         namespace = self.get_search_namespace(resource, context)
         namespace['batch'] = None
@@ -776,7 +766,7 @@ class Tchacker_RememberSearch(BaseView):
             searches = resource.search_resources(cls=StoredSearch)
             for search in searches:
                 # Found !
-                if title == search.get_property('title'):
+                if title == search.get_value('title'):
                     search_name = search.name
                     message = MSG(u'The search has been modified.')
                     break
@@ -1206,3 +1196,4 @@ class Tchacker_Zip_Img(Tchacker_ViewBottom):
         context.set_content_disposition('attachment; filename=%s' % zipname)
         return data
 """
+

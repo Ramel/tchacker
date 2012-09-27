@@ -25,37 +25,32 @@ from itools.datatypes import Boolean, String
 from itools.datatypes import Enumerate
 from itools.gettext import MSG
 from itools.database import PhraseQuery, AndQuery
+from itools.uri import normalize_path
 
 # Import from ikaaro
 from ikaaro.autoform import title_widget, CheckboxWidget, SelectWidget
 from ikaaro.autoform import ReadOnlyWidget
-#from ikaaro.datatypes import Multilingual
+from ikaaro.config_common import NewResource_Local
+from ikaaro.resource_ import DBResource
 from ikaaro.fields import Field #Multilingual
-from ikaaro.obsolete.table import OrderedTable, OrderedTableFile
-from ikaaro.obsolete.table_views import OrderedTable_View, Table_EditRecord
+from ikaaro.order import OrderedFolder, OrderedFolder_BrowseContent
+from ikaaro.autoedit import AutoEdit
+from ikaaro.autoadd import AutoAdd
+from ikaaro.enumerates import DynamicEnumerate_Field
 
-
-
-class ProductsEnumerate(Enumerate):
-
-    def get_options(cls):
-        products = cls.products.handler
-        return [
-            {'name': str(x.id),
-             'value': products.get_record_value(x, 'title')}
-            for x in products.get_records_in_order() ]
 
 
 ###########################################################################
 # Views
 ###########################################################################
-class SelectTable_View(OrderedTable_View):
+class SelectTable_View(OrderedFolder_BrowseContent):
 
     access = 'is_allowed_to_view'
 
     def get_table_columns(self, resource, context):
-        cls = OrderedTable_View
-        columns = cls.get_table_columns(self, resource, context)
+        proxy = super(SelectTable_View, self)
+        columns = proxy.get_table_columns(resource, context)
+        columns = columns[:]
         columns.append(('issues', MSG(u'Issues')))
         if resource.name == 'product':
             # Add specific columns for the product table
@@ -71,15 +66,15 @@ class SelectTable_View(OrderedTable_View):
 
             # Build the search query
             query_terms = resource.parent.get_issues_query_terms()
-            query_terms.append(PhraseQuery(filter, item.id))
+            query_terms.append(PhraseQuery(filter, item.name))
             query = AndQuery(*query_terms)
 
             # Search
-            results = context.root.search(query)
+            results = context.search(query)
             count = len(results)
             if count == 0:
                 return 0, None
-            return count, '../;view?%s=%s' % (filter, item.id)
+            return count, '../;view?%s=%s' % (filter, item.name)
         # Don't show the "edit" link when i am not an admin.
         elif column == 'id':
             ac = resource.get_access_control()
@@ -93,9 +88,9 @@ class SelectTable_View(OrderedTable_View):
                 return id
 
         # Default
-        cls = OrderedTable_View
-        value = cls.get_item_value(self, resource, context, item, column)
-
+        proxy = super(SelectTable_View, self)
+        value = proxy.get_item_value(resource, context, item, column)
+        
         # FIXME The field 'product' is reserved to make a reference to the
         # 'products' table.  Currently it is used by the 'versions' and
         # 'modules' tables.
@@ -103,16 +98,13 @@ class SelectTable_View(OrderedTable_View):
         # the 'modules' and 'versions' tables. Currently it is used by the
         # 'product' table
         if column == 'product':
-            value = int(value)
-            handler = resource.parent.get_resource('product').handler
-            record = handler.get_record(value)
-            return handler.get_record_value(record, 'title')
+            return resource.get_resource('../product/%s' % value).get_title()
         elif column in ('modules', 'versions'):
             # Strip 's' modules -> module
             associated_table = resource.get_resource('../%s' % column[:-1])
-            handler = associated_table.handler
             # Search
-            results = handler.search('product', str(item.id))
+            results = [ x for x in associated_table.get_resources()
+                        if x.get_value('product') == item.name ]
             count = len(results)
             if count == 0:
                 return 0, None
@@ -125,8 +117,8 @@ class SelectTable_View(OrderedTable_View):
         # Sort
         sort_by = context.query['sort_by']
         if sort_by != 'issues':
-            cls = OrderedTable_View
-            return cls.sort_and_batch(self, resource, context, items)
+            proxy = super(SelectTable_View, self)
+            return proxy.sort_and_batch(resource, context, items)
 
         reverse = context.query['reverse']
         f = lambda x: self.get_item_value(resource, context, x, 'issues')[0]
@@ -174,37 +166,31 @@ class SelectTable_View(OrderedTable_View):
         context.message = message
 
 
-
-class SelectTable_EditRecord(Table_EditRecord):
-
-    def get_widgets(self, resource, context):
-        widgets = Table_EditRecord.get_widgets(self, resource, context)
-        return [ widget if widget.name != 'product' else
-                 ReadOnlyWidget('product', title=MSG(u'Product'))
-                 for widget in widgets ]
-
-
-
 ###########################################################################
 # Resources
 ###########################################################################
-class Tchacker_TableHandler(OrderedTableFile):
+class Tchacker_Item(DBResource):
+    class_id = 'tchacker-item'
+    class_title = MSG(u"Tchacker Item")
+    title = DBResource.title(required=True)
 
-    record_properties = {'title': Field(mandatory=True)}
+    new_instance = AutoAdd(fields=['title'])
 
 
-
-class Tchacker_TableResource(OrderedTable):
+class Tchacker_TableResource(OrderedFolder):
 
     class_id = 'tchacker_select_table'
     class_title = MSG(u'Select Table')
-    class_handler = Tchacker_TableHandler
+    class_views = OrderedFolder.class_views + ['add_item']
 
     # Hide in browse_content
     is_content = False
 
     form = [title_widget]
 
+
+    def get_document_types(self):
+        return [Tchacker_Item]
 
     def get_options(self, value=None, sort=None):
         # Find out the options
@@ -233,60 +219,56 @@ class Tchacker_TableResource(OrderedTable):
         return options
 
 
-    view = SelectTable_View()
-    edit_record = SelectTable_EditRecord()
+    view = SelectTable_View
+    add_item = NewResource_Local(title=MSG(u'Add item'),
+                                 include_subclasses=False)
 
 
 
-class ModulesHandler(Tchacker_TableHandler):
+class Modules_Item_New(AutoAdd):
+    fields = ['title', 'product']
+    def get_field(self, name):
+        field = super(Modules_Item_New, self).get_field(name)
+        if name == 'product':
+            path = normalize_path('%s/../product' % self.resource.abspath)
+            return field(resource_path=path)
+        return field
 
-    record_properties = merge_dicts(
-        Tchacker_TableHandler.record_properties,
-        product=String(mandatory=True))
+
+class Modules_Item_Edit(AutoEdit):
+
+    fields = ['title', 'product']
+    def get_field(self, resource, name):
+        field = super(Modules_Item_Edit, self).get_field(resource, name)
+        if name == 'product':
+            path = normalize_path('%s/../../product' % self.resource.abspath)
+            return field(resource_path=path, widget=ReadOnlyWidget)
+        return field
+
+
+
+class Modules_Item(Tchacker_Item):
+
+    class_id = "modules-item"
+    class_views = ['edit']
+
+    product = DynamicEnumerate_Field(required=True, title=MSG(u'Product'),
+                                     widget=SelectWidget)
+
+    new_instance = Modules_Item_New
+    edit = Modules_Item_Edit
 
 
 
 class ModulesResource(Tchacker_TableResource):
 
     class_id = 'tchacker_modules'
-    class_handler = ModulesHandler
 
-    def get_schema(self):
-        products = self.parent.get_resource('product')
-        return merge_dicts(
-            ModulesHandler.record_properties,
-            product=ProductsEnumerate(products=products, mandatory=True))
-
-
-    form = [
-        SelectWidget('product', title=MSG(u'Product')),
-        title_widget]
+    def get_document_types(self):
+        return [Modules_Item]
 
 
 
-class VersionsHandler(ModulesHandler):
-
-    record_properties = merge_dicts(
-        ModulesHandler.record_properties,
-        released=Boolean)
-
-
-
-class VersionsResource(Tchacker_TableResource):
+class VersionsResource(ModulesResource):
 
     class_id = 'tchacker_versions'
-    class_handler = VersionsHandler
-
-    def get_schema(self):
-        products = self.parent.get_resource('product')
-        return merge_dicts(
-            VersionsHandler.record_properties,
-            product=ProductsEnumerate(products=products, mandatory=True))
-
-
-    form = [
-        SelectWidget('product', title=MSG(u'Product')),
-        title_widget,
-        CheckboxWidget('released', title=MSG(u'Released'))]
-
-

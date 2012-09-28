@@ -25,17 +25,19 @@
 from itools.csv import Property
 from itools.datatypes import Unicode, XMLContent
 from itools.gettext import MSG
-from itools.web import BaseView, STLView
+from itools.web import get_context, BaseView, STLView
 from itools.xml import XMLParser
 
 # Import from ikaaro
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
+from ikaaro.widgets import Widget
+from ikaaro.utils import make_stl_template
 
 # Import from tchacker
 from datatypes import get_issue_fields
 from comments import TchackerCommentsView
-
+#from issue import Issue
 
 
 def check_properties_differencies(prop1, prop2):
@@ -46,6 +48,78 @@ def check_properties_differencies(prop1, prop2):
         return prop2 is not None
     else:
         raise TypeError('This method wait for Property, or list of Property')
+
+
+
+###########################################################################
+# Widgets
+###########################################################################
+class ProductsSelectWidget(Widget):
+
+    template = make_stl_template("""
+    <script type="text/javascript">
+    var list_products = {<stl:inline stl:repeat="product products">
+        "${product/id}":
+            {'module':
+                [<stl:inline stl:repeat="module product/modules">
+                    {"id": "${module/id}", "value": "${module/value}"},
+                </stl:inline>],
+                'version':
+                [<stl:inline stl:repeat="version product/versions">
+                    {"id": "${version/id}", "value": "${version/value}"},
+                </stl:inline>]}
+            ,</stl:inline>
+        }
+    function update_tracker(){
+      update_tracker_list('version');
+      update_tracker_list('module');
+    }
+    </script>
+    <select id="${id}" name="${name}" multiple="${multiple}" size="${size}"
+      class="${css}">
+      <option value="" stl:if="has_empty_option"></option>
+      <option stl:repeat="option options" value="${option/name}"
+        selected="${option/selected}">${option/value}</option>
+    </select>""")
+
+
+    css = None
+    has_empty_option = True
+    size = None
+
+
+    def multiple(self):
+        #print("multiple = %s" % self.datatype.multiple)
+        return self.datatype.multiple
+
+
+    def products(self):
+        context = get_context()
+        if context is None:
+            return
+        resource = context.resource
+        #XXX Issue?
+        """
+        if isinstance(resource, issue.Issue):
+            tracker = resource.parent
+        else:
+            tracker = context.resource
+        """
+        tracker = context.resource
+        return tracker.get_list_products_namespace()
+
+    def options(self):
+        value = self.value
+        print("self.datatype.get_namespace(value) = %s" %
+                    self.datatype.get_namespace(value))
+        print("value = %s" % value)
+        # Check whether the value is already a list of options
+        # FIXME This is done to avoid a bug when using a select widget in an
+        # auto-form, where the 'datatype.get_namespace' method is called
+        # twice (there may be a better way of handling this).
+        if type(value) is not list:
+            return self.datatype.get_namespace(value)
+        return value
 
 
 ###########################################################################

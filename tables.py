@@ -90,7 +90,7 @@ class SelectTable_View(OrderedFolder_BrowseContent):
         # Default
         proxy = super(SelectTable_View, self)
         value = proxy.get_item_value(resource, context, item, column)
-        
+
         # FIXME The field 'product' is reserved to make a reference to the
         # 'products' table.  Currently it is used by the 'versions' and
         # 'modules' tables.
@@ -170,7 +170,7 @@ class SelectTable_View(OrderedFolder_BrowseContent):
 # Resources
 ###########################################################################
 class Tchacker_Item(DBResource):
-    class_id = 'tchacker-item'
+    class_id = 'tchacker_item'
     class_title = MSG(u"Tchacker Item")
     title = DBResource.title(required=True)
 

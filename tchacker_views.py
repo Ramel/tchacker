@@ -24,6 +24,7 @@
 from itools.core import merge_dicts, proto_lazy_property
 from itools.csv import CSVFile, Property
 from itools.datatypes import Boolean, Integer, String, Unicode
+from itools.datatypes import Enumerate
 from itools.gettext import MSG
 from itools.handlers.utils import transmap
 from itools.stl import stl
@@ -31,22 +32,23 @@ from itools.uri import encode_query, Reference
 from itools.web import BaseView, STLView, FormError, INFO, ERROR
 from itools.web.views import process_form
 from itools.handlers import checkid
-#from itools.uri import encode_query
 from itools.xml import XMLParser
+from itools.core import freeze
 
 # Import from ikaaro
 from ikaaro.autoadd import AutoAdd
-from ikaaro.autoform import TextWidget
+from ikaaro.autoform import AutoForm, TextWidget
 from ikaaro.buttons import BrowseButton
 from ikaaro import messages
 from ikaaro.views import BrowseForm, ContextMenu
-#from ikaaro.database import Database
 from ikaaro.cc import Followers_Datatype
 from ikaaro.fields import Text_Field
+from ikaaro.widgets import SelectWidget, MultilineWidget
+from ikaaro.widgets import FileWidget, ProgressBarWidget
 
 from issue import Issue
+from issue_views import ProductsSelectWidget
 from datatypes import get_issue_fields, TchackerList, ProductInfoList
-#from datatypes import Tchacker_UsersList
 from stored import StoredSearch
 from tables import Tchacker_Item
 from monkey import Image, Video
@@ -242,14 +244,31 @@ class Tchacker_NewInstance(AutoAdd):
 
 
 
-class Tchacker_AddIssue(STLView):
+class Tchacker_AddIssue(AutoForm):
 
     access = 'is_allowed_to_edit'
     title = MSG(u'Add')
     icon = 'new.png'
-    template = '/ui/tchacker/add_issue.xml'
+    #template = '/ui/tchacker/add_issue.xml'
     styles = ['/ui/tchacker/style.css']
     scripts = ['/ui/tchacker/tchacker.js']
+    form_id = "tchacker-add-issue"
+    method = 'post'
+
+    widgets = freeze([
+        TextWidget('title', title=MSG(u'Title:')),
+        SelectWidget('assigned_to', title=MSG(u'Assigned To:')),
+        ProductsSelectWidget('product', title=MSG(u'Product:')),
+        SelectWidget('type', title=MSG(u'Type:')),
+        SelectWidget('cc_list', title=MSG(u'CC:')),
+        SelectWidget('module', title=MSG(u'Module:')),
+        SelectWidget('version', title=MSG(u'Version:')),
+        SelectWidget('state', title=MSG(u'State:')),
+        SelectWidget('priority', title=MSG(u'Priority:')),
+        MultilineWidget('comment', title=MSG(u'New Comment:')),
+        FileWidget('attachment', title=MSG(u'Attachment:')),
+        ProgressBarWidget()
+        ])
 
 
     def get_schema(self, resource, context):
@@ -266,7 +285,12 @@ class Tchacker_AddIssue(STLView):
     def get_value(self, resource, context, name, datatype):
         if getattr(datatype, 'mandatory', False):
             datatype = datatype(mandatory=False)
-        value = context.get_query_value(name, type=datatype)
+        value = context.get_form_value(name, datatype)
+        if value is None:
+            value = datatype.get_default()
+            return value
+        if issubclass(datatype, Enumerate):
+            value = datatype.get_namespace(value)
         # By default, set cc_list to the current user
         if name == 'cc_list' and not value:
             return [context.user.name]
@@ -274,11 +298,18 @@ class Tchacker_AddIssue(STLView):
 
 
     def get_namespace(self, resource, context):
-        namespace = STLView.get_namespace(self, resource, context)
+        proxy = super(Tchacker_AddIssue, self)
+        namespace = proxy.get_namespace(resource, context)
+        fields = self.get_schema(resource, context)
         namespace['list_products'] = resource.get_list_products_namespace()
+        #print("namespace = %s" % namespace['fields']['comment'])
+        #for x in namespace['fields']['comment']:
+        #    print x
+        """
         if(namespace['comment']['error'] is not None):
             namespace['comment']['error'] = MSG(
                 u'This field is required (or can be emtpy if an attachment is joined)')
+        """
         return namespace
 
 
@@ -657,7 +688,8 @@ class Tchacker_Search(Tchacker_View):
         search_name = query['search_name']
         if search_name:
             search = get_resource(search_name)
-            get_value = search.handler.get_value
+            #get_value = search.handler.get_value
+            get_value = search.get_value
             get_values = search.get_values
             search_title = search.get_value('title')
         else:

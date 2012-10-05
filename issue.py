@@ -147,7 +147,6 @@ class Issue(CommentsAware, Folder):
         old_metadata = self.metadata.clone()
         # Title
         language = self.get_edit_languages(context)[0]
-        print form['title']
         for lang, title in form['title'].items():
             self.set_value('title', title.strip(), language=lang) 
         # Version, Priority, etc.
@@ -162,14 +161,12 @@ class Issue(CommentsAware, Folder):
         comment = form['comment']
 
         # Attachment
-        attachment = form['attachment']
+        #attachment = form['attachment']
+        attachment = None
         
         ids = 1
         if not new:
             if comment or not attachment:
-                #if ((not(comment) and attachment)
-                #            (comment and not(attachment)) or
-                #            (comment and attachment)):
                 ids = int(self.get_value('ids')) + 1
             else:
                 ids = int(self.get_value('ids'))
@@ -542,19 +539,25 @@ class IssueModel(Model):
         for field_name, field in self.base_class.get_fields():
             if not field.readonly:
                 self.make_resource(field_name, ModelField_Inherited)
-
+        
+        ####################
         # Demonstration data
+        ####################
+        # Priority
         field = self.make_resource('priority', ModelField_Choices)
         field.make_resource('high', Choice)
         field.make_resource('medium', Choice)
         field.make_resource('low', Choice)
+        # Product
         field = self.make_resource('product', ModelField_Choices)
         field.make_resource('projet - module1', Choice)
         field.make_resource('projet - module2', Choice)
+        # Type
         field = self.make_resource('type', ModelField_Choices)
         field.make_resource('props - 2d', Choice)
         field.make_resource('props - 3d modelisation', Choice)
         field.make_resource('props - 3d texturing', Choice)
+        # State
         field = self.make_resource('state', ModelField_Choices)
         field.make_resource('awaiting validation', Choice)
         field.make_resource('in progress', Choice)

@@ -176,6 +176,14 @@ class Issue_NewInstance(AutoAdd):
         new_issue.add_comment(context, form, new=True)
         
         return new_issue
+    
+    def get_field(self, name):
+        field = super(Issue_NewInstance, self).get_field(name)
+        print("name = %s" % name)
+        if (name == 'title' or name == 'product' or
+            name == 'comment' or name == 'state' or name == 'type'):
+            return field(required=True)
+        return field
 
 #    access = 'is_allowed_to_edit'
 #    title = MSG(u'Add')
@@ -268,8 +276,14 @@ class Issue_Edit(AutoEdit):
     title = MSG(u'Edit Issue')
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
               'version', 'state', 'priority', 'comment', 'attachment']
-
-
+    """
+    def get_field(self, resource, name):
+        field = super(Issue_Edit, self).get_field(resource, name)
+        if (name == 'title' or name == 'product' or
+            name == 'comment' or name == 'state' or name == 'type'):
+            return field(required=True)
+        return field
+    """
 #   template = '/ui/tchacker/edit_issue.xml'
 #   styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
 #   scripts = ['/ui/tchacker/tchacker.js', '/ui/thickbox/thickbox.js',

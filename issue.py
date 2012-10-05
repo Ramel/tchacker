@@ -51,6 +51,7 @@ from videoencoding import VideoEncodingToFLV
 from PIL import Image as PILImage
 
 # Import from Tchacker
+from issue_views import Issue_NewInstance
 from issue_views import IssueTchackerMenu, Issue_History
 from issue_views import Issue_DownloadAttachments, Issue_Edit
 from monkey import Image, Video
@@ -65,17 +66,26 @@ class Issue(CommentsAware, Folder):
     class_views = ['edit', 'edit_resources', 'browse_content', 'history']
 
     # Views
-    edit = Issue_Edit()
+    new_instance = Issue_NewInstance
+    edit = Issue_Edit
 
     # Metadata
-    product = Integer_Field(indexed=True, stored=True)
-    module = Integer_Field(indexed=True, stored=True)
-    version = Integer_Field(indexed=True, stored=True)
-    type = Integer_Field(indexed=True, stored=True)
-    state = Integer_Field(indexed=True, stored=True)
-    priority = Integer_Field(indexed=True, stored=True)
-    assigned_to = Followers_Field(indexed=True, stored=True)
-    cc_list = Followers_Field(multiple=True)
+    product = Integer_Field(indexed=True, stored=True,
+                                    title=MSG(u'Product'))
+    module = Integer_Field(indexed=True, stored=True,
+                                    title=MSG(u'Module'))
+    version = Integer_Field(indexed=True, stored=True,
+                                    title=MSG(u'Version'))
+    type = Integer_Field(indexed=True, stored=True,
+                                    title=MSG(u'Type'))
+    state = Integer_Field(indexed=True, stored=True,
+                                    title=MSG(u'State'))
+    priority = Integer_Field(indexed=True, stored=True,
+                                    title=MSG(u'Priority'))
+    assigned_to = Followers_Field(indexed=True, stored=True,
+                                    title=MSG(u'Assigned To'))
+    cc_list = Followers_Field(multiple=True,
+                                    title=MSG(u'CC List'))
     # Other
     id = Integer_Field(indexed=True, stored=True)
     attachment = URI_Field(multiple=True)

@@ -29,6 +29,7 @@ from itools.web import get_context, BaseView, STLView
 from itools.xml import XMLParser
 
 # Import from ikaaro
+from ikaaro.autoadd import AutoAdd
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
 from ikaaro.widgets import Widget
@@ -153,6 +154,99 @@ class Issue_DownloadAttachments(BaseView):
         context.set_content_disposition('inline', filename)
         # Ok
         return data
+
+
+
+class Issue_NewInstance(AutoAdd):
+
+    automatic_resource_name = True
+
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
+                'version', 'state', 'priority']
+
+#    access = 'is_allowed_to_edit'
+#    title = MSG(u'Add')
+#    icon = 'new.png'
+#    #template = '/ui/tchacker/add_issue.xml'
+#    styles = ['/ui/tchacker/style.css']
+#    scripts = ['/ui/tchacker/tchacker.js']
+#    form_id = "tchacker-add-issue"
+#    method = 'post'
+#
+#    widgets = freeze([
+#        TextWidget('title', title=MSG(u'Title:')),
+#        SelectWidget('assigned_to', title=MSG(u'Assigned To:')),
+#        ProductsSelectWidget('product', title=MSG(u'Product:')),
+#        SelectWidget('type', title=MSG(u'Type:')),
+#        SelectWidget('cc_list', title=MSG(u'CC:')),
+#        SelectWidget('module', title=MSG(u'Module:')),
+#        SelectWidget('version', title=MSG(u'Version:')),
+#        SelectWidget('state', title=MSG(u'State:')),
+#        SelectWidget('priority', title=MSG(u'Priority:')),
+#        MultilineWidget('comment', title=MSG(u'New Comment:')),
+#        FileWidget('attachment', title=MSG(u'Attachment:')),
+#        ProgressBarWidget()
+#        ])
+#
+#
+#    def get_schema(self, resource, context):
+#        schema = get_issue_fields(resource)
+#        comment = context.get_form_value('comment')
+#        attachment = context.get_form_value('attachment')
+#        if comment is None and attachment is True:
+#            schema['comment'] = Unicode(mandatory=False)
+#        if (comment is None or comment == '') and attachment is None:
+#            schema['comment'] = Unicode(mandatory=True)
+#        return schema
+#
+#
+#    def get_value(self, resource, context, name, datatype):
+#        if getattr(datatype, 'mandatory', False):
+#            datatype = datatype(mandatory=False)
+#        value = context.get_form_value(name, datatype)
+#        if value is None:
+#            value = datatype.get_default()
+#            return value
+#        if issubclass(datatype, Enumerate):
+#            value = datatype.get_namespace(value)
+#        # By default, set cc_list to the current user
+#        if name == 'cc_list' and not value:
+#            return [context.user.name]
+#        return value
+#
+#
+#    def get_namespace(self, resource, context):
+#        proxy = super(Tchacker_AddIssue, self)
+#        namespace = proxy.get_namespace(resource, context)
+#        fields = self.get_schema(resource, context)
+#        namespace['list_products'] = resource.get_list_products_namespace()
+#        #print("namespace = %s" % namespace['fields']['comment'])
+#        #for x in namespace['fields']['comment']:
+#        #    print x
+#        """
+#        if(namespace['comment']['error'] is not None):
+#            namespace['comment']['error'] = MSG(
+#                u'This field is required (or can be emtpy if an attachment is joined)')
+#        """
+#        return namespace
+#
+#
+#    def action(self, resource, context, form):
+#        comment = form['comment']
+#        attachment = form['attachment']
+#        if comment == '' and attachment is not None:
+#            form['comment'] = "comment_is_empty_but_has_attachment"
+#
+#        # Add
+#        id = resource.get_new_id()
+#        issue_cls = resource.issue_class
+#        issue = resource.make_resource(id, issue_cls)
+#        issue.add_comment(context, form, new=True)
+#
+#        # Ok
+#        message = INFO(u'New issue added.')
+#        goto = './%s/' % id
+#        return context.come_back(message, goto=goto)
 
 
 

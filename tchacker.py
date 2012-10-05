@@ -30,15 +30,17 @@ from itools.gettext import MSG
 from itools.database import RangeQuery, AndQuery, OrQuery, PhraseQuery
 
 # Import from ikaaro
+from ikaaro.autoadd import AutoAdd
+from ikaaro.config_common import NewResource_Local
 from ikaaro.folder import Folder
 from ikaaro.utils import get_base_path_query
 from ikaaro.autoadd import AutoAdd
 
 from issue import Issue
-from tchacker_views import Tchacker_NewInstance
+from model import IssueModel
 from tchacker_views import Tchacker_View #, Tchacker_Zip_Img
 from tchacker_views import GoToIssueMenu, StoredSearchesMenu
-from tchacker_views import Tchacker_AddIssue, Tchacker_GoToIssue
+from tchacker_views import Tchacker_GoToIssue
 from tchacker_views import Tchacker_ExportToCSVForm, Tchacker_ExportToCSV
 from tchacker_views import Tchacker_ExportToText, Tchacker_ChangeSeveralBugs
 from tchacker_views import Tchacker_RememberSearch, Tchacker_ForgetSearch
@@ -74,41 +76,46 @@ class Tchacker(Folder):
     class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_icon16 = 'tchacker/tchacker16.png'
     class_icon48 = 'tchacker/tchacker48.png'
-    class_views = ['search', 'add_issue', 'browse_content', 'edit']  #+ ['zip']
+    class_views = ['browse_content', 'search', 'add_issue', 'edit']  #+ ['zip']
 
-    __fixed_handlers__ = ['product', 'module', 'version', 'type', 'priority',
-        'state']
+    __fixed_handlers__ = ['model']
 
     # Configuration
-    issue_class = Issue
     stored_search_class = StoredSearch
 
     def init_resource(self, **kw):
-        Folder.init_resource(self, **kw)
-        # Products / Types / Priorities / States
-        for table_name, values in default_tables:
-            table = self.make_resource(table_name, Tchacker_TableResource)
-            for title in values:
-                table.make_resource(None, Tchacker_Item, title={'en': title})
-        # Modules
-        self.make_resource('module', ModulesResource)
-        # Versions
-        self.make_resource('version', VersionsResource)
-        # Pre-defined stored searches
-        open = StoredSearchFile(state='0')
-        not_assigned = StoredSearchFile(assigned_to='nobody')
-        high_priority = StoredSearchFile(state='0', priority='0')
-        i = 0
-        for search, title in [(open, u'Open Issues'),
-                              (not_assigned, u'Not Assigned'),
-                              (high_priority, u'High Priority')]:
-            ss = self.make_resource('s%s' % i, StoredSearch, title={'en': title})
-            ss.set_value('data', search)
-            i += 1
+        super(Tchacker, self).init_resource(**kw)
+
+        model = self.make_resource('model', IssueModel)
+
+
+#        # Products / Types / Priorities / States
+#        for table_name, values in default_tables:
+#            table = self.make_resource(table_name, Tchacker_TableResource)
+#            for title in values:
+#                table.make_resource(None, Tchacker_Item, title={'en': title})
+#        # Modules
+#        self.make_resource('module', ModulesResource)
+#        # Versions
+#        self.make_resource('version', VersionsResource)
+#
+#        # Pre-defined stored searches
+#        open = StoredSearchFile(state='0')
+#        not_assigned = StoredSearchFile(assigned_to='nobody')
+#        high_priority = StoredSearchFile(state='0', priority='0')
+#        i = 0
+#        for search, title in [(open, u'Open Issues'),
+#                              (not_assigned, u'Not Assigned'),
+#                              (high_priority, u'High Priority')]:
+#            ss = self.make_resource('s%s' % i, StoredSearch, title={'en': title})
+#            ss.set_value('data', search)
+#            i += 1
 
 
     def get_document_types(self):
-        return []
+        path = '%s/model' % str(self.abspath)
+        cls = self.database.get_resource_class(path)
+        return [cls]
 
 
     #######################################################################
@@ -135,8 +142,9 @@ class Tchacker(Folder):
 
 
     def get_issues_query_terms(self):
+        path = '%s/model' % str(self.abspath)
         return [get_base_path_query(self.abspath),
-                PhraseQuery('format', self.issue_class.class_id)]
+                PhraseQuery('format', path)]
 
 
     def get_list_products_namespace(self):
@@ -234,10 +242,10 @@ class Tchacker(Folder):
     context_menus = [GoToIssueMenu(), StoredSearchesMenu()]
 
     # Views
-    new_instance = Tchacker_NewInstance
+    new_instance = AutoAdd(fields=['title', 'location'])
     search = Tchacker_Search
     view = Tchacker_View
-    add_issue = Tchacker_AddIssue
+    add_issue = NewResource_Local(title=MSG(u'Add issue'))
     remember_search = Tchacker_RememberSearch
     forget_search = Tchacker_ForgetSearch
     go_to_issue = Tchacker_GoToIssue

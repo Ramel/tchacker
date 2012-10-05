@@ -31,7 +31,7 @@ from itools.xml import XMLParser
 # Import from ikaaro
 from ikaaro.autoadd import AutoAdd
 from ikaaro.autoedit import AutoEdit
-from ikaaro.fields import Textarea_Field
+from ikaaro.fields import Textarea_Field, File_Field
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
 from ikaaro.widgets import Widget
@@ -164,11 +164,18 @@ class Issue_NewInstance(AutoAdd):
     automatic_resource_name = True
 
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
-              'version', 'state', 'priority', 'comment']
+              'version', 'state', 'priority', 'comment', 'attachment']
 
     comment = Textarea_Field(title=MSG(u'Comment'))
+    #attachment = File_Field(title=MSG(u'Attachment'))
 
-
+    def make_new_resource(self, resource, context, form):
+        proxy = super(Issue_NewInstance, self)
+        new_issue = proxy.make_new_resource(resource, context, form)
+        
+        new_issue.add_comment(context, form, new=True)
+        
+        return new_issue
 
 #    access = 'is_allowed_to_edit'
 #    title = MSG(u'Add')
@@ -260,7 +267,7 @@ class Issue_Edit(AutoEdit):
 
     title = MSG(u'Edit Issue')
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
-              'version', 'state', 'priority']
+              'version', 'state', 'priority', 'comment', 'attachment']
 
 
 #   template = '/ui/tchacker/edit_issue.xml'

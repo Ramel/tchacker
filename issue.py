@@ -101,7 +101,7 @@ class Issue(CommentsAware, Folder):
     # API
     #######################################################################
     def get_title(self, language=None):
-        return u'#%s %s' % (self.name, self.get_property('title'))
+        return u'#%s %s' % (self.name, self.get_value('title'))
 
 
     def get_history(self):
@@ -118,7 +118,7 @@ class Issue(CommentsAware, Folder):
 
     # Tchacker
     def get_comments(self):
-        comments = self.metadata.get_property('comment')
+        comments = self.metadata.get_value('comment')
         if not comments:
             return None
         #base = self.get_canonical_path()
@@ -126,7 +126,7 @@ class Issue(CommentsAware, Folder):
 
 
     def get_attachments(self):
-        attachments = self.metadata.get_property('attachment')
+        attachments = self.metadata.get_value('attachment')
         if not attachments:
             return None
 
@@ -135,7 +135,7 @@ class Issue(CommentsAware, Folder):
 
 
     def get_attachments_ordered(self):
-        attachments = self.metadata.get_property('attachment')
+        attachments = self.metadata.get_value('attachment')
         if not attachments:
             return []
         #return dict([ (x.get_parameter('comment'), str(x.value)) for x in attachments])
@@ -146,11 +146,12 @@ class Issue(CommentsAware, Folder):
         # Keep a copy of the current metadata
         old_metadata = self.metadata.clone()
         # Title
-        title = form['title'].strip()
         language = self.get_edit_languages(context)[0]
-        self.set_property('title', title, language=language)
+        print form['title']
+        for lang, title in form['title'].items():
+            self.set_value('title', title.strip(), language=lang) 
         # Version, Priority, etc.
-        for name in ['product', 'module', 'version', 'type', 'state',
+        for name in ['product', 'type', 'state',
                      'priority', 'assigned_to']:
             value = form[name]
             self.set_property(name, value)
@@ -162,18 +163,16 @@ class Issue(CommentsAware, Folder):
 
         # Attachment
         attachment = form['attachment']
-        #print("ids = %s" % self.get_property('ids'))
-        #ids = int(self.get_property('ids'))
+        
         ids = 1
         if not new:
-            #print("ids = %s" % self.get_property('ids'))
-            if ((not(comment) and attachment) or
-                        (comment and not(attachment)) or
-                        (comment and attachment)):
-                ids = int(self.get_property('ids')) + 1
+            if comment or not attachment:
+                #if ((not(comment) and attachment)
+                #            (comment and not(attachment)) or
+                #            (comment and attachment)):
+                ids = int(self.get_value('ids')) + 1
             else:
-                ids = int(self.get_property('ids'))
-        #print("afterNotNew:ids = %s" % ids)
+                ids = int(self.get_value('ids'))
         att_name = ""
 
         if attachment is not None:
@@ -350,7 +349,7 @@ class Issue(CommentsAware, Folder):
                             author=author
                             )
         self.set_property('comment', comment)
-        #ids = int(self.get_property('ids'))
+        #ids = int(self.get_value('ids'))
         self.set_property('ids', ids)
 
         # Send a Notification Email
@@ -361,13 +360,13 @@ class Issue(CommentsAware, Folder):
             user_title = user.get_title()
         # Notify / To
         to_addrs = set(cc_list)
-        assigned_to = self.get_property('assigned_to')
+        assigned_to = self.get_value('assigned_to')
         if assigned_to:
             to_addrs.add(assigned_to)
         if user.name in to_addrs:
             to_addrs.remove(user.name)
         # Notify / Subject
-        tchacker_title = self.parent.get_property('title') or u'Tchacker Issue'
+        tchacker_title = self.parent.get_value('title') or u'Tchacker Issue'
         subject = '[%s #%s] %s' % (tchacker_title, self.name, title)
         # Notify / Body
         if isinstance(context.resource, self.__class__):
@@ -379,7 +378,7 @@ class Issue(CommentsAware, Folder):
                 u'issue, please visit:\n{issue_uri}')
         body = message.gettext(issue_uri=uri)
         body += '\n\n'
-        body += '#%s %s\n\n' % (self.name, self.get_property('title'))
+        body += '#%s %s\n\n' % (self.name, self.get_value('title'))
         message = MSG(u'The user {title} did some changes.')
         body +=  message.gettext(title=user_title)
         body += '\n\n'
@@ -405,7 +404,7 @@ class Issue(CommentsAware, Folder):
             user = root.get_user(to_addr)
             if not user:
                 continue
-            to_addr = user.get_property('email')
+            to_addr = user.get_value('email')
             root.send_email(to_addr, subject, text=body)
 
 
@@ -424,9 +423,9 @@ class Issue(CommentsAware, Folder):
             template = MSG(u'{field}: {old_value} to {new_value}')
             empty = MSG(u'[empty]').gettext(language=language)
         # Modification of title
-        last_prop = old_metadata.get_property('title')
+        last_prop = old_metadata.get_value('title')
         last_title = last_prop.value if last_prop else empty
-        new_title = self.get_property('title') or empty
+        new_title = self.get_value('title') or empty
         if last_title != new_title:
             field = MSG(u'Title').gettext(language=language)
             text = template.gettext(field=field, old_value=last_title,
@@ -442,9 +441,9 @@ class Issue(CommentsAware, Folder):
             ('state', MSG(u'State'))]
         for name, field in fields:
             field = field.gettext(language=language)
-            last_prop = old_metadata.get_property(name)
+            last_prop = old_metadata.get_value(name)
             last_value = last_prop.value if last_prop else None
-            new_value = self.get_property(name)
+            new_value = self.get_value(name)
             # Detect if modifications
             if last_value == new_value:
                 continue
@@ -468,14 +467,14 @@ class Issue(CommentsAware, Folder):
             modifications.append(text)
 
         # Modifications of assigned_to
-        new_user = self.get_property('assigned_to') or ''
-        last_prop = old_metadata.get_property('assigned_to')
+        new_user = self.get_value('assigned_to') or ''
+        last_prop = old_metadata.get_value('assigned_to')
         last_user = last_prop.value if last_prop else None
         if last_user != new_user:
             if last_user:
-                last_user = root.get_user(last_user).get_property('email')
+                last_user = root.get_user(last_user).get_value('email')
             if new_user:
-                new_user = root.get_user(new_user).get_property('email')
+                new_user = root.get_user(new_user).get_value('email')
             field = MSG(u'Assigned To').gettext(language=language)
             text = template.gettext(field=field, old_value=last_user or empty,
                                     new_value=new_user or empty,
@@ -483,18 +482,18 @@ class Issue(CommentsAware, Folder):
             modifications.append(text)
 
         # Modifications of cc_list
-        last_prop = old_metadata.get_property('cc_list')
+        last_prop = old_metadata.get_value('cc_list')
         last_cc = list(last_prop.value) if last_prop else ()
-        new_cc = self.get_property('cc_list')
+        new_cc = self.get_value('cc_list')
         new_cc = list(new_cc) if new_cc else []
         if last_cc != new_cc:
             last_values = []
             for cc in last_cc:
-                value = root.get_user(cc).get_property('email')
+                value = root.get_user(cc).get_value('email')
                 last_values.append(value)
             new_values = []
             for cc in new_cc:
-                value = root.get_user(cc).get_property('email')
+                value = root.get_user(cc).get_value('email')
                 new_values.append(value)
             field = MSG(u'CC').gettext(language=language)
             last_values = ', '.join(last_values) or empty
@@ -507,12 +506,12 @@ class Issue(CommentsAware, Folder):
 
 
     def get_reported_by(self):
-        comments = self.metadata.get_property('comment')
+        comments = self.metadata.get_value('comment')
         return comments[0].get_parameter('author')
 
 
     def to_text(self):
-        comments = self.get_property('comment')
+        comments = self.get_value('comment')
         return u'\n'.join(comments)
 
 
@@ -549,4 +548,15 @@ class IssueModel(Model):
         field.make_resource('high', Choice)
         field.make_resource('medium', Choice)
         field.make_resource('low', Choice)
+        field = self.make_resource('product', ModelField_Choices)
+        field.make_resource('projet - module1', Choice)
+        field.make_resource('projet - module2', Choice)
+        field = self.make_resource('type', ModelField_Choices)
+        field.make_resource('props - 2d', Choice)
+        field.make_resource('props - 3d modelisation', Choice)
+        field.make_resource('props - 3d texturing', Choice)
+        field = self.make_resource('state', ModelField_Choices)
+        field.make_resource('awaiting validation', Choice)
+        field.make_resource('in progress', Choice)
+        field.make_resource('validated', Choice)
 

@@ -38,6 +38,9 @@ from itools.database import Metadata
 
 # Import from ikaaro
 from ikaaro.comments import CommentsAware
+from ikaaro.config_models import Model
+from ikaaro.config_models import ModelField_Inherited
+from ikaaro.config_models import ModelField_Choices, Choice
 from ikaaro.folder import Folder
 from ikaaro.database import Database
 from ikaaro.utils import generate_name
@@ -70,18 +73,6 @@ class Issue(CommentsAware, Folder):
     edit = Issue_Edit
 
     # Metadata
-    product = Integer_Field(indexed=True, stored=True,
-                                    title=MSG(u'Product'))
-    module = Integer_Field(indexed=True, stored=True,
-                                    title=MSG(u'Module'))
-    version = Integer_Field(indexed=True, stored=True,
-                                    title=MSG(u'Version'))
-    type = Integer_Field(indexed=True, stored=True,
-                                    title=MSG(u'Type'))
-    state = Integer_Field(indexed=True, stored=True,
-                                    title=MSG(u'State'))
-    priority = Integer_Field(indexed=True, stored=True,
-                                    title=MSG(u'Priority'))
     assigned_to = Followers_Field(indexed=True, stored=True,
                                     title=MSG(u'Assigned To'))
     cc_list = Followers_Field(multiple=True,
@@ -98,7 +89,7 @@ class Issue(CommentsAware, Folder):
         document = Folder.get_catalog_values(self)
         document['id'] = int(self.name)
         # Override default (FIXME should set default to 'nobody' instead?)
-        document['assigned_to'] = self.get_property('assigned_to') or 'nobody'
+        document['assigned_to'] = self.get_value('assigned_to') or 'nobody'
         return document
 
 
@@ -532,7 +523,30 @@ class Issue(CommentsAware, Folder):
         return self.parent.get_context_menus() + [IssueTchackerMenu()]
 
 
-    download_attachments = Issue_DownloadAttachments()
-    edit = Issue_Edit()
-    history = Issue_History()
+    download_attachments = Issue_DownloadAttachments
+    edit = Issue_Edit
+    history = Issue_History
+
+
+
+
+class IssueModel(Model):
+
+    class_id = 'tchacker-issue-model'
+    class_title = MSG(u'Issue model')
+
+    base_class = Issue
+
+
+    def init_resource(self, **kw):
+        # XXX This should be done in ikaaro
+        for field_name, field in self.base_class.get_fields():
+            if not field.readonly:
+                self.make_resource(field_name, ModelField_Inherited)
+
+        # Demonstration data
+        field = self.make_resource('priority', ModelField_Choices)
+        field.make_resource('high', Choice)
+        field.make_resource('medium', Choice)
+        field.make_resource('low', Choice)
 

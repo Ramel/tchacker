@@ -24,7 +24,6 @@
 from datetime import datetime, timedelta
 
 # Import from itools
-from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode #, Tokens
 from itools.gettext import MSG
 from itools.database import RangeQuery, AndQuery, OrQuery, PhraseQuery
@@ -34,10 +33,8 @@ from ikaaro.autoadd import AutoAdd
 from ikaaro.config_common import NewResource_Local
 from ikaaro.folder import Folder
 from ikaaro.utils import get_base_path_query
-from ikaaro.autoadd import AutoAdd
 
-from issue import Issue
-from model import IssueModel
+from issue import IssueModel
 from tchacker_views import Tchacker_View #, Tchacker_Zip_Img
 from tchacker_views import GoToIssueMenu, StoredSearchesMenu
 from tchacker_views import Tchacker_GoToIssue

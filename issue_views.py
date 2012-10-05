@@ -30,6 +30,8 @@ from itools.xml import XMLParser
 
 # Import from ikaaro
 from ikaaro.autoadd import AutoAdd
+from ikaaro.autoedit import AutoEdit
+from ikaaro.fields import Textarea_Field
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
 from ikaaro.widgets import Widget
@@ -162,7 +164,11 @@ class Issue_NewInstance(AutoAdd):
     automatic_resource_name = True
 
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
-                'version', 'state', 'priority']
+              'version', 'state', 'priority', 'comment']
+
+    comment = Textarea_Field(title=MSG(u'Comment'))
+
+
 
 #    access = 'is_allowed_to_edit'
 #    title = MSG(u'Add')
@@ -250,92 +256,94 @@ class Issue_NewInstance(AutoAdd):
 
 
 
-class Issue_Edit(STLView):
+class Issue_Edit(AutoEdit):
 
-    access = 'is_allowed_to_edit'
     title = MSG(u'Edit Issue')
-    icon = 'edit.png'
-    template = '/ui/tchacker/edit_issue.xml'
-    styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
-    scripts = ['/ui/tchacker/tchacker.js', '/ui/thickbox/thickbox.js',
-               '/ui/flowplayer/flowplayer-3.2.2.min.js']
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
+              'version', 'state', 'priority']
 
 
-    def get_schema(self, resource, context):
-        tchacker = resource.parent
-        return get_issue_fields(tchacker)
+#   template = '/ui/tchacker/edit_issue.xml'
+#   styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
+#   scripts = ['/ui/tchacker/tchacker.js', '/ui/thickbox/thickbox.js',
+#              '/ui/flowplayer/flowplayer-3.2.2.min.js']
 
 
-    def get_value(self, resource, context, name, datatype):
-        if name in ('comment'):
-            return datatype.get_default()
-        return resource.get_property(name)
+#   def get_schema(self, resource, context):
+#       tchacker = resource.parent
+#       return get_issue_fields(tchacker)
 
 
-    def get_namespace(self, resource, context):
-        namespace = STLView.get_namespace(self, resource, context)
-
-        tracker = resource.parent
-        namespace['list_products'] = tracker.get_list_products_namespace()
-
-        # Local variables
-        root = context.root
-
-        # Comments
-        namespace['comments'] = TchackerCommentsView().GET(resource, context)
-
-        # cc_list
-        cc_list = resource.get_property('cc_list')
-        cc_list_userslist = self.get_schema(resource, context)['cc_list']
-        cc = []
-        nocc = []
-        for user in cc_list_userslist.get_options():
-            if user['name'] in cc_list:
-                cc.append(user)
-            else:
-                nocc.append(user)
-        namespace['cc'] = cc
-        namespace['nocc'] = nocc
-
-        # Reported by
-        reported_by = resource.get_reported_by()
-        namespace['reported_by'] = root.get_user_title(reported_by)
-
-        # Attachments
-        links = []
-        get_user = root.get_user_title
-        for attachment_name in resource.get_property('attachment'):
-            attachment = resource.get_resource(attachment_name, soft=True)
-            missing = (attachment is None)
-            author = mtime = None
-            if missing is False:
-                mtime = attachment.get_property('mtime')
-                mtime = context.format_datetime(mtime)
-                author = get_user(attachment.get_property('last_author'))
-
-            links.append({
-                'author': author,
-                'missing': missing,
-                'mtime': mtime,
-                'name': attachment_name})
-
-        namespace['attachments'] = links
-
-        namespace['which_module'] = None #resource.get_property('module')
-        for module in namespace['module']['value']:
-            if module['selected'] == True in module.values():
-                #print "module['selected'] = %s " % module #['value'][module]['value']
-                namespace['which_module'] = module['value']
-
-        return namespace
+#   def get_value(self, resource, context, name, datatype):
+#       if name in ('comment'):
+#           return datatype.get_default()
+#       return resource.get_property(name)
 
 
-    def action(self, resource, context, form):
-        # Edit
-        resource.add_comment(context, form)
-        # Change
-        context.database.change_resource(resource)
-        context.message = MSG_CHANGES_SAVED
+#   def get_namespace(self, resource, context):
+#       namespace = STLView.get_namespace(self, resource, context)
+
+#       tracker = resource.parent
+#       namespace['list_products'] = tracker.get_list_products_namespace()
+
+#       # Local variables
+#       root = context.root
+
+#       # Comments
+#       namespace['comments'] = TchackerCommentsView().GET(resource, context)
+
+#       # cc_list
+#       cc_list = resource.get_property('cc_list')
+#       cc_list_userslist = self.get_schema(resource, context)['cc_list']
+#       cc = []
+#       nocc = []
+#       for user in cc_list_userslist.get_options():
+#           if user['name'] in cc_list:
+#               cc.append(user)
+#           else:
+#               nocc.append(user)
+#       namespace['cc'] = cc
+#       namespace['nocc'] = nocc
+
+#       # Reported by
+#       reported_by = resource.get_reported_by()
+#       namespace['reported_by'] = root.get_user_title(reported_by)
+
+#       # Attachments
+#       links = []
+#       get_user = root.get_user_title
+#       for attachment_name in resource.get_property('attachment'):
+#           attachment = resource.get_resource(attachment_name, soft=True)
+#           missing = (attachment is None)
+#           author = mtime = None
+#           if missing is False:
+#               mtime = attachment.get_property('mtime')
+#               mtime = context.format_datetime(mtime)
+#               author = get_user(attachment.get_property('last_author'))
+
+#           links.append({
+#               'author': author,
+#               'missing': missing,
+#               'mtime': mtime,
+#               'name': attachment_name})
+
+#       namespace['attachments'] = links
+
+#       namespace['which_module'] = None #resource.get_property('module')
+#       for module in namespace['module']['value']:
+#           if module['selected'] == True in module.values():
+#               #print "module['selected'] = %s " % module #['value'][module]['value']
+#               namespace['which_module'] = module['value']
+
+#       return namespace
+
+
+#   def action(self, resource, context, form):
+#       # Edit
+#       resource.add_comment(context, form)
+#       # Change
+#       context.database.change_resource(resource)
+#       context.message = MSG_CHANGES_SAVED
 
 
 

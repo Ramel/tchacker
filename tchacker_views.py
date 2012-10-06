@@ -47,7 +47,6 @@ from ikaaro.widgets import SelectWidget, MultilineWidget
 from ikaaro.widgets import FileWidget, ProgressBarWidget
 
 from issue import Issue
-from issue_views import ProductsSelectWidget
 from datatypes import get_issue_fields, TchackerList, ProductInfoList
 from stored import StoredSearch
 from tables import Tchacker_Item

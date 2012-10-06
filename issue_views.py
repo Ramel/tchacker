@@ -32,15 +32,15 @@ from itools.xml import XMLParser
 from ikaaro.autoadd import AutoAdd
 from ikaaro.autoedit import AutoEdit
 from ikaaro.fields import Textarea_Field, File_Field
+from ikaaro.fields import ProgressBar_Field
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
 from ikaaro.widgets import Widget
 from ikaaro.utils import make_stl_template
-
+ 
 # Import from tchacker
 from datatypes import get_issue_fields
 from comments import TchackerCommentsView
-#from issue import Issue
 
 
 def check_properties_differencies(prop1, prop2):
@@ -52,77 +52,6 @@ def check_properties_differencies(prop1, prop2):
     else:
         raise TypeError('This method wait for Property, or list of Property')
 
-
-
-###########################################################################
-# Widgets
-###########################################################################
-class ProductsSelectWidget(Widget):
-
-    template = make_stl_template("""
-    <script type="text/javascript">
-    var list_products = {<stl:inline stl:repeat="product products">
-        "${product/id}":
-            {'module':
-                [<stl:inline stl:repeat="module product/modules">
-                    {"id": "${module/id}", "value": "${module/value}"},
-                </stl:inline>],
-                'version':
-                [<stl:inline stl:repeat="version product/versions">
-                    {"id": "${version/id}", "value": "${version/value}"},
-                </stl:inline>]}
-            ,</stl:inline>
-        }
-    function update_tracker(){
-      update_tracker_list('version');
-      update_tracker_list('module');
-    }
-    </script>
-    <select id="${id}" name="${name}" multiple="${multiple}" size="${size}"
-      class="${css}">
-      <option value="" stl:if="has_empty_option"></option>
-      <option stl:repeat="option options" value="${option/name}"
-        selected="${option/selected}">${option/value}</option>
-    </select>""")
-
-
-    css = None
-    has_empty_option = True
-    size = None
-
-
-    def multiple(self):
-        #print("multiple = %s" % self.datatype.multiple)
-        return self.datatype.multiple
-
-
-    def products(self):
-        context = get_context()
-        if context is None:
-            return
-        resource = context.resource
-        #XXX Issue?
-        """
-        if isinstance(resource, issue.Issue):
-            tracker = resource.parent
-        else:
-            tracker = context.resource
-        """
-        tracker = context.resource
-        return tracker.get_list_products_namespace()
-
-    def options(self):
-        value = self.value
-        print("self.datatype.get_namespace(value) = %s" %
-                    self.datatype.get_namespace(value))
-        print("value = %s" % value)
-        # Check whether the value is already a list of options
-        # FIXME This is done to avoid a bug when using a select widget in an
-        # auto-form, where the 'datatype.get_namespace' method is called
-        # twice (there may be a better way of handling this).
-        if type(value) is not list:
-            return self.datatype.get_namespace(value)
-        return value
 
 
 ###########################################################################
@@ -164,25 +93,31 @@ class Issue_NewInstance(AutoAdd):
     automatic_resource_name = True
 
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
-              'version', 'state', 'priority', 'comment', 'attachment']
+              'version', 'state', 'priority',
+              'comment', 'attachment', 'progressbar']
 
-    comment = Textarea_Field(title=MSG(u'Comment'))
-    #attachment = File_Field(title=MSG(u'Attachment'))
+    msg_new_resource = MSG(u'New issue added.')
+    comment = Textarea_Field(title=MSG(u'Comment'), required=True)
+    attachment = File_Field(title=MSG(u'Attachment'))
+    progressbar = ProgressBar_Field()
+
 
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
         new_issue = proxy.make_new_resource(resource, context, form)
-        
+
         new_issue.add_comment(context, form, new=True)
-        
+
         return new_issue
-    
+
+
     def get_field(self, name):
         field = super(Issue_NewInstance, self).get_field(name)
-        print("name = %s" % name)
+        """
         if (name == 'title' or name == 'product' or
             name == 'comment' or name == 'state' or name == 'type'):
             return field(required=True)
+        """
         return field
 
 #    access = 'is_allowed_to_edit'
@@ -276,6 +211,17 @@ class Issue_Edit(AutoEdit):
     title = MSG(u'Edit Issue')
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
               'version', 'state', 'priority', 'comment', 'attachment']
+    
+    
+    def get_field(self, name):
+        field = super(Issue_Edit, self).get_field(name)
+
+        if (name == 'title' or name == 'product' or
+            name == 'comment' or name == 'state' or name == 'type'):
+            return field(required=True)
+
+        return field
+    
     """
     def get_field(self, resource, name):
         field = super(Issue_Edit, self).get_field(resource, name)

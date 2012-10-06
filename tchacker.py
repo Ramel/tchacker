@@ -47,7 +47,7 @@ from tables import Tchacker_Item
 from stored import StoredSearch, StoredSearchFile
 from tables import ModulesResource, Modules_Item
 from tables import VersionsResource
-
+from issue import Issue
 
 resolution = timedelta.resolution
 
@@ -78,6 +78,7 @@ class Tchacker(Folder):
     __fixed_handlers__ = ['model']
 
     # Configuration
+    issue_class = Issue
     stored_search_class = StoredSearch
 
     def init_resource(self, **kw):

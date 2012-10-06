@@ -96,7 +96,7 @@ class Issue_NewInstance(AutoAdd):
               'version', 'state', 'priority',
               'comment', 'attachment', 'progressbar']
 
-    msg_new_resource = MSG(u'New issue added.')
+    msg_new_resource = MSG(u'New Issue added!')
     comment = Textarea_Field(title=MSG(u'Comment'), required=True)
     attachment = File_Field(title=MSG(u'Attachment'))
     progressbar = ProgressBar_Field()
@@ -105,20 +105,17 @@ class Issue_NewInstance(AutoAdd):
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
         new_issue = proxy.make_new_resource(resource, context, form)
+        ## Add
+        #new_issue = proxy.make_new_resource(resource.issue_class, context, form)
 
-        new_issue.add_comment(context, form, new=True)
+        #new_issue.add_comment(context, form, new=True)
+        ## Add
+        #id = resource.get_new_id()
+        #issue_cls = resource.issue_class
+        #issue = resource.make_resource(id, issue_cls)
+        ##issue.add_comment(context, form, new=True)
 
         return new_issue
-
-
-    def get_field(self, name):
-        field = super(Issue_NewInstance, self).get_field(name)
-        """
-        if (name == 'title' or name == 'product' or
-            name == 'comment' or name == 'state' or name == 'type'):
-            return field(required=True)
-        """
-        return field
 
 #    access = 'is_allowed_to_edit'
 #    title = MSG(u'Add')
@@ -212,7 +209,7 @@ class Issue_Edit(AutoEdit):
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
               'version', 'state', 'priority', 'comment', 'attachment']
     
-    
+    """ 
     def get_field(self, name):
         field = super(Issue_Edit, self).get_field(name)
 
@@ -221,7 +218,7 @@ class Issue_Edit(AutoEdit):
             return field(required=True)
 
         return field
-    
+    """  
     """
     def get_field(self, resource, name):
         field = super(Issue_Edit, self).get_field(resource, name)

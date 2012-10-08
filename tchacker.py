@@ -34,7 +34,7 @@ from ikaaro.config_common import NewResource_Local
 from ikaaro.folder import Folder
 from ikaaro.utils import get_base_path_query
 
-from issue import IssueModel
+from issue import Issue, IssueModel
 from tchacker_views import Tchacker_View #, Tchacker_Zip_Img
 from tchacker_views import GoToIssueMenu, StoredSearchesMenu
 from tchacker_views import Tchacker_GoToIssue
@@ -47,7 +47,6 @@ from tables import Tchacker_Item
 from stored import StoredSearch, StoredSearchFile
 from tables import ModulesResource, Modules_Item
 from tables import VersionsResource
-from issue import Issue
 
 resolution = timedelta.resolution
 

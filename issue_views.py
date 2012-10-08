@@ -37,10 +37,11 @@ from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
 from ikaaro.widgets import Widget
 from ikaaro.utils import make_stl_template
- 
+
 # Import from tchacker
 from datatypes import get_issue_fields
 from comments import TchackerCommentsView
+#from issue import Issue
 
 
 def check_properties_differencies(prop1, prop2):
@@ -92,9 +93,8 @@ class Issue_NewInstance(AutoAdd):
 
     automatic_resource_name = True
 
-    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
-              'version', 'state', 'priority',
-              'comment', 'attachment', 'progressbar']
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
+                    'priority', 'comment', 'attachment', 'progressbar']
 
     msg_new_resource = MSG(u'New Issue added!')
     comment = Textarea_Field(title=MSG(u'Comment'), required=True)
@@ -105,16 +105,17 @@ class Issue_NewInstance(AutoAdd):
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
         new_issue = proxy.make_new_resource(resource, context, form)
-        ## Add
-        #new_issue = proxy.make_new_resource(resource.issue_class, context, form)
 
-        #new_issue.add_comment(context, form, new=True)
-        ## Add
+        new_issue.add_comment(context, form, new=True)
+        ### Add
+        #print resource
         #id = resource.get_new_id()
+        #print id
         #issue_cls = resource.issue_class
+        #print issue_cls
         #issue = resource.make_resource(id, issue_cls)
-        ##issue.add_comment(context, form, new=True)
-
+        ##issue = resource.make_resource(Issue)
+        #issue.add_comment(context, form, new=True)
         return new_issue
 
 #    access = 'is_allowed_to_edit'
@@ -208,8 +209,8 @@ class Issue_Edit(AutoEdit):
     title = MSG(u'Edit Issue')
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
               'version', 'state', 'priority', 'comment', 'attachment']
-    
-    """ 
+
+    """
     def get_field(self, name):
         field = super(Issue_Edit, self).get_field(name)
 
@@ -218,7 +219,7 @@ class Issue_Edit(AutoEdit):
             return field(required=True)
 
         return field
-    """  
+    """
     """
     def get_field(self, resource, name):
         field = super(Issue_Edit, self).get_field(resource, name)

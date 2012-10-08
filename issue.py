@@ -60,6 +60,7 @@ from issue_views import Issue_DownloadAttachments, Issue_Edit
 from monkey import Image, Video
 
 
+
 class Issue(CommentsAware, Folder):
 
     class_id = 'issue'
@@ -77,17 +78,18 @@ class Issue(CommentsAware, Folder):
                                     title=MSG(u'Assigned To'))
     cc_list = Followers_Field(multiple=True,
                                     title=MSG(u'CC List'))
-    
+
     # Other
     id = Integer_Field(indexed=True, stored=True)
     attachment = URI_Field(multiple=True)
     # Tchacker
     ids = Integer_Field()
-    #last_attachment = URI_Field(indexed=False, stored=True)
+    last_attachment = URI_Field(indexed=False, stored=True)
 
 
     def get_catalog_values(self):
-        document = Folder.get_catalog_values(self)
+        #document = Folder.get_catalog_values(self)
+        document = super(Folder, self).get_catalog_values()
         document['id'] = int(self.name)
         # Override default (FIXME should set default to 'nobody' instead?)
         document['assigned_to'] = self.get_value('assigned_to') or 'nobody'
@@ -162,177 +164,176 @@ class Issue(CommentsAware, Folder):
         comment = form['comment']
 
         # Attachment
-        #attachment = form['attachment']
-        attachment = None
+        attachment = form['attachment']
 
         ids = 1
-        # Check if add (new) or update 
+        # Check if add (new) or update
         if not new:
             ids = int(self.get_value('ids')) + 1
-        
+
         att_name = ""
 
-        #if attachment is not None:
-        #    # Upload
-        #    filename, mimetype, body = attachment
-        #    # Find a non used name
-        #    name = checkid(filename)
-        #    name, extension, language = FileName.decode(name)
-        #    name = generate_name(name, self.get_names())
+        if attachment is not None:
+            # Upload
+            filename, mimetype, body = attachment
+            # Find a non used name
+            name = checkid(filename)
+            name, extension, language = FileName.decode(name)
+            name = generate_name(name, self.get_names())
 
-        #    mtype = mimetype.split("/")[0]
-        #    att_name = name
+            mtype = mimetype.split("/")[0]
+            att_name = name
 
-        #    # Image
-        #    if (mtype == "image"):
-        #        # Add attachment
-        #        tchackerImage = self.make_resource(
-        #                        name, Image,
-        #                        body=body,
-        #                        filename=filename,
-        #                        extension=extension,
-        #                        format=mimetype
-        #                        )
-        #        # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
-        #        # used instead of a ;thumb
-        #        if extension == "psd":
-        #            pass
-        #        else:
-        #            dirname = mkdtemp('makethumbs', 'ikaaro')
-        #            tempdir = vfs.open(dirname)
-        #            # Paste the file in the tempdir
-        #            tmpfolder = "%s" % (dirname)
-        #            tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
-        #            tmpfile = open("%s" % tmp_uri, "w+")
-        #            tmpfile.write(body)
-        #            tmpfile.close()
+            # Image
+            if (mtype == "image"):
+                # Add attachment
+                tchackerImage = self.make_resource(
+                                name, Image,
+                                body=body,
+                                filename=filename,
+                                extension=extension,
+                                format=mimetype
+                                )
+                # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
+                # used instead of a ;thumb
+                if extension == "psd":
+                    pass
+                else:
+                    dirname = mkdtemp('makethumbs', 'ikaaro')
+                    tempdir = vfs.open(dirname)
+                    # Paste the file in the tempdir
+                    tmpfolder = "%s" % (dirname)
+                    tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
+                    tmpfile = open("%s" % tmp_uri, "w+")
+                    tmpfile.write(body)
+                    tmpfile.close()
 
-        #            low = 256, 256
-        #            med = 800, 800
-        #            hig = 1024, 1024
+                    low = 256, 256
+                    med = 800, 800
+                    hig = 1024, 1024
 
-        #            # Create the thumbnail PNG resources
-        #            thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
+                    # Create the thumbnail PNG resources
+                    thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
 
-        #            uri = tmpfolder + sep
+                    uri = tmpfolder + sep
 
-        #            for te in thumbext:
-        #                try:
-        #                    im = PILImage.open(tmp_uri)
-        #                except IOError:
-        #                    print("IOError = %s" % tmp_uri)
-        #                im.thumbnail(te[1], PILImage.ANTIALIAS)
-        #                ima = name + te[0]
-        #                # Some images are in CMYB, force RVB if needed
-        #                if im.mode != "RGB":
-        #                    im = im.convert("RGB")
-        #                im.save(uri + ima + ".jpg", 'jpeg', quality=85)
-        #                # Copy the thumb content
-        #                thumb_filename = ima + ".jpg"
-        #                # Copy the thumb content
-        #                thumb_file = tempdir.open(thumb_filename)
-        #                try:
-        #                    thumb_data = thumb_file.read()
-        #                finally:
-        #                    thumb_file.close()
-        #                format = 'image/jpeg'
-        #                cls = Database.get_resource_class(format)
-        #                imageThumb = self.make_resource(
-        #                            ima, cls,
-        #                            body=thumb_data,
-        #                            filename=thumb_filename,
-        #                            extension='jpg',
-        #                            format=format
-        #                            )
-        #                is_thumb = Property(True)
-        #                imageThumb.set_property('is_thumb', is_thumb)
-        #            has_thumb = Property(True)
-        #            tchackerImage.set_property('has_thumb', has_thumb)
-        #            # Clean the temporary folder
-        #            vfs.remove(dirname)
+                    for te in thumbext:
+                        try:
+                            im = PILImage.open(tmp_uri)
+                        except IOError:
+                            print("IOError = %s" % tmp_uri)
+                        im.thumbnail(te[1], PILImage.ANTIALIAS)
+                        ima = name + te[0]
+                        # Some images are in CMYB, force RVB if needed
+                        if im.mode != "RGB":
+                            im = im.convert("RGB")
+                        im.save(uri + ima + ".jpg", 'jpeg', quality=85)
+                        # Copy the thumb content
+                        thumb_filename = ima + ".jpg"
+                        # Copy the thumb content
+                        thumb_file = tempdir.open(thumb_filename)
+                        try:
+                            thumb_data = thumb_file.read()
+                        finally:
+                            thumb_file.close()
+                        format = 'image/jpeg'
+                        cls = Database.get_resource_class(format)
+                        imageThumb = self.make_resource(
+                                    ima, cls,
+                                    body=thumb_data,
+                                    filename=thumb_filename,
+                                    extension='jpg',
+                                    format=format
+                                    )
+                        is_thumb = Property(True)
+                        imageThumb.set_property('is_thumb', is_thumb)
+                    has_thumb = Property(True)
+                    tchackerImage.set_property('has_thumb', has_thumb)
+                    # Clean the temporary folder
+                    vfs.remove(dirname)
 
-        #    # Video
-        #    elif (mtype == "video"):
-        #        # Make Thumbnail for it, and encode it
-        #        # in a Low version (319px width)
-        #        # First, upload it, then encode it, and make a thumb for the
-        #        # encoded file.
-        #        # video.mp4, video_low.mp4, video_low_thumb.jpg
-        #        # If the video is h264 and wider than 319px,
-        #        # so create a Low copy.
-        #        dirname = mkdtemp('videoencoding', 'ikaaro')
-        #        tempdir = vfs.open(dirname)
-        #        # Paste the file in the tempdir
-        #        tmpfolder = "%s" % (dirname)
-        #        #root_path = file.handler.database.path
-        #        tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
-        #        tmpfile = open("%s" % tmp_uri, "w+")
-        #        tmpfile.write(body)
-        #        tmpfile.close()
-        #        # Get size
-        #        dim = VideoEncodingToFLV(tmpfile).get_size_and_ratio(tmp_uri)
-        #        width, height, ratio = dim
-        #        # Codec
-        #        #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
-        #        width_low = 640
-        #        # In case of a video in h264 and widder than 319px
-        #        # We encode it in Flv at 640px width  and make a thumbnail
-        #        #if int(width) > 319 and venc == "h264":
-        #        #if int(width) > 319:
-        #        #video_low = ("%s_low" % name)
-        #        # video is already in temp dir, so encode it
-        #        encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
-        #            tmpfolder, name, name, width_low, encode='one_chroma_faststart')
+            # Video
+            elif (mtype == "video"):
+                # Make Thumbnail for it, and encode it
+                # in a Low version (319px width)
+                # First, upload it, then encode it, and make a thumb for the
+                # encoded file.
+                # video.mp4, video_low.mp4, video_low_thumb.jpg
+                # If the video is h264 and wider than 319px,
+                # so create a Low copy.
+                dirname = mkdtemp('videoencoding', 'ikaaro')
+                tempdir = vfs.open(dirname)
+                # Paste the file in the tempdir
+                tmpfolder = "%s" % (dirname)
+                #root_path = file.handler.database.path
+                tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
+                tmpfile = open("%s" % tmp_uri, "w+")
+                tmpfile.write(body)
+                tmpfile.close()
+                # Get size
+                dim = VideoEncodingToFLV(tmpfile).get_size_and_ratio(tmp_uri)
+                width, height, ratio = dim
+                # Codec
+                #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
+                width_low = 640
+                # In case of a video in h264 and widder than 319px
+                # We encode it in Flv at 640px width  and make a thumbnail
+                #if int(width) > 319 and venc == "h264":
+                #if int(width) > 319:
+                #video_low = ("%s_low" % name)
+                # video is already in temp dir, so encode it
+                encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
+                    tmpfolder, name, name, width_low, encode='one_chroma_faststart')
 
-        #        if encoded is not None:
-        #            vidfilename, vidmimetype, vidbody, vidextension, \
-        #                    width, height = encoded['flvfile']
-        #            thumbfilename, thumbmimetype, \
-        #                    thumbbody, thumbextension = encoded['flvthumb']
-        #            # Create the video resources
-        #            self.make_resource(vidfilename, Video,
-        #                body=vidbody, filename=vidfilename,
-        #                extension=vidextension, format=vidmimetype)
+                if encoded is not None:
+                    vidfilename, vidmimetype, vidbody, vidextension, \
+                            width, height = encoded['flvfile']
+                    thumbfilename, thumbmimetype, \
+                            thumbbody, thumbextension = encoded['flvthumb']
+                    # Create the video resources
+                    self.make_resource(vidfilename, Video,
+                        body=vidbody, filename=vidfilename,
+                        extension=vidextension, format=vidmimetype)
 
-        #            #height_low = int(round(float(width_low) / ratio))
+                    #height_low = int(round(float(width_low) / ratio))
 
-        #            vid = self.get_resource(vidfilename)
-        #            metadata = vid.metadata
+                    vid = self.get_resource(vidfilename)
+                    metadata = vid.metadata
 
-        #            # Get sizes from encoded['flvfile'] instead of *_low
-        #            # width_low = width now, sure!
-        #            width_low = Property(width)
-        #            metadata.set_property('width', width_low)
-        #            height_low = Property(height)
-        #            metadata.set_property('height', height_low)
-        #            ratio = Property(ratio)
-        #            metadata.set_property('ratio', ratio)
-        #            has_thumb = Property(True)
-        #            metadata.set_property('has_thumb', has_thumb)
+                    # Get sizes from encoded['flvfile'] instead of *_low
+                    # width_low = width now, sure!
+                    width_low = Property(width)
+                    metadata.set_property('width', width_low)
+                    height_low = Property(height)
+                    metadata.set_property('height', height_low)
+                    ratio = Property(ratio)
+                    metadata.set_property('ratio', ratio)
+                    has_thumb = Property(True)
+                    metadata.set_property('has_thumb', has_thumb)
 
-        #            # Create the thumbnail PNG resources
-        #            self.make_resource(thumbfilename, Image,
-        #                body=thumbbody, filename=thumbfilename,
-        #                extension=thumbextension, format=thumbmimetype)
-        #            is_thumb = Property(True)
-        #            self.get_resource(thumbfilename).metadata.set_property(
-        #                'is_thumb', is_thumb)
-        #            # As the video is a low version and reencoded
-        #            att_name = vidfilename
+                    # Create the thumbnail PNG resources
+                    self.make_resource(thumbfilename, Image,
+                        body=thumbbody, filename=thumbfilename,
+                        extension=thumbextension, format=thumbmimetype)
+                    is_thumb = Property(True)
+                    self.get_resource(thumbfilename).metadata.set_property(
+                        'is_thumb', is_thumb)
+                    # As the video is a low version and reencoded
+                    att_name = vidfilename
 
-        #        # Clean the temporary folder
-        #        vfs.remove(dirname)
+                # Clean the temporary folder
+                vfs.remove(dirname)
 
-        #    # Default case
-        #    else:
-        #        cls = Database.get_resource_class(mimetype)
-        #        self.make_resource(name, cls, body=body, filename=filename,
-        #        extension=extension, format=mimetype)
+            # Default case
+            else:
+                cls = Database.get_resource_class(mimetype)
+                self.make_resource(name, cls, body=body, filename=filename,
+                extension=extension, format=mimetype)
 
-        #    # Link
-        #    # The "ids" in comments is ids-1
-        #    attachment = Property(att_name, comment=ids-1)
-        #    self.set_value('attachment', attachment)
+            # Link
+            # The "ids" in comments is ids-1
+            attachment = Property(att_name, comment=ids-1)
+            self.set_value('attachment', attachment)
 
         # Comment
         date = context.timestamp
@@ -342,10 +343,10 @@ class Issue(CommentsAware, Folder):
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:
             self.set_value('last_attachment', att_name)
-        #comment = Property(comment, date=date, author=author)
-        new_comment = self.make_resource(None, Comment)
-        new_comment.set_value('description', comment, language=language)        
-        #self.set_property('comment', comment)
+        comment = Property(comment, date=date, author=author)
+        #new_comment = self.make_resource(None, Comment)
+        #new_comment.set_value('description', comment, language=language)
+        self.set_property('comment', comment)
         #ids = int(self.get_value('ids'))
         self.set_property('ids', ids)
 

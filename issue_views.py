@@ -60,10 +60,9 @@ class TchackIssue_Edit(Issue_Edit):
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
 
-        namespace['which_module'] = None #resource.get_property('module')
+        namespace['which_module'] = None
         for module in namespace['module']['value']:
             if module['selected'] == True in module.values():
-                #print "module['selected'] = %s " % module #['value'][module]['value']
                 namespace['which_module'] = module['value']
 
         return namespace

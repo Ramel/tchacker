@@ -51,7 +51,7 @@ class Tchack_Tracker(Tracker):
     issue_class = Tchack_Issue
 
     context_menus = [GoToIssueMenu(), Tchacker_StoredSearchesMenu()]
-    
+
     # Views
     view = Tchacker_View()
     add_issue = Tchacker_AddIssue()
@@ -67,7 +67,7 @@ class Tchack_Tracker(Tracker):
         instead of numbers minus one. Update the Issues olders than june 2011.
         """
         from issue import Tchack_Issue
-        
+
         for issue in self.search_resources(cls=Tchack_Issue):
 
             comments = issue.get_comments()

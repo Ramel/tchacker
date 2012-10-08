@@ -130,18 +130,12 @@ class Tchack_Issue(Issue):
 
         # Attachment
         attachment = form['attachment']
-        #print("ids = %s" % self.get_property('ids'))
-        #ids = int(self.get_property('ids')) 
-        ids = 1
-        if not new:
-            #print("ids = %s" % self.get_property('ids'))
-            if ((not(comment) and attachment) or
-                        (comment and not(attachment)) or
-                        (comment and attachment)):
-                ids = int(self.get_property('ids')) + 1
-            else:
-                ids = int(self.get_property('ids'))
-        #print("afterNotNew:ids = %s" % ids)
+
+        if new:
+            ids = 1
+        else:
+            ids = int(self.get_property('ids')) + 1
+
         att_name = ""
 
         if attachment is not None:
@@ -314,11 +308,10 @@ class Tchack_Issue(Issue):
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:
             self.set_property('last_attachment', att_name)
-        comment = Property(comment, date=date,
-                            author=author
-                            )
+
+        comment = Property(comment, date=date, author=author)
+
         self.set_property('comment', comment)
-        #ids = int(self.get_property('ids'))
         self.set_property('ids', ids)
 
         # Send a Notification Email

@@ -166,11 +166,10 @@ class Issue(CommentsAware, Folder):
         attachment = None
 
         ids = 1
+        # Check if add (new) or update 
         if not new:
-            if comment or not attachment:
-                ids = int(self.get_value('ids')) + 1
-            else:
-                ids = int(self.get_value('ids'))
+            ids = int(self.get_value('ids')) + 1
+        
         att_name = ""
 
         #if attachment is not None:
@@ -550,6 +549,7 @@ class IssueModel(Model):
         default_language = root.get_default_language()
         field = self.make_resource('priority', ModelField_Choices)
         field.set_value('required', True)
+        field.set_value('choices_widget', 'select')
         field.set_value('title', u'Priority', language=default_language)
         field.make_resource('high', Choice)
         field.make_resource('medium', Choice)
@@ -558,12 +558,14 @@ class IssueModel(Model):
         field = self.make_resource('product', ModelField_Choices)
         field.set_value('required', True)
         field.set_value('title', u'Product', language=default_language)
+        field.set_value('choices_widget', 'select')
         field.make_resource('projet - module1', Choice)
         field.make_resource('projet - module2', Choice)
         # Type
         field = self.make_resource('type', ModelField_Choices)
         field.set_value('required', True)
         field.set_value('title', u'Type', language=default_language)
+        field.set_value('choices_widget', 'select')
         field.make_resource('props - 2d', Choice)
         field.make_resource('props - 3d modelisation', Choice)
         field.make_resource('props - 3d texturing', Choice)
@@ -571,6 +573,7 @@ class IssueModel(Model):
         field = self.make_resource('state', ModelField_Choices)
         field.set_value('required', True)
         field.set_value('title', u'State', language=default_language)
+        field.set_value('choices_widget', 'select')
         field.make_resource('awaiting validation', Choice)
         field.make_resource('in progress', Choice)
         field.make_resource('validated', Choice)

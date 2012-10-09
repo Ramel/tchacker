@@ -45,6 +45,7 @@ from ikaaro.folder import Folder
 from ikaaro.database import Database
 from ikaaro.utils import generate_name
 from ikaaro.fields import Integer_Field, URI_Field
+from ikaaro.fields import Text_Field
 from ikaaro.cc import Followers_Field
 
 # Import from videoencoding
@@ -66,34 +67,37 @@ class Issue(CommentsAware, Folder):
     class_id = 'issue'
     class_version = '20100506'
     class_title = MSG(u'Issue')
-    class_description = MSG(u'Issue')
+    class_description = None #MSG(u'Adding a new Issue')
     class_views = ['edit', 'edit_resources', 'browse_content', 'history']
 
     # Views
     new_instance = Issue_NewInstance
     edit = Issue_Edit
 
+    title = Folder.title(title=MSG(u'Subject'),
+                            required=True, multilingual=False) 
     # Metadata
     assigned_to = Followers_Field(indexed=True, stored=True,
                                     title=MSG(u'Assigned To'))
     cc_list = Followers_Field(multiple=True,
                                     title=MSG(u'CC List'))
-
     # Other
     id = Integer_Field(indexed=True, stored=True)
     attachment = URI_Field(multiple=True)
     # Tchacker
     ids = Integer_Field()
     last_attachment = URI_Field(indexed=False, stored=True)
+    comment = Text_Field(indexed=False, stored=True, multilingual=False)
 
 
-    def get_catalog_values(self):
-        #document = Folder.get_catalog_values(self)
-        document = super(Folder, self).get_catalog_values()
-        document['id'] = int(self.name)
-        # Override default (FIXME should set default to 'nobody' instead?)
-        document['assigned_to'] = self.get_value('assigned_to') or 'nobody'
-        return document
+    #def get_catalog_values(self):
+    #    #document = Folder.get_catalog_values(self)
+    #    document = super(Folder, self).get_catalog_values()
+    #    print document
+    #    document['id'] = int(self.name)
+    #    # Override default (FIXME should set default to 'nobody' instead?)
+    #    document['assigned_to'] = self.get_value('assigned_to') or 'nobody'
+    #    return document
 
 
     def get_document_types(self):
@@ -346,7 +350,7 @@ class Issue(CommentsAware, Folder):
         comment = Property(comment, date=date, author=author)
         #new_comment = self.make_resource(None, Comment)
         #new_comment.set_value('description', comment, language=language)
-        self.set_property('comment', comment)
+        self.set_value('comment', comment)
         #ids = int(self.get_value('ids'))
         self.set_property('ids', ids)
 

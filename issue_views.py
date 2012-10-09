@@ -32,6 +32,7 @@ from itools.xml import XMLParser
 from ikaaro.autoadd import AutoAdd
 from ikaaro.autoedit import AutoEdit
 from ikaaro.fields import Textarea_Field, File_Field
+from ikaaro.fields import Text_Field
 from ikaaro.fields import ProgressBar_Field
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
@@ -97,16 +98,18 @@ class Issue_NewInstance(AutoAdd):
                     'priority', 'comment', 'attachment', 'progressbar']
 
     msg_new_resource = MSG(u'New Issue added!')
-    comment = Textarea_Field(title=MSG(u'Comment'), required=True)
+    
+    comment = Textarea_Field(title=MSG(u'Comment'),
+                                required=True, multilingual=False)
     attachment = File_Field(title=MSG(u'Attachment'))
-    progressbar = ProgressBar_Field()
+    progressbar = ProgressBar_Field
 
 
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
         new_issue = proxy.make_new_resource(resource, context, form)
 
-        new_issue.add_comment(context, form, new=True)
+        #new_issue.add_comment(context, form, new=True)
         ### Add
         #print resource
         #id = resource.get_new_id()
@@ -207,27 +210,15 @@ class Issue_NewInstance(AutoAdd):
 class Issue_Edit(AutoEdit):
 
     title = MSG(u'Edit Issue')
-    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'module',
-              'version', 'state', 'priority', 'comment', 'attachment']
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
+                    'priority', 'comment', 'attachment']#, 'progressbar']
 
-    """
-    def get_field(self, name):
-        field = super(Issue_Edit, self).get_field(name)
+    comment = Textarea_Field(title=MSG(u'Comment'),
+                            required=True, multilingual=False)
+    attachment = File_Field(title=MSG(u'Attachment'))
+    # XXX ProgressBar_Field seems not yet implemented
+    #progressbar = ProgressBar_Field
 
-        if (name == 'title' or name == 'product' or
-            name == 'comment' or name == 'state' or name == 'type'):
-            return field(required=True)
-
-        return field
-    """
-    """
-    def get_field(self, resource, name):
-        field = super(Issue_Edit, self).get_field(resource, name)
-        if (name == 'title' or name == 'product' or
-            name == 'comment' or name == 'state' or name == 'type'):
-            return field(required=True)
-        return field
-    """
 #   template = '/ui/tchacker/edit_issue.xml'
 #   styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
 #   scripts = ['/ui/tchacker/tchacker.js', '/ui/thickbox/thickbox.js',
@@ -244,6 +235,12 @@ class Issue_Edit(AutoEdit):
 #           return datatype.get_default()
 #       return resource.get_property(name)
 
+
+#    def get_namespace(self, resource, context):
+#        proxy = super(AutoEdit, self)
+#        namespace = proxy.get_namespace(resource, context)
+#        print namespace
+#        return namespace
 
 #   def get_namespace(self, resource, context):
 #       namespace = STLView.get_namespace(self, resource, context)

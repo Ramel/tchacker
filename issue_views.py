@@ -106,18 +106,19 @@ class Issue_NewInstance(AutoAdd):
 
 
     def make_new_resource(self, resource, context, form):
-        #proxy = super(Issue_NewInstance, self)
-        #issue = proxy.make_new_resource(resource, context, form)
+        proxy = super(Issue_NewInstance, self)
+        issue_cls = resource.issue_class
+        issue = proxy.make_new_resource(resource, context, form)
         #print "resource.issue_class = %s" % resource.issue_class
         
-        #new_issue.add_comment(context, form, new=True)
+        """
         #### Add
-        ##print resource
         id = resource.get_new_id()
-        ##print id
         issue_cls = resource.issue_class
         issue = resource.make_resource(id, issue_cls)
-        issue.add_comment(context, form, new=True)
+        """
+        #issue.add_comment(context, form, new=True)
+        issue.add_comment(form['comment'])
         return issue
 
 #    access = 'is_allowed_to_edit'

@@ -19,6 +19,7 @@
 from itools.datatypes import Unicode, String, DateTime
 
 # Import from ikaaro
+from ikaaro.comments import Comment
 from ikaaro.comments import CommentsView, indent
 
 from monkey import Image, Video
@@ -100,3 +101,25 @@ class TchackerCommentsView(CommentsView):
 
         comments.reverse()
         return {'comments': comments}
+
+
+
+class Tchacker_Comment(Comment):
+    
+    class_id = 'comment'
+    class_title = MSG(u'Comment')
+
+    # Fields
+    title = None
+    subject = None
+    owner = Owner_Field
+    comment_state = CommentState_Field
+    attachment = None
+
+    # Sharing is acquired from container
+    share = None
+    def get_share(self):
+        return self.parent.get_share()
+
+    # Views
+    view = Comment_View

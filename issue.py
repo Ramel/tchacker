@@ -45,7 +45,7 @@ from ikaaro.folder import Folder
 from ikaaro.database import Database
 from ikaaro.utils import generate_name
 from ikaaro.fields import Integer_Field, URI_Field
-from ikaaro.fields import Text_Field
+from ikaaro.fields import Select_Field, Text_Field
 from ikaaro.cc import Followers_Field
 
 # Import from videoencoding
@@ -74,8 +74,8 @@ class Issue(CommentsAware, Folder):
     new_instance = Issue_NewInstance
     edit = Issue_Edit
 
-    title = Folder.title(title=MSG(u'Subject'),
-                            required=True, multilingual=False) 
+    title = Folder.title(title=MSG(u'Subject'), 
+                                    required=True, multilingual=False) 
     # Metadata
     assigned_to = Followers_Field(indexed=True, stored=True,
                                     title=MSG(u'Assigned To'))
@@ -88,7 +88,11 @@ class Issue(CommentsAware, Folder):
     ids = Integer_Field()
     last_attachment = URI_Field(indexed=False, stored=True)
     comment = Text_Field(indexed=False, stored=True, multilingual=False)
-
+    # Models
+    #product = Select_Field()
+    #type = Select_Field()
+    #state = Select_Field()
+    #priority = Select_Field()
 
     #def get_catalog_values(self):
     #    #document = Folder.get_catalog_values(self)
@@ -153,17 +157,19 @@ class Issue(CommentsAware, Folder):
         # Keep a copy of the current metadata
         old_metadata = self.metadata.clone()
         # Title
-        language = self.get_edit_languages(context)[0]
-        for lang, title in form['title'].items():
-            self.set_value('title', title.strip(), language=lang)
+        #language = self.get_edit_languages(context)[0]
+        #for lang, title in form['title'].items():
+        #    self.set_value('title', title.strip(), language=lang)
         # Version, Priority, etc.
-        for name in ['product', 'type', 'state',
-                     'priority', 'assigned_to']:
-            value = form[name]
-            self.set_value(name, value)
-        # CCs
-        cc_list = form['cc_list']
-        self.set_value('cc_list', tuple(cc_list))
+        #for name in ['product', 'type', 'state',
+        #             'priority', 'assigned_to']:
+        #    value = form[name]
+        #    self.set_value(name, value)
+        ## CCs
+        #cc_list = form['cc_list']
+        title = self.get_value('title')
+        cc_list = self.get_value('cc_list')
+        #self.set_value('cc_list', tuple(cc_list))
 
         comment = form['comment']
 
@@ -336,7 +342,8 @@ class Issue(CommentsAware, Folder):
 
             # Link
             # The "ids" in comments is ids-1
-            attachment = Property(att_name, comment=ids-1)
+            comment_id = ids - 1
+            attachment = Property(att_name, comment=comment_id)
             self.set_value('attachment', attachment)
 
         # Comment

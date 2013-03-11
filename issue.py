@@ -737,13 +737,9 @@ class Issue(CommentsAware, Folder):
                 id = id + 1
                 comment = Property(comment, date=date, author=author)
             if comment == '' and file:
-                id = id + 1
                 comment = 'comment_is_empty_but_has_attachment'
-                comment = Property(comment, date=date, author=author)
             if not comment and issue_comments == 1:
-                id = id + 1
                 comment = 'empty'
-                comment = Property(comment, date=date, author=author)
 
             metadata.set_property('comment', comment)
             if file:

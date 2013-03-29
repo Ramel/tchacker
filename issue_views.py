@@ -41,7 +41,7 @@ from ikaaro.utils import make_stl_template
 
 # Import from tchacker
 from datatypes import get_issue_fields
-from comments import TchackerCommentsView
+#from comments import Tchacker_Comment_View
 #from issue import Issue
 
 
@@ -94,23 +94,22 @@ class Issue_NewInstance(AutoAdd):
 
     automatic_resource_name = True
 
-    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
-                    'priority', 'comment', 'attachment', 'progressbar']
-
     msg_new_resource = MSG(u'New Issue added!')
-    
+
     comment = Textarea_Field(title=MSG(u'Comment'),
                                 required=True, multilingual=False)
     attachment = File_Field(title=MSG(u'Attachment'))
     progressbar = ProgressBar_Field
 
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
+                    'priority', 'comment'] #, 'attachment', 'progressbar']
 
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
         issue_cls = resource.issue_class
         issue = proxy.make_new_resource(resource, context, form)
         #print "resource.issue_class = %s" % resource.issue_class
-        
+
         """
         #### Add
         id = resource.get_new_id()
@@ -210,12 +209,14 @@ class Issue_NewInstance(AutoAdd):
 class Issue_Edit(AutoEdit):
 
     title = MSG(u'Edit Issue')
-    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
-                    'priority', 'comment', 'attachment']#, 'progressbar']
 
-    comment = Textarea_Field(title=MSG(u'Comment'),
-                            required=True, multilingual=False)
-    attachment = File_Field(title=MSG(u'Attachment'))
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
+                    'priority', 'comment'] #, 'attachment']#, 'progressbar']
+
+    #print("fields = %s" % fields)
+    #comment = Textarea_Field(title=MSG(u'Comment'),
+    #                        required=True, multilingual=False)
+    #attachment = File_Field(title=MSG(u'Attachment'))
     # XXX ProgressBar_Field seems not yet implemented
     #progressbar = ProgressBar_Field
 

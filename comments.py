@@ -17,10 +17,12 @@
 
 # Import from itools
 from itools.datatypes import Unicode, String, DateTime
+from itools.gettext import MSG
 
 # Import from ikaaro
-from ikaaro.comments import Comment
-from ikaaro.comments import CommentsView, indent
+from ikaaro.fields import Owner_Field
+from ikaaro.comments import Comment, CommentState_Field
+from ikaaro.comments import Comment_View, indent
 
 from monkey import Image, Video
 
@@ -46,7 +48,7 @@ def has_comment(att):
 
 
 
-class TchackerCommentsView(CommentsView):
+class Tchacker_Comment_View(Comment_View):
 
     template = '/ui/tchacker/comments.xml'
 
@@ -105,7 +107,7 @@ class TchackerCommentsView(CommentsView):
 
 
 class Tchacker_Comment(Comment):
-    
+
     class_id = 'comment'
     class_title = MSG(u'Comment')
 
@@ -122,4 +124,4 @@ class Tchacker_Comment(Comment):
         return self.parent.get_share()
 
     # Views
-    view = Comment_View
+    view = Tchacker_Comment_View

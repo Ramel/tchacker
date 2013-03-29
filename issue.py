@@ -45,7 +45,7 @@ from ikaaro.folder import Folder
 from ikaaro.database import Database
 from ikaaro.utils import generate_name
 from ikaaro.fields import Integer_Field, URI_Field
-from ikaaro.fields import Select_Field, Text_Field
+from ikaaro.fields import Select_Field, Text_Field, Textarea_Field
 from ikaaro.cc import Followers_Field
 
 # Import from videoencoding
@@ -73,9 +73,12 @@ class Issue(CommentsAware, Folder):
     # Views
     new_instance = Issue_NewInstance
     edit = Issue_Edit
+    download_attachments = Issue_DownloadAttachments
+    history = Issue_History
 
-    title = Folder.title(title=MSG(u'Subject'), 
-                                    required=True, multilingual=False) 
+
+    title = Folder.title(title=MSG(u'Subject'),
+                                    required=True, multilingual=False)
     # Metadata
     assigned_to = Followers_Field(indexed=True, stored=True,
                                     title=MSG(u'Assigned To'))
@@ -87,7 +90,7 @@ class Issue(CommentsAware, Folder):
     # Tchacker
     ids = Integer_Field()
     last_attachment = URI_Field(indexed=False, stored=True)
-    comment = Text_Field(indexed=True, multiple=True, stored=True, multilingual=False)
+    comment = Textarea_Field(indexed=True, multiple=True, stored=True, multilingual=False)
     # Models
     #product = Select_Field()
     #type = Select_Field()
@@ -130,6 +133,7 @@ class Issue(CommentsAware, Folder):
     # Tchacker
     def get_comments(self):
         comments = self.metadata.get_value('comment')
+        print("comments = %s" % comments)
         if not comments:
             return None
         #base = self.get_canonical_path()
@@ -531,11 +535,6 @@ class Issue(CommentsAware, Folder):
         return self.parent.get_context_menus() + [IssueTchackerMenu()]
 
 
-    download_attachments = Issue_DownloadAttachments
-    edit = Issue_Edit
-    history = Issue_History
-
-
 
 
 class IssueModel(Model):
@@ -560,7 +559,7 @@ class IssueModel(Model):
         root = self.get_root()
         default_language = root.get_default_language()
         field = self.make_resource('priority', ModelField_Choices)
-        field.set_value('required', True)
+        field.set_value('required', False)
         field.set_value('choices_widget', 'select')
         field.set_value('title', u'Priority', language=default_language)
         field.make_resource('high', Choice)

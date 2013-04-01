@@ -90,7 +90,7 @@ class Issue(CommentsAware, Folder):
     # Tchacker
     ids = Integer_Field()
     last_attachment = URI_Field(indexed=False, stored=True)
-    comment = Textarea_Field(indexed=True, multiple=True, stored=True, multilingual=False)
+    #comment = Textarea_Field(indexed=True, multiple=True, stored=True, multilingual=False)
     # Models
     #product = Select_Field()
     #type = Select_Field()
@@ -130,14 +130,14 @@ class Issue(CommentsAware, Folder):
             sha = commit['sha']
             yield get_blob(sha, filename, Metadata)
 
-    # Tchacker
-    def get_comments(self):
-        comments = self.metadata.get_value('comment')
-        print("comments = %s" % comments)
-        if not comments:
-            return None
-        #base = self.get_canonical_path()
-        return [ ("%s" % x.value) for x in comments ]
+    ## Tchacker
+    #def get_comments(self):
+    #    comments = self.metadata.get_value('comment')
+    #    print("comments = %s" % comments)
+    #    if not comments:
+    #        return None
+    #    #base = self.get_canonical_path()
+    #    return [ ("%s" % x.value) for x in comments ]
 
 
     def get_attachments(self):

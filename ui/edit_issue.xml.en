@@ -3,25 +3,10 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <stl:block xmlns="http://www.w3.org/1999/xhtml"
   xmlns:stl="http://www.hforge.org/xml-namespaces/stl">
-<!-- Javascript -->
-<script language="javascript">
-    var list_products = {
-    <stl:inline stl:repeat="product list_products">"${product/id}":
-        {'module':
-        [<stl:inline stl:repeat="module product/modules">{"id": "${module/id}", "value": "${module/value}"}, </stl:inline>],
-        'version':
-        [<stl:inline stl:repeat="version product/versions">{"id": "${version/id}", "value": "${version/value}"},</stl:inline>]}
-    ,</stl:inline>
-    }
-    function update_tracker() {
-        update_tracker_list('version');
-        update_tracker_list('module');
-    }
-</script>
 
 <h2 class="tchacker">
-  <span stl:if="which_module">${which_module} - </span>
-  <span stl:if="reported_by">Reported by <em>${reported_by}</em></span>
+  <span class="stl:if=which_module">{which_module} - </span>
+  <span class="stl:if=reported_by">Reported by <em>{reported_by}</em></span>
 </h2>
 
 <br/>
@@ -36,26 +21,23 @@ ${comments}
         <a href="#" class="showall">Show/Hide options</a>
     </div>
     <div class="one">
-        <div class="two bord">
+        <div stl:if="title" class="two bord">
             <div id="title" class="light">
                 <div class="label">
                     <label for="title">Title:</label>
                     <span class="field-is-missing" title="This field is required">*</span>
-                    <span stl:if="title/error" class="field-error">${title/error}</span>
                 </div>
-                <input type="text" name="title" id="title" value="${title/value}"
-                    size="48" />
+                <input type="text" name="title" id="title" value="${title}" size="48" />
             </div>
         </div>
         <div class="two-right">
-            <div id="label-assigned-to" class="light">
+            <div stl:if="assigned_to" id="label-assigned-to" class="light">
                 <div class="label">
                     <label for="assigned-to">Assign To:</label>
-                    <span stl:if="assigned_to/error" class="field-error">${assigned_to/error}</span>
                 </div>
                 <select name="assigned_to" id="assigned-to" class="tracker-select">
                     <option value=""></option>
-                    <option stl:repeat="item assigned_to/value" value="${item/name}"
+                    <option stl:repeat="item assigned_to" value="${item/name}"
                         selected="${item/selected}">${item/value}</option>
                 </select>
             </div>

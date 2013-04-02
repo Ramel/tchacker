@@ -58,6 +58,7 @@ from PIL import Image as PILImage
 from issue_views import Issue_NewInstance
 from issue_views import IssueTchackerMenu, Issue_History
 from issue_views import Issue_DownloadAttachments, Issue_Edit
+from issue_views import Issue_AutoEdit
 from monkey import Image, Video
 
 

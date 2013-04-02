@@ -29,8 +29,9 @@ from itools.web import get_context, BaseView, STLView
 from itools.xml import XMLParser
 
 # Import from ikaaro
+from ikaaro.folder import Folder
 from ikaaro.autoadd import AutoAdd
-from ikaaro.autoedit import AutoEdit
+from ikaaro.autoedit import AutoEdit, AutoForm
 from ikaaro.fields import Textarea_Field, File_Field
 from ikaaro.fields import Text_Field
 from ikaaro.fields import ProgressBar_Field
@@ -39,6 +40,9 @@ from ikaaro.views import ContextMenu
 from ikaaro.widgets import Widget
 from ikaaro.utils import make_stl_template
 from ikaaro.comments import CommentsView
+from ikaaro.fields import Integer_Field, URI_Field
+from ikaaro.fields import Select_Field
+from ikaaro.cc import Followers_Field
 
 # Import from tchacker
 from datatypes import get_issue_fields
@@ -207,6 +211,16 @@ class Issue_NewInstance(AutoAdd):
 
 
 
+class Issue_AutoEdit(AutoEdit):
+    
+    access = 'is_allowed_to_edit'
+    title = MSG(u'AutoEdit Issue')
+
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
+                    'priority'] #, 'comment'] #, 'attachment']#, 'progressbar']
+
+
+
 class Issue_Edit(STLView):
 
     access = 'is_allowed_to_view'
@@ -214,32 +228,21 @@ class Issue_Edit(STLView):
     template = "/ui/tchacker/edit_issue.xml"
 
 
-    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
-                    'priority'] #, 'comment'] #, 'attachment']#, 'progressbar']
+    schema = {'comment': Unicode(required=True)}
+
     
-    schema = {
-        'comment': Unicode(required=True)}
-
-
     def get_namespace(self, resource, context):
-        print('fields[title] = %s' % self.fields.get_value['title'])
-        print('title = %s' % resource.get_value('title'))
-        print('assigned_to = %s' % resource.get_value('assigned_to'))
+        #print('issue_autoedit = %s' % Issue_AutoEdit().GET(resource, context))
         return {
-            'title': resource.get_value('title'),
-            'assigned_to': resource.get_value('assigned_to'),
-            'product': resource.get_value('product'),
-            'type': resource.get_value('type'),
-            'cc_list': resource.get_value('cc_list'),
-            'priority': resource.get_value('priority'),
-            #'priority': resource.get_value('priority')}
-            'comments': CommentsView().GET(resource, context)}
+            'issue_autoedit': Issue_AutoEdit().GET(resource, context),
+            'comments': CommentsView().GET(resource, context)
+            }
 
 
     def action(self, resource, context, form):
         resource.add_comment(form['comment'])
         context.message = MSG_CHANGES_SAVED
-    
+
     #print("fields = %s" % fields)
     #comment = Textarea_Field(title=MSG(u'Comment'),
     #                        required=True, multilingual=False)

@@ -211,29 +211,20 @@ class Issue_NewInstance(AutoAdd):
 
 
 
-class Issue_AutoEdit(AutoEdit):
-    
+class Issue_Edit(AutoAdd): #STLView):
+
     access = 'is_allowed_to_edit'
-    title = MSG(u'AutoEdit Issue')
-
-    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
-                    'priority'] #, 'comment'] #, 'attachment']#, 'progressbar']
-
-
-
-class Issue_Edit(AutoEdit): #STLView):
-
-    access = 'is_allowed_to_view'
     title = MSG(u'Edit Issue')
     template = "/ui/tchacker/edit_issue.xml"
     
     comment = Textarea_Field(title=MSG(u'Comment'),
-                                required=True, multilingual=False)
-
-    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
-                    'priority', 'comment'] #, 'attachment']#, 'progressbar']
+                                            required=True, multilingual=False)
 
     #schema = {'comment': Unicode(required=True)}
+    schema = {'comment': Unicode}
+    
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
+                    'priority', 'comment'] #, 'attachment']#, 'progressbar']
 
     
     def get_namespace(self, resource, context):

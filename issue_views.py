@@ -111,7 +111,7 @@ class Issue_NewInstance(AutoAdd):
 
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
-        issue_cls = resource.issue_class
+        #issue_cls = resource.issue_class
         issue = proxy.make_new_resource(resource, context, form)
         #print "resource.issue_class = %s" % resource.issue_class
 
@@ -221,20 +221,30 @@ class Issue_AutoEdit(AutoEdit):
 
 
 
-class Issue_Edit(STLView):
+class Issue_Edit(AutoEdit): #STLView):
 
     access = 'is_allowed_to_view'
     title = MSG(u'Edit Issue')
     template = "/ui/tchacker/edit_issue.xml"
+    
+    comment = Textarea_Field(title=MSG(u'Comment'),
+                                required=True, multilingual=False)
 
+    fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
+                    'priority', 'comment'] #, 'attachment']#, 'progressbar']
 
-    schema = {'comment': Unicode(required=True)}
+    #schema = {'comment': Unicode(required=True)}
 
     
     def get_namespace(self, resource, context):
         #print('issue_autoedit = %s' % Issue_AutoEdit().GET(resource, context))
+        #print('issue_autoedit = %s' % Issue_AutoEdit().get_widgets(resource, context))
+        proxy = super(Issue_Edit, self)
+        namespace = proxy.get_namespace(resource, context)
+        print('namespace = %s' % namespace)
         return {
-            'issue_autoedit': Issue_AutoEdit().GET(resource, context),
+            #'issue_autoedit': Issue_AutoEdit().get_fields(),
+            'issue_ae': namespace,
             'comments': CommentsView().GET(resource, context)
             }
 

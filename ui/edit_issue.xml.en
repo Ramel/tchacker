@@ -13,6 +13,33 @@
 
 ${comments}
 
-{issue_autoedit}
+<stl:block stl:if="issue_ae">
+${issue_ae/before}
 
+<form method="${issue_ae/method}" enctype="${issue_ae/enctype}"
+  name="autoform" class="autoform" id="${issue_ae/form_id}" onsubmit="${issue_ae/onsubmit}"
+  stl:omit-tag="not issue_ae/actions">
+  <fieldset>
+    <legend stl:if="issue_ae/title">${issue_ae/title}</legend>
+    <p stl:if="issue_ae/description">${issue_ae/description}</p>
+    <stl:block stl:repeat="field issue_ae/fields_list">${field}</stl:block>
+    <!--<div class="block-widget block-widget-comment">
+      <div>
+        <label class="title" for="comment">Comment</label>    
+      </div>
+      <div class="widget">
+        <textarea name="comment" id="comment" cols="72" rows="7"></textarea>
+      </div>
+    </div>-->
+    <div class="autoform-actions" stl:if="issue_ae/actions">
+      <stl:block stl:repeat="action issue_ae/actions">${action}</stl:block>
+    </div>
+  </fieldset>
+  <script type="text/javascript">
+    document.getElementById("${issue_ae/first_widget}").focus();
+  </script>
+</form>
+
+${issue_ae/after}
+</stl:block>
 </stl:block>

@@ -23,7 +23,7 @@
 
 # Import from itools
 from itools.csv import Property
-from itools.datatypes import Unicode, XMLContent
+from itools.datatypes import String, Unicode, XMLContent
 from itools.gettext import MSG
 from itools.web import get_context, BaseView, STLView
 from itools.xml import XMLParser
@@ -34,14 +34,14 @@ from ikaaro.autoadd import AutoAdd
 from ikaaro.autoedit import AutoEdit, AutoForm
 from ikaaro.fields import Textarea_Field, File_Field
 from ikaaro.fields import Text_Field
+from ikaaro.fields import Integer_Field, URI_Field
+from ikaaro.fields import Select_Field
 from ikaaro.fields import ProgressBar_Field
 from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.views import ContextMenu
 from ikaaro.widgets import Widget
 from ikaaro.utils import make_stl_template
 from ikaaro.comments import CommentsView
-from ikaaro.fields import Integer_Field, URI_Field
-from ikaaro.fields import Select_Field
 from ikaaro.cc import Followers_Field
 
 # Import from tchacker
@@ -101,20 +101,17 @@ class Issue_NewInstance(AutoAdd):
 
     msg_new_resource = MSG(u'New Issue added!')
 
-    comment = Textarea_Field(title=MSG(u'Comment'),
-                                required=True, multilingual=False)
-    attachment = File_Field(title=MSG(u'Attachment'))
-    progressbar = ProgressBar_Field
+    comment = Textarea_Field(title=MSG(u'Comment Issue_NewInstance'),
+                                stored=False, required=True, multilingual=False)
+    #attachment = File_Field(title=MSG(u'Attachment'))
+    #progressbar = ProgressBar_Field
 
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
                     'priority', 'comment'] #, 'attachment', 'progressbar']
 
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
-        #issue_cls = resource.issue_class
         issue = proxy.make_new_resource(resource, context, form)
-        #print "resource.issue_class = %s" % resource.issue_class
-
         """
         #### Add
         id = resource.get_new_id()
@@ -123,6 +120,7 @@ class Issue_NewInstance(AutoAdd):
         """
         #issue.add_comment(context, form, new=True)
         issue.add_comment(form['comment'])
+        issue.set_property('ids', 0)
         return issue
 
 #    access = 'is_allowed_to_edit'
@@ -211,36 +209,45 @@ class Issue_NewInstance(AutoAdd):
 
 
 
-class Issue_Edit(AutoAdd): #STLView):
+class Issue_Edit(AutoEdit): #STLView):
 
     access = 'is_allowed_to_edit'
     title = MSG(u'Edit Issue')
     template = "/ui/tchacker/edit_issue.xml"
     
-    comment = Textarea_Field(title=MSG(u'Comment'),
-                                            required=True, multilingual=False)
-
-    #schema = {'comment': Unicode(required=True)}
-    schema = {'comment': Unicode}
+    comment = Textarea_Field(title=MSG(u'Comment Issue_Edit'),
+                                            required=True, multilingual=False
+                                            )
+    #schema = {'comment': Unicode}
     
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
                     'priority', 'comment'] #, 'attachment']#, 'progressbar']
 
+    #schema = {'comment': Unicode(required=True)}
     
     def get_namespace(self, resource, context):
         #print('issue_autoedit = %s' % Issue_AutoEdit().GET(resource, context))
         #print('issue_autoedit = %s' % Issue_AutoEdit().get_widgets(resource, context))
+        #ids = resource.get_value('ids')
+        #print("ids = {}".format(ids))
+        #ids = len(resource.get_comments())
+        #print len(cm)
         proxy = super(Issue_Edit, self)
         namespace = proxy.get_namespace(resource, context)
+        #cm = CommentsView().GET(resource, context)
+        #print cm['index']
+        namespace.update({'comments': CommentsView().GET(resource, context)})
+        ids = resource.get_value('ids')
+        namespace.update({'ids': ids})
+        #namespace.update({'ids': ids})
         print('namespace = %s' % namespace)
-        return {
-            #'issue_autoedit': Issue_AutoEdit().get_fields(),
-            'issue_ae': namespace,
-            'comments': CommentsView().GET(resource, context)
-            }
+        #print('fields_list = %s' % self.fields_list)
+        return namespace
 
 
     def action(self, resource, context, form):
+        ids = resource.get_value('ids')
+        resource.set_property('ids', ids + 1)
         resource.add_comment(form['comment'])
         context.message = MSG_CHANGES_SAVED
 

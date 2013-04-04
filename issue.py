@@ -91,6 +91,8 @@ class Issue(CommentsAware, Folder):
     ids = Integer_Field()
     last_attachment = URI_Field(indexed=False, stored=True)
     #comment = Textarea_Field(indexed=True, multiple=True, stored=True, multilingual=False)
+    comment = Textarea_Field(stored=False, multilingual=False,
+                                    title=MSG(u'Comment Issue'))
     # Models
     #product = Select_Field()
     #type = Select_Field()

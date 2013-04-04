@@ -112,13 +112,7 @@ class Issue_NewInstance(AutoAdd):
     def make_new_resource(self, resource, context, form):
         proxy = super(Issue_NewInstance, self)
         issue = proxy.make_new_resource(resource, context, form)
-        """
-        #### Add
-        id = resource.get_new_id()
-        issue_cls = resource.issue_class
-        issue = resource.make_resource(id, issue_cls)
-        """
-        #issue.add_comment(context, form, new=True)
+        
         issue.add_comment(form['comment'])
         issue.set_property('ids', 0)
         return issue
@@ -214,34 +208,21 @@ class Issue_Edit(AutoEdit): #STLView):
     access = 'is_allowed_to_edit'
     title = MSG(u'Edit Issue')
     template = "/ui/tchacker/edit_issue.xml"
-    
+
     comment = Textarea_Field(title=MSG(u'Comment Issue_Edit'),
                                             required=True, multilingual=False
                                             )
-    #schema = {'comment': Unicode}
-    
+
     fields = ['title', 'assigned_to', 'product', 'type', 'cc_list', 'state',
                     'priority', 'comment'] #, 'attachment']#, 'progressbar']
 
-    #schema = {'comment': Unicode(required=True)}
-    
+
     def get_namespace(self, resource, context):
-        #print('issue_autoedit = %s' % Issue_AutoEdit().GET(resource, context))
-        #print('issue_autoedit = %s' % Issue_AutoEdit().get_widgets(resource, context))
-        #ids = resource.get_value('ids')
-        #print("ids = {}".format(ids))
-        #ids = len(resource.get_comments())
-        #print len(cm)
         proxy = super(Issue_Edit, self)
         namespace = proxy.get_namespace(resource, context)
-        #cm = CommentsView().GET(resource, context)
-        #print cm['index']
+
         namespace.update({'comments': CommentsView().GET(resource, context)})
-        ids = resource.get_value('ids')
-        namespace.update({'ids': ids})
-        #namespace.update({'ids': ids})
-        print('namespace = %s' % namespace)
-        #print('fields_list = %s' % self.fields_list)
+        namespace.update({'ids': resource.get_value('ids')})
         return namespace
 
 
@@ -250,6 +231,7 @@ class Issue_Edit(AutoEdit): #STLView):
         resource.set_property('ids', ids + 1)
         resource.add_comment(form['comment'])
         context.message = MSG_CHANGES_SAVED
+
 
     #print("fields = %s" % fields)
     #comment = Textarea_Field(title=MSG(u'Comment'),

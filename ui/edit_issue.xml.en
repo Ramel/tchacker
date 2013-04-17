@@ -28,8 +28,8 @@
 
 ${comments}
 
-<form action=";edit" method="post" enctype="multipart/form-data" id="tracker"
-        onsubmit="beginUpload()">
+<form action=";edit" method="post" enctype="multipart/form-data" id="tracker">
+        <!--onsubmit="beginUpload()">-->
   <fieldset>
     <legend>Edit Issue</legend>
     <div class="bord">
@@ -160,7 +160,7 @@ ${comments}
                     <label class="label" for="attachment">New attachment:</label>
                     <input type="file" name="attachment" id="attachment" size="36" />
                 </div>
-                <div id="upload" class="one bord">
+                <!--<div id="upload" class="one bord">
                     <div id="infos">
                         <p id="attName" />
                         <p id="attSize" />
@@ -175,7 +175,7 @@ ${comments}
                             <div id="current" />
                         </div>
                     </div>
-                </div>
+                </div>-->
             </fieldset>
         </div>
         <p>
@@ -188,7 +188,8 @@ ${comments}
     $("#attachment").focus(function () {
         attachmentSelected($(this));
     });
-
+    
+    /*
     var upload_id = "{upload_id}";
     var started = 0;
     var attSize = 0;
@@ -296,5 +297,6 @@ ${comments}
             }
         }
     }
+    */
 </script>
 </stl:block>

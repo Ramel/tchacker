@@ -93,6 +93,13 @@ class Tchack_Issue(Issue):
         return [ ("%s" % x.value) for x in comments ]
 
 
+    def get_len_comments(self):
+        comments = self.metadata.get_property('comment')
+        if not comments:
+            return None
+        return len(comments)
+
+
     def get_attachments(self):
         attachments = self.metadata.get_property('attachment')
         if not attachments:
@@ -127,14 +134,13 @@ class Tchack_Issue(Issue):
         self.set_property('cc_list', tuple(cc_list))
 
         comment = form['comment']
-
         # Attachment
         attachment = form['attachment']
 
         if new:
             ids = 1
         else:
-            ids = int(self.get_property('ids')) + 1
+            ids = self.get_len_comments() + 1
 
         att_name = ""
 
@@ -312,7 +318,7 @@ class Tchack_Issue(Issue):
         comment = Property(comment, date=date, author=author)
 
         self.set_property('comment', comment)
-        self.set_property('ids', ids)
+        #self.set_property('ids', ids)
 
         # Send a Notification Email
         # Notify / From

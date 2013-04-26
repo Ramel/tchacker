@@ -188,7 +188,7 @@ ${comments}
     $("#attachment").focus(function () {
         attachmentSelected($(this));
     });
-    
+
     /*
     var upload_id = "{upload_id}";
     var started = 0;

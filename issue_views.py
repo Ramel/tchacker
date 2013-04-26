@@ -25,6 +25,7 @@
 from itools.gettext import MSG
 
 # Import from ikaaro
+from ikaaro.messages import MSG_CHANGES_SAVED
 from ikaaro.tracker.issue_views import Issue_Edit
 
 # Import from tchacker
@@ -66,3 +67,12 @@ class TchackIssue_Edit(Issue_Edit):
                 namespace['which_module'] = module['value']
 
         return namespace
+
+    def action(self, resource, context, form):
+        #filename, mimetype, body = form['attachment']
+        #print("action.form['attachment'].filename = %s" % filename)
+        # Edit
+        resource.add_comment(context, form)
+        # Change
+        context.database.change_resource(resource)
+        context.message = MSG_CHANGES_SAVED

@@ -22,7 +22,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from the Standard Library
-from os.path import basename
 from tempfile import mkdtemp
 from os import sep
 
@@ -89,7 +88,6 @@ class Tchack_Issue(Issue):
         comments = self.metadata.get_property('comment')
         if not comments:
             return None
-        base = self.get_canonical_path()
         return [ ("%s" % x.value) for x in comments ]
 
 
@@ -104,8 +102,6 @@ class Tchack_Issue(Issue):
         attachments = self.metadata.get_property('attachment')
         if not attachments:
             return None
-
-        base = self.get_canonical_path()
         return set([ str(x.value) for x in attachments ])
 
 

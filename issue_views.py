@@ -55,9 +55,6 @@ class TchackIssue_Edit(Issue_Edit):
     def get_namespace(self, resource, context):
         namespace = Issue_Edit.get_namespace(self, resource, context)
 
-        # Local variables
-        root = context.root
-
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
 

@@ -20,8 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from operator import itemgetter, attrgetter
-
 # Import from itools
 from itools.gettext import MSG
 from itools.uri import encode_query
@@ -36,7 +34,7 @@ from ikaaro.tracker.tracker_views import StoredSearchesMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.tracker.tracker_views import Tracker_AddIssue
 from ikaaro.tracker.datatypes import get_issue_fields
-from ikaaro.datatypes import FileDataType
+
 
 from monkey import Image, Video
 from issue import Tchack_Issue
@@ -82,7 +80,7 @@ class Tchacker_View(Tracker_View):
             issue = item.name
             if attach_name is None:
                 return None
-            last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
+            #last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
             attachments = resource.get_resource(issue).get_attachments_ordered()
             thumbnails = []
             max_width = 0

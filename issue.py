@@ -65,7 +65,7 @@ class Tchack_Issue(Issue):
 
     class_schema = merge_dicts(
         Issue.class_schema,
-        ids=Integer(source='metadata'),
+        #ids=Integer(source='metadata'),
         last_attachment=String(source='metadata', indexed=False, stored=True))
 
     #XXX: Replace the original datatypes

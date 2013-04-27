@@ -36,5 +36,4 @@ def get_issue_fields(tracker):
             'assigned_to': Tracker_UsersList(resource=tracker),
             'cc_list': Tracker_UsersList(resource=tracker, multiple=True),
             'comment': Unicode,
-            'attachment': FileDataType,
-            'ids': Integer}
+            'attachment': FileDataType}

@@ -57,7 +57,7 @@ from monkey import Image, Video
 class Tchack_Issue(Issue):
 
     class_id = 'tchack_issue'
-    class_version = '20100506'
+    class_version = '20130427'
     class_title = MSG(u'Tchacker Issue')
     class_description = MSG(u'Tchacker Issue')
 
@@ -138,9 +138,9 @@ class Tchack_Issue(Issue):
         attachment = form['attachment']
 
         if new:
-            ids = 1
+            ids = 0
         else:
-            ids = self.get_len_comments() + 1
+            ids = self.get_len_comments()
 
         att_name = ""
 
@@ -303,7 +303,7 @@ class Tchack_Issue(Issue):
 
             # Link
             # The "ids" in comments is ids-1
-            attachment = Property(att_name, comment=ids-1)
+            attachment = Property(att_name, comment=ids)
             self.set_property('attachment', attachment)
 
         # Comment
@@ -386,223 +386,13 @@ class Tchack_Issue(Issue):
     #######################################################################
     # Update
     #######################################################################
-    def update_20100506(self):
-        from itools.core import fixed_offset
-        utc = fixed_offset(0)
-        from ikaaro.tracker.obsolete import History
-
+    def update_20130427(self):
+        """Delete the ids property"""
         metadata = self.metadata
-        history = self.handler.get_handler('.history', History)
+        metadata.del_property('ids')
 
-        record = history.records[-1]
-        # Title
-        lang = self.get_site_root().get_default_language()
-        title = history.get_record_value(record, 'title')
-        title = Property(title, lang=lang)
-        metadata.set_property('title', title)
-        # Product, module, etc.
-        names = 'product', 'module', 'version', 'type', 'state', 'priority'
-        for name in names:
-            value = history.get_record_value(record, name)
-            if value is not None:
-                metadata.set_property(name, value)
-        # Assigned
-        value = history.get_record_value(record, 'assigned_to')
-        if value:
-            metadata.set_property('assigned_to', value)
-        else:
-            author = history.get_record_value(record, 'username')
-            metadata.set_property('assigned_to', author)
 
-        # We start at zero, so set id to:
-        id = -1
-        issue_comments = len(history.records)
+    def update_20100507(self):
+        """Fake update to pass the inherited method"""
+        print "Fake update"
 
-        for record in history.records:
-            if record is None:
-                # deleted record
-                continue
-            comment = history.get_record_value(record, 'comment')
-            date = history.get_record_value(record, 'datetime')
-            date = date.replace(tzinfo=utc)
-            author = history.get_record_value(record, 'username')
-            file = history.get_record_value(record, 'file')
-            attfile = self.get_resource(file)
-
-            ##############
-            # Images
-            ##############
-            if isinstance(attfile, Image):
-                # Get extension
-                filename = attfile.get_property('filename')
-                name, extension, language = FileName.decode(filename)
-                if extension == 'psd':
-                    pass
-                else:
-                    thumbs = [["_LOW", False], ["_MED", False], ["_HIG", False]]
-                    for thumb in thumbs:
-                        try:
-                            thumb[0] = self.get_resource('%s%s' % (file, thumb[0]))
-                            thumb[1] = True
-                        except LookupError:
-                            print("LookupError, need to create thumnails for '%s'" % file)
-                            thumb[1] = False
-
-                    if ((not thumbs[0][1]) and (not thumbs[1][1]) and
-                                            (not thumbs[2][1])):
-                        dirname = mkdtemp('makethumbs', 'ikaaro')
-                        tempdir = vfs.open(dirname)
-                        # Paste the file in the tempdir
-                        tmpfolder = "%s" % (dirname)
-                        tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
-                        tmpfile = open("%s" % tmp_uri, "w+")
-                        tmpfile.write(attfile.handler.to_str())
-                        tmpfile.close()
-
-                        low = 256, 256
-                        med = 800, 800
-                        hig = 1024, 1024
-
-                        # Create the thumbnail PNG resources
-                        thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-
-                        uri = tmpfolder + sep
-
-                        for te in thumbext:
-                            try:
-                                im = PILImage.open(tmp_uri)
-                            except IOError:
-                                print("IOError at PILImage.open(%s)" % tmp_uri)
-                            im.thumbnail(te[1], PILImage.ANTIALIAS)
-                            # Need to put the name in lowercase
-                            ima = name.lower() + te[0]
-                            # Some images are in CMYB, force RVB if needed
-                            if im.mode != "RGB":
-                                im = im.convert("RGB")
-                            im.save(uri + ima + ".jpg", 'jpeg', quality=85)
-                            # Copy the thumb content
-                            thumb_file = tempdir.open(ima + ".jpg")
-                            try:
-                                thumb_data = thumb_file.read()
-                            finally:
-                                thumb_file.close()
-                            format = 'image/jpeg'
-                            cls = get_resource_class(format)
-                            print("Creating %s" % ima)
-                            imageThumb = self.make_resource(
-                                        ima,
-                                        cls,
-                                        body=thumb_data,
-                                        filename=ima+'.jpg',
-                                        extension='jpg',
-                                        format=format
-                                        )
-                            is_thumb = Property(True)
-                            imageThumb.set_property('is_thumb', is_thumb)
-
-                        has_thumb = Property(True)
-                        attfile.set_property('has_thumb', has_thumb)
-
-                        thumbs[0][1] = True
-                        thumbs[1][1] = True
-                        thumbs[2][1] = True
-                        # Clean the temporary folder
-                        vfs.remove(dirname)
-                    else:
-                        print("Update existing Image's Properties: %s" % attfile.name)
-                        attfile.set_property('has_thumb', True)
-                        attfile.del_property('thumbnail')
-                        self.get_resource('%s_LOW' % file).set_property(
-                                                                'is_thumb', True)
-                        self.get_resource('%s_MED' % file).set_property(
-                                                                'is_thumb', True)
-                        self.get_resource('%s_HIG' % file).set_property(
-                                                                'is_thumb', True)
-
-            ##############
-            # Video
-            ##############
-            thumb = False
-            low_thumb = False
-            if isinstance(attfile, Video):
-                try :
-                    self.get_resource('%s_thumb' % file)
-                    thumb = True
-                except LookupError:
-                    thumb = False
-                try :
-                    self.get_resource('%s_low_thumb' % file)
-                    low_thumb = True
-                except LookupError:
-                    low_thumb = False
-
-                print("Update Video: %s" % attfile.name)
-                self.get_resource(file).del_property('thumbnail')
-                self.get_resource(file).set_property('has_thumb', True)
-                if thumb:
-                    self.get_resource('%s_thumb' % file).set_property('is_thumb', True)
-                if low_thumb:
-                    resource = self.get_resource('%s_low_thumb' % file, soft=True)
-                    handler = resource.get_handler()
-                    folder = self.handler
-                    filename = resource.get_property('filename')
-                    handler_name = basename(handler.key)
-                    resource.set_property("filename",
-                            filename.replace('_low', ''))
-                    print("Need to rename the _low_thumb in _thumb")
-                    # Copy the handler, we delete it after
-                    folder.copy_handler(handler_name,
-                            handler_name.replace('_low', ''))
-                    folder.copy_handler('%s.metadata' % filename,
-                            '%s.metadata' % filename.replace('_low', ''))
-                    # Delete old 'thumb_x' file
-                    try:
-                        self.get_resource('thumb_%s' % file)
-                        self.del_resource('thumb_%s' % file)
-                    except LookupError:
-                        print("The file 'thumb_%s' doesn't exist" % file)
-
-                    # Now delete the old 'x_low_thumb' file copied before
-                    try:
-                        filename = '%s_low_thumb' % file
-                        if self.get_resource(filename):
-                            print("Delete old '%s.metadata'" % filename)
-                            self.del_resource(filename)
-                    except LookupError:
-                        print("File '%s.metadata' doesn't exist!" % filename)
-
-            # Add comment only if it was a comment
-            # or a comment AND a file.
-            if comment:
-                id = id + 1
-                comment = Property(comment, date=date, author=author)
-            if comment == '' and file:
-                comment = 'comment_is_empty_but_has_attachment'
-            if not comment and issue_comments == 1:
-                comment = 'empty'
-
-            metadata.set_property('comment', comment)
-            if file:
-                attachment = Property(file, comment=id)
-                metadata.set_property('attachment', attachment)
-                if isinstance(attfile, Image) or isinstance(attfile, Video):
-                    if low_thumb:
-                        last_attachment = file.replace('_low', '')
-                    else:
-                        last_attachment = file
-                    metadata.set_property('last_attachment', last_attachment)
-
-        # Set the total of ids in the issue, count only comments with text or
-        # image/video, doesn't need to increment 'ids' if the modification
-        # is everything else.
-        metadata.set_property('ids', id)
-
-        # CC
-        reporter = history.records[0].username
-        value = history.get_record_value(record, 'cc_list')
-        if reporter not in value:
-            value = value + (reporter,)
-        metadata.set_property('cc_list', value)
-
-        # Remove .history
-        self.handler.del_handler('.history')

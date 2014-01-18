@@ -94,26 +94,27 @@ $(document).ready(function () {
           $("INPUT#title").val("LV-P-" + str);
         }
       }
-    if (type == 2) { // We add a Props
-      (function($){
-        // Because prop is not functionning
-        //http://stackoverflow.com/questions/6323431/jquery-prop-compatibility
-        if (typeof $.fn.prop !== 'function')
-          $.fn.prop = function(name, value){
-            if (typeof value === 'undefined') {
-              return this.attr(name);
-            } else {
-              return this.attr(name, value);
-            }
-          };
-      })(jQuery);
-      var names = "1,3,5,21,25,159";
-      // CCs
-      $.each(names.split(","), function(i,e){
-        $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
-      });
-      // Assigned-to
-      $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
+      if (type == 2) { // We add a Props
+        (function($){
+          // Because prop is not functionning
+          //http://stackoverflow.com/questions/6323431/jquery-prop-compatibility
+          if (typeof $.fn.prop !== 'function')
+            $.fn.prop = function(name, value) {
+              if (typeof value === 'undefined') {
+                return this.attr(name);
+              } else {
+                return this.attr(name, value);
+              }
+            };
+        })(jQuery);
+        var names = "1,3,5,21,25,159";
+        // CCs
+        $.each(names.split(","), function(i,e){
+          $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+        });
+        // Assigned-to
+        $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
+      }
     }
   }).change();
   if (document.URL.match(";view\\?[a-zA-Z0-9%+!&=]*search_name") != null && document.URL.match("luluvroumette") != null) {

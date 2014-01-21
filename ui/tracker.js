@@ -107,7 +107,7 @@ $(document).ready(function () {
               }
             };
         })(jQuery);
-        var names = "1,3,5,21,25,159";
+        var names = "1,3,5,7,21,25,128,159";
         // CCs
         $.each(names.split(","), function(i,e){
           $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);

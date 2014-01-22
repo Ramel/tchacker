@@ -63,6 +63,19 @@ $(document).ready(function () {
 				.stop().css("display", "none").parent().css("background-color", "transparent");
 	});
 
+  // Because prop is not functionning
+  //http://stackoverflow.com/questions/6323431/jquery-prop-compatibility
+  (function($){
+    if (typeof $.fn.prop !== 'function')
+      $.fn.prop = function(name, value) {
+        if (typeof value === 'undefined') {
+          return this.attr(name);
+        } else {
+          return this.attr(name, value);
+        }
+      };
+  })(jQuery);
+
   /*
    * For LuluVroumette
    */
@@ -95,18 +108,6 @@ $(document).ready(function () {
         }
       }
       if (type == 2) { // We add a Props
-        (function($){
-          // Because prop is not functionning
-          //http://stackoverflow.com/questions/6323431/jquery-prop-compatibility
-          if (typeof $.fn.prop !== 'function')
-            $.fn.prop = function(name, value) {
-              if (typeof value === 'undefined') {
-                return this.attr(name);
-              } else {
-                return this.attr(name, value);
-              }
-            };
-        })(jQuery);
         var names = "1,3,5,7,21,25,128,159";
         // CCs
         $.each(names.split(","), function(i,e){
@@ -114,6 +115,33 @@ $(document).ready(function () {
         });
         // Assigned-to
         $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
+      }
+    }
+  }).change();
+  $("SELECT#product").change(function() {
+    if (document.URL.match(";add_issue") != null && document.URL.match("projets.pro") != null) {
+      var product = $("SELECT#product option:selected").attr("value");    // selected type
+      var str = $("INPUT#title").val();
+      if (product == 0) { // We add a Project
+        var names = "3,9,21,25";
+        // CCs
+        $.each(names.split(","), function(i,e){
+          $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+        });
+        // Assigned-to
+        $("SELECT#assigned-to OPTION[value='1']").attr('selected', true);
+      }
+    }
+    if (document.URL.match(";add_issue") != null && ((document.URL.match("umt.pro") != null) || (document.URL.match("unmondetruque.pro") != null))) {
+      var product = $("SELECT#product option:selected").attr("value");    // selected type
+      if (product == 0) { // We add an Issue
+        var names = "9,18,21,148,152,149,150,154,131,3,140,1,25,155";
+        // CCs
+        $.each(names.split(","), function(i,e){
+          $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+        });
+        // Assigned-to
+        $("SELECT#assigned-to OPTION[value='151']").attr('selected', true);
       }
     }
   }).change();

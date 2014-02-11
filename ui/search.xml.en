@@ -56,12 +56,12 @@
             </select>
           </td>
           <td valign="top">
-            <label for="module">Module:<stl:inline stl:if="is_admin"> (<a
-              href="./module/;view">Edit</a>)</stl:inline></label>
+            <label for="type">Type:<stl:inline stl:if="is_admin"> (<a
+              href="./type/;view">Edit</a>)</stl:inline></label>
             <br/>
-            <select name="module" id="module" class="tracker-select"
+            <select name="type" id="type" class="tracker-select"
               multiple="multiple" size="4">
-              <option stl:repeat="item modules" value="${item/name}"
+              <option stl:repeat="item types" value="${item/name}"
                 selected="${item/selected}">${item/value}</option>
             </select>
           </td>
@@ -78,12 +78,12 @@
         </tr>
         <tr>
           <td valign="top">
-            <label for="type">Type:<stl:inline stl:if="is_admin"> (<a
-              href="./type/;view">Edit</a>)</stl:inline></label>
+            <label for="module">Module:<stl:inline stl:if="is_admin"> (<a
+              href="./module/;view">Edit</a>)</stl:inline></label>
             <br/>
-            <select name="type" id="type" class="tracker-select"
+            <select name="module" id="module" class="tracker-select"
               multiple="multiple" size="4">
-              <option stl:repeat="item types" value="${item/name}"
+              <option stl:repeat="item modules" value="${item/name}"
                 selected="${item/selected}">${item/value}</option>
             </select>
           </td>

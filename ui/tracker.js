@@ -147,7 +147,7 @@ $(document).ready(function () {
   }).change();
   if (document.URL.match(";view\\?[a-zA-Z0-9%+!&=]*search_name") != null && document.URL.match("luluvroumette") != null) {
     var search = $("DIV.context-menu UL LI.nav-active A").text();
-    var pattn = new RegExp("^EP[0-9]{3}");
+    var pattn = new RegExp("^(B6-EP|EP)[0-9]{3}");
     var isEpisode = pattn.exec(search); // EP000
     var validated = 0;
     var threedtextures = 0;

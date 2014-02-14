@@ -108,7 +108,7 @@ $(document).ready(function () {
         }
       }
       if (type == 2) { // We add a Props
-        var names = "1,3,5,7,21,25,128,159";
+        var names = "1,3,5,7,9,21,25,128,159";
         // CCs
         $.each(names.split(","), function(i,e){
           $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);

@@ -249,14 +249,14 @@ class Tchack_Issue(Issue):
                 #if int(width) > 319:
                 #video_low = ("%s_low" % name)
                 # video is already in temp dir, so encode it
-                encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
+                encoded = VideoEncodingToFLV(tmpfile).encode_video_to_mp4(
                     tmpfolder, name, name, width_low, encode='one_chroma_faststart')
 
                 if encoded is not None:
                     vidfilename, vidmimetype, vidbody, vidextension, \
-                            width, height = encoded['flvfile']
+                            width, height = encoded['videoFile']
                     thumbfilename, thumbmimetype, \
-                            thumbbody, thumbextension = encoded['flvthumb']
+                            thumbbody, thumbextension = encoded['videoThumb']
                     # Create the video resources
                     self.make_resource(vidfilename, Video,
                         body=vidbody, filename=vidfilename,

@@ -306,7 +306,9 @@ class Tchack_Issue(Issue):
         date = context.timestamp
         user = context.user
         author = user.name if user else None
-        if comment == '' and attachment is not None:
+        # Check for empty comment
+        comment_check = " ".join(comment.split())
+        if comment_check == '' and attachment is not None:
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:
             self.set_property('last_attachment', att_name)

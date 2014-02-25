@@ -47,11 +47,16 @@
   <script stl:if="comment/attachment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.2.2.swf", {
      clip: {
        autoPlay: false,
-       autoBuffering: false
+       autoBuffering: false,
+       scaling: 'orig'
+     },
+     onBeforeFullscreen: function () {
+       this.getPlugin("canvas").css({background: '#000000 repeat fixed center'});
      },
      // canvas background, the video thumbnail.
      canvas: {
-       backgroundImage: 'url(${comment/attachment/link}_thumb/;download)'
+       background: '#000000 url(${comment/attachment/link}_thumb/;download) no-repeat fixed center',
+       backgroundGradient: 'none'
      }
   });
   </script>

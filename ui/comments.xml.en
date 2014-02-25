@@ -48,7 +48,7 @@
      clip: {
        autoPlay: false,
        autoBuffering: false,
-       scaling: 'orig'
+       scaling: 'fit'
      },
      onBeforeFullscreen: function () {
        this.getPlugin("canvas").css({background: '#000000 repeat fixed center'});

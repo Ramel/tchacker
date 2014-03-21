@@ -1,4 +1,6 @@
 $(document).ready(function () {
+  // hide some user
+  $("SELECT#cc-list.tracker-select OPTION[value='156']").hide();
   // Keep on One line :
   $('TABLE#browse-list THEAD TR TH:nth-child(1), TABLE#browse-list TBODY TR TD:nth-child(1), TABLE#browse-list THEAD TR TH:nth-child(4), TABLE#browse-list TBODY TR TD:nth-child(4), TABLE#browse-list THEAD TR TH:nth-child(6), TABLE#browse-list TBODY TR TD:nth-child(6), TABLE#browse-list THEAD TR TH:nth-child(10), TABLE#browse-list TBODY TR TD:nth-child(10)').hide();
   /* show.hide some TDs */

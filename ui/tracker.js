@@ -87,11 +87,13 @@ $(document).ready(function () {
       var state = $("SELECT#state option:selected").attr("value");  // selected state
       var str = $("TEXTAREA#comment").val();                        // actual comment
       var pattn = /ftp(.*).7z/gim;                                  // Is there an ftp pasted text?
-      var is7z = str.match(pattn);
-      var isFtp = str.match("ftp://tchack@tchack.com@192.175.0.1/lulu-vroumette-s2/From-Tchack/");
-      if (state == 4 && is7z != null && isFtp != null) {
-        var ftp = str.replace("ftp://tchack@tchack.com@192.175.0.1/lulu-vroumette-s2/", "");
-        $("TEXTAREA#comment").val("Modélisation et texture livrées, disponible sur le Ftp :\n\nftp://ftp2.tchack.com/" + ftp);
+      if (str != undefined) {
+        var is7z = str.match(pattn);
+        var isFtp = str.match("ftp://tchack@tchack.com@192.175.0.1/lulu-vroumette-s2/From-Tchack/");
+        if (state == 4 && is7z != null && isFtp != null) {
+          var ftp = str.replace("ftp://tchack@tchack.com@192.175.0.1/lulu-vroumette-s2/", "");
+          $("TEXTAREA#comment").val("Modélisation et texture livrées, disponible sur le Ftp :\n\nftp://ftp2.tchack.com/" + ftp);
+        }
       }
     }
   }).change();
@@ -100,24 +102,26 @@ $(document).ready(function () {
       var type = $("SELECT#type option:selected").attr("value");    // selected type
       var str = $("INPUT#title").val();
       var pattn = /^LV([_\- ]*)P([_\- ]*)/gi;                        //
-      var good = str.match(pattn);
-      if (type == 2 || type == 12 || type == 13 || type == 15) {
-        if (good != null) {
-          var str = str.replace(good, "LV-P-");
-          $("INPUT#title").val(str);
+      if (str != undefined) {
+        var good = str.match(pattn);
+        if (type == 2 || type == 12 || type == 13 || type == 15) {
+          if (good != null) {
+            var str = str.replace(good, "LV-P-");
+            $("INPUT#title").val(str);
+          }
+          if (good == null) {
+            $("INPUT#title").val("LV-P-" + str);
+          }
         }
-        if (good == null) {
-          $("INPUT#title").val("LV-P-" + str);
+        if (type == 2) { // We add a Props
+          var names = "1,3,5,7,9,21,25,128,159";
+          // CCs
+          $.each(names.split(","), function(i,e){
+            $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+          });
+          // Assigned-to
+          $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
         }
-      }
-      if (type == 2) { // We add a Props
-        var names = "1,3,5,7,9,21,25,128,159";
-        // CCs
-        $.each(names.split(","), function(i,e){
-          $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
-        });
-        // Assigned-to
-        $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
       }
     }
   }).change();
@@ -125,14 +129,16 @@ $(document).ready(function () {
     if (document.URL.match(";add_issue") != null && document.URL.match("projets.pro") != null) {
       var product = $("SELECT#product option:selected").attr("value");    // selected type
       var str = $("INPUT#title").val();
-      if (product == 0) { // We add a Project
-        var names = "3,9,21,25";
-        // CCs
-        $.each(names.split(","), function(i,e){
-          $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
-        });
-        // Assigned-to
-        $("SELECT#assigned-to OPTION[value='1']").attr('selected', true);
+      if (str != undefined) {
+        if (product == 0) { // We add a Project
+          var names = "3,9,21,25";
+          // CCs
+          $.each(names.split(","), function(i,e){
+            $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+          });
+          // Assigned-to
+          $("SELECT#assigned-to OPTION[value='1']").attr('selected', true);
+        }
       }
     }
     if (document.URL.match(";add_issue") != null && ((document.URL.match("umt.pro") != null) || (document.URL.match("unmondetruque.pro") != null))) {

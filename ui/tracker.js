@@ -1,6 +1,4 @@
 $(document).ready(function () {
-  // hide some user
-  $("SELECT#cc-list.tracker-select OPTION[value='156']").hide();
   // Keep on One line :
   $('TABLE#browse-list THEAD TR TH:nth-child(1), TABLE#browse-list TBODY TR TD:nth-child(1), TABLE#browse-list THEAD TR TH:nth-child(4), TABLE#browse-list TBODY TR TD:nth-child(4), TABLE#browse-list THEAD TR TH:nth-child(6), TABLE#browse-list TBODY TR TD:nth-child(6), TABLE#browse-list THEAD TR TH:nth-child(10), TABLE#browse-list TBODY TR TD:nth-child(10)').hide();
   /* show.hide some TDs */
@@ -121,6 +119,8 @@ $(document).ready(function () {
           });
           // Assigned-to
           $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
+          // hide some user
+          $("SELECT#cc-list.tracker-select OPTION[value='156']").hide();
         }
       }
     }
@@ -183,4 +183,6 @@ $(document).ready(function () {
       $("DIV.context-menu UL LI.nav-active A").append(" Livrés : " + validated + "/" + threedtextures);
     }
   }
+  // hide some user
+  $("SELECT#cc-list.tracker-select OPTION[value='156']").hide();
 });

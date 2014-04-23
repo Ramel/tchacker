@@ -178,6 +178,23 @@ ${comments}
                 </div>-->
             </fieldset>
         </div>
+        <div class="one bord">
+            <fieldset class="drawing">
+                <legend>Online retake</legend>
+                <div class="bord">
+                  <div class="tools">
+                    <a href="#tools-sketch" data-tool="marker">Marker</a>
+                    <a href="#tools-sketch" data-tool="eraser">Eraser</a>
+                  </div>
+                  <canvas id="tools-sketch" width="${last_attachment/width}" height="${last_attachment/height}" style="background: url(${last_attachment/name}_MED/;download) no-repeat center center;"></canvas>
+                  <script type="text/javascript">
+                    $(function() {
+                      $('#tools-sketch').sketch({defaultColor: "#f00"});
+                    });
+                  </script>
+                </div>
+            </fieldset>
+        </div>
         <p>
             <button type="submit" class="button-ok">Edit</button>
         </p>

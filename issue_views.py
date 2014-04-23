@@ -32,6 +32,7 @@ from ikaaro.tracker.issue_views import Issue_Edit
 from datatypes import get_issue_fields
 from comments import TchackerCommentsView
 
+from monkey import Image
 
 class TchackIssue_Edit(Issue_Edit):
 
@@ -41,7 +42,7 @@ class TchackIssue_Edit(Issue_Edit):
     template = '/ui/tchacker/edit_issue.xml'
     styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
-               '/ui/flowplayer/flowplayer-3.2.2.min.js']
+               '/ui/flowplayer/flowplayer-3.2.2.min.js', '/ui/tchacker/sketch.min.js']
 
     def get_schema(self, resource, context):
         tracker = resource.parent
@@ -53,7 +54,22 @@ class TchackIssue_Edit(Issue_Edit):
         return resource.get_property(name)
 
     def get_namespace(self, resource, context):
-        namespace = Issue_Edit.get_namespace(self, resource, context)
+        proxy = super(TchackIssue_Edit, self)
+        namespace = proxy.get_namespace(resource, context)
+
+        last_attachment = resource.get_property('last_attachment')
+        # If last_attachment is an Image
+        # Add the sketch-tool
+        image_file = resource.get_resource(str(last_attachment + "_MED"))
+        is_image = isinstance(image_file, Image) or False
+        print("is_image = %s" % is_image)
+        handler = image_file.handler
+        image_width, image_height = handler.get_size()
+        print("image_width = %s" % image_width)
+
+        namespace['last_attachment'] = {'name': last_attachment,
+            'width': image_width, 'height': image_height}
+        print("namespace['last_attachment'] = %s" % namespace['last_attachment'])
 
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)
@@ -63,6 +79,7 @@ class TchackIssue_Edit(Issue_Edit):
             if module['selected'] == True in module.values():
                 namespace['which_module'] = module['value']
 
+        #print("namespace = %s" % namespace)
         return namespace
 
     def action(self, resource, context, form):

@@ -29,7 +29,7 @@ from os import sep
 from itools.gettext import MSG
 from itools.handlers import checkid
 from itools.fs import FileName, vfs
-from itools.core import merge_dicts
+from itools.core import merge_dicts, get_abspath
 from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode
 
@@ -146,13 +146,45 @@ class Tchack_Issue(Issue):
         canvasSketch = False
         if drawing is not None:
             body = re.search(r'base64,(.*)', drawing).group(1)
-            print("drawingToStr = %s" % body)
+            body = body.decode('base64')
+            from StringIO import StringIO
+            #body = cStringIO.StringIO(body.decode('base64'))
+            # body is only the canvas sketch, we need to add the original image
+            # to it
+            # create a tmp image that contains body
+            alphaImage = PILImage.open(StringIO(body))
+            # transform the tmp image black color to alpha
+            alphaImage = alphaImage.convert("RGBA")
+            datas = alphaImage.getdata()
+            newData = []
+            for item in datas:
+                if item[0] == 0 and item[1] == 0 and item[2] == 0:
+                    newData.append((0, 0, 0, 0))
+                else:
+                    newData.append(item)
+            alphaImage.putdata(newData)
+            # create a tmp2 image that contains the last attachment
+            last_attachment = self.get_property('last_attachment')
+            print("last_attachment = %s" % last_attachment)
+            last_attach_file = self.get_resource(last_attachment)
+            last_attach_uri = last_attach_file.handler.key
+            #path = Path(self.handler.key).get_pathto(last_attach_file)
+            print("last_attach_uri = %s" % last_attach_uri)
+            #print("path = %s" % path)
+            originalImage = PILImage.open(path)
+            # paste the tmp onto tmp2
+            originalImage.paste(alphaImage, (0, 0), alphaImage)
+            # retrieve the result body
+            body = originalImage.tostring()
+            originalImage.close()
+            alphaImage.close()
+            #print("drawingToStr = %s" % body)
             mimetype = "image/png"
             filename = "oneline-drawing.png"
             canvasSketch = True
 
         if attachment is not None or drawing is not None:
-            if canvasSketch is not False:
+            if canvasSketch is not True:
                 # Upload
                 filename, mimetype, body = attachment
             # Find a non used name
@@ -165,7 +197,7 @@ class Tchack_Issue(Issue):
 
             # Image
             if (mtype == "image"):
-                # Add attachment
+                # Create the image in the database
                 tchackerImage = self.make_resource(
                                 name, Image,
                                 body=body,

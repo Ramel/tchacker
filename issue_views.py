@@ -51,6 +51,8 @@ class TchackIssue_Edit(Issue_Edit):
     def get_value(self, resource, context, name, datatype):
         if name in ('comment'):
             return datatype.get_default()
+        if name in ('canvasDrawing'):
+            return datatype.get_default()
         return resource.get_property(name)
 
     def get_namespace(self, resource, context):

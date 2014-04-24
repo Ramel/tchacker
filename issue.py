@@ -48,6 +48,8 @@ from videoencoding import VideoEncodingToFLV
 # Import from PIL
 from PIL import Image as PILImage
 
+import re
+
 from comments import tchacker_comment_datatype
 from monkey import Image, Video
 
@@ -132,6 +134,7 @@ class Tchack_Issue(Issue):
         comment = form['comment']
         # Attachment
         attachment = form['attachment']
+        drawing = form['canvasDrawing']
 
         if new:
             ids = 0
@@ -139,10 +142,19 @@ class Tchack_Issue(Issue):
             ids = self.get_len_comments()
 
         att_name = ""
+        
+        canvasSketch = False
+        if drawing is not None:
+            body = re.search(r'base64,(.*)', drawing).group(1)
+            print("drawingToStr = %s" % body)
+            mimetype = "image/png"
+            filename = "oneline-drawing.png"
+            canvasSketch = True
 
-        if attachment is not None:
-            # Upload
-            filename, mimetype, body = attachment
+        if attachment is not None or drawing is not None:
+            if canvasSketch is not False:
+                # Upload
+                filename, mimetype, body = attachment
             # Find a non used name
             name = checkid(filename)
             name, extension, language = FileName.decode(name)

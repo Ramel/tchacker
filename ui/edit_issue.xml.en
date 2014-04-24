@@ -153,6 +153,7 @@ ${comments}
             </div>
             <textarea name="comment" id="comment" cols="80" rows="10"></textarea>
         </div>
+        <!--
         <div class="one bord">
             <fieldset class="attachment">
                 <legend>Attachments</legend>
@@ -160,24 +161,9 @@ ${comments}
                     <label class="label" for="attachment">New attachment:</label>
                     <input type="file" name="attachment" id="attachment" size="36" />
                 </div>
-                <!--<div id="upload" class="one bord">
-                    <div id="infos">
-                        <p id="attName" />
-                        <p id="attSize" />
-                        <p id="attType" />
-                    </div>
-                    <div id="progress">
-                        <div class="box">
-                            <span><div id="progressbar" /></span><span id="percent" />
-                        </div>
-                        <div class="box">
-                            <div id="speedtime"><div id="speed" /><div id="time" /></div>
-                            <div id="current" />
-                        </div>
-                    </div>
-                </div>-->
             </fieldset>
         </div>
+        -->
         <div class="one bord">
             <fieldset class="drawing">
                 <legend>Online retake</legend>
@@ -186,6 +172,7 @@ ${comments}
                     <a href="#tools-sketch" data-tool="marker">Marker</a>
                     <a href="#tools-sketch" data-tool="eraser">Eraser</a>
                   </div>
+                  <input type="text" id="canvasDrawing" name="canvasDrawing"/>        
                   <canvas id="tools-sketch" width="${last_attachment/width}" height="${last_attachment/height}" style="background: url(${last_attachment/name}_MED/;download) no-repeat center center;"></canvas>
                   <script type="text/javascript">
                     $(function() {
@@ -196,124 +183,16 @@ ${comments}
             </fieldset>
         </div>
         <p>
-            <button type="submit" class="button-ok">Edit</button>
+            <button type="submit" class="button-ok" onclick="updateDrawing()">Edit</button>
         </p>
     </fieldset>
 </form>
-
 <script type="text/javascript">
-    $("#attachment").focus(function () {
-        attachmentSelected($(this));
-    });
-
-    /*
-    var upload_id = "{upload_id}";
-    var started = 0;
-    var attSize = 0;
-    var uploaded = 0;
-    var previouslyUploaded = 0;
-    var interval = 500;
-
-    function beginUpload()
-    {
-        $("#progressbar").progressbar();
-
-        var intervalId = setInterval(function()
-        {
-            $.getJSON("/;upload_stats?upload_id=" + upload_id, function(data)
-            {
-                if (data == null || (started == 1 <![CDATA[&&]]> data.percent == '0.0'))
-                {
-                    clearInterval(intervalId);
-                    $("#progressbar").progressbar("destroy");
-                    $("#percent, #speed, #current, #time").empty();
-                    uploaded = 0;
-                    previouslyUploaded = 0;
-                    return
-                }
-                started = 1;
-                var percent = Math.floor(data.percent);
-                updateCurrentSize(data.percent);
-                $("#progressbar").progressbar("option", "value", percent);
-                $("#percent").html(percent + "%");
-            });
-        },
-        interval);
-    }
-
-    function updateCurrentSize(percent)
-    {
-        uploaded = parseFloat(percent) * parseFloat(attSize) / 100;
-        var currentlyUploaded = uploaded;
-        var sizeDiff = currentlyUploaded - previouslyUploaded;
-        if (sizeDiff == 0) return;
-        previouslyUploaded = currentlyUploaded;
-        sizeDiff = sizeDiff * 1000 / interval;
-        var bytesRemaining = attSize - previouslyUploaded;
-        var secondsRemaining = bytesRemaining / sizeDiff;
-
-        $("#speed").html(sizeToText(sizeDiff, '/s'));
-        $("#current").html(sizeToText(uploaded, ''));
-        $("#time").html(secondsToText(secondsRemaining));
-
-    }
-
-    function sizeToText(size, text)
-    {
-        if (size > 1024 * 1024) {
-            return (Math.round(size * 100/(1024*1024))/100).toString() + ' Mo' + text;
-        } else if (size > 1024) {
-            return (Math.round(size * 100/1024)/100).toString() + ' Ko' + text;
-        } else {
-            return size.toString() + ' octets' + text;
-        }
-    }
-
-    function secondsToText(seconds)
-    {
-        var h = Math.floor(seconds / 3600);
-        var m = Math.floor(seconds % 3600 / 60);
-        var s = Math.floor(seconds % 3600 % 60);
-        return ((h > 0 ? h + ":" : "") +
-            (m > 0 ? (h > 0 <![CDATA[&&]]> m <![CDATA[<]]> 10 ? "0" : "") + m + ":" : "0:") +
-            (s <![CDATA[<]]> 10 ? "0" : "") + s);
-    }
-
-    function filenameHasExtension(filename)
-    {
-        return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
-    }
-
-    function attachmentSelected(file)
-    {
-        var attachment = file.get(0).files[0];
-        if (attachment)
-        {
-            //var attSize = 0;
-            attName = attachment.name;
-            attSize = attachment.size;
-            attType = attachment.type;
-            if (attSize > 1024 * 1024) {
-                attSizeTxt = (Math.round(attSize * 100 / (1024 * 1024)) / 100).toString() + ' Mo';
-            }
-            else {
-                attSizeTxt = (Math.round(attSize * 100 / 1024) / 100).toString() + ' Ko';
-            }
-            // If the user choose a file without an extension.
-            if (filenameHasExtension(attName) == undefined) {
-                $("#attName").html(
-                    'Name: <![CDATA[<span class="field-is-missing">The given filename have no extension! Please add one before going further!</span>]]>');
-            } else {
-                $("#attName").html('Name: ' + attName);
-            }
-            $("#attSize").html('Size: ' + attSizeTxt);
-            if(attType == '') {
-                $("#attType").html('Type: Unknown');
-            } else {
-                $("#attType").html('Type: ' + attType);
-            }
-        }
-    }
-    */
+function updateDrawing() {
+  $('#canvasDrawing')[0].value = $('canvas')[0].toDataURL();
+}
+$("#attachment").focus(function () {
+  attachmentSelected($(this));
+});
 </script>
 </stl:block>

@@ -32,6 +32,8 @@ from itools.fs import FileName, vfs
 from itools.core import merge_dicts, get_abspath
 from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode
+from itools.handlers import ro_database, File as FileHandler
+from itools.uri import Path
 
 # Import from ikaaro
 from ikaaro.tracker.issue import Issue
@@ -49,6 +51,8 @@ from videoencoding import VideoEncodingToFLV
 from PIL import Image as PILImage
 
 import re
+#import base64
+from StringIO import StringIO
 
 from comments import tchacker_comment_datatype
 from monkey import Image, Video
@@ -142,43 +146,34 @@ class Tchack_Issue(Issue):
             ids = self.get_len_comments()
 
         att_name = ""
-        
+
         canvasSketch = False
         if drawing is not None:
             body = re.search(r'base64,(.*)', drawing).group(1)
             body = body.decode('base64')
-            from StringIO import StringIO
-            #body = cStringIO.StringIO(body.decode('base64'))
-            # body is only the canvas sketch, we need to add the original image
-            # to it
-            # create a tmp image that contains body
+            # body is only the canvas sketch,
+            # we need to add the original image to it
+            # So, create a tmp image that contains body
             alphaImage = PILImage.open(StringIO(body))
             # transform the tmp image black color to alpha
             alphaImage = alphaImage.convert("RGBA")
-            datas = alphaImage.getdata()
-            newData = []
-            for item in datas:
-                if item[0] == 0 and item[1] == 0 and item[2] == 0:
-                    newData.append((0, 0, 0, 0))
-                else:
-                    newData.append(item)
-            alphaImage.putdata(newData)
             # create a tmp2 image that contains the last attachment
             last_attachment = self.get_property('last_attachment')
-            print("last_attachment = %s" % last_attachment)
-            last_attach_file = self.get_resource(last_attachment)
-            last_attach_uri = last_attach_file.handler.key
-            #path = Path(self.handler.key).get_pathto(last_attach_file)
-            print("last_attach_uri = %s" % last_attach_uri)
-            #print("path = %s" % path)
-            originalImage = PILImage.open(path)
+            #print("last_attachment = %s" % last_attachment)
+
+            fs = self.metadata.database.fs
+            originalImage = self.get_resource(last_attachment + "_MED")
+            fileabspath = fs.get_absolute_path(originalImage.handler.key)
+            #print("fileabspath = %s" % fileabspath)
+
+            originalImage = PILImage.open(str(fileabspath))
             # paste the tmp onto tmp2
             originalImage.paste(alphaImage, (0, 0), alphaImage)
             # retrieve the result body
-            body = originalImage.tostring()
-            originalImage.close()
-            alphaImage.close()
-            #print("drawingToStr = %s" % body)
+            # Save it in memory
+            f = StringIO()
+            originalImage.save(f, "PNG")
+            body = f.getvalue()
             mimetype = "image/png"
             filename = "oneline-drawing.png"
             canvasSketch = True
@@ -230,7 +225,7 @@ class Tchack_Issue(Issue):
 
                     for te in thumbext:
                         try:
-                            im = PILImage.open(tmp_uri)
+                            im = PILImage.open(str(tmp_uri))
                         except IOError:
                             print("IOError = %s" % tmp_uri)
                         im.thumbnail(te[1], PILImage.ANTIALIAS)

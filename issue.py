@@ -175,7 +175,7 @@ class Tchack_Issue(Issue):
             originalImage.save(f, "PNG")
             body = f.getvalue()
             mimetype = "image/png"
-            filename = "oneline-drawing.png"
+            filename = "online-drawing.png"
             canvasSketch = True
 
         if attachment is not None or drawing is not None:

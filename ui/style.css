@@ -136,3 +136,17 @@ P.attachment {
 H2.tchacker {
   font-weight: normal;
 }
+/* Canvas sketching */
+#drawing-tools .tools A {
+    border: 1px solid #000000;
+    color: #000000;
+    display: inline-block;
+    font-weight: bold;
+    height: 20px;
+    line-height: 20px;
+    padding: 0;
+    margin: 5px;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+}

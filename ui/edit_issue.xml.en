@@ -167,7 +167,7 @@ ${comments}
         <div class="one bord">
             <fieldset class="drawing">
                 <legend>Online retake</legend>
-                <div class="bord">
+                <div id="drawing-tools" class="bord">
                   <div class="tools">
                     <a href="#tools-sketch" data-tool="marker">Marker</a>
                     <a href="#tools-sketch" data-tool="eraser">Eraser</a>
@@ -176,7 +176,11 @@ ${comments}
                   <canvas id="tools-sketch" width="${last_attachment/width}" height="${last_attachment/height}" style="background: url(${last_attachment/name}_MED/;download) no-repeat center;"></canvas>
                   <script type="text/javascript">
                     $(function() {
-                      $('#tools-sketch').sketch({defaultColor: "#f00"});
+                      $.each(['#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f', '#000', '#fff'], function() {
+                        $('#drawing-tools .tools').append('<a href="#tools-sketch" data-color="' + this + '" style="width: 20px; background: ' + this + ';"></a>');
+                      });
+                      $('#tools-sketch').sketch();
+                      //$('#tools-sketch').sketch({defaultColor: "#f00"});
                     });
                   </script>
                 </div>

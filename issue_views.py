@@ -40,9 +40,13 @@ class TchackIssue_Edit(Issue_Edit):
     title = MSG(u'Edit Issue')
     icon = 'edit.png'
     template = '/ui/tchacker/edit_issue.xml'
-    styles = ['/ui/tchacker/style.css', '/ui/thickbox/style.css']
+    styles = ['/ui/tchacker/jquery-ui.css',
+                '/ui/tchacker/style.css',
+                '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
-               '/ui/flowplayer/flowplayer-3.2.2.min.js', '/ui/tchacker/sketch.min.js']
+                '/ui/tchacker/jquery-ui.js',
+                '/ui/flowplayer/flowplayer-3.2.2.min.js',
+                '/ui/tchacker/sketch.min.js']
 
     def get_schema(self, resource, context):
         tracker = resource.parent

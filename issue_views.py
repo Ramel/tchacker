@@ -64,14 +64,14 @@ class TchackIssue_Edit(Issue_Edit):
         # Add the sketch-tool
         image_file = resource.get_resource(str(last_attachment + "_MED"))
         is_image = isinstance(image_file, Image) or False
-        print("is_image = %s" % is_image)
+        #print("is_image = %s" % is_image)
         handler = image_file.handler
         image_width, image_height = handler.get_size()
-        print("image_width = %s" % image_width)
+        #print("image_width = %s" % image_width)
 
         namespace['last_attachment'] = {'name': last_attachment,
             'width': image_width, 'height': image_height}
-        print("namespace['last_attachment'] = %s" % namespace['last_attachment'])
+        #print("namespace['last_attachment'] = %s" % namespace['last_attachment'])
 
         # Comments
         namespace['comments'] = TchackerCommentsView().GET(resource, context)

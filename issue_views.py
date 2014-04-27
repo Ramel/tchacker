@@ -40,13 +40,32 @@ class TchackIssue_Edit(Issue_Edit):
     title = MSG(u'Edit Issue')
     icon = 'edit.png'
     template = '/ui/tchacker/edit_issue.xml'
-    styles = ['/ui/tchacker/jquery-ui.css',
+    styles = [
+                #'//code.jquery.com/ui/1.8.24/themes/base/jquery-ui.css',
+                #'//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css',
+                #'/ui/tchacker/jquery-ui.css',
+                '/ui/tchacker/jquery-ui-1.8.5/themes/base/jquery.ui.all.css',
+                #'/ui/tchacker/jquery-ui-1.8.2/themes/base/jquery.ui.core.css',
+                #'/ui/tchacker/jquery-ui-1.8.2/themes/base/jquery.ui.tabs.css',
                 '/ui/tchacker/style.css',
                 '/ui/thickbox/style.css']
-    scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
-                '/ui/tchacker/jquery-ui.js',
+    scripts = [
+                '/ui/tchacker/tracker.js',
+                '/ui/thickbox/thickbox.js',
+                #'/ui/tchacker/jquery-ui-1.8.2/ui/minified/jquery-ui.min.js',
+                '/ui/tchacker/jquery-ui-1.8.5/ui/jquery.ui.core.js',
+                '/ui/tchacker/jquery-ui-1.8.5/ui/jquery.ui.widget.js',
+                #'/ui/tchacker/jquery-ui-1.8.2/ui/minified/jquery.effects.core.min.js',
+                '/ui/tchacker/jquery-ui-1.8.5/ui/jquery.ui.tabs.js',
+                #'http://code.jquery.com/jquery-1.11.0.min.js',
+                #'//code.jquery.com/jquery-1.9.0.js',
+                #'//code.jquery.com/jquery-migrate-1.2.1.js',
+                #'//code.jquery.com/ui/1.10.4/jquery-ui.js',
+                #'//code.jquery.com/ui/1.8.24/jquery-ui.js',
+                #'/ui/tchacker/jquery-ui.js',
                 '/ui/flowplayer/flowplayer-3.2.2.min.js',
-                '/ui/tchacker/sketch.min.js']
+                '/ui/tchacker/sketch.min.js'
+                ]
 
     def get_schema(self, resource, context):
         tracker = resource.parent

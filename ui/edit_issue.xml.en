@@ -164,6 +164,23 @@ ${comments}
             </fieldset>
         </div>
         -->
+        <div id="onglets">
+          <ul>
+            <li><a href="#tabs-1"><span>One</span></a></li>
+            <li><a href="#tabs-2"><span>Two</span></a></li>
+          </ul>
+          <div id="tabs-1">
+            <p>First tab is active by default:</p>
+            <pre><code>$( "#tabs" ).tabs(); </code></pre>
+          </div>
+          <div id="tabs-2">
+            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+          </div>
+<script type="text/javascript">
+$("#onglets").tabs();
+</script>
+        </div>
         <div class="one bord">
             <fieldset class="drawing">
                 <legend>Online retake</legend>
@@ -186,23 +203,6 @@ ${comments}
                 </div>
             </fieldset>
         </div>
-        <div id="tabs">
-          <ul>
-            <li><a href="#fragment-1"><span>One</span></a></li>
-            <li><a href="#fragment-2"><span>Two</span></a></li>
-          </ul>
-          <div id="fragment-1">
-            <p>First tab is active by default:</p>
-            <pre><code>$( "#tabs" ).tabs(); </code></pre>
-          </div>
-          <div id="fragment-2">
-            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-          </div>
-        </div>
-        <script type="text/javascript">
-          $("#tabs").tabs();
-        </script>
         <p>
             <button type="submit" class="button-ok" onclick="updateDrawing()">Edit</button>
         </p>

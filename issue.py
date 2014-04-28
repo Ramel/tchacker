@@ -84,7 +84,6 @@ class Tchack_Issue(Issue):
                             'attachment': String,
                             'comment': Integer})
 
-
     def get_catalog_values(self):
         document = Issue.get_catalog_values(self)
         return document
@@ -138,7 +137,11 @@ class Tchack_Issue(Issue):
         comment = form['comment']
         # Attachment
         attachment = form['attachment']
-        drawing = form['canvasDrawing']
+        if new:
+            drawing = ""
+            #last_attachment = None
+        else:
+            drawing = form['canvasDrawing']
 
         emptyDrawing = False
         #print("attachment = '%s', drawing = '%s'" % (attachment, drawing))

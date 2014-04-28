@@ -156,7 +156,7 @@ ${comments}
         <div id="onglets">
           <ul>
             <li><a href="#tabs-1"><span>Upload a file</span></a></li>
-            <li><a href="#tabs-2"><span>Draw on last attachment</span></a></li>
+            <li stl:if="last_attachment"><a href="#tabs-2"><span>Draw on last attachment</span></a></li>
           </ul>
           <div id="tabs-1">
             <div class="one bord">
@@ -169,7 +169,7 @@ ${comments}
                 </fieldset>
             </div>
           </div>
-          <div id="tabs-2">
+          <div id="tabs-2" stl:if="last_attachment">
             <div class="one bord">
                 <fieldset class="drawing">
                     <legend>Online retake</legend>

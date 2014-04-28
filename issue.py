@@ -141,7 +141,7 @@ class Tchack_Issue(Issue):
         drawing = form['canvasDrawing']
 
         emptyDrawing = False
-        print("attachment = '%s', drawing = '%s'" % (attachment, drawing))
+        #print("attachment = '%s', drawing = '%s'" % (attachment, drawing))
         # Test if drawing is an empty String
         if not drawing:
             emptyDrawing = True

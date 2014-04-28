@@ -159,46 +159,43 @@ ${comments}
             <li><a href="#tabs-2"><span>Draw on last attachment</span></a></li>
           </ul>
           <div id="tabs-1">
-        <div class="one bord">
-            <fieldset class="attachment">
-                <legend>Attachments</legend>
-                <div class="bord">
-                    <label class="label" for="attachment">New attachment:</label>
-                    <input type="file" name="attachment" id="attachment" size="36" />
-                </div>
-            </fieldset>
-        </div>
+            <div class="one bord">
+                <fieldset class="attachment">
+                    <legend>Attachments</legend>
+                    <div class="bord">
+                        <label class="label" for="attachment">New attachment:</label>
+                        <input type="file" name="attachment" id="attachment" size="36" />
+                    </div>
+                </fieldset>
+            </div>
           </div>
           <div id="tabs-2">
-        <div class="one bord">
-            <fieldset class="drawing">
-                <legend>Online retake</legend>
-                <div id="drawing-tools" class="bord">
-                  <div class="tools">
-                    <a href="#tools-sketch" data-tool="marker">Marker</a>
-                    <a href="#tools-sketch" data-tool="eraser">Eraser</a>
-                  </div>
-                  <input type="text" id="canvasDrawing" name="canvasDrawing" type="hidden"/>
-                  <canvas id="tools-sketch" width="${last_attachment/width}" height="${last_attachment/height}" style="background: url(${last_attachment/name}_MED/;download) no-repeat center;"></canvas>
-                  <script type="text/javascript">
-                    $(function() {
-                      $.each(['#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f', '#000', '#fff'], function() {
-                        $('#drawing-tools .tools').append('<a href="#tools-sketch" data-color="' + this + '" style="width: 20px; background: ' + this + ';"></a>');
-                      });
-                      $('#tools-sketch').sketch();
-                      //$('#tools-sketch').sketch({defaultColor: "#f00"});
-                    });
-                  </script>
-                </div>
-            </fieldset>
-        </div>
+            <div class="one bord">
+                <fieldset class="drawing">
+                    <legend>Online retake</legend>
+                    <div id="drawing-tools" class="bord">
+                      <div class="tools">
+                        <a href="#tools-sketch" data-tool="marker">Marker</a>
+                        <a href="#tools-sketch" data-tool="eraser">Eraser</a>
+                      </div>
+                      <input type="text" id="canvasDrawing" name="canvasDrawing" type="hidden"/>
+                      <canvas id="tools-sketch" width="${last_attachment/width}" height="${last_attachment/height}" style="background: url(${last_attachment/name}_MED/;download) no-repeat center;"></canvas>
+                      <script type="text/javascript">
+                        $(function() {
+                          $.each(['#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f', '#000', '#fff'], function() {
+                            $('#drawing-tools .tools').append('<a href="#tools-sketch" data-color="' + this + '" style="width: 20px; background: ' + this + ';"></a>');
+                          });
+                          $('#tools-sketch').sketch({defaultColor: "#f00"});
+                          //$('#tools-sketch').sketch({defaultColor: "#f00"});
+                        });
+                      </script>
+                    </div>
+                </fieldset>
+            </div>
           </div>
-<script type="text/javascript">
-var $tabs = $("#onglets").tabs();
-// getter
-var selected = $tabs.tabs('option', 'selected'); // => 0
-window.alert(selected);
-</script>
+          <script type="text/javascript">
+            var $tabs = $("#onglets").tabs();
+          </script>
         </div>
         <p>
             <button type="submit" class="button-ok" onclick="updateDrawing()">Edit</button>
@@ -207,7 +204,21 @@ window.alert(selected);
 </form>
 <script type="text/javascript">
 function updateDrawing() {
-  $('#canvasDrawing')[0].value = $('canvas')[0].toDataURL();
+  //$('#canvasDrawing')[0].value = $('canvas')[0].toDataURL();
+  var selected = $tabs.tabs('option', 'selected'); // => 0
+  switch(selected) {
+    case 0:
+      // reset canvas
+      $('#canvasDrawing').val("");
+      break;
+    case 1:
+      // reset upload
+      var att= $('#attachment');
+      att.replaceWith(att.val('').clone(true));
+      // send canvas
+      $('#canvasDrawing')[0].value = $('canvas')[0].toDataURL();
+      break;
+  }
 }
 $("#attachment").focus(function () {
   attachmentSelected($(this));

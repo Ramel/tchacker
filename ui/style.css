@@ -150,6 +150,16 @@ H2.tchacker {
     text-decoration: none;
     vertical-align: middle;
 }
+#onglets {
+  margin-top: 20px;
+}
+#onglets.ui-tabs ul.ui-tabs-nav A {
+  outline: 0;
+}
 #onglets ul li {
-    list-style-type: none;
+  list-style-type: none;
+}
+.ui-widget {
+  font-size:100%;
+  font-family: "Arial","DejaVu Sans",sans-serif;
 }

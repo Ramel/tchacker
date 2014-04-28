@@ -45,9 +45,9 @@ class TchackIssue_Edit(Issue_Edit):
                 '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js',
                 '/ui/thickbox/thickbox.js',
-                '/ui/tchacker/jquery-ui-1.8.5/ui/jquery.ui.core.js',
-                '/ui/tchacker/jquery-ui-1.8.5/ui/jquery.ui.widget.js',
-                '/ui/tchacker/jquery-ui-1.8.5/ui/jquery.ui.tabs.js',
+                '/ui/tchacker/jquery-ui-1.8.5/ui/minified/jquery.ui.core.min.js',
+                '/ui/tchacker/jquery-ui-1.8.5/ui/minified/jquery.ui.widget.min.js',
+                '/ui/tchacker/jquery-ui-1.8.5/ui/minified/jquery.ui.tabs.min.js',
                 '/ui/flowplayer/flowplayer-3.2.2.min.js',
                 '/ui/tchacker/sketch.min.js']
 

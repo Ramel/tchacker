@@ -140,6 +140,12 @@ class Tchack_Issue(Issue):
         attachment = form['attachment']
         drawing = form['canvasDrawing']
 
+        emptyDrawing = False
+        print("attachment = '%s', drawing = '%s'" % (attachment, drawing))
+        # Test if drawing is an empty String
+        if not drawing:
+            emptyDrawing = True
+
         if new:
             ids = 0
         else:
@@ -148,7 +154,8 @@ class Tchack_Issue(Issue):
         att_name = ""
 
         canvasSketch = False
-        if drawing is not None:
+
+        if not emptyDrawing:
             body = re.search(r'base64,(.*)', drawing).group(1)
             body = body.decode('base64')
             # body is only the canvas sketch,
@@ -178,8 +185,8 @@ class Tchack_Issue(Issue):
             filename = "online-drawing.png"
             canvasSketch = True
 
-        if attachment is not None or drawing is not None:
-            if canvasSketch is not True:
+        if attachment is not None or emptyDrawing is False:
+            if canvasSketch is False:
                 # Upload
                 filename, mimetype, body = attachment
             # Find a non used name

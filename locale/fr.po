@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fr\n"
 "POT-Creation-Date: 2014-04-28 15:04+CET\n"
-"PO-Revision-Date: 2014-04-28 17:40+0100\n"
+"PO-Revision-Date: 2014-04-28 18:03+0100\n"
 "Last-Translator: FORTUN <armel@maar.fr>\n"
 "Language-Team: en_US <kde-i18n-doc@kde.org>\n"
 "Language: \n"
@@ -209,7 +209,7 @@ msgstr "Télécharger  les « Dernières P.-J. » de ces fiches sous la forme 
 #: ../ui/edit_issue.xml.en:160
 msgctxt "span"
 msgid "Draw on last attachment"
-msgstr "Dessiner sur la dernière image en P-J&nbsp;:"
+msgstr "Dessiner sur la dernière image en P-J"
 
 #: ../ui/edit_issue.xml.en:202
 msgctxt "button"

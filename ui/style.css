@@ -150,3 +150,6 @@ H2.tchacker {
     text-decoration: none;
     vertical-align: middle;
 }
+#onglets ul li {
+    list-style-type: none;
+}

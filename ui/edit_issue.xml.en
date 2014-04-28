@@ -153,7 +153,12 @@ ${comments}
             </div>
             <textarea name="comment" id="comment" cols="80" rows="10"></textarea>
         </div>
-        <!--
+        <div id="onglets">
+          <ul>
+            <li><a href="#tabs-1"><span>Upload a file</span></a></li>
+            <li><a href="#tabs-2"><span>Draw on last attachment</span></a></li>
+          </ul>
+          <div id="tabs-1">
         <div class="one bord">
             <fieldset class="attachment">
                 <legend>Attachments</legend>
@@ -163,24 +168,8 @@ ${comments}
                 </div>
             </fieldset>
         </div>
-        -->
-        <div id="onglets">
-          <ul>
-            <li><a href="#tabs-1"><span>One</span></a></li>
-            <li><a href="#tabs-2"><span>Two</span></a></li>
-          </ul>
-          <div id="tabs-1">
-            <p>First tab is active by default:</p>
-            <pre><code>$( "#tabs" ).tabs(); </code></pre>
           </div>
           <div id="tabs-2">
-            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-          </div>
-<script type="text/javascript">
-$("#onglets").tabs();
-</script>
-        </div>
         <div class="one bord">
             <fieldset class="drawing">
                 <legend>Online retake</legend>
@@ -202,6 +191,14 @@ $("#onglets").tabs();
                   </script>
                 </div>
             </fieldset>
+        </div>
+          </div>
+<script type="text/javascript">
+var $tabs = $("#onglets").tabs();
+// getter
+var selected = $tabs.tabs('option', 'selected'); // => 0
+window.alert(selected);
+</script>
         </div>
         <p>
             <button type="submit" class="button-ok" onclick="updateDrawing()">Edit</button>

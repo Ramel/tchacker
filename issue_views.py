@@ -70,7 +70,7 @@ class TchackIssue_Edit(Issue_Edit):
         if last_attachment is not None:
             # If last_attachment is an Image
             # Add the sketch-tool
-            image_file = resource.get_resource(str(last_attachment + "_MED"))
+            image_file = resource.get_resource(str(last_attachment))
             is_image = isinstance(image_file, Image) or False
             #print("is_image = %s" % is_image)
             handler = image_file.handler

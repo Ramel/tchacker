@@ -28,7 +28,6 @@ Image.class_schema = freeze(merge_dicts(
         is_thumb=Boolean(source='metadata')))
 
 
-
 Video.class_schema = freeze(merge_dicts(
         Video.class_schema,
         has_thumb=Boolean(source='metadata'),

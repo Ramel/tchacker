@@ -21,7 +21,8 @@
     </tr>
     <tr stl:if="comment/attachment/is_image">
       <td colspan="5">
-          <a href="${comment/attachment/link}_HIG/;download" class="thickbox"><img src="${comment/attachment/link}_MED/;download" /></a>
+          <a stl:if="comment/attachment/has_thumb" href="${comment/attachment/link}_HIG/;download" class="thickbox"><img src="${comment/attachment/link}_MED/;download" /></a>
+          <a stl:if="not comment/attachment/has_thumb"><img src="${comment/attachment/link}/;thumb?width=800&amp;height=600" /></a>
       </td>
     </tr>
     <tr stl:if="comment/attachment/is_video">

@@ -212,9 +212,14 @@ class Tchack_Issue(Issue):
                                 )
                 # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
                 # used instead of a ;thumb
+                has_thumb = Property(False)
+                tchackerImage.set_property('has_thumb', has_thumb)
+
                 if extension == "psd":
                     pass
                 else:
+                    """
+                    # We can cron now this part
                     dirname = mkdtemp('makethumbs', 'ikaaro')
                     tempdir = vfs.open(dirname)
                     # Paste the file in the tempdir
@@ -267,7 +272,7 @@ class Tchack_Issue(Issue):
                     tchackerImage.set_property('has_thumb', has_thumb)
                     # Clean the temporary folder
                     vfs.remove(dirname)
-
+                    """
             # Video
             elif (mtype == "video"):
                 # Make Thumbnail for it, and encode it

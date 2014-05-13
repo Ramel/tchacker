@@ -86,6 +86,7 @@ class TchackerCommentsView(CommentsView):
                     'link': file.name,
                     'is_image': image or False,
                     'is_video': video or False,
+                    'has_thumb': has_thumb or False,
                     'format': fileformat
                     }
 

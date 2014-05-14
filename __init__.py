@@ -54,3 +54,9 @@ register_document_type(Tchack_Tracker, WebSite.class_id)
 for name, cli in [("zip", "zip")]:
     if(which(cli)) is None:
         print 'You need to install "%s".' % name
+
+from ikaaro.server import Server
+from cron import run_cron, make_thumbnails, _make_image_thumbnails
+Server.run_cron = run_cron
+Server.make_thumbnails = make_thumbnails
+Server._make_image_thumbnails = _make_image_thumbnails

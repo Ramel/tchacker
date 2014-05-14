@@ -27,7 +27,6 @@ from datetime import timedelta
 # Import from itools
 from itools.gettext import MSG
 from itools.loop import cron
-from itools.database import PhraseQuery, RangeQuery, AndQuery
 
 # Import from ikaaro
 from ikaaro.messages import MSG_CHANGES_SAVED
@@ -108,3 +107,8 @@ class TchackIssue_Edit(Issue_Edit):
         # Change
         context.database.change_resource(resource)
         context.message = MSG_CHANGES_SAVED
+
+        server = context.server
+        print("server = %s" % server)
+        from cron import run_cron
+        server.run_cron()

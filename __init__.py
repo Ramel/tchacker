@@ -31,6 +31,8 @@ from ikaaro.website import WebSite
 from tracker import Tchack_Tracker
 from utils import which
 
+import monkey
+
 # Import obsolete if command is icms-update.py
 if sys.argv[0].endswith('icms-update.py'):
     from ikaaro import obsolete

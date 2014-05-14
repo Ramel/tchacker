@@ -36,13 +36,14 @@ from itools.datatypes import Integer, String, Unicode
 from itools.handlers import ro_database, File as FileHandler
 from itools.uri import Path
 from itools.loop import cron
+from itools.database import PhraseQuery, RangeQuery, AndQuery
 
 # Import from ikaaro
 from ikaaro.tracker.issue import Issue
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
 from ikaaro.tracker.issue_views import IssueTrackerMenu
-from ikaaro.server import get_fake_context
+from ikaaro.server import get_fake_context, get_root
 
 # Import from Tchacker
 from issue_views import TchackIssue_Edit
@@ -74,7 +75,6 @@ class Tchack_Issue(Issue):
 
     class_schema = merge_dicts(
         Issue.class_schema,
-        #ids=Integer(source='metadata'),
         last_attachment=String(source='metadata', indexed=False, stored=True))
 
     #XXX: Replace the original datatypes
@@ -126,11 +126,35 @@ class Tchack_Issue(Issue):
 
 
     def _make_image_thumbnails(self, context):
+        database = context.database
+
+        # Build fake context
+        #context = get_fake_context()
+        #context.server = self
+        #context.database = self.database
+        #context.root = self.root
+        #context.site_root = self.root
+        #context.init_context()
+        root = get_root(database)
+
+        # Go
+        #from datetime import datetime
+        #t = context.fix_tzinfo(datetime.now())
+        q1 = PhraseQuery('has_thumb', False)
+        #query = PhraseQuery('is_image', True)
+        #q2 = PhraseQuery('is_image', True)
+        q2 = PhraseQuery('need_thumb', True)
+        #q3 = PhraseQuery('is_image', True)
+        #query = AndQuery(q1, q2)
+        query = AndQuery(q1, q2)
+        #for brain in self.root.search(query).get_documents():
+        for brain in root.search(query).get_documents():
+            print("brain = %s" % brain.name)
         #database = self.database
         # Build fake context
         #context = get_fake_context()
-        database = context.database
-
+        #database = context.database
+        """
         # Get last_attachment
         last_attachment = self.get_property('last_attachment')
         fs = self.metadata.database.fs
@@ -191,9 +215,8 @@ class Tchack_Issue(Issue):
         image.set_property('has_thumb', has_thumb)
         # Clean the temporary folder
         #vfs.remove(dirname)
-
-        return False
-
+        #return False
+        """
 
     def add_comment(self, context, form, new=False):
         # Keep a copy of the current metadata
@@ -264,9 +287,9 @@ class Tchack_Issue(Issue):
             mimetype = "image/png"
             filename = "online-drawing.png"
             canvasSketch = True
-        
-        run_cron = False
-        
+
+        #run_cron = False
+
         if attachment is not None or emptyDrawing is False:
             if canvasSketch is False:
                 # Upload
@@ -293,6 +316,8 @@ class Tchack_Issue(Issue):
                 # used instead of a ;thumb
                 has_thumb = Property(False)
                 tchackerImage.set_property('has_thumb', has_thumb)
+                need_thumb = Property(True)
+                tchackerImage.set_property('need_thumb', need_thumb)
 
                 if extension == "psd":
                     pass
@@ -447,10 +472,10 @@ class Tchack_Issue(Issue):
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:
             self.set_property('last_attachment', att_name)
-        
-        # Let's make thumbnails 
-        if run_cron:
-            self.run_cron(context)
+
+        # Cron: Let's make thumbnails
+        #if run_cron:
+        #    self.run_cron(context)
 
         comment = Property(comment, date=date, author=author)
 

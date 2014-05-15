@@ -38,6 +38,8 @@ from datatypes import get_issue_fields
 from comments import TchackerCommentsView
 
 from monkey import Image
+from cron import run_cron
+
 
 class TchackIssue_Edit(Issue_Edit):
 
@@ -109,6 +111,4 @@ class TchackIssue_Edit(Issue_Edit):
         context.message = MSG_CHANGES_SAVED
 
         server = context.server
-        print("server = %s" % server)
-        from cron import run_cron
         server.run_cron()

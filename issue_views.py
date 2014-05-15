@@ -67,7 +67,10 @@ class TchackIssue_Edit(Issue_Edit):
         namespace = proxy.get_namespace(resource, context)
 
         last_attachment = resource.get_property('last_attachment') or None
-        if last_attachment is not None:
+
+        is_image = resource.get_resource(str(last_attachment))
+        is_image = isinstance(is_image, Image)
+        if last_attachment is not None and is_image:
             # If last_attachment is an Image
             # Add the sketch-tool
             image_file = resource.get_resource(str(last_attachment + "_MED"))

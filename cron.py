@@ -62,7 +62,8 @@ def _make_image_thumbnails(self):
     for image in self.root.search(query).get_documents():
         abspath = image.abspath
         #print("str(self.abspath) = %s" % str(self.root.abspath))
-        #print("abspath = %s" % abspath)
+        print("image = %s" % image.name)
+        print("abspath = %s" % abspath)
         # Get the resource
         resource = context.root.get_resource(abspath)
         #print("resource.name = %s" % resource.name)

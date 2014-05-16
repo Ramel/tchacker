@@ -159,7 +159,11 @@ def _make_image_thumbnails(self):
         has_thumb = Property(True)
         resource.set_property('has_thumb', has_thumb)
         # Clean the temporary folder
-        vfs.remove(dirname)
+        #vfs.remove(dirname)
+        print("dirname = %s" % dirname)
+        catalog = database.catalog
+        catalog.unindex_document(str(resource.abspath))
+        catalog.index_document(resource.get_catalog_values())
         database.save_changes()
     return False
 

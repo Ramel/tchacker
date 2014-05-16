@@ -68,19 +68,20 @@ class TchackIssue_Edit(Issue_Edit):
 
         last_attachment = resource.get_property('last_attachment') or None
 
-        is_image = resource.get_resource(str(last_attachment))
-        is_image = isinstance(is_image, Image)
-        if last_attachment is not None and is_image:
-            # If last_attachment is an Image
-            # Add the sketch-tool
-            image_file = resource.get_resource(str(last_attachment + "_MED"))
-            is_image = isinstance(image_file, Image) or False
-            #print("is_image = %s" % is_image)
-            handler = image_file.handler
-            image_width, image_height = handler.get_size()
-            #print("image_width = %s" % image_width)
-            namespace['last_attachment'] = {'name': last_attachment,
-               'width': image_width, 'height': image_height}
+        if last_attachment is not None:
+            is_image = resource.get_resource(str(last_attachment))
+            is_image = isinstance(is_image, Image)
+            if is_image:
+                # If last_attachment is an Image
+                # Add the sketch-tool
+                image_file = resource.get_resource(str(last_attachment + "_MED"))
+                is_image = isinstance(image_file, Image) or False
+                #print("is_image = %s" % is_image)
+                handler = image_file.handler
+                image_width, image_height = handler.get_size()
+                #print("image_width = %s" % image_width)
+                namespace['last_attachment'] = {'name': last_attachment,
+                   'width': image_width, 'height': image_height}
         #print("namespace['last_attachment'] = %s" % namespace['last_attachment'])
         else:
             namespace['last_attachment'] = False

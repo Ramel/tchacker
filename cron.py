@@ -32,10 +32,11 @@ from ikaaro.registry import get_resource_class
 # Import from PIL
 from PIL import Image as PILImage
 
+from monkey import Image
 
 def run_cron(self):
     print("cron started!")
-    cron(self._make_image_thumbnails, timedelta(seconds=1))
+    cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=10))
 
 
 def make_thumbnails(self):
@@ -92,7 +93,9 @@ def _make_image_thumbnails(self):
         print("abspath = %s" % abspath)
         # Get the resource
         resource = context.root.get_resource(abspath)
+        print("resource.name = %s" % resource.name)
         container = resource.parent
+        print("container.__class__ = %s" % container.__class__)
         abspath = container.abspath
         print("abspath.parent = %s" % container.abspath)
 
@@ -138,33 +141,59 @@ def _make_image_thumbnails(self):
                 thumb_file.close()
             format = 'image/jpeg'
             cls = get_resource_class(format)
-            imageThumb = container.make_resource(
-                        ima, cls,
+            try:
+                imageThumb = container.make_resource(
+                        ima, Image,
                         body=thumb_data,
                         filename=thumb_filename,
                         extension='jpg',
                         format=format
                         )
+                imageThumb.init_resource()
+            except Exception:
+                print("Error creating image")
             is_thumb = Property(True)
             imageThumb.set_property('is_thumb', is_thumb)
+            print("imageThumb.abspath = %s" % imageThumb.abspath)
             try:
+                """
                 # Reindex resource without committing
                 catalog = database.catalog
-                #catalog.unindex_document(str(resource.abspath))
-                #catalog.index_document(resource.get_catalog_values())
+                print("catalog.__class__ = %s" % catalog.__class__)
+                print("str(imageThumb.abspath) = %s" % str(imageThumb.abspath))
+                catalog.unindex_document(str(imageThumb.abspath))
+                #print("imageThumb.get_catalog_values() = %s " % imageThumb.get_catalog_values())
+                catalog.index_document(imageThumb.get_catalog_values())
+                print("imageThumb.get_catalog_values() = %s " % imageThumb.get_catalog_values())
                 catalog.save_changes()
-            except Exception:
+                context.database.change_resource(imageThumb)
+                """
+                context.set_mtime = True
+                # Save changes
+                context.git_message = 'add Image'
+                database.save_changes()
+                # Index the root
+                catalog = database.catalog
+                catalog.index_document(imageThumb)
+                catalog.save_changes()
+            except Exception as e:
                 print('CRON ERROR COMMIT CATALOG')
+                print("%s" % e)
         # Now we need to update the has_thumb property in the file metadata
         has_thumb = Property(True)
-        resource.set_property('has_thumb', has_thumb)
+        resource.metadata.set_property('has_thumb', has_thumb)
+        need_thumb = Property(True)
+        resource.metadata.set_property('need_thumb', need_thumb)
         # Clean the temporary folder
         #vfs.remove(dirname)
         print("dirname = %s" % dirname)
+        """
         catalog = database.catalog
         catalog.unindex_document(str(resource.abspath))
         catalog.index_document(resource.get_catalog_values())
-        database.save_changes()
+        catalog.save_changes()
+        """
+        context.database.change_resource(resource)
     return False
 
 #from ikaaro.server import Server

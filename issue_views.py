@@ -82,6 +82,8 @@ class TchackIssue_Edit(Issue_Edit):
                 #print("image_width = %s" % image_width)
                 namespace['last_attachment'] = {'name': last_attachment,
                    'width': image_width, 'height': image_height}
+            else:
+                namespace['last_attachment'] = False
         #print("namespace['last_attachment'] = %s" % namespace['last_attachment'])
         else:
             namespace['last_attachment'] = False

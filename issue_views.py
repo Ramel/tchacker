@@ -109,6 +109,6 @@ class TchackIssue_Edit(Issue_Edit):
         # Change
         context.database.change_resource(resource)
         context.message = MSG_CHANGES_SAVED
-
+        # Thrown cron to do the thumnails
         server = context.server
         server.run_cron()

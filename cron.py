@@ -36,7 +36,8 @@ from monkey import Image
 
 def run_cron(self):
     print("cron started!")
-    cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=10))
+    #cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=10))
+    cron(self._make_image_thumbnails, timedelta(seconds=1))
 
 
 def make_thumbnails(self):
@@ -53,51 +54,22 @@ def _make_image_thumbnails(self):
     context.root = self.root
     context.site_root = self.root
 
-    # Build fake context
-    #context = get_fake_context()
-    print("context = %s" % context)
-    #database = context.database
-    #context.server = self
-    #context.database = self.database
-    #context.root = self.root
-    #context.site_root = self.root
-    #context.init_context()
-    #root = get_root(database)
-
-    # Go
-    #from datetime import datetime
-    #t = context.fix_tzinfo(datetime.now())
+    # Search for images without thumbnails
     q1 = PhraseQuery('has_thumb', False)
-    #query = PhraseQuery('is_image', True)
-    #q2 = PhraseQuery('is_image', True)
     q2 = PhraseQuery('need_thumb', True)
     q3 = PhraseQuery('is_image', True)
     query = AndQuery(q1, q2, q3)
-    #for brain in self.root.search(query).get_documents():
     for image in self.root.search(query).get_documents():
-        """
-        # Get last_attachment
-        last_attachment = self.get_property('last_attachment')
-        fs = self.metadata.database.fs
-        image = self.get_resource(last_attachment)
-        """
-        print("image.name = %s" % image.name)
-        #fs = self.database.fs
-        #fileabspath = lfs.get_absolute_path(image)
-        #print("fileabspath = %s" % fileabspath)
-        #handler = get_handler(image.url)
-        #handler = context.root.get_resource(results.get_documents()[0].abspath)
         abspath = image.abspath
-
-        print("str(self.abspath) = %s" % str(self.root.abspath))
-        print("abspath = %s" % abspath)
+        #print("str(self.abspath) = %s" % str(self.root.abspath))
+        #print("abspath = %s" % abspath)
         # Get the resource
         resource = context.root.get_resource(abspath)
-        print("resource.name = %s" % resource.name)
+        #print("resource.name = %s" % resource.name)
         container = resource.parent
-        print("container.__class__ = %s" % container.__class__)
+        #print("container.__class__ = %s" % container.__class__)
         abspath = container.abspath
-        print("abspath.parent = %s" % container.abspath)
+        #print("abspath.parent = %s" % container.abspath)
 
         # For this image we need to find is parent folder
         name = image.name
@@ -154,27 +126,12 @@ def _make_image_thumbnails(self):
                 print("Error creating image")
             is_thumb = Property(True)
             imageThumb.set_property('is_thumb', is_thumb)
-            print("imageThumb.abspath = %s" % imageThumb.abspath)
             try:
-                """
+                context.set_mtime = True
                 # Reindex resource without committing
                 catalog = database.catalog
-                print("catalog.__class__ = %s" % catalog.__class__)
-                print("str(imageThumb.abspath) = %s" % str(imageThumb.abspath))
                 catalog.unindex_document(str(imageThumb.abspath))
-                #print("imageThumb.get_catalog_values() = %s " % imageThumb.get_catalog_values())
                 catalog.index_document(imageThumb.get_catalog_values())
-                print("imageThumb.get_catalog_values() = %s " % imageThumb.get_catalog_values())
-                catalog.save_changes()
-                context.database.change_resource(imageThumb)
-                """
-                context.set_mtime = True
-                # Save changes
-                context.git_message = 'add Image'
-                database.save_changes()
-                # Index the root
-                catalog = database.catalog
-                catalog.index_document(imageThumb)
                 catalog.save_changes()
             except Exception as e:
                 print('CRON ERROR COMMIT CATALOG')
@@ -182,28 +139,11 @@ def _make_image_thumbnails(self):
         # Now we need to update the has_thumb property in the file metadata
         has_thumb = Property(True)
         resource.metadata.set_property('has_thumb', has_thumb)
-        need_thumb = Property(True)
+        need_thumb = Property(False)
         resource.metadata.set_property('need_thumb', need_thumb)
         # Clean the temporary folder
-        #vfs.remove(dirname)
-        print("dirname = %s" % dirname)
-        """
-        catalog = database.catalog
-        catalog.unindex_document(str(resource.abspath))
-        catalog.index_document(resource.get_catalog_values())
-        catalog.save_changes()
-        """
-        context.database.change_resource(resource)
+        vfs.remove(dirname)
+        # Save changes
+        context.git_message = "Add thumbnails for: %s" % image.abspath
+        database.save_changes()
     return False
-
-#from ikaaro.server import Server
-#Server.run_cron = run_cron
-"""
-def cron(self):
-    database = self.database
-
-    # Build fake context
-    context = get_fake_context()
-    context.server = self
-    self.run_cron
-"""

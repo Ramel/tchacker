@@ -18,6 +18,7 @@
 from tempfile import mkdtemp
 from os import sep
 from datetime import timedelta
+from StringIO import StringIO
 
 # Import from itools
 from itools.fs import vfs, lfs
@@ -74,15 +75,22 @@ def _make_image_thumbnails(self):
 
         # For this image we need to find is parent folder
         name = image.name
-        dirname = mkdtemp('makethumbs', 'ikaaro')
-        tempdir = vfs.open(dirname)
-        # Paste the file in the tempdir
-        tmpfolder = "%s" % (dirname)
-        tmp_uri = "%s%s%s" % (tmpfolder, sep, name)
-        tmpfile = open("%s" % tmp_uri, "w+")
-        # Here we need to open the file in the database
-        tmpfile.write(resource.get_handler().data)
-        tmpfile.close()
+        #dirname = mkdtemp('makethumbs', 'ikaaro')
+        #tempdir = vfs.open(dirname)
+        ## Paste the file in the tempdir
+        #tmpfolder = "%s" % (dirname)
+        #tmp_uri = "%s%s%s" % (tmpfolder, sep, name)
+        #tmpfile = open("%s" % tmp_uri, "w+")
+        ## Here we need to open the file in the database
+        #tmpfile.write(resource.get_handler().data)
+        #tmpfile.close()
+
+        tmpdata = resource.get_handler()
+        #tmpdata = resource.get_handler().data
+        #tmpdata.load_sate()
+        tmpdata = tmpdata.data
+        print(tmpdata)
+        tmpbody = StringIO(tmpdata)
 
         low = 256, 256
         med = 800, 800
@@ -91,27 +99,31 @@ def _make_image_thumbnails(self):
         # Create the thumbnail PNG resources
         thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
 
-        uri = tmpfolder + sep
+        #uri = tmpfolder + sep
 
         for te in thumbext:
-            try:
-                im = PILImage.open(str(tmp_uri))
-            except IOError:
-                print("IOError = %s" % tmp_uri)
+            im = PILImage.open(tmpbody)
+            #try:
+            #    im = PILImage.open(str(tmp_uri))
+            #except IOError:
+            #    print("IOError = %s" % tmp_uri)
             im.thumbnail(te[1], PILImage.ANTIALIAS)
             ima = name + te[0]
             # Some images are in CMYB, force RVB if needed
             if im.mode != "RGB":
                 im = im.convert("RGB")
-            im.save(uri + ima + ".jpg", 'jpeg', quality=85)
+            #im.save(uri + ima + ".jpg", 'jpeg', quality=85)
             # Copy the thumb content
             thumb_filename = ima + ".jpg"
             # Copy the thumb content
-            thumb_file = tempdir.open(thumb_filename)
-            try:
-                thumb_data = thumb_file.read()
-            finally:
-                thumb_file.close()
+            #thumb_file = tempdir.open(thumb_filename)
+            thumb_file = StringIO()
+            im.save(thumb_file, 'jpeg', quality=85)
+            thumb_data = thumb_file.read()
+            #try:
+            #    thumb_data = thumb_file.read()
+            #finally:
+            #    thumb_file.close()
             format = 'image/jpeg'
             cls = get_resource_class(format)
             try:
@@ -143,7 +155,7 @@ def _make_image_thumbnails(self):
         need_thumb = Property(False)
         resource.metadata.set_property('need_thumb', need_thumb)
         # Clean the temporary folder
-        vfs.remove(dirname)
+        #vfs.remove(dirname)
         # Save changes
         context.git_message = "Add thumbnails for: %s" % image.abspath
         database.save_changes()

@@ -144,8 +144,8 @@ def _make_image_thumbnails(self):
         context.git_message = "Add thumbnails for: %s" % image.abspath
         database.save_changes()
         return False
-    
-    """ 
+
+    """
     ##############
     # Videos
     ##############
@@ -163,8 +163,8 @@ def _make_image_thumbnails(self):
         container = resource.parent
         abspath = container.abspath
         tmpdata = resource.get_handler().key
-        
-        return False    
-    """
-    return 60
 
+        return False
+    """
+
+    return 60

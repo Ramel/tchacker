@@ -53,6 +53,9 @@ def _make_image_thumbnails(self):
     context.root = self.root
     context.site_root = self.root
 
+    ##############
+    # Images
+    ##############
     # Search for images without thumbnails
     q1 = PhraseQuery('has_thumb', False)
     q2 = PhraseQuery('need_thumb', True)
@@ -60,13 +63,13 @@ def _make_image_thumbnails(self):
     query = AndQuery(q1, q2, q3)
 
     for image in self.root.search(query).get_documents():
+        name = image.name
+        print("image.name = %s" % name)
         abspath = image.abspath
         # Get the resource
         resource = context.root.get_resource(abspath)
         container = resource.parent
         abspath = container.abspath
-        name = image.name
-        print("image.name = %s" % name)
         tmpdata = resource.get_handler().key
 
         low = 256, 256
@@ -127,7 +130,41 @@ def _make_image_thumbnails(self):
         resource.metadata.set_property('has_thumb', has_thumb)
         need_thumb = Property(False)
         resource.metadata.set_property('need_thumb', need_thumb)
+        try:
+            context.set_mtime = True
+            # Reindex resource without committing
+            catalog = database.catalog
+            catalog.unindex_document(str(resource.abspath))
+            catalog.index_document(resource.get_catalog_values())
+            catalog.save_changes()
+        except Exception as e:
+            print('CRON ERROR COMMIT CATALOG')
+            print("%s" % e)
         # Save changes
         context.git_message = "Add thumbnails for: %s" % image.abspath
         database.save_changes()
-    return False
+        return False
+    
+    """ 
+    ##############
+    # Videos
+    ##############
+    # Search for videos unencoded
+    q1 = PhraseQuery('encoded', False)
+    q2 = PhraseQuery('is_video', True)
+    query = AndQuery(q1, q2)
+
+    for video in self.root.search(query).get_documents():
+        name = video.name
+        print("video.name = %s" % name)
+        abspath = image.abspath
+        # Get the resource
+        resource = context.root.get_resource(abspath)
+        container = resource.parent
+        abspath = container.abspath
+        tmpdata = resource.get_handler().key
+        
+        return False    
+    """
+    return 60
+

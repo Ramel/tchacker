@@ -15,19 +15,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Import from the Standard Library
-from tempfile import mkdtemp
-from os import sep
 from datetime import timedelta
-from StringIO import StringIO
+from cStringIO import StringIO
 
 # Import from itools
-from itools.fs import vfs, lfs
+from itools.fs import vfs
 from itools.loop import cron
-from itools.database import PhraseQuery, RangeQuery, AndQuery
+from itools.database import PhraseQuery, AndQuery
 from itools.csv import Property
 
 # Import from ikaaro
-from ikaaro.server import get_fake_context, get_root
+from ikaaro.server import get_fake_context
 from ikaaro.registry import get_resource_class
 
 # Import from PIL
@@ -60,37 +58,16 @@ def _make_image_thumbnails(self):
     q2 = PhraseQuery('need_thumb', True)
     q3 = PhraseQuery('is_image', True)
     query = AndQuery(q1, q2, q3)
+
     for image in self.root.search(query).get_documents():
         abspath = image.abspath
-        #print("str(self.abspath) = %s" % str(self.root.abspath))
-        print("image = %s" % image.name)
-        print("abspath = %s" % abspath)
         # Get the resource
         resource = context.root.get_resource(abspath)
-        #print("resource.name = %s" % resource.name)
         container = resource.parent
-        #print("container.__class__ = %s" % container.__class__)
         abspath = container.abspath
-        #print("abspath.parent = %s" % container.abspath)
-
-        # For this image we need to find is parent folder
         name = image.name
-        #dirname = mkdtemp('makethumbs', 'ikaaro')
-        #tempdir = vfs.open(dirname)
-        ## Paste the file in the tempdir
-        #tmpfolder = "%s" % (dirname)
-        #tmp_uri = "%s%s%s" % (tmpfolder, sep, name)
-        #tmpfile = open("%s" % tmp_uri, "w+")
-        ## Here we need to open the file in the database
-        #tmpfile.write(resource.get_handler().data)
-        #tmpfile.close()
-
-        tmpdata = resource.get_handler()
-        #tmpdata = resource.get_handler().data
-        #tmpdata.load_sate()
-        tmpdata = tmpdata.data
-        print(tmpdata)
-        tmpbody = StringIO(tmpdata)
+        print("image.name = %s" % name)
+        tmpdata = resource.get_handler().key
 
         low = 256, 256
         med = 800, 800
@@ -99,31 +76,27 @@ def _make_image_thumbnails(self):
         # Create the thumbnail PNG resources
         thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
 
-        #uri = tmpfolder + sep
-
         for te in thumbext:
-            im = PILImage.open(tmpbody)
-            #try:
-            #    im = PILImage.open(str(tmp_uri))
-            #except IOError:
-            #    print("IOError = %s" % tmp_uri)
+            try:
+                im = PILImage.open(str(tmpdata))
+            except IOError as e:
+                print("IOError = %s" % e)
+            # make a thumbnail
             im.thumbnail(te[1], PILImage.ANTIALIAS)
             ima = name + te[0]
             # Some images are in CMYB, force RVB if needed
             if im.mode != "RGB":
                 im = im.convert("RGB")
-            #im.save(uri + ima + ".jpg", 'jpeg', quality=85)
             # Copy the thumb content
             thumb_filename = ima + ".jpg"
             # Copy the thumb content
-            #thumb_file = tempdir.open(thumb_filename)
             thumb_file = StringIO()
             im.save(thumb_file, 'jpeg', quality=85)
-            thumb_data = thumb_file.read()
-            #try:
-            #    thumb_data = thumb_file.read()
-            #finally:
-            #    thumb_file.close()
+            thumb_file.seek(0)
+            try:
+                thumb_data = thumb_file.read()
+            finally:
+                thumb_file.close()
             format = 'image/jpeg'
             cls = get_resource_class(format)
             try:
@@ -154,8 +127,6 @@ def _make_image_thumbnails(self):
         resource.metadata.set_property('has_thumb', has_thumb)
         need_thumb = Property(False)
         resource.metadata.set_property('need_thumb', need_thumb)
-        # Clean the temporary folder
-        #vfs.remove(dirname)
         # Save changes
         context.git_message = "Add thumbnails for: %s" % image.abspath
         database.save_changes()

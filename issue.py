@@ -24,26 +24,20 @@
 # Import from the Standard Library
 from tempfile import mkdtemp
 from os import sep
-from datetime import timedelta
 
 # Import from itools
 from itools.gettext import MSG
 from itools.handlers import checkid
 from itools.fs import FileName, vfs
-from itools.core import merge_dicts, get_abspath
+from itools.core import merge_dicts
 from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode
-from itools.handlers import ro_database, File as FileHandler
-from itools.uri import Path
-from itools.loop import cron
-from itools.database import PhraseQuery, RangeQuery, AndQuery
 
 # Import from ikaaro
 from ikaaro.tracker.issue import Issue
 from ikaaro.utils import generate_name
 from ikaaro.registry import get_resource_class
 from ikaaro.tracker.issue_views import IssueTrackerMenu
-from ikaaro.server import get_fake_context, get_root
 
 # Import from Tchacker
 from issue_views import TchackIssue_Edit
@@ -55,7 +49,6 @@ from videoencoding import VideoEncodingToFLV
 from PIL import Image as PILImage
 
 import re
-#import base64
 from StringIO import StringIO
 
 from comments import tchacker_comment_datatype
@@ -120,103 +113,6 @@ class Tchack_Issue(Issue):
         #return dict([ (x.get_parameter('comment'), str(x.value)) for x in attachments])
         return [ str(x.value) for x in attachments]
 
-
-    def run_cron(self, context):
-        cron(self._make_image_thumbnails(context), timedelta(seconds=1))
-
-
-    def _make_image_thumbnails(self, context):
-        database = context.database
-
-        # Build fake context
-        #context = get_fake_context()
-        #context.server = self
-        #context.database = self.database
-        #context.root = self.root
-        #context.site_root = self.root
-        #context.init_context()
-        root = get_root(database)
-
-        # Go
-        #from datetime import datetime
-        #t = context.fix_tzinfo(datetime.now())
-        q1 = PhraseQuery('has_thumb', False)
-        #query = PhraseQuery('is_image', True)
-        #q2 = PhraseQuery('is_image', True)
-        q2 = PhraseQuery('need_thumb', True)
-        #q3 = PhraseQuery('is_image', True)
-        #query = AndQuery(q1, q2)
-        query = AndQuery(q1, q2)
-        #for brain in self.root.search(query).get_documents():
-        for brain in root.search(query).get_documents():
-            print("brain = %s" % brain.name)
-        #database = self.database
-        # Build fake context
-        #context = get_fake_context()
-        #database = context.database
-        """
-        # Get last_attachment
-        last_attachment = self.get_property('last_attachment')
-        fs = self.metadata.database.fs
-        image = self.get_resource(last_attachment)
-        print("image.name = %s" % image.name)
-        name = image.name
-        dirname = mkdtemp('makethumbs', 'ikaaro')
-        tempdir = vfs.open(dirname)
-        # Paste the file in the tempdir
-        tmpfolder = "%s" % (dirname)
-        tmp_uri = "%s%s%s" % (tmpfolder, sep, name)
-        tmpfile = open("%s" % tmp_uri, "w+")
-        # Here we need to open the file in the database
-        tmpfile.write(image.get_handler().data)
-        tmpfile.close()
-
-        low = 256, 256
-        med = 800, 800
-        hig = 1024, 1024
-
-        # Create the thumbnail PNG resources
-        thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-
-        uri = tmpfolder + sep
-
-        for te in thumbext:
-            try:
-                im = PILImage.open(str(tmp_uri))
-            except IOError:
-                print("IOError = %s" % tmp_uri)
-            im.thumbnail(te[1], PILImage.ANTIALIAS)
-            ima = name + te[0]
-            # Some images are in CMYB, force RVB if needed
-            if im.mode != "RGB":
-                im = im.convert("RGB")
-            im.save(uri + ima + ".jpg", 'jpeg', quality=85)
-            # Copy the thumb content
-            thumb_filename = ima + ".jpg"
-            # Copy the thumb content
-            thumb_file = tempdir.open(thumb_filename)
-            try:
-                thumb_data = thumb_file.read()
-            finally:
-                thumb_file.close()
-            format = 'image/jpeg'
-            cls = get_resource_class(format)
-            imageThumb = self.make_resource(
-                        ima, cls,
-                        body=thumb_data,
-                        filename=thumb_filename,
-                        extension='jpg',
-                        format=format
-                        )
-            is_thumb = Property(True)
-            imageThumb.set_property('is_thumb', is_thumb)
-        # Now we need to update the has_thumb property in the file metadata
-        has_thumb = Property(True)
-        image.set_property('has_thumb', has_thumb)
-        # Clean the temporary folder
-        #vfs.remove(dirname)
-        #return False
-        """
 
     def add_comment(self, context, form, new=False):
         # Keep a copy of the current metadata
@@ -288,8 +184,6 @@ class Tchack_Issue(Issue):
             filename = "online-drawing.png"
             canvasSketch = True
 
-        #run_cron = False
-
         if attachment is not None or emptyDrawing is False:
             if canvasSketch is False:
                 # Upload
@@ -321,64 +215,6 @@ class Tchack_Issue(Issue):
 
                 if extension == "psd":
                     pass
-                else:
-                    run_cron = True
-                    #self.run_cron(context)
-                    """
-                    # We can cron now this part
-                    dirname = mkdtemp('makethumbs', 'ikaaro')
-                    tempdir = vfs.open(dirname)
-                    # Paste the file in the tempdir
-                    tmpfolder = "%s" % (dirname)
-                    tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
-                    tmpfile = open("%s" % tmp_uri, "w+")
-                    tmpfile.write(body)
-                    tmpfile.close()
-
-                    low = 256, 256
-                    med = 800, 800
-                    hig = 1024, 1024
-
-                    # Create the thumbnail PNG resources
-                    thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-
-                    uri = tmpfolder + sep
-
-                    for te in thumbext:
-                        try:
-                            im = PILImage.open(str(tmp_uri))
-                        except IOError:
-                            print("IOError = %s" % tmp_uri)
-                        im.thumbnail(te[1], PILImage.ANTIALIAS)
-                        ima = name + te[0]
-                        # Some images are in CMYB, force RVB if needed
-                        if im.mode != "RGB":
-                            im = im.convert("RGB")
-                        im.save(uri + ima + ".jpg", 'jpeg', quality=85)
-                        # Copy the thumb content
-                        thumb_filename = ima + ".jpg"
-                        # Copy the thumb content
-                        thumb_file = tempdir.open(thumb_filename)
-                        try:
-                            thumb_data = thumb_file.read()
-                        finally:
-                            thumb_file.close()
-                        format = 'image/jpeg'
-                        cls = get_resource_class(format)
-                        imageThumb = self.make_resource(
-                                    ima, cls,
-                                    body=thumb_data,
-                                    filename=thumb_filename,
-                                    extension='jpg',
-                                    format=format
-                                    )
-                        is_thumb = Property(True)
-                        imageThumb.set_property('is_thumb', is_thumb)
-                    has_thumb = Property(True)
-                    tchackerImage.set_property('has_thumb', has_thumb)
-                    # Clean the temporary folder
-                    vfs.remove(dirname)
-                    """
             # Video
             elif (mtype == "video"):
                 # Make Thumbnail for it, and encode it
@@ -473,14 +309,9 @@ class Tchack_Issue(Issue):
         if attachment is not None:
             self.set_property('last_attachment', att_name)
 
-        # Cron: Let's make thumbnails
-        #if run_cron:
-        #    self.run_cron(context)
-
         comment = Property(comment, date=date, author=author)
 
         self.set_property('comment', comment)
-        #self.set_property('ids', ids)
 
         # Send a Notification Email
         # Notify / From
@@ -503,8 +334,6 @@ class Tchack_Issue(Issue):
             uri = context.uri.resolve(';edit')
         else:
             uri = context.uri.resolve('%s/;edit' % self.name)
-
-        #module = self.parent.get_property('module') or ''
 
         message = MSG(u'DO NOT REPLY TO THIS EMAIL. To comment on this '
                 u'issue, please visit:\n{issue_uri}')

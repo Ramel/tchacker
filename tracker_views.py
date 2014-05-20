@@ -89,13 +89,44 @@ class Tchacker_View(Tracker_View):
             for filename in attachments:
                 attachment = resource.get_resource('%s/%s' % (issue, filename))
                 #print("attachment = %s" % attachment)
-                has_thumb = attachment.metadata.get_property('has_thumb') or False
+                has_thumb = attachment.metadata.get_property(
+                                    'has_thumb') or False
                 #print("%s -> has_thumb = %s" % (filename, has_thumb))
                 if has_thumb:
                     image = False
                     video = False
                     if isinstance(attachment, Image):
                         endfile = "_LOW"
+                        link = ';download'
+                        image = True
+                        thumbnail = resource.get_resource(
+                                        '%s/%s%s' % (issue, filename, endfile))
+                        width, height = thumbnail.handler.get_size()
+                    if isinstance(attachment, Video):
+                        endfile = "_thumb"
+                        link = ';thumb?width=256&amp;height=256'
+                        video = True
+                        thumbnail = resource.get_resource(
+                                        '%s/%s%s' % (issue, filename, endfile))
+                        width, height = thumbnail.handler.get_size()
+                        # video thumbnail is certainly widder than 256 px
+                        height = 256 * height / width
+                        width = 256
+                    if (max_width < width):
+                        max_width = width
+                    if (max_height < height):
+                        max_height = height
+                    thumbnails.append({ 'name' : filename + endfile,
+                                    'link': link,
+                                    'width': width,
+                                    'height': height,
+                                    'image': image,
+                                    'video': video})
+                else:
+                    image = False
+                    video = False
+                    if isinstance(attachment, Image):
+                        endfile = ";thumb?width=256&amp;height=256"
                         link = ';download'
                         image = True
                         thumbnail = resource.get_resource(

@@ -83,26 +83,30 @@ class Tchacker_View(Tracker_View):
             #last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
             attachments = resource.get_resource(issue).get_attachments_ordered()
             thumbnails = []
+            width = 0
+            height = 0
             max_width = 0
             max_height = 0
+            image = False
+            video = False
             #print("%s: attachments = %s" % (issue, attachments))
             for filename in attachments:
                 attachment = resource.get_resource('%s/%s' % (issue, filename))
+                image = isinstance(attachment, Image)
+                video = isinstance(attachment, Video)
                 #print("attachment = %s" % attachment)
                 has_thumb = attachment.metadata.get_property(
                                     'has_thumb') or False
                 #print("%s -> has_thumb = %s" % (filename, has_thumb))
                 if has_thumb:
-                    image = False
-                    video = False
-                    if isinstance(attachment, Image):
+                    if image:
                         endfile = "_LOW"
                         link = ';download'
                         image = True
                         thumbnail = resource.get_resource(
                                         '%s/%s%s' % (issue, filename, endfile))
                         width, height = thumbnail.handler.get_size()
-                    if isinstance(attachment, Video):
+                    if video:
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'
                         video = True
@@ -123,9 +127,9 @@ class Tchacker_View(Tracker_View):
                                     'image': image,
                                     'video': video})
                 else:
-                    image = False
-                    video = False
-                    if isinstance(attachment, Image):
+                    if not image or not video:
+                        continue
+                    if image:
                         endfile = ";thumb?width=256&amp;height=256"
                         link = ';download'
                         image = True
@@ -135,7 +139,7 @@ class Tchacker_View(Tracker_View):
                         # Thumbnail is certainly widder than 256 px
                         height = 256 * height / width
                         width = 256
-                    if isinstance(attachment, Video):
+                    if video:
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'
                         video = True

@@ -143,7 +143,6 @@ def _make_image_thumbnails(self):
         # Save changes
         context.git_message = "Add thumbnails for: %s" % image.abspath
         database.save_changes()
-        return False
 
     """
     ##############

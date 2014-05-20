@@ -132,6 +132,9 @@ class Tchacker_View(Tracker_View):
                         thumbnail = resource.get_resource(
                                         '%s/%s%s' % (issue, filename, endfile))
                         width, height = thumbnail.handler.get_size()
+                        # Thumbnail is certainly widder than 256 px
+                        height = 256 * height / width
+                        width = 256
                     if isinstance(attachment, Video):
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'

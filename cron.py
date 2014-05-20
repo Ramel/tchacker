@@ -33,6 +33,9 @@ from PIL import Image as PILImage
 
 from monkey import Image
 
+
+TMP_FFMPEG = "/tmp/ffmpeg_tchacker"
+
 def run_cron(self):
     print("cron started!")
     #cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=10))
@@ -144,7 +147,6 @@ def _make_image_thumbnails(self):
         context.git_message = "Add thumbnails for: %s" % image.abspath
         database.save_changes()
 
-    """
     ##############
     # Videos
     ##############
@@ -152,6 +154,13 @@ def _make_image_thumbnails(self):
     q1 = PhraseQuery('encoded', False)
     q2 = PhraseQuery('is_video', True)
     query = AndQuery(q1, q2)
+
+    search = self.root.search(query)
+    if search.__len__() < 0:
+        # Check for tmp folder
+        encoding_folder = TMP_FFMPEG
+        if not os.path.exists(encoding_folder):
+            os.mkdir(encoding_folder)
 
     for video in self.root.search(query).get_documents():
         name = video.name
@@ -163,7 +172,4 @@ def _make_image_thumbnails(self):
         abspath = container.abspath
         tmpdata = resource.get_handler().key
 
-        return False
-    """
-
-    return 60
+    return False

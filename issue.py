@@ -217,6 +217,29 @@ class Tchack_Issue(Issue):
                     pass
             # Video
             elif (mtype == "video"):
+                # Copy the uploaded video in the TMP folder for later encoding
+                # Then copy a Fake/Waiting video in the issue metadata
+                # "wait_ffmpeg_encoding.mp4"
+                # Also copy the thumb file:
+                # "wait_ffmpeg_encoding_thumb.png"
+                # Then the cron job will encode it later
+
+                wait_video = self.make_resource()
+                # Create the thumbnail PNG resources
+                # A copy of the file in the database
+                wait_video_thumbnail = self.make_resource(
+                                thumbfilename,
+                                Image,
+                                body=thumbbody,
+                                filename=thumbfilename,
+                                extension=thumbextension,
+                                format=thumbmimetype)
+                is_thumb = Property(True)
+                wait_video_thumbnail.set_property('is_thumb', is_thumb)
+
+
+
+
                 # Make Thumbnail for it, and encode it
                 # in a Low version (319px width)
                 # First, upload it, then encode it, and make a thumb for the

@@ -59,6 +59,11 @@ class Tchack_Tracker(Tracker):
     search = Tchacker_Search()
     #zip = Tracker_Zip_Img()
 
+    def init_resource(self, **kw):
+        super(Tchack_Tracker, self).init_resource(**kw)
+        # Add the files for waiting ffmpeg encoding
+        # A "Waiting for encoding" image
+
     #######################################################################
     # Update
     #######################################################################

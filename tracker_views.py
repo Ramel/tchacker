@@ -96,9 +96,15 @@ class Tchacker_View(Tracker_View):
                 video = isinstance(attachment, Video)
                 #print("attachment = %s" % attachment)
                 has_thumb = attachment.metadata.get_property(
-                                    'has_thumb') or False
-                #print("%s -> has_thumb = %s" % (filename, has_thumb))
+                                    'has_thumb') or None
+                if has_thumb is None:
+                    break
+                else:
+                    has_thumb = attachment.metadata.get_property('has_thumb').value
+
                 if has_thumb:
+                    if image is False or video is False:
+                        break
                     if image:
                         endfile = "_LOW"
                         link = ';download'
@@ -127,8 +133,8 @@ class Tchacker_View(Tracker_View):
                                     'image': image,
                                     'video': video})
                 else:
-                    if not image or not video:
-                        continue
+                    if image is False or video is False:
+                        break
                     if image:
                         endfile = ";thumb?width=256&amp;height=256"
                         link = ';download'
@@ -139,6 +145,12 @@ class Tchacker_View(Tracker_View):
                         # Thumbnail is certainly widder than 256 px
                         height = 256 * height / width
                         width = 256
+                        need_thumb = attachment.metadata.get_property('need_thumb').value or False
+                        #print("## %s -> need_thumb = %s" % (filename, need_thumb))
+                        if need_thumb:
+                            from cron import run_cron
+                            server = context.server
+                            server.run_cron()
                     if video:
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'

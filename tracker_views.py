@@ -120,12 +120,12 @@ class Tchacker_View(Tracker_View):
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'
                         video = True
-                        # video thumbnail is certainly widder than 256 px
-                        height = 256 * height / width
-                        width = 256
                         thumbnail = resource.get_resource(
                                         '%s/%s%s' % (issue, filename, endfile))
                         width, height = thumbnail.handler.get_size()
+                        # video thumbnail is certainly widder than 256 px
+                        height = 256 * height / width
+                        width = 256
                     if (max_width < width):
                         max_width = width
                     if (max_height < height):
@@ -143,16 +143,17 @@ class Tchacker_View(Tracker_View):
                                         "%s/%s" % (issue, filename))
                         height = 256
                         width = 256
-                        """
                         # Run Cron?
                         need_thumb = attachment.metadata.get_property(
+                                    'need_thumb') or None
+                        if need_thumb is not None:
+                            need_thumb = attachment.metadata.get_property(
                                     'need_thumb').value or False
-                        #print("## %s -> need_thumb = %s" % (filename, need_thumb))
-                        if need_thumb:
-                            from cron import run_cron
-                            server = context.server
-                            server.run_cron()
-                        """
+                            #print("## %s -> need_thumb = %s" % (filename, need_thumb))
+                            if need_thumb:
+                                from cron import run_cron
+                                server = context.server
+                                server.run_cron()
                     if video:
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'

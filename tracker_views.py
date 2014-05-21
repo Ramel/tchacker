@@ -20,12 +20,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Import from standard library
+from base64 import b64encode
+
 # Import from itools
 from itools.gettext import MSG
 from itools.uri import encode_query
 from itools.xml import XMLParser
 from itools.datatypes import Unicode
 from itools.web import INFO
+from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
@@ -34,7 +38,6 @@ from ikaaro.tracker.tracker_views import StoredSearchesMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.tracker.tracker_views import Tracker_AddIssue
 from ikaaro.tracker.datatypes import get_issue_fields
-
 
 from monkey import Image, Video
 from issue import Tchack_Issue
@@ -97,14 +100,15 @@ class Tchacker_View(Tracker_View):
                 #print("attachment = %s" % attachment)
                 has_thumb = attachment.metadata.get_property(
                                     'has_thumb') or None
+                #print("1) has_thumb = %s" % has_thumb)
                 if has_thumb is None:
-                    break
+                    continue
                 else:
-                    has_thumb = attachment.metadata.get_property('has_thumb').value
+                    has_thumb = attachment.metadata.get_property(
+                                    'has_thumb').value
 
+                #print("2) has_thumb = %s" % has_thumb)
                 if has_thumb:
-                    if image is False or video is False:
-                        break
                     if image:
                         endfile = "_LOW"
                         link = ';download'
@@ -116,41 +120,58 @@ class Tchacker_View(Tracker_View):
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'
                         video = True
-                        thumbnail = resource.get_resource(
-                                        '%s/%s%s' % (issue, filename, endfile))
-                        width, height = thumbnail.handler.get_size()
                         # video thumbnail is certainly widder than 256 px
                         height = 256 * height / width
                         width = 256
+                        thumbnail = resource.get_resource(
+                                        '%s/%s%s' % (issue, filename, endfile))
+                        width, height = thumbnail.handler.get_size()
                     if (max_width < width):
                         max_width = width
                     if (max_height < height):
                         max_height = height
-                    thumbnails.append({ 'name' : filename + endfile,
-                                    'link': link,
-                                    'width': width,
-                                    'height': height,
-                                    'image': image,
-                                    'video': video})
+                    #print('%s/%s%s' % (issue, filename, endfile))
+
+                # Or use the default ikaaro's thumbnails
                 else:
-                    if image is False or video is False:
-                        break
+                    if image is False and video is False:
+                        continue
                     if image:
-                        endfile = ";thumb?width=256&amp;height=256"
+                        endfile = "/;thumb"
+                        #link= ";thumb?width=256&height=256"
                         link = ';download'
                         image = True
+                        #print("resource.abspath = %s" % resource.abspath)
+                        abspath = resource.abspath
+                        #abspath = resource.get_root()
+                        #print("abspath = %s" % abspath)
+                        root = get_context().root
+                        #thumbnail = resource.get_resource(
+                        #    "%s/%s/%s" % (issue, filename, endfile))
+                        #"%s/%s/%s/%s" % (abspath, issue, filename, endfile))
                         thumbnail = resource.get_resource(
-                                        '%s/%s%s' % (issue, filename, endfile))
-                        width, height = thumbnail.handler.get_size()
+                                        "%s/%s" % (issue, filename))
+                        #handler = imagefile.get_handler()
+                        #thumb, format = handler.get_thumbnail(256, 256)
+                        #thumbnail = b64encode(thumb)
+                        #get_resource(
+                        #                '%s/%s/%s' % (issue, filename, endfile))
+                        #'%s/%s/%s/%s' % (abspath, issue, filename, endfile))
+                        #width, height = thumbnail.get_size()
                         # Thumbnail is certainly widder than 256 px
-                        height = 256 * height / width
+                        #height = 256 * height / width
+                        height = 256
                         width = 256
-                        need_thumb = attachment.metadata.get_property('need_thumb').value or False
+                        """
+                        # Run Cron?
+                        need_thumb = attachment.metadata.get_property(
+                                    'need_thumb').value or False
                         #print("## %s -> need_thumb = %s" % (filename, need_thumb))
                         if need_thumb:
                             from cron import run_cron
                             server = context.server
                             server.run_cron()
+                        """
                     if video:
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'
@@ -158,19 +179,21 @@ class Tchacker_View(Tracker_View):
                         thumbnail = resource.get_resource(
                                         '%s/%s%s' % (issue, filename, endfile))
                         width, height = thumbnail.handler.get_size()
-                        # video thumbnail is certainly widder than 256 px
+                        # Thumbnail is certainly widder than 256 px
                         height = 256 * height / width
                         width = 256
                     if (max_width < width):
                         max_width = width
                     if (max_height < height):
                         max_height = height
-                    thumbnails.append({ 'name' : filename + endfile,
-                                    'link': link,
-                                    'width': width,
-                                    'height': height,
-                                    'image': image,
-                                    'video': video})
+                # Add an image to the Thumbnails
+                thumbnails.append({
+                                'name': filename + endfile,
+                                'link': link,
+                                'width': width,
+                                'height': height,
+                                'image': image,
+                                'video': video})
             #thumbnails.reverse()
             #print("%s: thumbnails = %s" % (issue, thumbnails))
             quantity = len(thumbnails)

@@ -38,8 +38,8 @@ TMP_FFMPEG = "/tmp/ffmpeg_tchacker"
 
 def run_cron(self):
     print("cron started!")
-    #cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=10))
-    cron(self._make_image_thumbnails, timedelta(seconds=1))
+    cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=3))
+    #cron(self._make_image_thumbnails, timedelta(seconds=1))
 
 
 def make_thumbnails(self):
@@ -67,7 +67,7 @@ def _make_image_thumbnails(self):
 
     for image in self.root.search(query).get_documents():
         name = image.name
-        print("image.name = %s" % name)
+        print("    Found an image without thumbnails: %s" % name)
         abspath = image.abspath
         # Get the resource
         resource = context.root.get_resource(abspath)

@@ -137,29 +137,10 @@ class Tchacker_View(Tracker_View):
                     if image is False and video is False:
                         continue
                     if image:
-                        endfile = "/;thumb"
-                        #link= ";thumb?width=256&height=256"
-                        link = ';download'
-                        image = True
-                        #print("resource.abspath = %s" % resource.abspath)
-                        abspath = resource.abspath
-                        #abspath = resource.get_root()
-                        #print("abspath = %s" % abspath)
-                        root = get_context().root
-                        #thumbnail = resource.get_resource(
-                        #    "%s/%s/%s" % (issue, filename, endfile))
-                        #"%s/%s/%s/%s" % (abspath, issue, filename, endfile))
+                        endfile = ""
+                        link= ";thumb?width=256&amp;height=256"
                         thumbnail = resource.get_resource(
                                         "%s/%s" % (issue, filename))
-                        #handler = imagefile.get_handler()
-                        #thumb, format = handler.get_thumbnail(256, 256)
-                        #thumbnail = b64encode(thumb)
-                        #get_resource(
-                        #                '%s/%s/%s' % (issue, filename, endfile))
-                        #'%s/%s/%s/%s' % (abspath, issue, filename, endfile))
-                        #width, height = thumbnail.get_size()
-                        # Thumbnail is certainly widder than 256 px
-                        #height = 256 * height / width
                         height = 256
                         width = 256
                         """

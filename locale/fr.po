@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fr\n"
 "POT-Creation-Date: 2014-04-28 15:04+CET\n"
-"PO-Revision-Date: 2014-04-28 18:03+0100\n"
+"PO-Revision-Date: 2014-05-21 11:42+0100\n"
 "Last-Translator: FORTUN <armel@maar.fr>\n"
 "Language-Team: en_US <kde-i18n-doc@kde.org>\n"
 "Language: \n"
@@ -40,7 +40,7 @@ msgstr "&nbsp;:"
 #: ../ui/edit_issue.xml.en:23
 msgctxt "span"
 msgid "<g id='1'>${which_module} - </g>  <g id='2'>Reported by <g id='3'>${reported_by}</g></g>"
-msgstr "<g id='1'>${which_module} - </g>  <g id='2'>Raporté par <g id='3'>${reported_by}</g></g>"
+msgstr "<g id='1'>${which_module} - </g>  <g id='2'>Rapporté par <g id='3'>${reported_by}</g></g>"
 
 #: ../ui/browse_table.xml.en:9
 #: ../ui/tchacker_view_top.xml.en:8
@@ -214,7 +214,7 @@ msgstr "Dessiner sur la dernière image en P-J"
 #: ../ui/edit_issue.xml.en:202
 msgctxt "button"
 msgid "Edit"
-msgstr "Éditer"
+msgstr "Envoyer la réponse"
 
 #: ../issue_views.py:40
 msgid "Edit Issue"

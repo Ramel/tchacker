@@ -39,7 +39,7 @@ TMP_FFMPEG = "/tmp/ffmpeg_tchacker"
 def run_cron(self):
     print("cron started!")
     #cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=3))
-    cron(self._make_image_thumbnails, timedelta(seconds=1))
+    cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=0))
 
 
 def make_thumbnails(self):

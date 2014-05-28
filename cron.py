@@ -38,8 +38,7 @@ TMP_FFMPEG = "/tmp/ffmpeg_tchacker"
 
 def run_cron(self):
     print("cron started!")
-    #cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=3))
-    cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=0))
+    cron(self._make_image_thumbnails, timedelta(seconds=1), timedelta(seconds=30))
 
 
 def make_thumbnails(self):
@@ -105,19 +104,18 @@ def _make_image_thumbnails(self):
                 thumb_file.close()
             format = 'image/jpeg'
             cls = get_resource_class(format)
-            try:
-                imageThumb = container.make_resource(
-                        ima, Image,
-                        body=thumb_data,
-                        filename=thumb_filename,
-                        extension='jpg',
-                        format=format
-                        )
-                imageThumb.init_resource()
-            except Exception:
-                print("Error creating image")
+
+            imageThumb = container.make_resource(
+                    ima, Image,
+                    body=thumb_data,
+                    filename=thumb_filename,
+                    extension='jpg',
+                    format=format
+                    )
+            imageThumb.init_resource()
             is_thumb = Property(True)
-            imageThumb.set_property('is_thumb', is_thumb)
+            imageThumb.metadata.set_property('is_thumb', is_thumb)
+
             try:
                 context.set_mtime = True
                 # Reindex resource without committing

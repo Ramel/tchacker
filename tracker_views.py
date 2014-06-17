@@ -266,7 +266,7 @@ class Tchacker_View(Tracker_View):
 
             return XMLParser(state_template.format(
                                     state=item.state,
-                                    value=value))
+                                    value=value.encode('utf8')))
 
         return Tracker_View.get_item_value(self, resource, context, item, column)
 

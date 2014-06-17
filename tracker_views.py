@@ -256,6 +256,31 @@ class Tchacker_View(Tracker_View):
                 return None
             return user.get_title()
 
+        #print("column = %s" % column)
+        if column == "state":
+            state_template = '<span class="state-{state}">{value}</span>'
+            """
+            print("state = %s, %s" % (item.state, item))
+            value = getattr(item, column)
+            print("value = %s" % value)
+            if value is None:
+                return None
+            """
+
+            # Tables
+            table = resource.get_resource(column).handler
+            #table_record = table.get_record(value)
+            table_record = table.get_record(item.state)
+
+            #print("get_item_value = %s" % value)
+            value = table.get_record_value(table_record, 'title')
+            #print("n = %s" % table.get_record_value(table_record, 'title'))
+
+            #return value
+            return XMLParser(state_template.format(
+                                    state=item.state,
+                                    value=value))
+
         return Tracker_View.get_item_value(self, resource, context, item, column)
 
 

@@ -185,4 +185,16 @@ $(document).ready(function () {
   }
   // hide some user
   $("SELECT#cc-list.tracker-select OPTION[value='156']").hide();
+  // Coloring
+  /*
+  var $row = $(this).closest("TR"),
+      $spans = $row.find("TR TD SPAN[class*='state-']");
+  $.each($spans, function() {
+    console.log($(this).text());
+  });
+  */
+  $("TR TD SPAN[class*='state-']").each(function() {
+    var state = $(this).attr("class");
+    $(this).parent('TD').parent('TR').addClass(state);
+  });
 });

@@ -240,7 +240,7 @@ class Tchack_LastComments_View(Tracker_View):
 
 
     def get_item_value(self, resource, context, item, column):
-        
+
         issue = item.name
         # Last Attachment
         if column == 'last_attachment':
@@ -254,7 +254,7 @@ class Tchack_LastComments_View(Tracker_View):
             if isinstance(attach, Video):
                 thumb = attach.metadata.get_property('has_thumb')
                 if thumb:
-                    # The encoded file already as a name "fn_low.flv" 
+                    # The encoded file already as a name "fn_low.flv"
                     img_template = '<img \
                         src="./%s/%s_thumb/;thumb?width=256&amp;height=256"/>'
                 #TODO: Don't think it can append, as we encode every video input file
@@ -264,7 +264,7 @@ class Tchack_LastComments_View(Tracker_View):
                 return XMLParser(img_template % (issue, attach_name))
             else:
                 return None
-        
+
         """
         # Last Author
         if column == 'last_author':
@@ -291,8 +291,8 @@ class Tchack_LastComments_View(Tracker_View):
 
     def get_table_columns(self, resource, context):
         table_columns = Tracker_View.get_table_columns(self, resource, context)
-        del table_columns[2:11] 
-        #table_columns.pop(3) 
+        del table_columns[2:11]
+        #table_columns.pop(3)
         # Insert the last attachement row's title in the table
         table_columns.insert(2, ('last_attachment', MSG(u'Last Attach.')))
         table_columns.insert(3, ('last_comments', MSG(u'Last Comments')))

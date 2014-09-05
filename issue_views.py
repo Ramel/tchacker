@@ -32,7 +32,7 @@ from ikaaro.tracker.issue_views import ProductsSelectWidget
 #from ikaaro.views import CompositeView, CompositeForm
 from ikaaro.autoform import TextWidget, SelectWidget
 from ikaaro.autoform import ProgressBarWidget, FileWidget, MultilineWidget
-from ikaaro.forms import XHTMLBody
+from ikaaro.autoform import XHTMLBody
 
 # Import from tchacker
 from datatypes import get_issue_fields

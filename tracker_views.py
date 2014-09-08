@@ -28,8 +28,12 @@ from itools.xml import XMLParser
 from itools.datatypes import Unicode
 from itools.web import INFO
 from itools.datatypes import String
+from itools.core import freeze
 
 # Import from ikaaro
+from ikaaro.tracker.issue_views import ProductsSelectWidget
+from ikaaro.autoform import TextWidget, SelectWidget
+from ikaaro.autoform import ProgressBarWidget, FileWidget, MultilineWidget
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.tracker.tracker_views import Tracker_AddIssue, Tracker_ExportToCSV
@@ -326,7 +330,31 @@ class Tchacker_Search(Tracker_Search):
 
 class Tchack_Tracker_AddIssue(Tracker_AddIssue):
 
+    styles = ['/ui/tracker/style.css',
+              '/ui/tchacker/style.css', '/ui/thickbox/style.css']
+    scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
+               '/ui/flowplayer/flowplayer-3.2.2.min.js']
     access = 'is_allowed_to_edit'
+
+    widgets = freeze([
+        TextWidget('title', title=MSG(u'Title:'),
+                                classes=['left-center', 'light']),
+        SelectWidget('assigned_to', title=MSG(u'Assigned To:'),
+                                classes=['right', 'light']),
+        ProductsSelectWidget('product', title=MSG(u'Product:'),
+                                classes=['left', 'light']),
+        SelectWidget('type', title=MSG(u'Type:'), classes=['center', 'light']),
+        SelectWidget('cc_list', title=MSG(u'CC:'), classes=['right', 'light']),
+        SelectWidget('module', title=MSG(u'Module:'), classes=['left', 'light']),
+        SelectWidget('state', title=MSG(u'State:'), classes=['center']),
+        SelectWidget('version', title=MSG(u'Version:'),
+                                classes=['left', 'light']),
+        SelectWidget('priority', title=MSG(u'Priority:'),
+                                classes=['center', 'light']),
+        MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
+        FileWidget('attachment', title=MSG(u'Attachment:'), classes=['all']),
+        ProgressBarWidget()
+        ])
 
     def get_schema(self, resource, context):
         schema = get_issue_fields(resource)

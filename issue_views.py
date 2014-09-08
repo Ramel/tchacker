@@ -49,17 +49,17 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
     description = XHTMLBody.decode('<a href="#" class="showall">Show/Hide options</a>')
 
     widgets = freeze([
-        TextWidget('title', title=MSG(u'Title:'), css="light"),
-        SelectWidget('assigned_to', title=MSG(u'Assigned To:')),
-        ProductsSelectWidget('product', title=MSG(u'Product:')),
-        SelectWidget('type', title=MSG(u'Type:')),
-        SelectWidget('cc_list', title=MSG(u'CC:')),
-        SelectWidget('module', title=MSG(u'Module:')),
-        SelectWidget('version', title=MSG(u'Version:')),
-        SelectWidget('state', title=MSG(u'State:')),
-        SelectWidget('priority', title=MSG(u'Priority:')),
-        MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['test']),
-        FileWidget('attachment', title=MSG(u'Attachment:'), classes=['att','filewidget']),
+        TextWidget('title', title=MSG(u'Title:'), classes=['left-center']),
+        SelectWidget('assigned_to', title=MSG(u'Assigned To:'), classes=['right']),
+        ProductsSelectWidget('product', title=MSG(u'Product:'), classes=['left']),
+        SelectWidget('type', title=MSG(u'Type:'), classes=['center']),
+        SelectWidget('cc_list', title=MSG(u'CC:'), classes=['right']),
+        SelectWidget('module', title=MSG(u'Module:'), classes=['left']),
+        SelectWidget('state', title=MSG(u'State:'), classes=['center']),
+        SelectWidget('version', title=MSG(u'Version:'), classes=['left']),
+        SelectWidget('priority', title=MSG(u'Priority:'), classes=['center']),
+        MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
+        FileWidget('attachment', title=MSG(u'Attachment:'), classes=['all']),
         ProgressBarWidget()
         ])
 

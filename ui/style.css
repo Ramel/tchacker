@@ -89,3 +89,36 @@ DIV.issue-roll {
 	float:left;
 	position:absolute;
 }
+
+/*
+FORM#autoform FIELDSET {
+  position: relative;
+  width: 100%;
+  right: 0px;
+}
+
+FORM#autoform FIELDSET DIV{
+  height: 20px;
+}
+*/
+.left {
+    width: 33%;
+    float: left;
+}
+.left-center {
+    width: 66%;
+    float: left;
+}
+.center {
+    width: 34%;
+    margin-left: 33%;
+    float: left;
+}
+.right {
+    width: 33%;
+    float: right;
+}
+.all {
+    width: 100%;
+    float: left;
+}

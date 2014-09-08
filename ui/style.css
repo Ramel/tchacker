@@ -89,18 +89,7 @@ DIV.issue-roll {
 	float:left;
 	position:absolute;
 }
-
-/*
-FORM#autoform FIELDSET {
-  position: relative;
-  width: 100%;
-  right: 0px;
-}
-
-FORM#autoform FIELDSET DIV{
-  height: 20px;
-}
-*/
+/* Tracker FORM */
 .left {
     width: 33%;
     float: left;

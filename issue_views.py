@@ -64,7 +64,7 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
         SelectWidget('priority', title=MSG(u'Priority:'),
                                 classes=['center', 'light']),
         MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
-        FileWidget('attachment', title=MSG(u'Attachment:'), classes=['all']),
+        FileWidget('attachment', title=MSG(u'Attachment (<512Mo):'), classes=['all']),
         ProgressBarWidget()
         ])
 

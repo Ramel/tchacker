@@ -49,6 +49,25 @@ register_document_type(Tchack_Tracker, WebSite.class_id)
 ###########################################################################
 # Check required software
 ###########################################################################
-for name, cli in [("zip", "zip")]:
+for name, cli in [
+            ("zip", "zip"),
+            ("ffmpeg", "ffmpeg")]:
     if(which(cli)) is None:
         print 'You need to install "%s".' % name
+
+# Check for required software
+for name, import_path, reason in [
+            ("pexpect", "pexpect", "Run cron CLI async")]:
+    try:
+        __import__(import_path)
+    except ImportError:
+        print '%s: You need to install "%s" (pip install %s).' % (
+                            reason, name, import_path)
+
+
+from ikaaro.server import Server
+from cron import run_cron, _make_image_thumbnails
+from cron import ffmpeg_worker
+Server.ffmpeg_worker= ffmpeg_worker
+Server.run_cron = run_cron
+Server._make_image_thumbnails = _make_image_thumbnails

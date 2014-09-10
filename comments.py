@@ -71,7 +71,7 @@ class Tchack_CommentsView(CommentsView):
             has_thumb = False
             image = isinstance(file, Image) or False
             video = isinstance(file, Video) or False
-            format = file.metadata.format
+            fileformat = file.metadata.format or False
 
             if image or video:
                 has_thumb = file.get_property('has_thumb') or False
@@ -86,12 +86,14 @@ class Tchack_CommentsView(CommentsView):
                     'link': file.name,
                     'is_image': image or False,
                     'is_video': video or False,
-                    'format': format
+                    'has_thumb': has_thumb or False,
+                    'format': fileformat
                     }
 
         # Get resource metadata values: is_video, is_image
+        # TODO: Perhaps we need to run this if comments is not empty
         comments = [
-            {'number': i,
+            {'number': i + 1,
              'user': root.get_user_title(x.get_parameter('author')),
              'datetime': context.format_datetime(x.get_parameter('date')),
              'comment': has_comment(x.value),

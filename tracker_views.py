@@ -5,7 +5,7 @@
 # Copyright (C) 2007-2008 Hervé Cauwelier <herve@itaapy.com>
 # Copyright (C) 2007-2008 Juan David Ibáñez Palomar <jdavid@itaapy.com>
 # Copyright (C) 2007-2008 Nicolas Deram <nicolas@itaapy.com>
-# Copyright (C) 2009 Armel FORTUN <armel@tchack.comr>
+# Copyright (C) 2009 Armel FORTUN <armel@tchack.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,26 +20,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Import from standard library
+from base64 import b64encode
+
 # Import from itools
 from itools.gettext import MSG
 from itools.csv import CSVFile
-from itools.uri import encode_query, Reference
+from itools.uri import encode_query
 from itools.xml import XMLParser
 from itools.datatypes import Unicode
 from itools.web import INFO
-from itools.datatypes import String
+from itools.web import get_context
 from itools.core import freeze
+from itools.datatypes import String
 
 # Import from ikaaro
 from ikaaro.tracker.issue_views import ProductsSelectWidget
 from ikaaro.autoform import TextWidget, SelectWidget
 from ikaaro.autoform import ProgressBarWidget, FileWidget, MultilineWidget
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
+from ikaaro.tracker.tracker_views import StoredSearch, StoredSearchesMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.tracker.tracker_views import Tracker_AddIssue, Tracker_ExportToCSV
 from ikaaro.tracker.tracker_views import columns
+from ikaaro.tracker.tracker_views import Tracker_AddIssue
 from ikaaro.tracker.datatypes import get_issue_fields
 
+from issue import Tchack_Issue
 from monkey import Image, Video
 
 
@@ -64,7 +71,7 @@ class Tchack_Tracker_View(Tracker_View):
     title = MSG(u'View')
     icon = 'view.png'
     scripts = ['/ui/tchacker/tracker.js']
-    styles = ['/ui/tchacker/style.css', '/ui/tracker/style.css' ]
+    styles = ['/ui/tchacker/style.css']
 
     context_menus = [
                     TrackerViewMenu(),
@@ -81,41 +88,42 @@ class Tchack_Tracker_View(Tracker_View):
         if column == 'last_attachment':
             attach_name = item.last_attachment
             issue = item.name
-            """
-            comments =  resource.get_resource(issue).get_comments_ordered()
-            print("%s" % comments)
-            la =  resource.get_resource(issue).get_last_attachment()
-            print("%s" % la)
-            glaid =  resource.get_resource(issue).get_last_attachment_id()
-            print("%s" % glaid)
-            last_comments = resource.get_resource(issue).get_last_comments_from_id(glaid)
-            for lc in last_comments:
-                print("%s" % lc)
-            """
             if attach_name is None:
                 return None
             #last_attachment = resource.get_resource('%s/%s' % (issue, attach_name))
             attachments = resource.get_resource(issue).get_attachments_ordered()
             thumbnails = []
+            width = 0
+            height = 0
             max_width = 0
             max_height = 0
+            image = False
+            video = False
             #print("%s: attachments = %s" % (issue, attachments))
             for filename in attachments:
                 attachment = resource.get_resource('%s/%s' % (issue, filename))
+                image = isinstance(attachment, Image)
+                video = isinstance(attachment, Video)
                 #print("attachment = %s" % attachment)
-                has_thumb = attachment.metadata.get_property('has_thumb') or False
-                #print("%s -> has_thumb = %s" % (filename, has_thumb))
+                has_thumb = attachment.metadata.get_property(
+                                    'has_thumb') or None
+                #print("1) has_thumb = %s" % has_thumb)
+                if has_thumb is None:
+                    continue
+                else:
+                    has_thumb = attachment.metadata.get_property(
+                                    'has_thumb').value
+
+                #print("2) has_thumb = %s" % has_thumb)
                 if has_thumb:
-                    image = False
-                    video = False
-                    if isinstance(attachment, Image):
+                    if image:
                         endfile = "_LOW"
                         link = ';download'
                         image = True
                         thumbnail = resource.get_resource(
                                         '%s/%s%s' % (issue, filename, endfile))
                         width, height = thumbnail.handler.get_size()
-                    if isinstance(attachment, Video):
+                    if video:
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'
                         video = True
@@ -129,12 +137,53 @@ class Tchack_Tracker_View(Tracker_View):
                         max_width = width
                     if (max_height < height):
                         max_height = height
-                    thumbnails.append({ 'name' : filename + endfile,
-                                    'link': link,
-                                    'width': width,
-                                    'height': height,
-                                    'image': image,
-                                    'video': video})
+                    #print('%s/%s%s' % (issue, filename, endfile))
+
+                # Or use the default ikaaro's thumbnails
+                else:
+                    if image is False and video is False:
+                        continue
+                    if image:
+                        endfile = ""
+                        link= ";thumb?width=256&amp;height=256"
+                        thumbnail = resource.get_resource(
+                                        "%s/%s" % (issue, filename))
+                        height = 256
+                        width = 256
+                        # Run Cron?
+                        need_thumb = attachment.metadata.get_property(
+                                    'need_thumb') or None
+                        if need_thumb is not None:
+                            need_thumb = attachment.metadata.get_property(
+                                    'need_thumb').value or False
+                            #print("## %s -> need_thumb = %s" % (filename, need_thumb))
+                            if need_thumb:
+                                from cron import run_cron
+                                server = context.server
+                                server.run_cron()
+                    if video:
+                        endfile = "_thumb"
+                        link = ';thumb?width=256&amp;height=256'
+                        video = True
+                        thumbnail = resource.get_resource(
+                                        '%s/%s%s' % (issue, filename, endfile))
+                        width, height = thumbnail.handler.get_size()
+                        # Thumbnail is certainly widder than 256 px
+                        height = 256 * height / width
+                        width = 256
+                    if (max_width < width):
+                        max_width = width
+                    if (max_height < height):
+                        max_height = height
+                # Add an image to the Thumbnails
+                thumbnails.append({
+                                'name': filename + endfile,
+                                'link': link,
+                                'width': width,
+                                'height': height,
+                                'image': image,
+                                'video': video})
+
             #thumbnails.reverse()
             #print("%s: thumbnails = %s" % (issue, thumbnails))
             quantity = len(thumbnails)
@@ -172,7 +221,7 @@ class Tchack_Tracker_View(Tracker_View):
                                     issue=issue,
                                     name=thumb['name'],
                                     link=thumb['link'])
-                        #thumb_name = thumb['name']
+                        thumb_name = thumb['name']
                         link = thumb['link']
                 if thumbnails[-1]['image']:
                     last_img_template = '<img class="thumbnail" style="vertical-align:middle" \
@@ -215,6 +264,18 @@ class Tchack_Tracker_View(Tracker_View):
                 return None
             return user.get_title()
 
+        if column == "state":
+            state_template = '<span class="state-{state}">{value}</span>'
+            # Tables
+            table = resource.get_resource(column).handler
+            table_record = table.get_record(item.state)
+
+            value = table.get_record_value(table_record, 'title')
+
+            return XMLParser(state_template.format(
+                                    state=item.state,
+                                    value=value.encode('utf8')))
+
         return Tracker_View.get_item_value(self, resource, context, item, column)
 
 
@@ -224,7 +285,6 @@ class Tchack_Tracker_View(Tracker_View):
         table_columns.insert(2, ('last_attachment', MSG(u'Last Attach.')))
         table_columns.insert(11, ('last_author', MSG(u'Last Auth.')))
         return table_columns
-
 
 
 class Tchack_LastComments_View(Tracker_View):
@@ -380,7 +440,9 @@ class Tchack_Tracker_AddIssue(Tracker_AddIssue):
         return value
 
     def get_namespace(self, resource, context):
-        namespace = Tracker_AddIssue.get_namespace(self, resource, context)
+        #namespace = Tracker_AddIssue.get_namespace(self, resource, context)
+        proxy = super(Tracker_AddIssue, self)
+        namespace = proxy.get_namespace(resource, context)
         widgets = namespace['widgets']
         for name in widgets:
             if name['name'] == 'comment':

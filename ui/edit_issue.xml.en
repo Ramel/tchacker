@@ -8,15 +8,9 @@
     var list_products = {
     <stl:inline stl:repeat="product list_products">"${product/id}":
         {'module':
-        [<stl:inline stl:repeat="module product/modules">
-            {"id": "${module/id}",
-            "value": "${module/value}"},
-        </stl:inline>],
+        [<stl:inline stl:repeat="module product/modules">{"id": "${module/id}", "value": "${module/value}"}, </stl:inline>],
         'version':
-        [<stl:inline stl:repeat="version product/versions">
-            {"id": "${version/id}",
-            "value": "${version/value}"},
-        </stl:inline>]}
+        [<stl:inline stl:repeat="version product/versions">{"id": "${version/id}", "value": "${version/value}"}, </stl:inline>]}
     ,</stl:inline>
     }
     function update_tracker() {
@@ -25,9 +19,10 @@
     }
 </script>
 
-<p stl:if="reported_by">
-  Reported by <em>${reported_by}</em>
-</p>
+<h2 class="tchacker">
+  <span stl:if="which_module">${which_module} - </span>
+  <span stl:if="reported_by">Reported by <em>${reported_by}</em></span>
+</h2>
 
 <br/>
 
@@ -97,8 +92,7 @@ text-align: right;
 }
 </style>
 
-<form action=";edit" method="post" enctype="multipart/form-data" id="tracker"
-        onsubmit="beginUpload()">
+<form action=";edit" method="post" enctype="multipart/form-data" id="tracker">
   <fieldset>
     <legend>Edit Issue</legend>
     <div class="bord">

@@ -21,7 +21,8 @@
     </tr>
     <tr stl:if="comment/attachment/is_image">
       <td colspan="5">
-          <a href="${comment/attachment/link}_HIG/;download" class="thickbox"><img src="${comment/attachment/link}_MED/;download" /></a>
+        <a stl:if="comment/attachment/has_thumb" href="${comment/attachment/link}_HIG/;download" class="thickbox"><img src="${comment/attachment/link}_MED/;download" /></a>
+        <a stl:if="not comment/attachment/has_thumb"><img src="${comment/attachment/link}/;thumb?width=800&amp;height=600" /></a>
       </td>
     </tr>
     <tr stl:if="comment/attachment/is_video">
@@ -47,11 +48,16 @@
   <script stl:if="comment/attachment/is_video" language="JavaScript">flowplayer("player-${comment/number}", "/ui/flowplayer/flowplayer-3.2.2.swf", {
      clip: {
        autoPlay: false,
-       autoBuffering: false
+       autoBuffering: false,
+       scaling: 'fit'
+     },
+     onBeforeFullscreen: function () {
+       this.getPlugin("canvas").css({background: '#000000 repeat fixed center'});
      },
      // canvas background, the video thumbnail.
      canvas: {
-       backgroundImage: 'url(${comment/attachment/link}_thumb/;download)'
+       background: '#000000 url(${comment/attachment/link}_thumb/;download) no-repeat fixed center',
+       backgroundGradient: 'none'
      }
   });
   </script>

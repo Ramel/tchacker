@@ -24,15 +24,16 @@
 # Import from the Standard Library
 from os.path import basename
 from tempfile import mkdtemp
-from os import sep
+from os import sep, path
 
 # Import from itools
 from itools.gettext import MSG
 from itools.handlers import checkid
-from itools.fs import FileName, vfs
+from itools.fs import FileName, vfs, lfs
 from itools.core import merge_dicts
 from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode
+from itools.core import get_abspath
 
 # Import from ikaaro
 from ikaaro.tracker.issue import Issue
@@ -51,11 +52,13 @@ from comments import tchacker_comment_datatype
 from monkey import Image, Video
 from issue_views import Tchack_Issue_Edit_ProxyView
 
+import re
+from StringIO import StringIO
 
 class Tchack_Issue(Issue):
 
     class_id = 'tchack_issue'
-    class_version = '20100506'
+    class_version = '20130427'
     class_title = MSG(u'Tchacker Issue')
     class_description = MSG(u'Tchacker Issue')
 
@@ -64,7 +67,6 @@ class Tchack_Issue(Issue):
 
     class_schema = merge_dicts(
         Issue.class_schema,
-        ids=Integer(source='metadata'),
         last_attachment=String(source='metadata', indexed=False, stored=True))
 
     #XXX: Replace the original datatypes
@@ -77,19 +79,27 @@ class Tchack_Issue(Issue):
                             'attachment': String,
                             'comment': Integer})
 
-
     def get_catalog_values(self):
-        document = Issue.get_catalog_values(self)
-        return document
+       document = Issue.get_catalog_values(self)
+       return document
 
+    def get_comments(self):
+        comments = self.metadata.get_property('comment')
+        if not comments:
+            return None
+        return [ ("%s" % x.value) for x in comments ]
+
+    def get_len_comments(self):
+        comments = self.metadata.get_property('comment')
+        if not comments:
+            return None
+        return len(comments)
 
     def get_attachments(self):
         attachments = self.metadata.get_property('attachment')
         if not attachments:
             return None
-        #base = self.get_canonical_path()
         return set([ str(x.value) for x in attachments ])
-
 
     def get_attachments_ordered(self):
         attachments = self.metadata.get_property('attachment')
@@ -97,43 +107,6 @@ class Tchack_Issue(Issue):
             return []
         #return dict([ (x.get_parameter('comment'), str(x.value)) for x in attachments])
         return [ str(x.value) for x in attachments]
-
-
-    def get_comments_ordered(self):
-        comments = self.metadata.get_property('comment')
-        if not comments:
-            return []
-        # WIP: with or without STR?
-        #return [ str(x.value) for x in comments ]
-        return [ x.value for x in comments ]
-
-
-    def get_last_attachment(self):
-        last_attachment = self.metadata.get_property('last_attachment')
-        if not last_attachment:
-            return None
-        return str(last_attachment.value)
-
-
-    def get_last_attachment_id(self):
-        attachments = self.metadata.get_property('attachment')
-        if not attachments:
-            return None
-        last = attachments[-1].get_parameter('comment')
-        return int(last)
-
-
-    def get_last_comments_from_id(self, last):
-        if last is None:
-            return None
-        comments = self.metadata.get_property('comment')
-        # Get all of thr comments, from the last attachement
-        last_comments = [ x.value for x in comments[last:] ]
-        # Remove the empty comments
-        last_comments = filter(
-            lambda a: a != 'comment_is_empty_but_has_attachment', last_comments)
-        return last_comments
-
 
     def add_comment(self, context, form, new=False):
         # Keep a copy of the current metadata
@@ -155,21 +128,61 @@ class Tchack_Issue(Issue):
 
         # Attachment
         attachment = form['attachment']
-        ids = 0
-        if not new:
-            if ((not(comment) and attachment) or
-                        (comment and not(attachment)) or
-                        (comment and attachment)):
-                ids = int(self.get_property('ids'))
-                ids = ids+1
-            else:
-                ids = int(self.get_property('ids'))
+        if new:
+            drawing = ""
+            #last_attachment = None
+        else:
+            drawing = form['canvasDrawing']
+
+        emptyDrawing = False
+        #print("attachment = '%s', drawing = '%s'" % (attachment, drawing))
+        # Test if drawing is an empty String
+        if not drawing:
+            emptyDrawing = True
+
+        if new:
+            ids = 0
+        else:
+            ids = self.get_len_comments()
 
         att_name = ""
 
-        if attachment is not None:
-            # Upload
-            filename, mimetype, body = attachment
+        canvasSketch = False
+
+        if not emptyDrawing:
+            body = re.search(r'base64,(.*)', drawing).group(1)
+            body = body.decode('base64')
+            # body is only the canvas sketch,
+            # we need to add the original image to it
+            # So, create a tmp image that contains body
+            alphaImage = PILImage.open(StringIO(body))
+            # transform the tmp image black color to alpha
+            alphaImage = alphaImage.convert("RGBA")
+            # create a tmp2 image that contains the last attachment
+            last_attachment = self.get_property('last_attachment')
+            #print("last_attachment = %s" % last_attachment)
+
+            fs = self.metadata.database.fs
+            originalImage = self.get_resource(last_attachment + "_MED")
+            fileabspath = fs.get_absolute_path(originalImage.handler.key)
+            #print("fileabspath = %s" % fileabspath)
+
+            originalImage = PILImage.open(str(fileabspath))
+            # paste the tmp onto tmp2
+            originalImage.paste(alphaImage, (0, 0), alphaImage)
+            # retrieve the result body
+            # Save it in memory
+            f = StringIO()
+            originalImage.save(f, "PNG")
+            body = f.getvalue()
+            mimetype = "image/png"
+            filename = "online-drawing.png"
+            canvasSketch = True
+
+        if attachment is not None or emptyDrawing is False:
+            if canvasSketch is False:
+                # Upload
+                filename, mimetype, body = attachment
             # Find a non used name
             name = checkid(filename)
             name, extension, language = FileName.decode(name)
@@ -180,7 +193,7 @@ class Tchack_Issue(Issue):
 
             # Image
             if (mtype == "image"):
-                # Add attachment
+                # Create the image in the database
                 tchackerImage = self.make_resource(
                                 name, Image,
                                 body=body,
@@ -188,78 +201,26 @@ class Tchack_Issue(Issue):
                                 extension=extension,
                                 format=mimetype
                                 )
-                # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
-                # used instead of a ;thumb
-                if extension == "psd":
-                    pass
-                else:
-                    dirname = mkdtemp('makethumbs', 'ikaaro')
-                    tempdir = vfs.open(dirname)
-                    # Paste the file in the tempdir
-                    tmpfolder = "%s" % (dirname)
-                    tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
-                    tmpfile = open("%s" % tmp_uri, "w+")
-                    tmpfile.write(body)
-                    tmpfile.close()
-
-                    low = 256, 256
-                    med = 800, 800
-                    hig = 1024, 1024
-
-                    # Create the thumbnail PNG resources
-                    thumbext = (["_HIG", hig], ["_MED", med], ["_LOW", low])
-
-                    uri = tmpfolder + sep
-
-                    for te in thumbext:
-                        try:
-                            im = PILImage.open(tmp_uri)
-                        except IOError:
-                            print("IOError = %s" % tmp_uri)
-                        im.thumbnail(te[1], PILImage.ANTIALIAS)
-                        ima = name + te[0]
-                        # Some images are in CMYB, force RVB if needed
-                        if im.mode != "RGB":
-                            im = im.convert("RGB")
-                        im.save(uri + ima + ".jpg", 'jpeg', quality=85)
-                        # Copy the thumb content
-                        thumb_filename = ima + ".jpg"
-                        # Copy the thumb content
-                        thumb_file = tempdir.open(thumb_filename)
-                        try:
-                            thumb_data = thumb_file.read()
-                        finally:
-                            thumb_file.close()
-                        format = 'image/jpeg'
-                        cls = get_resource_class(format)
-                        imageThumb = self.make_resource(
-                                    ima, cls,
-                                    body=thumb_data,
-                                    filename=thumb_filename,
-                                    extension='jpg',
-                                    format=format
-                                    )
-                        is_thumb = Property(True)
-                        imageThumb.set_property('is_thumb', is_thumb)
-                    has_thumb = Property(True)
+                if extension != "psd":
+                    # For speed, we need to add _LOW, _MED, _HIG resources, in the DB
+                    # used instead of a ;thumb
+                    has_thumb = Property(False)
                     tchackerImage.set_property('has_thumb', has_thumb)
-                    # Clean the temporary folder
-                    vfs.remove(dirname)
+                    need_thumb = Property(True)
+                    tchackerImage.set_property('need_thumb', need_thumb)
+                else:
+                    pass
 
             # Video
             elif (mtype == "video"):
-                # Make Thumbnail for it, and encode it
-                # in a Low version (319px width)
-                # First, upload it, then encode it, and make a thumb for the
-                # encoded file.
-                # video.mp4, video_low.mp4, video_low_thumb.jpg
-                # If the video is h264 and wider than 319px,
-                # so create a Low copy.
-                dirname = mkdtemp('videoencoding', 'ikaaro')
-                tempdir = vfs.open(dirname)
+                ffmpeg_encoding_folder = '../ffmpeg-encoding'
+                print("ffmpeg_encoding_folder = %s" % ffmpeg_encoding_folder)
+                if not lfs.exists(ffmpeg_encoding_folder):
+                    lfs.make_folder(ffmpeg_encoding_folder)
+                dirname = mkdtemp('encoding', 'tchacker',
+                                    dir=ffmpeg_encoding_folder)
                 # Paste the file in the tempdir
                 tmpfolder = "%s" % (dirname)
-                #root_path = file.handler.database.path
                 tmp_uri = ("%s%s%s" % (tmpfolder, sep, name))
                 tmpfile = open("%s" % tmp_uri, "w+")
                 tmpfile.write(body)
@@ -270,53 +231,46 @@ class Tchack_Issue(Issue):
                 # Codec
                 #venc = VideoEncodingToFLV(file).get_video_codec(tmp_uri)
                 width_low = 640
-                # In case of a video in h264 and widder than 319px
-                # We encode it in Flv at 640px width  and make a thumbnail
-                #if int(width) > 319 and venc == "h264":
-                #if int(width) > 319:
-                #video_low = ("%s_low" % name)
-                # video is already in temp dir, so encode it
-                encoded = VideoEncodingToFLV(tmpfile).encode_video_to_flv(
-                    tmpfolder, name, name, width_low, encode='one_chroma_faststart')
+                # Add the files for waiting ffmpeg encoding
+                f = open(get_abspath('./ffmpeg-encoding/loading-animation.mp4'), 'r')
+                data = f.read()
+                f.close()
+                self.make_resource(name, Video, body=data,
+                                extension='mp4', filename='%s.mp4' % name,
+                                format='video/mp4')
 
-                if encoded is not None:
-                    vidfilename, vidmimetype, vidbody, vidextension, \
-                            width, height = encoded['flvfile']
-                    thumbfilename, thumbmimetype, \
-                            thumbbody, thumbextension = encoded['flvthumb']
-                    # Create the video resources
-                    self.make_resource(vidfilename, Video,
-                        body=vidbody, filename=vidfilename,
-                        extension=vidextension, format=vidmimetype)
+                vid = self.get_resource(name)
+                metadata = vid.metadata
 
-                    #height_low = int(round(float(width_low) / ratio))
+                width_low = Property(640)
+                metadata.set_property('width', width_low)
+                height_low = Property(480)
+                metadata.set_property('height', height_low)
+                ratio = Property(1.)
+                metadata.set_property('ratio', ratio)
+                is_video = Property(True)
+                metadata.set_property('is_video', is_video)
+                has_thumb = Property(True)
+                metadata.set_property('has_thumb', has_thumb)
+                encoded = Property(False)
+                metadata.set_property('encoded', encoded)
+                print("dirname = %s" % path.basename(path.basename(tmpfolder)))
+                tmp_folder= Property(path.basename(path.basename(dirname)))
+                metadata.set_property('tmp_folder', tmp_folder)
 
-                    vid = self.get_resource(vidfilename)
-                    metadata = vid.metadata
+                # A "Waiting for encoding" image
+                f = open(get_abspath('./ffmpeg-encoding/loading-animation_thumb.png'), 'r')
+                data = f.read()
+                f.close()
+                self.make_resource('%s_thumb' % name, Image, body=data,
+                                extension='png',
+                                filename='%s_thumb.png' % name,
+                                format='image/png')
+                is_thumb = Property(True)
+                self.get_resource('%s_thumb' % name).metadata.set_property(
+                    'is_thumb', is_thumb)
 
-                    # Get sizes from encoded['flvfile'] instead of *_low
-                    # width_low = width now, sure!
-                    width_low = Property(width)
-                    metadata.set_property('width', width_low)
-                    height_low = Property(height)
-                    metadata.set_property('height', height_low)
-                    ratio = Property(ratio)
-                    metadata.set_property('ratio', ratio)
-                    has_thumb = Property(True)
-                    metadata.set_property('has_thumb', has_thumb)
-
-                    # Create the thumbnail PNG resources
-                    self.make_resource(thumbfilename, Image,
-                        body=thumbbody, filename=thumbfilename,
-                        extension=thumbextension, format=thumbmimetype)
-                    is_thumb = Property(True)
-                    self.get_resource(thumbfilename).metadata.set_property(
-                        'is_thumb', is_thumb)
-                    # As the video is a low version and reencoded
-                    att_name = vidfilename
-
-                # Clean the temporary folder
-                vfs.remove(dirname)
+                att_name = name
 
             # Default case
             else:
@@ -325,6 +279,7 @@ class Tchack_Issue(Issue):
                 extension=extension, format=mimetype)
 
             # Link
+            # The "ids" in comments is ids-1
             attachment = Property(att_name, comment=ids)
             self.set_property('attachment', attachment)
 
@@ -332,16 +287,15 @@ class Tchack_Issue(Issue):
         date = context.timestamp
         user = context.user
         author = user.name if user else None
-        if comment == '' and attachment is not None:
+        # Check for empty comment
+        comment_check = " ".join(comment.split())
+        if comment_check == '' and attachment is not None:
             comment = "comment_is_empty_but_has_attachment"
         if attachment is not None:
             self.set_property('last_attachment', att_name)
-        comment = Property(comment, date=date,
-                            author=author
-                            )
+        comment = Property(comment, date=date, author=author)
+
         self.set_property('comment', comment)
-        ids = Property(ids)
-        self.set_property('ids', ids)
 
         # Send a Notification Email
         # Notify / From
@@ -370,6 +324,7 @@ class Tchack_Issue(Issue):
         body = message.gettext(issue_uri=uri)
         body += '\n\n'
         body += '#%s %s\n\n' % (self.name, self.get_property('title'))
+        #body += '%s\n\n' % module
         message = MSG(u'The user {title} did some changes.')
         body +=  message.gettext(title=user_title)
         body += '\n\n'
@@ -397,6 +352,9 @@ class Tchack_Issue(Issue):
                 continue
             to_addr = user.get_property('email')
             root.send_email(to_addr, subject, text=body)
+        # Thrown cron to do the thumnails
+        server = context.server
+        server.run_cron()
 
 
     #######################################################################
@@ -409,6 +367,15 @@ class Tchack_Issue(Issue):
     #######################################################################
     # Update
     #######################################################################
+    def update_20130427(self):
+        """Delete the ids property"""
+        metadata = self.metadata
+        metadata.del_property('ids')
+
+    def update_20100507(self):
+        """Fake update to pass the inherited method"""
+        print "Fake update"
+
     def update_20100506(self):
         from itools.core import fixed_offset
         utc = fixed_offset(0)

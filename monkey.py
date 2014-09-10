@@ -17,21 +17,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from itools.core import freeze, merge_dicts
-from itools.datatypes import Integer, Boolean, Decimal
+from itools.datatypes import Integer, Boolean, Decimal, String
+from itools.database import register_field
 
 from ikaaro.file import Image, Video
 
 
 Image.class_schema = freeze(merge_dicts(
         Image.class_schema,
-        has_thumb=Boolean(source='metadata'),
+        has_thumb=Boolean(source='metadata', indexed=True),
+        need_thumb=Boolean(source='metadata', indexed=True),
         is_thumb=Boolean(source='metadata')))
-
 
 
 Video.class_schema = freeze(merge_dicts(
         Video.class_schema,
         has_thumb=Boolean(source='metadata'),
+        is_video=Boolean(source='metadata', indexed=True),
+        encoded=Boolean(source='metadata', indexed=True),
+        tmp_folder=String(source='metadata'),
         width=Integer(source='metadata'),
         height=Integer(source='metadata'),
         ratio=Decimal(source='metadata')))
@@ -48,3 +52,5 @@ def is_image_content(self):
 
 
 Image.is_content = property(is_image_content)
+register_field('has_thumb', Boolean(indexed=True))
+register_field('need_thumb', Boolean(indexed=True))

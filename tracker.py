@@ -30,6 +30,7 @@ from itools.fs import FileName
 from ikaaro.tracker import Tracker
 from ikaaro.registry import register_resource_class
 from ikaaro.registry import get_resource_class
+from ikaaro.tracker.tracker_views import GoToIssueMenu
 
 from issue import Tchack_Issue
 from tracker_views import Tchack_Tracker_View #, Tracker_Zip_Img
@@ -37,13 +38,13 @@ from tracker_views import Tchack_LastComments_View
 from tracker_views import Tchack_Tracker_ExportToCSVForm
 from tracker_views import Tchack_Tracker_ExportToCSV
 from tracker_views import Tchack_Tracker_AddIssue
-
+from monkey import Image, Video
 
 
 class Tchack_Tracker(Tracker):
 
     class_id = 'tchack_tracker'
-    class_version = '20110408'
+    class_version = '20120202'
     class_title = MSG(u'Tchack Tracker')
     class_description = MSG(u'To manage images, videos, bugs and tasks')
     class_views = Tracker.class_views #+ ['zip']
@@ -65,6 +66,34 @@ class Tchack_Tracker(Tracker):
     #######################################################################
     # Update
     #######################################################################
+
+    def update_20120202(self):
+        """Upgrade the Issues to have an ids equal to the numbers of comments
+        instead of numbers minus one. Update the Issues olders than june 2011.
+        """
+        from issue import Tchack_Issue
+
+        for issue in self.search_resources(cls=Tchack_Issue):
+
+            comments = issue.get_comments()
+            attachments = issue.get_attachments()
+            mtime = issue.metadata.get_property('mtime')
+            year = int(mtime.value.year)
+            month = int(mtime.value.month)
+            ids = int(issue.metadata.get_property('ids').value)
+            #product = int(issue.metadata.get_property('product').value)
+            if (year < 2011 and month < 6):
+                print("issue = %s, comments = %s, attachments = %s, mtime = %s, ids = %s" %
+                        (issue.name, len(comments), len(attachments), str(mtime.value), ids))
+                if ids != (len(comments)) :
+                    if ids == (len(comments)-1):
+                        print("Issue '%s' need to be upgraded!" % issue.name)
+                        issue.metadata.set_property('ids', ids + 1)
+                """
+                if (ids + 1) == len(attachments):
+                    print("Issue '%s' need to be upgraded!" % issue.name)
+                    issue.metadata.set_property('ids', ids + 1)
+                """
 
     def update_20110408(self):
         import os
@@ -118,7 +147,7 @@ class Tchack_Tracker(Tracker):
                         if output is not None:
                             thumbfilename, thumbmimetype,\
                             thumbbody, thumbextension = output['flvthumb']
-                            #cls = get_resource_class(thumbmimetype)
+                            cls = get_resource_class(thumbmimetype)
                             issue.make_resource(thumbfilename, Image,
                                 body=thumbbody, filename=thumbfilename,
                                 extension=thumbextension, format=thumbmimetype)

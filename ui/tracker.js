@@ -62,4 +62,22 @@ $(document).ready(function () {
 			$("#" + issue + " .rollimages DIV.roll:nth-child(" + (index+1) +")")
 				.stop().css("display", "none").parent().css("background-color", "transparent");
 	});
-});
+});i
+
+/* Sketch canvas drawing */ 
+function updateDrawing() {
+  var selected = $tabs.tabs('option', 'selected'); // => 0
+  switch(selected) {
+    case 0:
+      // reset canvas
+      $('#canvasDrawing').val("");
+      break;
+    case 1:
+      // reset upload
+      var att= $('#attachment');
+      att.replaceWith(att.val('').clone(true));
+      // send canvas
+      $('#canvasDrawing')[0].value = $('canvas')[0].toDataURL();
+      break;
+  }
+}

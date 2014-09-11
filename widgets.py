@@ -20,6 +20,7 @@ from itools.web import get_context
 from ikaaro.autoform import Widget
 from ikaaro.utils import make_stl_template
 from ikaaro.buttons import Button
+from ikaaro.autoform import ProgressBarWidget
 
 from monkey import Image
 
@@ -30,6 +31,33 @@ class OnSubmitButton(Button):
             <button type="submit" id="${id}" name="${action}"
             value="${name}" class="${css}"
             onclick="${onclick}">${title}</button>''')
+
+
+class Tchack_ProgressBarWidget(Widget):
+
+    template = make_stl_template("""
+    <div id="progress-bar-widget">
+        <div id="attachment-file-infos">
+            <p id="file-name" />
+            <p id="file-size" />
+            <p id="file-type" />
+        </div>
+        <div id="progress-bar-box">
+            <span><div id="progress-bar" /></span><span id="percent" />
+            <div id="upload-size" />
+        </div>
+    </div>
+    <script type="text/javascript">
+      //$('head').append('<link rel="stylesheet" href="/ui/progressbar/jquery-progressbar.css" type="text/css" />');
+      var upload_id = ${upload_id};
+      var filled = new Boolean();
+      $("INPUT:file").focus(function () {
+        attachmentSelected($(this));
+        filled = true;
+      });
+    </script>
+    <script  type="text/javascript" src="/ui/progressbar/jquery-progressbar.min.js"/>
+    """)
 
 
 class FileAndSketchTabbedWidget(Widget):

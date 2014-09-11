@@ -39,15 +39,17 @@ from monkey import Image
 from datatypes import get_issue_fields
 from comments import Tchack_CommentsView
 from widgets import FileAndSketchTabbedWidget
-from widgets import OnSubmitButton
-
+from widgets import Tchack_ProgressBarWidget
 
 class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
 
     template = '/ui/tchacker/tchacker_issue_autoform.xml'
 
-    styles = ['/ui/tchacker/jquery-ui-1.8.5/themes/base/jquery.ui.all.css',
-                '/ui/tchacker/style.css', '/ui/thickbox/style.css']
+    styles = [
+                '/ui/tchacker/jquery-ui-1.8.5/themes/base/jquery.ui.all.css',
+                '/ui/tchacker/style.css',
+                '/ui/tchacker/progressbar.css',
+                '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js',
                 '/ui/thickbox/thickbox.js',
                 '/ui/tchacker/jquery-ui-1.8.5/ui/minified/jquery.ui.core.min.js',
@@ -55,11 +57,6 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
                 '/ui/tchacker/jquery-ui-1.8.5/ui/minified/jquery.ui.tabs.min.js',
                 '/ui/flowplayer/flowplayer-3.2.2.min.js',
                 '/ui/tchacker/sketch.min.js']
-
-    actions = [OnSubmitButton(access=True,
-                                css='button-ok',
-                                onclick='updateDrawing()',
-                                title=MSG(u"Save the modifications"))]
 
     description = XHTMLBody.decode('<a href="#" class="showall">Show/Hide options</a>')
 
@@ -79,8 +76,8 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
         SelectWidget('priority', title=MSG(u'Priority:'),
                                 classes=['center', 'light']),
         MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
-        FileAndSketchTabbedWidget('onglets', classes=['all']),
-        ProgressBarWidget()
+        FileAndSketchTabbedWidget(classes=['all']),
+        Tchack_ProgressBarWidget()
         ])
 
     def get_schema(self, resource, context):

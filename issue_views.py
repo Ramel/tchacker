@@ -47,7 +47,7 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
     template = '/ui/tchacker/tchacker_issue_autoform.xml'
 
     styles = ['/ui/tchacker/jquery-ui-1.8.5/themes/base/jquery.ui.all.css',
-              '/ui/tchacker/style.css', '/ui/thickbox/style.css']
+                '/ui/tchacker/style.css', '/ui/thickbox/style.css']
     scripts = ['/ui/tchacker/tracker.js',
                 '/ui/thickbox/thickbox.js',
                 '/ui/tchacker/jquery-ui-1.8.5/ui/minified/jquery.ui.core.min.js',
@@ -79,7 +79,7 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
         SelectWidget('priority', title=MSG(u'Priority:'),
                                 classes=['center', 'light']),
         MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
-        FileAndSketchTabbedWidget(classes=['all']),
+        FileAndSketchTabbedWidget('onglets', classes=['all']),
         ProgressBarWidget()
         ])
 

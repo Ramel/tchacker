@@ -75,10 +75,10 @@ class FileAndSketchTabbedWidget(Widget):
                 </div>
             </fieldset>
         </div>
-        <script type="text/javascript">
-            var $tabs = $("#${name}").tabs();
-        </script>
-    </div>""")
+    </div>
+    <script type="text/javascript">
+        var $tabs = $("#${name}").tabs();
+    </script>""")
 
     def get_medium_image_size(self, image_width, image_height):
         if image_width >= image_height:

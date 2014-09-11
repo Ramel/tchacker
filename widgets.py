@@ -19,8 +19,17 @@ from itools.web import get_context
 # Import from tchacker
 from ikaaro.autoform import Widget
 from ikaaro.utils import make_stl_template
+from ikaaro.buttons import Button
 
 from monkey import Image
+
+
+class OnSubmitButton(Button):
+    onsubmit = None
+    template = make_stl_template('''
+            <button type="submit" id="${id}" name="${action}"
+            value="${name}" class="${css}"
+            onclick="${onclick}">${title}</button>''')
 
 
 class FileAndSketchTabbedWidget(Widget):
@@ -53,7 +62,7 @@ class FileAndSketchTabbedWidget(Widget):
                         <a href="#tools-sketch" data-tool="marker">Marker</a>
                         <a href="#tools-sketch" data-tool="eraser">Eraser</a>
                     </div>
-                    <input type="text" id="canvasDrawing" name="canvasDrawing" type="hidden"/>
+                    <input type="text" id="canvasDrawing" name="canvasDrawing" type="hidden" />
                         <canvas id="tools-sketch" width="${last_attachment/width_MED}" height="${last_attachment/height_MED}" style="background: url(${last_attachment/drawing_MED}) no-repeat center;"></canvas>
                     <script type="text/javascript">
                     $(function() {
@@ -121,5 +130,5 @@ class FileAndSketchTabbedWidget(Widget):
                         'width': image_width, 'height': image_height,
                         'width_MED': width_MED, 'height_MED': height_MED,
                         'drawing_MED': drawing_MED}
-        print("attachment = %s" % attachment)
+        #print("attachment = %s" % attachment)
         return attachment

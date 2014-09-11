@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<stl:block xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:stl="http://www.hforge.org/xml-namespaces/stl">
+
+${before}
+
+<form id="tracker" name="tracker" action="${action}" method="post"
+  onsubmit="${onsubmit}" enctype="multipart/form-data"
+  stl:omit-tag="not actions">
+  <fieldset>
+    <legend>${title}</legend>
+    <p stl:if="description">${description}</p>
+    <stl:block stl:repeat="widget widgets">
+      <div id="${widget/id}" class="${widget/classes}">
+        <stl:block stl:if="widget/title">
+          <label class="title" for="${widget/name}">${widget/title}</label>
+          <span stl:if="widget/mandatory" class="field-is-missing"
+            title="This field is required">*</span>
+          <span stl:if="widget/tip" title="${widget/tip}">(?)</span>
+        </stl:block>
+        <span stl:if="widget/error" class="field-error">${widget/error}</span>
+        <stl:block stl:repeat="widget widget/widgets">${widget}</stl:block>
+      </div>
+      <div stl:if="widget/endline" class="clear" />
+    </stl:block>
+    <p stl:if="actions">
+      <stl:block stl:repeat="action actions">${action}</stl:block>
+    </p>
+  </fieldset>
+  <script type="text/javascript">
+  /*
+  function updateDrawing() {
+    var selected = $tabs.tabs('option', 'selected'); // => 0
+    switch(selected) {
+      case 0:
+        // reset canvas
+        $('#canvasDrawing').val("");
+        break;
+      case 1:
+        // reset upload
+        var att= $('#attachment');
+        att.replaceWith(att.val('').clone(true));
+        // send canvas
+        $('#canvasDrawing')[0].value = $('canvas')[0].toDataURL();
+        break;
+    }
+  }
+  $("#attachment").focus(function () {
+    attachmentSelected($(this));
+  });
+  */
+  document.getElementById("${first_widget}").focus();
+  </script>
+</form>
+
+${after}
+
+</stl:block>

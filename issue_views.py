@@ -39,9 +39,12 @@ from monkey import Image
 from datatypes import get_issue_fields
 from comments import Tchack_CommentsView
 from widgets import FileAndSketchTabbedWidget
+from widgets import OnSubmitButton
 
 
 class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
+
+    template = '/ui/tchacker/tchacker_issue_autoform.xml'
 
     styles = ['/ui/tchacker/jquery-ui-1.8.5/themes/base/jquery.ui.all.css',
               '/ui/tchacker/style.css', '/ui/thickbox/style.css']
@@ -52,6 +55,11 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
                 '/ui/tchacker/jquery-ui-1.8.5/ui/minified/jquery.ui.tabs.min.js',
                 '/ui/flowplayer/flowplayer-3.2.2.min.js',
                 '/ui/tchacker/sketch.min.js']
+
+    actions = [OnSubmitButton(access=True,
+                                css='button-ok',
+                                onclick='updateDrawing()',
+                                title=MSG(u"Save the modifications"))]
 
     description = XHTMLBody.decode('<a href="#" class="showall">Show/Hide options</a>')
 
@@ -72,7 +80,6 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
                                 classes=['center', 'light']),
         MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
         FileAndSketchTabbedWidget(classes=['all']),
-        #FileWidget('attachment', title=MSG(u'Attachment (<512Mo):'), classes=['all']),
         ProgressBarWidget()
         ])
 
@@ -87,59 +94,12 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
             return datatype.get_default()
         return resource.get_property(name)
 
-    def get_medium_image_size(self, image_width, image_height):
-        if image_width >= image_height:
-            medium_image_height = 800 * image_height / image_width
-            medium_image_width = 800
-        else:
-            medium_image_width = 800 * image_width / image_height
-            medium_image_height = 800
-        return medium_image_width, medium_image_height
-
     def get_namespace(self, resource, context):
         proxy = super(Issue_Edit_AutoForm, self)
         namespace = proxy.get_namespace(resource, context)
-        """
-        # Last attachment
-        last_attachment = resource.get_property('last_attachment') or None
-        namespace['last_attachment'] = False
-        if last_attachment is not None:
-            image_file = resource.get_resource(str(last_attachment))
-            is_image = isinstance(image_file, Image) or False
-
-            try:
-                drawing_MED = resource.get_resource(
-                                str(last_attachment + "_MED"))
-            except LookupError:
-                    drawing_MED = False
-
-            if is_image:
-                # If last_attachment is an Image
-                # Add the sketch-tool
-                # Get the _MED image, if exist
-                if drawing_MED:
-                    # Get the _MED size if there is a MED image
-                    handler = drawing_MED.handler
-                    image_width, image_height = handler.get_size()
-                    width_MED = image_width
-                    height_MED = image_height
-                    #print(last_attachment + '_MED/;download')
-                    drawing_MED = last_attachment + '_MED/;download'
-                else:
-                    handler = image_file.handler
-                    image_width, image_height = handler.get_size()
-                    width_MED, height_MED = self.get_medium_image_size(
-                                            image_width, image_height)
-                    drawing_MED = last_attachment + '/;thumb?width=800&height=800'
-
-                namespace['last_attachment'] = {'name': last_attachment,
-                   'width': image_width, 'height': image_height,
-                   'width_MED': width_MED, 'height_MED': height_MED,
-                   'drawing_MED': drawing_MED}
-        """
+        print("namespace = %s" % namespace)
         # Comments
         namespace['comments'] = Tchack_CommentsView().GET(resource, context)
-        print("namespace = %s" % namespace)
         return namespace
 
 

@@ -3,7 +3,7 @@ $(document).ready(function () {
   $('TABLE#browse-list THEAD TR TH:nth-child(1), TABLE#browse-list TBODY TR TD:nth-child(1), TABLE#browse-list THEAD TR TH:nth-child(4), TABLE#browse-list TBODY TR TD:nth-child(4), TABLE#browse-list THEAD TR TH:nth-child(6), TABLE#browse-list TBODY TR TD:nth-child(6), TABLE#browse-list THEAD TR TH:nth-child(10), TABLE#browse-list TBODY TR TD:nth-child(10)').hide();
   /* show.hide some TDs */
   $("A.showall").click(function() {
-    $("FORM#autoform .light").toggle();
+    $("FORM#tracker .light").toggle();
     return false;
   });
   /* show.hide.toggle some table columns in tracker_views.py */
@@ -215,3 +215,6 @@ function updateDrawing() {
       break;
   }
 }
+$("#attachment").focus(function() {
+  attachmentSelected($(this));
+});

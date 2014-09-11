@@ -40,11 +40,15 @@ from datatypes import get_issue_fields
 from comments import Tchack_CommentsView
 from widgets import FileAndSketchTabbedWidget
 from widgets import Tchack_ProgressBarWidget
+from widgets import OnSubmitButton
+
 
 class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
 
     template = '/ui/tchacker/tchacker_issue_autoform.xml'
-
+    actions = [OnSubmitButton(access=True, css='button-ok', 
+                    onclick='updateDrawing()',
+                    title=MSG(u'Send the answer'))]
     styles = [
                 '/ui/tchacker/jquery-ui-1.8.5/themes/base/jquery.ui.all.css',
                 '/ui/tchacker/style.css',

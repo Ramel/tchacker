@@ -33,7 +33,7 @@ class OnSubmitButton(Button):
             onclick="${onclick}">${title}</button>''')
 
 
-class Tchack_ProgressBarWidget(Widget):
+class Tchack_ProgressBarWidget(ProgressBarWidget):
 
     template = make_stl_template("""
     <div id="progress-bar-widget">

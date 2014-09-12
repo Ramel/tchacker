@@ -82,7 +82,7 @@ DIV.issue-roll {
 }
 .center {
     width: 34%;
-    margin-left: 33%;
+    /*margin-left: 33%;*/
     float: left;
 }
 .right {
@@ -152,6 +152,11 @@ FORM#tracker FIELDSET.attachment .label {
   margin: 4px ;
   padding: 0px;
 }
+FORM#tracker #comment TEXTAREA,
+FORM#tracker #comment LABEL {
+  clear: both;
+  float: left;
+}
 FORM#tracker #upload {
   clear: both;
 }
@@ -178,6 +183,7 @@ H2.tchacker {
 }
 #onglets {
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 #onglets.ui-tabs ul.ui-tabs-nav A {
   outline: 0;

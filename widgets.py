@@ -21,6 +21,7 @@ from ikaaro.autoform import Widget
 from ikaaro.utils import make_stl_template
 from ikaaro.buttons import Button
 from ikaaro.autoform import ProgressBarWidget
+from ikaaro.autoform import MultilineWidget
 
 from monkey import Image
 
@@ -31,6 +32,16 @@ class OnSubmitButton(Button):
             <button type="submit" id="${id}" name="${action}"
             value="${name}" class="${css}"
             onclick="${onclick}">${title}</button>''')
+
+
+class Tchack_MultilineWidget(MultilineWidget):
+
+    template = make_stl_template("""
+    <a name="${target}"></a>
+    <label class="language block" for="${id}" stl:if="language"
+      >${language}</label>
+    <textarea rows="${rows}" cols="${cols}" id="${id}" name="${name}"
+    >${value}</textarea>""")
 
 
 class Tchack_ProgressBarWidget(ProgressBarWidget):
@@ -122,7 +133,7 @@ class FileAndSketchTabbedWidget(Widget):
         resource = context.resource
         # Last attachment
         last_attachment = resource.get_property('last_attachment') or None
-        print("last_attachment = %s" % last_attachment)
+        #print("last_attachment = %s" % last_attachment)
         attachment = None
         if last_attachment is not None:
             image_file = resource.get_resource(str(last_attachment))

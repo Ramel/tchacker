@@ -1,8 +1,16 @@
 /* Ikaaro 0.62
  *  * Additional part for the progress bar
  *   */
+/*
+#the-progress-bar-widget {
+  margin-bottom: 80px;
+}
+*/
+#progress-bar DIV.ui-widget-header {
+  background: #e78f08;
+}
 #progress-bar-widget {
-  margin-top: 8px 
+  margin-top: 8px
 }
 #progress-bar-widget #attachment-file-infos {
   margin: 8px 0px;
@@ -13,7 +21,7 @@
   color: #666666;
 }
 #progress-bar-widget #progress-bar-box {
-  width: 425px;
+  width: 435px;
   display: none;
 }
 #progress-bar-widget #progress-bar-box #progress-bar{

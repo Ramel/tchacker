@@ -29,24 +29,22 @@ from itools.core import freeze
 from ikaaro.tracker.issue_views import Issue_Edit_AutoForm
 from ikaaro.tracker.issue_views import Issue_Edit_ProxyView
 from ikaaro.tracker.issue_views import ProductsSelectWidget
-#from ikaaro.views import CompositeView, CompositeForm
 from ikaaro.autoform import TextWidget, SelectWidget
-from ikaaro.autoform import ProgressBarWidget, FileWidget, MultilineWidget
 from ikaaro.autoform import XHTMLBody
 
 # Import from tchacker
-from monkey import Image
 from datatypes import get_issue_fields
 from comments import Tchack_CommentsView
 from widgets import FileAndSketchTabbedWidget
 from widgets import Tchack_ProgressBarWidget
+from widgets import Tchack_MultilineWidget
 from widgets import OnSubmitButton
 
 
 class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
 
     template = '/ui/tchacker/tchacker_issue_autoform.xml'
-    actions = [OnSubmitButton(access=True, css='button-ok', 
+    actions = [OnSubmitButton(access=True, css='button-ok',
                     onclick='updateDrawing()',
                     title=MSG(u'Send the answer'))]
     styles = [
@@ -79,7 +77,9 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
                                 classes=['left', 'light']),
         SelectWidget('priority', title=MSG(u'Priority:'),
                                 classes=['center', 'light']),
-        MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
+        Tchack_MultilineWidget('comment', title=MSG(u'New Comment:'),
+                                target="new_comment",
+                                classes=['all']),
         FileAndSketchTabbedWidget(classes=['all']),
         Tchack_ProgressBarWidget()
         ])
@@ -98,7 +98,7 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
     def get_namespace(self, resource, context):
         proxy = super(Issue_Edit_AutoForm, self)
         namespace = proxy.get_namespace(resource, context)
-        print("namespace = %s" % namespace)
+        #print("namespace = %s" % namespace)
         # Comments
         namespace['comments'] = Tchack_CommentsView().GET(resource, context)
         return namespace

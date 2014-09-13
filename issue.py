@@ -25,6 +25,8 @@
 from os.path import basename
 from tempfile import mkdtemp
 from os import sep, path
+from sys import exc_info
+from base64 import b64encode
 
 # Import from itools
 from itools.gettext import MSG
@@ -163,11 +165,27 @@ class Tchack_Issue(Issue):
             #print("last_attachment = %s" % last_attachment)
 
             fs = self.metadata.database.fs
-            originalImage = self.get_resource(last_attachment + "_MED")
-            fileabspath = fs.get_absolute_path(originalImage.handler.key)
-            #print("fileabspath = %s" % fileabspath)
 
-            originalImage = PILImage.open(str(fileabspath))
+            thumbnail = True
+            try:
+                originalImage = self.get_resource(last_attachment + "_MED")
+            except LookupError:
+                thumbnail = False
+            except:
+                thumbnail = False
+                print "Unexpected error:", exc_info()[0]
+                raise
+
+            if thumbnail:
+                fileabspath = fs.get_absolute_path(originalImage.handler.key)
+                #print("fileabspath = %s" % fileabspath)
+                originalImage = PILImage.open(str(fileabspath))
+            else:
+                resource = self.get_resource(last_attachment)
+                handler = resource.handler #get_value('data')
+                data, format = handler.get_thumbnail(800, 800)
+                file_like = StringIO(data)
+                originalImage = PILImage.open(file_like)
             # paste the tmp onto tmp2
             originalImage.paste(alphaImage, (0, 0), alphaImage)
             # retrieve the result body

@@ -59,9 +59,9 @@ class Tchack_ProgressBarWidget(ProgressBarWidget):
         </div>
     </div>
     <script type="text/javascript">
-      //$('head').append('<link rel="stylesheet" href="/ui/progressbar/jquery-progressbar.css" type="text/css" />');
       var upload_id = ${upload_id};
       var filled = new Boolean();
+      filled = false;
       $("INPUT:file").focus(function () {
         attachmentSelected($(this));
         filled = true;

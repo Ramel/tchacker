@@ -36,6 +36,7 @@ from itools.core import merge_dicts
 from itools.csv import Property
 from itools.datatypes import Integer, String, Unicode
 from itools.core import get_abspath
+from itools.web import get_context
 
 # Import from ikaaro
 from ikaaro.tracker.issue import Issue
@@ -231,7 +232,10 @@ class Tchack_Issue(Issue):
 
             # Video
             elif (mtype == "video"):
-                ffmpeg_encoding_folder = '../ffmpeg-encoding'
+                context = get_context()
+                server = context.server
+                ffmpeg_encoding_folder = lfs.resolve2(server.target, 'ffmpeg-encoding')
+                #ffmpeg_encoding_folder = '../ffmpeg-encoding'
                 print("ffmpeg_encoding_folder = %s" % ffmpeg_encoding_folder)
                 if not lfs.exists(ffmpeg_encoding_folder):
                     lfs.make_folder(ffmpeg_encoding_folder)

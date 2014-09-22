@@ -20,6 +20,7 @@ from cStringIO import StringIO
 from os import sep
 from threading  import Thread
 import pexpect
+import subprocess
 
 # Import from itools
 from itools.fs import lfs, vfs
@@ -308,6 +309,22 @@ def _make_image_thumbnails(self):
         #print("Size: FROM %sx%s TO %sx%s" % (in_w, in_h, width, height))
 
         print("ffmpeg_worker = %s" % ffmpeg_worker)
+        # Ffmpeg must be installed, but perhaps the "drawtext" filter is not
+        cmd = "ffmpeg -filters 2>&1| grep -c drawtext | tr -d '\\n'"
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        result = process.communicate()[0]
+        drawtext = ""
+        if int(result) == 1:
+            drawtext = ','\
+                    'drawtext=fontfile='\
+                    '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
+                    ':fontsize=12:timecode=\'00\:00\:00\:00\':rate=25:'\
+                    'fontcolor=white:borderw=2:x=10:y=10,'\
+                    'drawtext=fontfile='\
+                    '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
+                    ':fontcolor=white@0.25:x=(w-tw)/2'\
+                    ':y=h-(2*lh):fontsize=10:text=\'%s\'' % COPYRIGHTS
+
         # First pass
         if not ffmpeg_worker and not ffmpeg_pass:
             ffmpeg_cli = 'nice -n 8 ffmpeg -y -i %s%s -f %s '\
@@ -317,22 +334,15 @@ def _make_image_thumbnails(self):
                     '-an '\
                     '-pix_fmt yuv420p -strict -2 -r 25 '\
                     '-vf '\
-                    '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2,'\
-                    'drawtext=fontfile='\
-                    '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
-                    ':fontsize=12:timecode=\'00\:00\:00\:00\':rate=25:'\
-                    'fontcolor=white:borderw=2:x=10:y=10,'\
-                    'drawtext=fontfile='\
-                    '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
-                    ':fontcolor=white@0.25:x=(w-tw)/2'\
-                    ':y=h-(2*lh):fontsize=10:text=\'%s\'" '\
+                    '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2'\
+                    '%s" '\
                     '-passlogfile %s%s '\
                     '/dev/null' % (
                     tmp_folder, name, EXTENSION,
                     int(width), int(width), int(height),
-                    COPYRIGHTS,
+                    drawtext,
                     tmp_folder, name)
-            #print(ffmpeg_cli)
+            print(ffmpeg_cli)
             print("ffmpeg_worker does not exist, start it!")
             ffmpeg_worker = ThreadWorker(ffmpeg)
             ffmpeg_worker.start((ffmpeg_cli,))
@@ -360,20 +370,13 @@ def _make_image_thumbnails(self):
                         '-pix_fmt yuv420p -strict -2 -r 25 '\
                         '-movflags +faststart '\
                         '-vf '\
-                        '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2,'\
-                        'drawtext=fontfile='\
-                        '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
-                        ':fontsize=12:timecode=\'00\:00\:00\:00\':rate=25:'\
-                        'fontcolor=white:borderw=2:x=10:y=10,'\
-                        'drawtext=fontfile='\
-                        '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
-                        ':fontcolor=white@0.25:x=(w-tw)/2'\
-                        ':y=h-(2*lh):fontsize=10:text=\'%s\'" '\
+                        '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2'\
+                        '%s" '\
                         '-passlogfile %s%s '\
                         '%s' % (
                         tmp_folder, name, EXTENSION,
                         int(width), int(width), int(height),
-                        COPYRIGHTS,
+                        drawtext,
                         tmp_folder, name,
                         tmp_video_path_filename)
                 #print(ffmpeg_cli)

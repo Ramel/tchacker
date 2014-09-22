@@ -52,5 +52,8 @@ def is_image_content(self):
 
 
 Image.is_content = property(is_image_content)
+
 register_field('has_thumb', Boolean(indexed=True))
 register_field('need_thumb', Boolean(indexed=True))
+register_field('is_video', Boolean(indexed=True))
+register_field('encoded', Boolean(indexed=True))

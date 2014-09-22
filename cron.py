@@ -140,10 +140,8 @@ def _make_image_thumbnails(self):
     print("cron started!")
 
     # Check if there is a lock
-    ffmpeg_encoding_folder = lfs.resolve2(self.target, 'ffmpeg-encoding')
-    if not lfs.exists(ffmpeg_encoding_folder):
-        lfs.make_folder(ffmpeg_encoding_folder)
-    encoding = lfs.open(ffmpeg_encoding_folder)
+    encodingfolder = get_abspath('ffmpeg-encoding%s' % sep)
+    encoding = lfs.open(encodingfolder)
 
     lock = False
 

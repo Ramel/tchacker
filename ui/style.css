@@ -195,3 +195,6 @@ H2.tchacker {
   font-size:100%;
   font-family: "Arial","DejaVu Sans",sans-serif;
 }
+BUTTON.button-ok {
+  margin-top: 20px;
+}

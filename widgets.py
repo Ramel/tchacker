@@ -48,6 +48,7 @@ class Tchack_MultilineWidget(MultilineWidget):
 
 
 class Tchack_ProgressBarWidget(ProgressBarWidget):
+    onsubmit = 'startProgressBar(filled, port)'
 
     template = make_stl_template("""
     <div id="progress-bar-widget">
@@ -65,12 +66,7 @@ class Tchack_ProgressBarWidget(ProgressBarWidget):
       var upload_id = ${upload_id};
       var filled = new Boolean();
       filled = false;
-      /*
-      $("INPUT:file").focus(function () {
-        attachmentSelected($(this));
-        filled = true;
-      });
-      */
+      var port = ${port};
       $(function() {
         $("INPUT:file").change(function (){
           attachmentSelected($(this));

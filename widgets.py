@@ -48,7 +48,7 @@ class Tchack_MultilineWidget(MultilineWidget):
 
 
 class Tchack_ProgressBarWidget(ProgressBarWidget):
-    onsubmit = 'startProgressBar(filled, port)'
+    onsubmit = 'startProgressBarWithPort(filled, port)'
 
     template = make_stl_template("""
     <div id="progress-bar-widget">

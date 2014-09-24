@@ -181,8 +181,10 @@ def _make_image_thumbnails(self):
         # Get the resource
         resource = context.root.get_resource(abspath)
         container = resource.parent
-        abspath = container.abspath
         tmpdata = resource.get_handler().key
+        # Database full path (HACK)
+        dbp = self.database.path + sep + "database" + sep
+        #print("dbp %s" % dbp)
 
         low = 256, 256
         med = 800, 800
@@ -193,7 +195,7 @@ def _make_image_thumbnails(self):
 
         for te in thumbext:
             try:
-                im = PILImage.open(str(tmpdata))
+                im = PILImage.open(dbp + str(tmpdata))
             except IOError as e:
                 print("IOError = %s" % e)
             # make a thumbnail

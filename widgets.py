@@ -66,7 +66,6 @@ class Tchack_ProgressBarWidget(ProgressBarWidget):
       var upload_id = ${upload_id};
       var filled = new Boolean();
       filled = false;
-      var port = ${port};
       $(function() {
         $("INPUT:file").change(function (){
           attachmentSelected($(this));

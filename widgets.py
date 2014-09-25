@@ -92,7 +92,7 @@ class FileAndSketchTabbedWidget(Widget):
             <fieldset class="attachment">
                 <legend>Attachments</legend>
                 <div class="bord">
-                    <label class="label" for="attachment">New attachment:</label>
+                    <label class="label" for="attachment">New attachment (Size &lt; 768Mo):</label>
                     <input type="${type}" name="attachment" id="attachment" size="36" />
                 </div>
             </fieldset>

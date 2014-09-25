@@ -412,7 +412,7 @@ class Tchack_Tracker_AddIssue(Tracker_AddIssue):
         SelectWidget('priority', title=MSG(u'Priority:'),
                                 classes=['center', 'light']),
         MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
-        FileWidget('attachment', title=MSG(u'Attachment (<512Mo):'), classes=['all']),
+        FileWidget('attachment', title=MSG(u'Attachment (Size < 768Mo):'), classes=['all']),
         ProgressBarWidget()
         ])
 

@@ -352,7 +352,7 @@ class Tchack_Issue(Issue):
         body += '\n\n'
         if attachment:
             filename = unicode(filename, 'utf-8')
-            message = MSG(u'New Attachment: {filename}')
+            message = MSG(u'Attachment: {filename}')
             message = message.gettext(filename=filename)
             body += message + '\n'
         comment = context.get_form_value('comment', type=Unicode)

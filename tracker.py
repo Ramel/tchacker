@@ -38,6 +38,7 @@ from tracker_views import Tchack_LastComments_View
 from tracker_views import Tchack_Tracker_ExportToCSVForm
 from tracker_views import Tchack_Tracker_ExportToCSV
 from tracker_views import Tchack_Tracker_AddIssue
+from tracker_views import Tchack_StoredSearchesMenu
 from monkey import Image, Video
 
 
@@ -51,6 +52,8 @@ class Tchack_Tracker(Tracker):
 
     # Configuration
     issue_class = Tchack_Issue
+
+    context_menus = [GoToIssueMenu(), Tchack_StoredSearchesMenu()]
 
     # Views
     view = Tchack_Tracker_View()

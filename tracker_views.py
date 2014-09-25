@@ -468,6 +468,50 @@ class Tchack_Tracker_AddIssue(Tracker_AddIssue):
         return context.come_back(message, goto=goto)
 
 
+class Tchack_StoredSearchesMenu(StoredSearchesMenu):
+    """Provides links to every stored search.
+    """
+
+    title = MSG(u'Stored Searches')
+
+    def get_items(self):
+        context = self.context
+        resource = self.resource
+        root = context.root
+
+        # If called from a child
+        if isinstance(resource, Tchack_Issue):
+            resource = resource.parent
+
+        # Namespace
+        search_name = context.get_query_value('search_name')
+        base = '%s/;view' % context.get_link(resource)
+        items = []
+        ac = resource.get_access_control()
+        for item in resource.search_resources(cls=StoredSearch):
+            if not ac.is_allowed_to_view(context.user, item):
+                continue
+            # Make the title
+            get_value = item.handler.get_value
+            query = resource.get_search_query(get_value)
+            issues_nb = len(root.search(query))
+            kw = {'search_title': item.get_property('title'),
+                  'issues_nb': issues_nb}
+            title = MSG(u'{search_title} ({issues_nb})')
+            class_title = MSG(u'{search_title}')
+            title = title.gettext(**kw)
+            class_title = class_title.gettext(**kw).lower().replace(" ", "-").replace("_", "-")
+
+            # Namespace
+            items.append({'title': title,
+                          'href': '%s?search_name=%s' % (base, item.name),
+                          'class': 'nav-active' if (item.name == search_name)
+                                                else class_title})
+        items.sort(lambda x, y: cmp(x['title'], y['title']))
+
+        return items
+
+
 """
 class Tracker_Zip_Img(Tchacker_ViewBottom):
 
@@ -660,4 +704,3 @@ def get_issue_informations(resource, item, context):
     infos['mtime'] = context.format_datetime(item.mtime)
 
     return infos
-

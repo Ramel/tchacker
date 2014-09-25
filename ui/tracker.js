@@ -114,7 +114,7 @@ $(document).ready(function () {
           var names = "1,3,5,7,9,21,25,128,159";
           // CCs
           $.each(names.split(","), function(i,e){
-            $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+            $("SELECT#cc-list OPTION[value='" + e + "']").prop("selected", true);
           });
           // Assigned-to
           $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
@@ -124,32 +124,44 @@ $(document).ready(function () {
       }
     }
   }).change();
-  $("SELECT#product").change(function() {
+  $("#product.widget SELECT#product").change(function() {
     if (document.URL.match(";add_issue") != null && document.URL.match("projets.pro") != null) {
-      var product = $("SELECT#product option:selected").attr("value");    // selected type
+      var product = $("#product.widget SELECT#product option:selected").attr("value");    // selected type
       var str = $("INPUT#title").val();
       if (str != undefined) {
         if (product == 0) { // We add a Project
           var names = "3,9,21,25";
           // CCs
           $.each(names.split(","), function(i,e){
-            $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+            $("#cc-list.widget SELECT#cc-list OPTION[value='" + e + "']").prop("selected", true);
           });
           // Assigned-to
-          $("SELECT#assigned-to OPTION[value='1']").attr('selected', true);
+          $("#assigned-to.widget SELECT#assigned-to OPTION[value='1']").attr('selected', true);
         }
       }
     }
     if (document.URL.match(";add_issue") != null && ((document.URL.match("umt.pro") != null) || (document.URL.match("unmondetruque.pro") != null))) {
-      var product = $("SELECT#product option:selected").attr("value");    // selected type
+      var product = $("#product.widget SELECT#product option:selected").attr("value");    // selected type
       if (product == 0) { // We add an Issue
         var names = "9,18,21,148,152,149,150,154,131,3,140,1,25,155";
         // CCs
         $.each(names.split(","), function(i,e){
-          $("SELECT#cc-add OPTION[value='" + e + "']").prop("selected", true);
+          $("#cc-list.widget SELECT#cc-list OPTION[value='" + e + "']").prop("selected", true);
         });
         // Assigned-to
-        $("SELECT#assigned-to OPTION[value='151']").attr('selected', true);
+        $("#assigned-to.widget SELECT#assigned-to OPTION[value='170']").attr('selected', true);
+      }
+    }
+    if (document.URL.match(";add_issue") != null && document.URL.match("louise-en-hiver.pro") != null) {
+      var product = $("#product.widget SELECT#product option:selected").attr("value");    // selected type
+      if (product == 0) { // We add an Issue
+        var names = "9,188,21,189,187,186,3,1,25";
+        // CCs
+        $.each(names.split(","), function(i,e){
+          $("#cc-list.widget SELECT#cc-list OPTION[value='" + e + "']").prop("selected", true);
+        });
+        // Assigned-to
+        $("#assigned-to.widget SELECT#assigned-to OPTION[value='166']").attr('selected', true);
       }
     }
   }).change();

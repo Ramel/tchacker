@@ -29,30 +29,6 @@ ${before}
       <stl:block stl:repeat="action actions">${action}</stl:block>
     </p>
   </fieldset>
-  <script type="text/javascript">
-  /*
-  function updateDrawing() {
-    var selected = $tabs.tabs('option', 'selected'); // => 0
-    switch(selected) {
-      case 0:
-        // reset canvas
-        $('#canvasDrawing').val("");
-        break;
-      case 1:
-        // reset upload
-        var att= $('#attachment');
-        att.replaceWith(att.val('').clone(true));
-        // send canvas
-        $('#canvasDrawing')[0].value = $('canvas')[0].toDataURL();
-        break;
-    }
-  }
-  $("#attachment").focus(function () {
-    attachmentSelected($(this));
-  });
-  */
-  document.getElementById("${first_widget}").focus();
-  </script>
 </form>
 
 ${after}

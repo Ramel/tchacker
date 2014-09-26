@@ -504,7 +504,7 @@ class Tchack_StoredSearchesMenu(StoredSearchesMenu):
 
             # Namespace
             items.append({'title': title,
-                          'href': '%s?search_name=%s' % (base, item.name),
+                          'href': '%s?search_name=%s&sort_by=title' % (base, item.name),
                           'class': 'nav-active' if (item.name == search_name)
                                                 else class_title})
         items.sort(lambda x, y: cmp(x['title'], y['title']))

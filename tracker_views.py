@@ -157,10 +157,11 @@ class Tchack_Tracker_View(Tracker_View):
                             need_thumb = attachment.metadata.get_property(
                                     'need_thumb').value or False
                             #print("## %s -> need_thumb = %s" % (filename, need_thumb))
-                            if need_thumb:
-                                from cron import run_cron
-                                server = context.server
-                                server.run_cron()
+                            # TODO: Is that needed?
+                            #if need_thumb:
+                            #    from cron import run_cron
+                            #    server = context.server
+                            #    server.run_cron()
                     if video:
                         endfile = "_thumb"
                         link = ';thumb?width=256&amp;height=256'

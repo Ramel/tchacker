@@ -47,9 +47,16 @@ ffmpeg_worker = {'worker': False, 'pass': False}
 
 
 def run_cron(self):
+    print("Run cron after 5s.")
     cron(self._make_image_thumbnails,
-            timedelta(seconds=30),
-            first_call_delay=timedelta(seconds=30))
+            timedelta(seconds=120),
+            first_call_delay=timedelta(seconds=5))
+
+def run_cron_hourly(self):
+    print("Run cron hourly.")
+    cron(self._make_image_thumbnails,
+            timedelta(minutes=60),
+            first_call_delay=timedelta(seconds=5))
 
 
 def make_thumbnails(self):

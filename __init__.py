@@ -67,9 +67,7 @@ for name, import_path, reason in [
 from ikaaro.server import Server
 from cron import run_cron, run_cron_hourly, _make_image_thumbnails
 from cron import ffmpeg_worker
-Server.ffmpeg_worker= ffmpeg_worker
 Server.run_cron = run_cron
 Server.run_cron_hourly = run_cron_hourly
 Server._make_image_thumbnails = _make_image_thumbnails
-# Run hourly
-Server.run_cron_hourly()
+Server.ffmpeg_worker= ffmpeg_worker

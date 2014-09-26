@@ -48,6 +48,7 @@ from ikaaro.tracker.datatypes import get_issue_fields
 
 from issue import Tchack_Issue
 from monkey import Image, Video
+from cron import run_cron
 
 
 class Tchack_TrackerViewMenu(TrackerViewMenu):
@@ -466,6 +467,11 @@ class Tchack_Tracker_AddIssue(Tracker_AddIssue):
         # Ok
         message = INFO(u'New issue added.')
         goto = './%s/' % id
+        
+        # Run Cron
+        server = context.server
+        server.run_cron()
+
         return context.come_back(message, goto=goto)
 
 

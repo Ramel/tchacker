@@ -118,8 +118,6 @@ $(document).ready(function () {
           });
           // Assigned-to
           $("SELECT#assigned-to OPTION[value='50']").attr('selected', true);
-          // hide some user
-          $("SELECT#cc-list.tracker-select OPTION[value='156']").hide();
         }
       }
     }
@@ -195,7 +193,7 @@ $(document).ready(function () {
     }
   }
   // hide some user
-  $("SELECT#cc-list.tracker-select OPTION[value='156']").hide();
+  $("SELECT#cc-list OPTION[value='156']").hide();
   // Coloring
   /*
   var $row = $(this).closest("TR"),

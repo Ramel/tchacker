@@ -89,6 +89,14 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
         return get_issue_fields(tracker)
 
     def get_value(self, resource, context, name, datatype):
+        if name == 'cc_list':
+            assigned_to = resource.get_property('assigned_to')
+            cc_list = list(resource.get_property('cc_list'))
+            #print("assigned_to = %s" % assigned_to)
+            #print("cc_list = %s" % cc_list)
+            if assigned_to in cc_list: cc_list.remove(assigned_to)
+            #print("cc_list2 = %s" % cc_list)
+            return cc_list
         if name in ('comment'):
             return datatype.get_default()
         if name in ('canvasDrawing'):

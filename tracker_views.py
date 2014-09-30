@@ -44,11 +44,11 @@ from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
 from ikaaro.tracker.tracker_views import Tracker_AddIssue, Tracker_ExportToCSV
 from ikaaro.tracker.tracker_views import columns
 from ikaaro.tracker.tracker_views import Tracker_AddIssue
-from ikaaro.tracker.datatypes import get_issue_fields
 
 from issue import Tchack_Issue
 from monkey import Image, Video
 from cron import run_cron
+from datatypes import get_issue_fields
 
 
 class Tchack_TrackerViewMenu(TrackerViewMenu):

@@ -29,6 +29,7 @@ from itools.database import PhraseQuery, AndQuery
 from itools.csv import Property
 from itools.web import get_context
 from itools.core import get_abspath
+from itools.log import log_error, log_info
 
 # Import from ikaaro
 from ikaaro.server import get_fake_context
@@ -47,13 +48,13 @@ ffmpeg_worker = {'worker': False, 'pass': False}
 
 
 def run_cron(self):
-    print("Run cron after 5s.")
+    log_info("Run cron after 5s.")
     cron(self._make_image_thumbnails,
             timedelta(seconds=120),
             first_call_delay=timedelta(seconds=5))
 
 def run_cron_hourly(self):
-    print("Run cron hourly.")
+    log_info("Run cron hourly.")
     cron(self._make_image_thumbnails,
             timedelta(minutes=60),
             first_call_delay=timedelta(seconds=5))
@@ -72,8 +73,8 @@ def update_database(context, database, resource):
         catalog.index_document(resource.get_catalog_values())
         catalog.save_changes()
     except Exception as e:
-        print('CRON ERROR COMMIT CATALOG')
-        print("%s" % e)
+        log_error('CRON ERROR COMMIT CATALOG')
+        log_error("%s" % e)
 
 
 class ThreadWorker():
@@ -143,9 +144,9 @@ def _make_image_thumbnails(self):
     # A variable shared between the different callback's calls
     ffmpeg_worker = self.ffmpeg_worker['worker']
     ffmpeg_pass = self.ffmpeg_worker['pass']
-    #print("ffmpeg_worker = %s" % ffmpeg_worker)
+    #log_info("ffmpeg_worker = %s" % ffmpeg_worker)
 
-    print("cron started!")
+    log_info("cron started!")
 
     # Check if there is a lock
     encodingfolder = get_abspath('ffmpeg-encoding%s' % sep)
@@ -155,11 +156,11 @@ def _make_image_thumbnails(self):
 
     for name in encoding.get_names():
         if name == 'lock':
-            #print("lock")
+            #log_info("lock")
             lock = True
 
     if not lock:
-        #print("Need to create a lock file while encoding/resizing video/image!")
+        #log_info("Need to create a lock file while encoding/resizing video/image!")
         encoding.make_file('lock')
 
     database = self.database
@@ -183,7 +184,7 @@ def _make_image_thumbnails(self):
 
     for image in self.root.search(query).get_documents():
         name = image.name
-        print("\tFound an image without thumbnails: %s" % name)
+        log_info("\tFound an image without thumbnails: %s" % name)
         abspath = image.abspath
         # Get the resource
         resource = context.root.get_resource(abspath)
@@ -191,7 +192,7 @@ def _make_image_thumbnails(self):
         tmpdata = resource.get_handler().key
         # Database full path (HACK)
         dbp = self.database.path + sep + "database" + sep
-        #print("dbp %s" % dbp)
+        #log_info("dbp %s" % dbp)
 
         low = 256, 256
         med = 800, 800
@@ -204,7 +205,7 @@ def _make_image_thumbnails(self):
             try:
                 im = PILImage.open(dbp + str(tmpdata))
             except IOError as e:
-                print("IOError = %s" % e)
+                log_error("IOError = %s" % e)
             # make a thumbnail
             im.thumbnail(te[1], PILImage.ANTIALIAS)
             ima = name + te[0]
@@ -246,7 +247,7 @@ def _make_image_thumbnails(self):
         update_database(context, database, resource)
 
         # Save changes
-        print("\t\tAdd thumbnails for: %s" % image.abspath)
+        log_info("\t\tAdd thumbnails for: %s" % image.abspath)
         context.git_message = "Add thumbnails for: %s" % image.abspath
         database.save_changes()
 
@@ -262,23 +263,24 @@ def _make_image_thumbnails(self):
 
     for video in self.root.search(query).get_documents():
         name = video.name
-        print("\tFound a video to encode: %s" % name)
+        log_info("\tFound a video to encode: %s" % name)
         abspath = video.abspath
         context = get_context()
         # Get the resource
         resource = context.root.get_resource(abspath)
         container = resource.parent
 
-        #print("target = %s" % self.target)
-        ffmpeg_encoding_folder = lfs.resolve2(self.target, 'ffmpeg-encoding')
-        if not lfs.exists(ffmpeg_encoding_folder):
-            lfs.make_folder(ffmpeg_encoding_folder)
+        #log_info("target = %s" % self.target)
+        #ffmpeg_encoding_folder = lfs.resolve2(self.target, 'ffmpeg-encoding')
+        #if not lfs.exists(ffmpeg_encoding_folder):
+        #    lfs.make_folder(ffmpeg_encoding_folder)
+        dbp = self.database.path + sep + "ffmpeg-encoding" + sep
         resource_tmp_folder = resource.get_property("tmp_folder")
         tmp_folder = get_abspath('%s%s%s%s' % (
-                            ffmpeg_encoding_folder, sep,
+                            dbp, sep,
                             resource_tmp_folder, sep))
 
-        print("tmp_folder = %s" % tmp_folder)
+        log_info("tmp_folder = %s" % tmp_folder)
 
         WIDTH_LOW = 640
         EXTENSION = "mp4"
@@ -315,9 +317,9 @@ def _make_image_thumbnails(self):
                 width = int(round(float(output_size)*ratio))
                 height = output_size
 
-        #print("Size: FROM %sx%s TO %sx%s" % (in_w, in_h, width, height))
+        #log_info("Size: FROM %sx%s TO %sx%s" % (in_w, in_h, width, height))
 
-        print("ffmpeg_worker = %s" % ffmpeg_worker)
+        log_info("ffmpeg_worker = %s" % ffmpeg_worker)
         # Ffmpeg must be installed, but perhaps the "drawtext" filter is not
         cmd = "ffmpeg -filters 2>&1| grep -c drawtext | tr -d '\\n'"
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
@@ -351,26 +353,26 @@ def _make_image_thumbnails(self):
                     int(width), int(width), int(height),
                     drawtext,
                     tmp_folder, name)
-            print(ffmpeg_cli)
-            print("ffmpeg_worker does not exist, start it!")
+            log_info("%s" % (u''.join(ffmpeg_cli).encode('utf-8').strip()))
+            log_info("ffmpeg_worker does not exist, start it!")
             ffmpeg_worker = ThreadWorker(ffmpeg)
             ffmpeg_worker.start((ffmpeg_cli,))
             ffmpeg_status = ffmpeg_worker.status()
-            #print("ffmpeg_worker.status() = %s" % ffmpeg_status)
+            #log_info("ffmpeg_worker.status() = %s" % ffmpeg_status)
             self.ffmpeg_worker['worker'] = ffmpeg_worker
             self.ffmpeg_worker['pass'] = "first"
             return WAIT
         if ffmpeg_worker and ffmpeg_pass == 'first':
             ffmpeg_status = ffmpeg_worker.status()
-            #print("ffmpeg_status = %s" % ffmpeg_status)
+            #log_info("ffmpeg_status = %s" % ffmpeg_status)
             if ffmpeg_status == 'running':
-                print "First pass running"
+                log_info("First pass running")
                 return WAIT
             elif ffmpeg_status == 'not_started':
-                print "First pass not started! Bug!"
+                log_info("First pass not started! Bug!")
                 return False
             elif ffmpeg_status == 'finished':
-                print "First pass finished"
+                log_info("First pass finished")
                 # Second pass
                 ffmpeg_cli = 'nice -n 8 ffmpeg -y -i %s%s -f %s '\
                         '-pass 2 -preset slow '\
@@ -388,26 +390,26 @@ def _make_image_thumbnails(self):
                         drawtext,
                         tmp_folder, name,
                         tmp_video_path_filename)
-                #print(ffmpeg_cli)
-                print("Start second pass!")
+                #log_info(ffmpeg_cli)
+                log_info("Start second pass!")
                 ffmpeg_worker = ThreadWorker(ffmpeg)
                 ffmpeg_worker.start((ffmpeg_cli,))
                 ffmpeg_status = ffmpeg_worker.status()
-                #print("ffmpeg_worker.status() = %s" % ffmpeg_status)
+                #log_info("ffmpeg_worker.status() = %s" % ffmpeg_status)
                 self.ffmpeg_worker['worker'] = ffmpeg_worker
                 self.ffmpeg_worker['pass'] = "second"
                 return WAIT
         else:
             ffmpeg_status = ffmpeg_worker.status()
-            #print("ffmpeg_status = %s" % ffmpeg_status)
+            #log_info("ffmpeg_status = %s" % ffmpeg_status)
             if ffmpeg_status == 'running':
-                print "running"
+                log_info("running")
                 return WAIT
             elif ffmpeg_status == 'not_started':
-                print "Not started bug!"
+                log_info("Not started bug!")
                 return False
             elif ffmpeg_status == 'finished':
-                print "finished"
+                log_info("finished")
                 # if finished, check if the folder is not already deleted
                 if not lfs.exists(tmp_video_path_filename):
                     return WAIT
@@ -491,13 +493,13 @@ def _make_image_thumbnails(self):
                     context.git_message = "Add encoded video, with is thumbnail: %s" % vidfilename
                     database.save_changes()
                 else:
-                    print("Not encoded! This should never append!")
+                    log_info("Not encoded! This should never append!")
                     # Encoding process is finished
         # ffmpeg_worker can now be reseted
         self.ffmpeg_worker['worker'] = False
         self.ffmpeg_worker['pass'] = False
         # Clean the temporary folder
-        print("Delete '%s'" % tmp_folder)
+        log_info("Delete '%s'" % tmp_folder)
         vfs.remove(tmp_folder)
 
     encoding.remove('lock')

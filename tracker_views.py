@@ -72,8 +72,8 @@ class Tchack_Tracker_View(Tracker_View):
     access = 'is_allowed_to_view'
     title = MSG(u'View')
     icon = 'view.png'
-    scripts = ['/ui/tchacker/tracker.js']
     styles = ['/ui/tchacker/style.css']
+    scripts = ['/ui/tchacker/tracker.js']
 
     context_menus = [
                     TrackerViewMenu(),
@@ -394,9 +394,13 @@ class Tchacker_Search(Tracker_Search):
 class Tchack_Tracker_AddIssue(Tracker_AddIssue):
 
     styles = ['/ui/tracker/style.css',
-              '/ui/tchacker/style.css', '/ui/thickbox/style.css']
-    scripts = ['/ui/tchacker/tracker.js', '/ui/thickbox/thickbox.js',
-               '/ui/flowplayer/flowplayer-3.2.2.min.js']
+                '/ui/tchacker/jquery-ui-1.8.5/themes/base/jquery.ui.all.css',
+                '/ui/tchacker/style.css',
+                '/ui/tchacker/progressbar.css',
+                '/ui/thickbox/style.css']
+    scripts = ['/ui/tchacker/tracker.js',
+                '/ui/thickbox/thickbox.js',
+                '/ui/flowplayer/flowplayer-3.2.2.min.js']
     access = 'is_allowed_to_edit'
 
     widgets = freeze([

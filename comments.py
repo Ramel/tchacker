@@ -60,10 +60,11 @@ class Tchack_CommentsView(CommentsView):
         tracker = resource.parent
         modules = tracker.get_resource('module').handler
         module = resource.metadata.get_property('module') or None
+        which_module = None
         if module is not None:
             module = modules.get_record(int(module))
             if module is not None:
-                which_module = modules.get_record_value(module, 'title') or []
+                which_module = modules.get_record_value(module, 'title')
 
         attached = [{ 'link': False,
                     'is_image': False,

@@ -37,7 +37,7 @@ from itools.datatypes import String
 # Import from ikaaro
 from ikaaro.tracker.issue_views import ProductsSelectWidget
 from ikaaro.autoform import TextWidget, SelectWidget
-from ikaaro.autoform import ProgressBarWidget, FileWidget, MultilineWidget
+from ikaaro.autoform import FileWidget, MultilineWidget
 from ikaaro.tracker.tracker_views import Tracker_View, StoreSearchMenu
 from ikaaro.tracker.tracker_views import StoredSearch, StoredSearchesMenu
 from ikaaro.tracker.tracker_views import TrackerViewMenu, Tracker_Search
@@ -49,6 +49,7 @@ from issue import Tchack_Issue
 from monkey import Image, Video
 from cron import run_cron
 from datatypes import get_issue_fields
+from widgets import Tchack_ProgressBarWidget
 
 
 class Tchack_TrackerViewMenu(TrackerViewMenu):
@@ -415,7 +416,7 @@ class Tchack_Tracker_AddIssue(Tracker_AddIssue):
                                 classes=['center', 'light']),
         MultilineWidget('comment', title=MSG(u'New Comment:'), classes=['all']),
         FileWidget('attachment', title=MSG(u'Attachment (Size < 768Mo):'), classes=['all']),
-        ProgressBarWidget()
+        Tchack_ProgressBarWidget()
         ])
 
     def get_schema(self, resource, context):
@@ -467,10 +468,6 @@ class Tchack_Tracker_AddIssue(Tracker_AddIssue):
         # Ok
         message = INFO(u'New issue added.')
         goto = './%s/' % id
-        
-        # Run Cron
-        server = context.server
-        server.run_cron()
 
         return context.come_back(message, goto=goto)
 

@@ -57,6 +57,13 @@ class Tchack_CommentsView(CommentsView):
         comments = resource.metadata.get_property('comment') or []
         attachments = resource.metadata.get_property('attachment') or []
 
+        tracker = resource.parent
+        modules = tracker.get_resource('module').handler
+        module = resource.metadata.get_property('module') or None
+        if module is not None:
+            module = modules.get_record(int(module))
+            if module is not None:
+                which_module = modules.get_record_value(module, 'title') or []
 
         attached = [{ 'link': False,
                     'is_image': False,
@@ -101,5 +108,9 @@ class Tchack_CommentsView(CommentsView):
              }
             for i, x in enumerate(comments) ]
 
+        reported_by = comments[0]['user']
+
         comments.reverse()
-        return {'comments': comments}
+        return {'comments': comments,
+                'which_module': which_module,
+                'reported_by': reported_by}

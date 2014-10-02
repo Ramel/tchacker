@@ -236,7 +236,7 @@ class Tchack_Issue(Issue):
                 server = context.server
                 ffmpeg_encoding_folder = lfs.resolve2(server.target, 'ffmpeg-encoding')
                 #ffmpeg_encoding_folder = '../ffmpeg-encoding'
-                print("ffmpeg_encoding_folder = %s" % ffmpeg_encoding_folder)
+                #print("ffmpeg_encoding_folder = %s" % ffmpeg_encoding_folder)
                 if not lfs.exists(ffmpeg_encoding_folder):
                     lfs.make_folder(ffmpeg_encoding_folder)
                 dirname = mkdtemp('encoding', 'tchacker',
@@ -276,7 +276,7 @@ class Tchack_Issue(Issue):
                 metadata.set_property('has_thumb', has_thumb)
                 encoded = Property(False)
                 metadata.set_property('encoded', encoded)
-                print("dirname = %s" % path.basename(path.basename(tmpfolder)))
+                #print("dirname = %s" % path.basename(path.basename(tmpfolder)))
                 tmp_folder= Property(path.basename(path.basename(dirname)))
                 metadata.set_property('tmp_folder', tmp_folder)
 

@@ -29,6 +29,7 @@ from itools.core import freeze
 from ikaaro.tracker.issue_views import Issue_Edit_AutoForm
 from ikaaro.tracker.issue_views import Issue_Edit_ProxyView
 from ikaaro.tracker.issue_views import ProductsSelectWidget
+from ikaaro.tracker.issue_views import CcListSelectWidget
 from ikaaro.autoform import TextWidget, SelectWidget
 from ikaaro.autoform import XHTMLBody
 
@@ -70,7 +71,7 @@ class Tchack_Issue_Edit_AutoForm(Issue_Edit_AutoForm):
         ProductsSelectWidget('product', title=MSG(u'Product:'),
                                 classes=['left', 'light']),
         SelectWidget('type', title=MSG(u'Type:'), classes=['center', 'light']),
-        SelectWidget('cc_list', title=MSG(u'CC:'), classes=['right', 'light']),
+        CcListSelectWidget('cc_list', title=MSG(u'CC:'), classes=['right', 'light']),
         SelectWidget('module', title=MSG(u'Module:'), classes=['left', 'light']),
         SelectWidget('state', title=MSG(u'State:'), classes=['center']),
         SelectWidget('version', title=MSG(u'Version:'),

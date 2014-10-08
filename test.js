@@ -1,6 +1,5 @@
 var previous,
 actual;
-
 $(document).ready(function () {
   $('#assigned-to').find('select#assigned-to').focus(function () {
     // Store the current value on focus, before it changes
@@ -46,6 +45,25 @@ $(document).ready(function () {
       console.log('append(' + previous.text() + ')');
     }
     previous = $(this).find('option:selected').clone();
+    /*
+    Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option'), function (a, b) {
+      return $(a).text() > $(b).text() ? 1 : - 1;
+    }).appendTo($('#cc-list').find('SELECT#cc-list'));
+    */
+    var selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:selected'), function (a, b) {
+      return $(a).text() > $(b).text() ? 1 : - 1;
+    });
+    var not_selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:not(:selected,[value=""])'), function (a, b) {
+      return $(a).text() > $(b).text() ? 1 : - 1;
+    });
+    console.log('selected(' + selected.length + ')');
+    console.log('not_selected(' + not_selected.length + ')');
+    //var sep = new Option();
+    $('#cc-list').find('SELECT#cc-list option[value=""]').remove();
+    $('#cc-list').find('SELECT#cc-list').append(selected);
+    if (not_selected.length > 0) {
+      $('#cc-list').find('SELECT#cc-list').append('<option value="">------</option>');
+      $('#cc-list').find('SELECT#cc-list').append(not_selected);
+    }
   });
 });
-);

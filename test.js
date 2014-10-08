@@ -1,7 +1,16 @@
-var previous,
-actual;
 $(document).ready(function () {
+  var previous, actual;
+  actual = $('#assigned-to').find('select#assigned-to :selected');
   // Reodering
+  var selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:selected'), function (a, b) {
+    return $(a).text() > $(b).text() ? 1 : - 1;
+  });
+  var not_selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:not(:selected,[value=""])'), function (a, b) {
+    return $(a).text() > $(b).text() ? 1 : - 1;
+  });
+  // Remove double
+  $('#cc-list').find('SELECT#cc-list option[text="' + actual.text() + '"]').remove();
+  // Remove separator
   $('#cc-list').find('SELECT#cc-list option[value=""]').remove();
   $('#cc-list').find('SELECT#cc-list').append(selected);
   if (not_selected.length > 0) {
@@ -43,10 +52,10 @@ $(document).ready(function () {
       $('#cc-list').find('SELECT#cc-list').append(previous);
     }
     previous = $(this).find('option:selected').clone();
-    var selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:selected'), function (a, b) {
+    selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:selected'), function (a, b) {
       return $(a).text() > $(b).text() ? 1 : - 1;
     });
-    var not_selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:not(:selected,[value=""])'), function (a, b) {
+    not_selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:not(:selected,[value=""])'), function (a, b) {
       return $(a).text() > $(b).text() ? 1 : - 1;
     });
     //var sep = new Option();

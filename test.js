@@ -1,6 +1,14 @@
 var previous,
 actual;
 $(document).ready(function () {
+  // Reodering
+  $('#cc-list').find('SELECT#cc-list option[value=""]').remove();
+  $('#cc-list').find('SELECT#cc-list').append(selected);
+  if (not_selected.length > 0) {
+    $('#cc-list').find('SELECT#cc-list').append('<option value="">------</option>');
+    $('#cc-list').find('SELECT#cc-list').append(not_selected);
+  }
+  // Keep updated
   $('#assigned-to').find('select#assigned-to').focus(function () {
     // Store the current value on focus, before it changes
     previous = $(this).find('option:selected').clone();

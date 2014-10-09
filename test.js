@@ -1,6 +1,8 @@
 $(document).ready(function () {
-  var previous, actual;
-  actual = $('#assigned-to').find('select#assigned-to :selected');
+  var previous;
+  var actual = $('#assigned-to').find('select#assigned-to option:selected');
+  // Remove the Assigned To:
+  $('#cc-list').find('SELECT#cc-list option[value="' + actual.val() + '"]').remove();
   // Reodering
   var selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:selected'), function (a, b) {
     return $(a).text() > $(b).text() ? 1 : - 1;
@@ -8,8 +10,6 @@ $(document).ready(function () {
   var not_selected = Array.prototype.sort.call($('#cc-list').find('SELECT#cc-list option:not(:selected,[value=""])'), function (a, b) {
     return $(a).text() > $(b).text() ? 1 : - 1;
   });
-  // Remove double
-  $('#cc-list').find('SELECT#cc-list option[text="' + actual.text() + '"]').remove();
   // Remove separator
   $('#cc-list').find('SELECT#cc-list option[value=""]').remove();
   $('#cc-list').find('SELECT#cc-list').append(selected);

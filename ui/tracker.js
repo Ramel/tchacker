@@ -141,7 +141,7 @@ $(document).ready(function () {
     if (document.URL.match(";add_issue") != null && ((document.URL.match("umt.pro") != null) || (document.URL.match("unmondetruque.pro") != null))) {
       var product = $("#product.widget SELECT#product option:selected").attr("value");    // selected type
       if (product == 0) { // We add an Issue
-        var names = "9,18,21,148,152,149,150,154,131,3,140,1,25,155";
+        var names = "9,18,21,148,152,149,150,154,131,3,140,1,25,155,191";
         // CCs
         $.each(names.split(","), function(i,e){
           $("#cc-list.widget SELECT#cc-list OPTION[value='" + e + "']").prop("selected", true);

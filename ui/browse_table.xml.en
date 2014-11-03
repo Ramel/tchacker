@@ -17,9 +17,7 @@
             onclick="select_checkboxes('form-table', this.checked);" />
       </th>
       <!-- not is_checkbox -->
-      <th stl:if="not column/is_checkbox" class="${column/css}">
-        ${column/title}
-        <stl:block stl:if="column/sortable">
+      <th stl:if="not column/is_checkbox" class="${column/css}">${column/title}<stl:block stl:if="column/sortable">
           <br/>
           <a stl:if="not column/sort_up_active" href="${column/href_up}"
             class="sort sort-up"/>
@@ -35,17 +33,10 @@
     </tr>
   </thead>
   <tbody>
-    <tr stl:repeat="row rows" class="${repeat/row/even}">
-      <stl:block stl:repeat="column row/columns">
-      <td>
-        <input stl:if="column/is_checkbox" type="checkbox" name="ids"
-          value="${column/value}" checked="${column/checked}" class="checkbox" />
-        <img stl:if="column/is_icon" src="${column/src}" border="0" />
-        <a stl:if="column/is_link" stl:omit-tag="not column/href"
-          href="${column/href}">${column/value}</a>
-      </td>
-      </stl:block>
-    </tr>
+    <tr stl:repeat="row rows" class="${repeat/row/even}"><stl:block stl:repeat="column row/columns"></stl:block><td><input stl:if="column/is_checkbox" type="checkbox" name="ids"
+          value="${column/value}" checked="${column/checked}" class="checkbox" /><img stl:if="column/is_icon" 
+          src="${column/src}" border="0" /><a stl:if="column/is_link" stl:omit-tag="not column/href"
+          href="${column/href}">${column/value}</a></td></stl:block></tr>
   </tbody>
 </table>
 <p stl:if="actions">

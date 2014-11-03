@@ -17,10 +17,7 @@
       <td align="right">
       &nbsp;[
       <a href="#new_comment"
-        onclick="javascript:reply('${comment/number}'); return false;">
-        Reply
-      </a>]&nbsp;
-      </td>
+        onclick="javascript:reply('${comment/number}'); return false;">Reply </a> ] </td>
     </tr>
     <tr stl:if="comment/attachment/is_image">
       <td colspan="5">

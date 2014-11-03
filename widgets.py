@@ -58,7 +58,7 @@ class Tchack_ProgressBarWidget(ProgressBarWidget):
             <p id="file-type" />
         </div>
         <div id="progress-bar-box">
-            <span><div id="progress-bar" /></span><span id="percent" />
+            <span><div id="progress-bar"/></span><span id="percent" />
             <div id="upload-size" />
         </div>
     </div>
@@ -108,7 +108,7 @@ class FileAndSketchTabbedWidget(Widget):
                         <a href="#tools-sketch" data-tool="eraser">Eraser</a>
                     </div>
                     <input type="text" id="canvasDrawing" name="canvasDrawing" type="hidden" />
-                        <canvas id="tools-sketch" width="${last_attachment/width_MED}" height="${last_attachment/height_MED}" style="background: url(${last_attachment/drawing_MED}) no-repeat center;"></canvas>
+                    <canvas id="tools-sketch" width="${last_attachment/width_MED}" height="${last_attachment/height_MED}" style="background: url(${last_attachment/drawing_MED}) no-repeat center;"></canvas>
                     <script type="text/javascript">
                     $(function() {
                         $.each(['#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f', '#000', '#fff'], function() {

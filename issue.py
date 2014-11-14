@@ -187,8 +187,10 @@ class Tchack_Issue(Issue):
                 data, format = handler.get_thumbnail(800, 800)
                 file_like = StringIO(data)
                 originalImage = PILImage.open(file_like)
+                file_like.close()
             # paste the tmp onto tmp2
             originalImage.paste(alphaImage, (0, 0), alphaImage)
+            alphaImage.close()
             # retrieve the result body
             # Save it in memory
             f = StringIO()
@@ -197,6 +199,7 @@ class Tchack_Issue(Issue):
             mimetype = "image/png"
             filename = "online-drawing.png"
             canvasSketch = True
+            f.close()
 
         if attachment is not None or emptyDrawing is False:
             if canvasSketch is False:

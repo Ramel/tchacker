@@ -276,8 +276,8 @@ def _make_image_thumbnails(self):
         #    lfs.make_folder(ffmpeg_encoding_folder)
         dbp = self.database.path + sep + "ffmpeg-encoding" + sep
         resource_tmp_folder = resource.get_property("tmp_folder")
-        tmp_folder = get_abspath('%s%s%s%s' % (
-                            dbp, sep,
+        tmp_folder = get_abspath('%s%s%s' % (
+                            dbp,
                             resource_tmp_folder, sep))
 
         log_info("tmp_folder = %s" % tmp_folder)
@@ -335,6 +335,8 @@ def _make_image_thumbnails(self):
                     '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
                     ':fontcolor=white@0.25:x=(w-tw)/2'\
                     ':y=h-(2*lh):fontsize=10:text=\'%s\'' % COPYRIGHTS
+        else:
+            pass
 
         # First pass
         if not ffmpeg_worker and not ffmpeg_pass:
@@ -347,6 +349,7 @@ def _make_image_thumbnails(self):
                     '-vf '\
                     '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2'\
                     '%s" '\
+                    '-loglevel quiet '\
                     '-passlogfile %s%s '\
                     '/dev/null' % (
                     tmp_folder, name, EXTENSION,
@@ -383,14 +386,16 @@ def _make_image_thumbnails(self):
                         '-vf '\
                         '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2'\
                         '%s" '\
+                        '-loglevel quiet '\
                         '-passlogfile %s%s '\
                         '%s' % (
                         tmp_folder, name, EXTENSION,
                         int(width), int(width), int(height),
                         drawtext,
                         tmp_folder, name,
-                        tmp_video_path_filename)
-                #log_info(ffmpeg_cli)
+                        tmp_video_path_filename
+                        )
+                log_info("%s" % (u''.join(ffmpeg_cli).encode('utf-8').strip()))
                 log_info("Start second pass!")
                 ffmpeg_worker = ThreadWorker(ffmpeg)
                 ffmpeg_worker.start((ffmpeg_cli,))
@@ -412,6 +417,7 @@ def _make_image_thumbnails(self):
                 log_info("finished")
                 # if finished, check if the folder is not already deleted
                 if not lfs.exists(tmp_video_path_filename):
+                    log_info("Output file is not here!")
                     return WAIT
                 else:
                     pass

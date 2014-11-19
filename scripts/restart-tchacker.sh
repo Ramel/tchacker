@@ -17,7 +17,7 @@ pkill -f ikaaro-tchack-com-0.62
 
 rm pid-subprocess
 
-/home/tchack/Dev/venv/0.62/bin/icms-start.py -d /home/tchack/Dev/venv/0.62/ikaaro-tchack-com-0.62
+screen -dm /home/tchack/Dev/venv/0.62/bin/icms-start.py /home/tchack/Dev/venv/0.62/ikaaro-tchack-com-0.62
 
 #service ikaaro_tchack_com-0.62 start
 echo "re-starting"

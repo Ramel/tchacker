@@ -1,0 +1,59 @@
+#!/bin/sh                                                                                                                                                                           
+### BEGIN INIT INFO
+# Provides:          ikaaro from /var/www/ikaaro-tchack-com database
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+
+# With the Python in ~/.venv/0.62
+#./server-ikaaro-venv $COMMAND venv /home/fortuna/.venv/0.62 ikaaro-tchack-com
+#./server-ikaaro-venv start venv /home/fortuna/.venv/0.62 ikaaro-tchack-com
+# With the system Python
+#./server-ikaaro start ikaaro-tchack-com
+
+DATABASE="ikaaro-tchack-com"
+VERSION="0.62"
+VENV="/home/tchack/Dev/venv"
+
+
+#virtualenvwrapper.sh
+#export WORKON_HOME=$VENV
+#source /usr/local/bin/virtualenvwrapper.sh
+#source /home/tchack/.bashrc
+#workon $VERSION
+
+cd $VENV/$VERSION
+
+#if [[ "$USER" == "tchack" ]]
+#then
+#  daemon my_cmd &>/dev/null &
+#else
+#  daemon --user=tchack my_cmd &>/dev/null &
+#fi
+
+case "$1" in
+  start)
+    echo "Starting '$VENV/$DATABASE-$VERSION' server"
+    su - tchack -c "screen -dm $VENV/$VERSION/bin/icms-$1.py $VENV/$VERSION/$DATABASE-$VERSION"
+    #icms-$1.py -d $DATABASE-$VERSION
+    #daemon --user=tchack $VENV/$VERSION/bin/icms-$1.py -d $DATABASE-$VERSION &>/dev/null &
+    ;;
+  stop)
+    echo "Stopping '$VENV/$DATABASE-$VERSION' server"
+    su - tchack -c "$VENV/$VERSION/bin/icms-$1.py $VENV/$VERSION/$DATABASE-$VERSION"
+    sleep 5
+    #icms-$1.py $DATABASE-$VERSION
+    ;;
+  *)
+    echo "Usage: /etc/init.d/ikaaro_tchack_com-$VERSION {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
+

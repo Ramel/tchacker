@@ -18,9 +18,10 @@
 from datetime import timedelta
 from cStringIO import StringIO
 from os import sep
-from threading  import Thread
+from threading import Thread
 import pexpect
 import subprocess
+import time
 
 # Import from itools
 from itools.fs import lfs, vfs
@@ -83,7 +84,7 @@ class ThreadWorker():
     It provides a wrapper to start it,check its status,and get data out the function.
     """
 
-    def __init__(self,func):
+    def __init__(self, func):
         self.thread = None
         self.data = None
         self.func = self.save_data(func)
@@ -95,14 +96,14 @@ class ThreadWorker():
 
         return new_func
 
-    def start(self,params):
+    def start(self, params):
         self.data = None
         if self.thread is not None:
             if self.thread.isAlive():
                 return 'running' #could raise exception here
 
         #unless thread exists and is alive start or restart it
-        self.thread = Thread(target=self.func,args=params)
+        self.thread = Thread(target=self.func, args=params)
         self.thread.start()
         return 'started'
 
@@ -128,14 +129,61 @@ class ThreadWorker():
 def ffmpeg(cli):
     """Thrown the ffmpeg command line, and return True if completed
     """
-    thread = pexpect.spawn(cli)
-    cpl = thread.compile_pattern_list(pexpect.EOF)
-    i = thread.expect_list(cpl, timeout=None)
-    while 1:
-        if i == 0:
-            return True
-        else:
-            return False
+    #log_info("\tdef ffmpeg(cli) is running")
+    #import os
+    #from asyncproc import Process as AsyncProcess
+    #myProc = AsyncProcess(cli)
+    #from pprint import pprint
+    #while True:
+    #    # check to see if process has ended
+    #    poll = myProc.wait(os.WNOHANG)
+    #    pprint("\tpoll = %s" % poll)
+    #    if poll is not None:
+    #        pprint("\tdef ffmpeg(cli) is ended!")
+    #        break
+    #    # print any new output
+    #    out = myProc.read()
+    #    if out != "":
+    #        pprint("\t%s" % out)
+    #return True
+
+    child = pexpect.spawn(cli)
+    child.expect(pexpect.EOF)
+
+    exit_status = child.exitstatus
+
+    if(exit_status == 1):
+        #raise Exception("Failed to convert %s to %s (ffmpeg exit status %s)" %
+        #    (in_path, format_settings['ext'], exit_status))
+        print "Error"
+        return False
+    elif(exit_status == 255):
+        #logger.info("Convert %s to %s with errors" %
+        #    (in_file, format_settings['ext']))
+        print "Error 255"
+        return False
+    print "Seems to be converted"
+    return True
+    #ff.setecho(False)
+    #ff.timeout = None
+    #cpl = ff.compile_pattern_list(pexpect.EOF)
+    #i = ff.expect_list(cpl, timeout=None)
+    #import shlex
+    #import subprocess
+    #retVal = subprocess.Popen(shlex.split(cmd), shell=True, stdout=subprocess.PIPE)
+    #while 1:
+    #    if retVal==['']:
+    #        return False
+    #    else:
+    #        log_info(retval)
+    #        return False
+    #from pprint import pprint
+    #while 1:
+    #    pprint("i = %s" % i)
+    #    if i == 0:
+    #        return True
+    #    else:
+    #        return False
 
 
 def _make_image_thumbnails(self):
@@ -319,11 +367,12 @@ def _make_image_thumbnails(self):
 
         #log_info("Size: FROM %sx%s TO %sx%s" % (in_w, in_h, width, height))
 
-        log_info("ffmpeg_worker = %s" % ffmpeg_worker)
+        log_info("1::ffmpeg_worker = %s, ffmpeg_pass = %s" % (ffmpeg_worker, ffmpeg_pass))
         # Ffmpeg must be installed, but perhaps the "drawtext" filter is not
         cmd = "ffmpeg -filters 2>&1| grep -c drawtext | tr -d '\\n'"
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         result = process.communicate()[0]
+        #log_info("result = %s" % result)
         drawtext = ""
         if int(result) == 1:
             drawtext = ','\
@@ -335,9 +384,7 @@ def _make_image_thumbnails(self):
                     '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf'\
                     ':fontcolor=white@0.25:x=(w-tw)/2'\
                     ':y=h-(2*lh):fontsize=10:text=\'%s\'' % COPYRIGHTS
-        else:
-            pass
-
+        #log_info("drawtext = %s" % drawtext)
         # First pass
         if not ffmpeg_worker and not ffmpeg_pass:
             ffmpeg_cli = 'nice -n 8 ffmpeg -y -i %s%s -f %s '\
@@ -349,19 +396,22 @@ def _make_image_thumbnails(self):
                     '-vf '\
                     '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2'\
                     '%s" '\
-                    '-loglevel quiet '\
                     '-passlogfile %s%s '\
                     '/dev/null' % (
                     tmp_folder, name, EXTENSION,
                     int(width), int(width), int(height),
                     drawtext,
                     tmp_folder, name)
-            log_info("%s" % (u''.join(ffmpeg_cli).encode('utf-8').strip()))
-            log_info("ffmpeg_worker does not exist, start it!")
+            #'-loglevel quiet '\
+            #ffmpeg_cli = u''.join(ffmpeg_cli).encode('utf-8').strip()
+            #log_info(ffmpeg_cli)
+            log_info("if_1::%s" % (u''.join(ffmpeg_cli).encode('utf-8').strip()))
+            log_info("if_::ffmpeg_worker does not exist, start it!")
             ffmpeg_worker = ThreadWorker(ffmpeg)
             ffmpeg_worker.start((ffmpeg_cli,))
+            #time.sleep(0.2)
             ffmpeg_status = ffmpeg_worker.status()
-            #log_info("ffmpeg_worker.status() = %s" % ffmpeg_status)
+            log_info("if_1::ffmpeg_worker.status() = %s" % ffmpeg_status)
             self.ffmpeg_worker['worker'] = ffmpeg_worker
             self.ffmpeg_worker['pass'] = "first"
             return WAIT
@@ -375,7 +425,7 @@ def _make_image_thumbnails(self):
                 log_info("First pass not started! Bug!")
                 return False
             elif ffmpeg_status == 'finished':
-                log_info("First pass finished")
+                log_info("if_2::First pass finished")
                 # Second pass
                 ffmpeg_cli = 'nice -n 8 ffmpeg -y -i %s%s -f %s '\
                         '-pass 2 -preset slow '\
@@ -386,7 +436,6 @@ def _make_image_thumbnails(self):
                         '-vf '\
                         '"scale=trunc(%s/2)*2:-1,scale=trunc(%s/2)*2:trunc(%s/2)*2'\
                         '%s" '\
-                        '-loglevel quiet '\
                         '-passlogfile %s%s '\
                         '%s' % (
                         tmp_folder, name, EXTENSION,
@@ -395,6 +444,9 @@ def _make_image_thumbnails(self):
                         tmp_folder, name,
                         tmp_video_path_filename
                         )
+                #'-loglevel quiet '\
+                #ffmpeg_cli = u''.join(ffmpeg_cli).encode('utf-8').strip()
+                #log_info(ffmpeg_cli)
                 log_info("%s" % (u''.join(ffmpeg_cli).encode('utf-8').strip()))
                 log_info("Start second pass!")
                 ffmpeg_worker = ThreadWorker(ffmpeg)
@@ -406,7 +458,7 @@ def _make_image_thumbnails(self):
                 return WAIT
         else:
             ffmpeg_status = ffmpeg_worker.status()
-            #log_info("ffmpeg_status = %s" % ffmpeg_status)
+            log_info("else::ffmpeg_status = %s" % ffmpeg_status)
             if ffmpeg_status == 'running':
                 log_info("running")
                 return WAIT
@@ -418,6 +470,9 @@ def _make_image_thumbnails(self):
                 # if finished, check if the folder is not already deleted
                 if not lfs.exists(tmp_video_path_filename):
                     log_info("Output file is not here!")
+                    # ffmpeg_worker can now be reseted
+                    #self.ffmpeg_worker['worker'] = False
+                    #self.ffmpeg_worker['pass'] = False
                     return WAIT
                 else:
                     pass

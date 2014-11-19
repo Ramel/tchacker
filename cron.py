@@ -128,25 +128,8 @@ class ThreadWorker():
 
 def ffmpeg(cli):
     """Thrown the ffmpeg command line, and return True if completed
+    https://github.com/jgroszko/django-albums/blob/master/albums/conversion.py
     """
-    #log_info("\tdef ffmpeg(cli) is running")
-    #import os
-    #from asyncproc import Process as AsyncProcess
-    #myProc = AsyncProcess(cli)
-    #from pprint import pprint
-    #while True:
-    #    # check to see if process has ended
-    #    poll = myProc.wait(os.WNOHANG)
-    #    pprint("\tpoll = %s" % poll)
-    #    if poll is not None:
-    #        pprint("\tdef ffmpeg(cli) is ended!")
-    #        break
-    #    # print any new output
-    #    out = myProc.read()
-    #    if out != "":
-    #        pprint("\t%s" % out)
-    #return True
-
     child = pexpect.spawn(cli)
     child.expect(pexpect.EOF)
 
@@ -155,35 +138,15 @@ def ffmpeg(cli):
     if(exit_status == 1):
         #raise Exception("Failed to convert %s to %s (ffmpeg exit status %s)" %
         #    (in_path, format_settings['ext'], exit_status))
-        print "Error"
+        #print "Error"
         return False
     elif(exit_status == 255):
         #logger.info("Convert %s to %s with errors" %
         #    (in_file, format_settings['ext']))
-        print "Error 255"
+        #print "Error 255"
         return False
-    print "Seems to be converted"
+    #print "ffmpeg(cli) is finished!"
     return True
-    #ff.setecho(False)
-    #ff.timeout = None
-    #cpl = ff.compile_pattern_list(pexpect.EOF)
-    #i = ff.expect_list(cpl, timeout=None)
-    #import shlex
-    #import subprocess
-    #retVal = subprocess.Popen(shlex.split(cmd), shell=True, stdout=subprocess.PIPE)
-    #while 1:
-    #    if retVal==['']:
-    #        return False
-    #    else:
-    #        log_info(retval)
-    #        return False
-    #from pprint import pprint
-    #while 1:
-    #    pprint("i = %s" % i)
-    #    if i == 0:
-    #        return True
-    #    else:
-    #        return False
 
 
 def _make_image_thumbnails(self):
@@ -328,7 +291,7 @@ def _make_image_thumbnails(self):
                             dbp,
                             resource_tmp_folder, sep))
 
-        log_info("tmp_folder = %s" % tmp_folder)
+        #log_info("tmp_folder = %s" % tmp_folder)
 
         WIDTH_LOW = 640
         EXTENSION = "mp4"
@@ -367,7 +330,7 @@ def _make_image_thumbnails(self):
 
         #log_info("Size: FROM %sx%s TO %sx%s" % (in_w, in_h, width, height))
 
-        log_info("1::ffmpeg_worker = %s, ffmpeg_pass = %s" % (ffmpeg_worker, ffmpeg_pass))
+        #log_info("1::ffmpeg_worker = %s, ffmpeg_pass = %s" % (ffmpeg_worker, ffmpeg_pass))
         # Ffmpeg must be installed, but perhaps the "drawtext" filter is not
         cmd = "ffmpeg -filters 2>&1| grep -c drawtext | tr -d '\\n'"
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
@@ -405,13 +368,13 @@ def _make_image_thumbnails(self):
             #'-loglevel quiet '\
             #ffmpeg_cli = u''.join(ffmpeg_cli).encode('utf-8').strip()
             #log_info(ffmpeg_cli)
-            log_info("if_1::%s" % (u''.join(ffmpeg_cli).encode('utf-8').strip()))
-            log_info("if_::ffmpeg_worker does not exist, start it!")
+            #log_info("if_1::%s" % (u''.join(ffmpeg_cli).encode('utf-8').strip()))
+            #log_info("if_::ffmpeg_worker does not exist, start it!")
             ffmpeg_worker = ThreadWorker(ffmpeg)
             ffmpeg_worker.start((ffmpeg_cli,))
             #time.sleep(0.2)
             ffmpeg_status = ffmpeg_worker.status()
-            log_info("if_1::ffmpeg_worker.status() = %s" % ffmpeg_status)
+            #log_info("if_1::ffmpeg_worker.status() = %s" % ffmpeg_status)
             self.ffmpeg_worker['worker'] = ffmpeg_worker
             self.ffmpeg_worker['pass'] = "first"
             return WAIT
@@ -425,7 +388,7 @@ def _make_image_thumbnails(self):
                 log_info("First pass not started! Bug!")
                 return False
             elif ffmpeg_status == 'finished':
-                log_info("if_2::First pass finished")
+                #log_info("if ffmpeg_worker and ffmpeg_pass=='first'::elif ffmpeg_status == 'finished'")
                 # Second pass
                 ffmpeg_cli = 'nice -n 8 ffmpeg -y -i %s%s -f %s '\
                         '-pass 2 -preset slow '\
@@ -469,7 +432,7 @@ def _make_image_thumbnails(self):
                 log_info("finished")
                 # if finished, check if the folder is not already deleted
                 if not lfs.exists(tmp_video_path_filename):
-                    log_info("Output file is not here!")
+                    log_info("Output file is not here, the ffmpeg CLI has failed!")
                     # ffmpeg_worker can now be reseted
                     #self.ffmpeg_worker['worker'] = False
                     #self.ffmpeg_worker['pass'] = False

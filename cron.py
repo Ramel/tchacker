@@ -21,7 +21,6 @@ from os import sep
 from threading import Thread
 import pexpect
 import subprocess
-import time
 
 # Import from itools
 from itools.fs import lfs, vfs
@@ -53,6 +52,7 @@ def run_cron(self):
     cron(self._make_image_thumbnails,
             timedelta(seconds=120),
             first_call_delay=timedelta(seconds=5))
+
 
 def run_cron_hourly(self):
     log_info("Run cron hourly.")

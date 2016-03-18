@@ -1,0 +1,19 @@
+Tchacker is a module for the Ikaaro CMS.
+
+This branch (0.62_progressbar) is tested with:
+
+  - itools: master-venv-0.62-sd-26262
+  - ikaaro:  progressbar
+  - thickbox:  master
+  - videoencoding: master
+
+Tested with Nginx > 1.7 because it has a new feature to pass the Posted data directly to the proxied server, aka Ikaaro.
+Then Ikaaro seems to support the upload of big images better than with the previous Nginx version which sometimes lost the Posted data somewhere.
+
+In Django it exist:
+https://github.com/smartfile/django-transfer
+
+And the other solution before Nginx 1.7 are:
+
+ - https://github.com/vkholodkov/nginx-upload-module
+ - https://github.com/masterzen/nginx-upload-progress-module
